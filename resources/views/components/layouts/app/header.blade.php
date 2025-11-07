@@ -15,6 +15,7 @@
 
         <!-- Right side: Search, notifications, profile -->
         <div class="flex items-center space-x-4">
+            @auth
             <!-- Profile -->
             <div x-data="{ open: false }" class="relative">
                 <button @click="open = !open" class="flex items-center focus:outline-none">
@@ -63,6 +64,7 @@
                     </form>
                 </div>
             </div>
+            @endauth
         </div>
     </div>
 </header>

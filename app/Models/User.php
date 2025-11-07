@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_organizer',
     ];
 
     /**
@@ -44,6 +45,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_organizer' => 'boolean',
         ];
     }
 
@@ -56,5 +58,21 @@ class User extends Authenticatable
             ->explode(' ')
             ->map(fn (string $name) => Str::of($name)->substr(0, 1))
             ->implode('');
+    }
+
+    /**
+     * Get the events created by this user
+     */
+    public function events()
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /**
+     * Get the bookings made by this user
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
     }
 }
