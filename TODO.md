@@ -107,14 +107,33 @@
 - [ ] Kalender-Integration (Google Calendar, iCal)
 
 ### 3. Organizer Features
-- [ ] Organizer Registration & Login
-- [ ] Organizer Dashboard
-- [ ] Event Management (Create, Edit, Delete)
-- [ ] Booking Management (View, Export)
-- [ ] Ticket Type Management
-- [ ] Discount Code Management
-- [ ] Event Reviews Management
-- [ ] Check-In System (QR-Code Scanning)
+- [x] Organizer Registration & Login (verwendet is_organizer Flag)
+- [x] Organizer Dashboard
+  - [x] Organizer DashboardController implementiert
+  - [x] Statistiken (Events, Buchungen, Umsatz)
+  - [x] Upcoming Events Übersicht
+  - [x] Recent Bookings Übersicht
+- [x] Event Management (Create, Edit, Delete)
+  - [x] Organizer EventManagementController implementiert
+  - [x] Event Create View (create.blade.php)
+  - [x] Event Edit View (edit.blade.php)
+  - [x] Event Index View (index.blade.php) - erstellt
+- [x] Booking Management (View, Export)
+  - [x] Organizer BookingManagementController implementiert
+  - [x] Booking Show View (show.blade.php)
+  - [x] Booking Index View (index.blade.php) - erstellt
+- [x] Ticket Type Management
+  - [x] Organizer TicketTypeController implementiert
+  - [x] CRUD Operationen für Ticket-Typen
+  - [x] Ticket Type Reorder Funktion
+- [x] Discount Code Management
+  - [x] Organizer DiscountCodeController implementiert
+  - [x] CRUD Operationen für Rabattcodes
+  - [x] Toggle aktiv/inaktiv
+  - [x] Code Generator
+- [x] Event Reviews Management (über EventReviewController)
+- [x] Check-In System (QR-Code Scanning)
+  - [x] Check-In Funktion in BookingManagementController
 - [ ] Organizer Profile Management
 - [ ] Email Notifications für Organizer
 - [ ] Event Statistics & Analytics
