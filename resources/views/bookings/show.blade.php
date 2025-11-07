@@ -171,6 +171,13 @@
                                 📄 Rechnung herunterladen (PDF)
                             </a>
 
+                            @if($booking->status === 'confirmed' && $booking->event->end_date->isPast())
+                                <a href="{{ route('bookings.certificate', $booking->booking_number) }}"
+                                   class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition block text-center">
+                                    🏆 Teilnahmezertifikat herunterladen
+                                </a>
+                            @endif
+
                             <button onclick="window.print()"
                                     class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
                                 🖨️ Diese Seite drucken

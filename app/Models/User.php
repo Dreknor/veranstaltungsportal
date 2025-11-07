@@ -75,4 +75,21 @@ class User extends Authenticatable
     {
         return $this->hasMany(Booking::class);
     }
+
+    /**
+     * Get the user's favorite events
+     */
+    public function favoriteEvents()
+    {
+        return $this->belongsToMany(Event::class, 'event_user_favorites')
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if user has favorited an event
+     */
+    public function hasFavorited(Event $event): bool
+    {
+        return $this->favoriteEvents()->where('event_id', $event->id)->exists();
+    }
 }

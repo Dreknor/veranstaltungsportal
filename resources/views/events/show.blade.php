@@ -309,6 +309,19 @@
                                class="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold mt-4">
                                 Jetzt Tickets buchen
                             </a>
+
+                            @auth
+                                <button onclick="toggleFavorite({{ $event->id }})"
+                                        id="favorite-btn-{{ $event->id }}"
+                                        class="block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-2
+                                               {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
+                                    <x-icon.heart class="w-5 h-5 inline-block mr-2"
+                                                  fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
+                                    <span id="favorite-text-{{ $event->id }}">
+                                        {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
+                                    </span>
+                                </button>
+                            @endauth
                         </div>
                     @endif
 
@@ -345,5 +358,42 @@
             </div>
         </div>
     </div>
+
+    @auth
+    @push('scripts')
+    <script>
+        function toggleFavorite(eventId) {
+            const btn = document.getElementById(`favorite-btn-${eventId}`);
+            const text = document.getElementById(`favorite-text-${eventId}`);
+            const icon = btn.querySelector('svg');
+
+            fetch(`/events/${eventId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.favorited) {
+                    btn.className = 'block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-2 border-red-500 text-red-600 bg-red-50';
+                    text.textContent = 'Aus Favoriten entfernen';
+                    icon.setAttribute('fill', 'currentColor');
+                } else {
+                    btn.className = 'block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-2 border-gray-300 text-gray-700 hover:bg-gray-50';
+                    text.textContent = 'Zu Favoriten hinzufügen';
+                    icon.setAttribute('fill', 'none');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+            });
+        }
+    </script>
+    @endpush
+    @endauth
 </x-layouts.public>
 

@@ -121,5 +121,23 @@ class EventController extends Controller
 
         return back()->withErrors(['access_code' => 'Ungültiger Access Code.']);
     }
+
+    public function exportToCalendar($slug)
+    {
+        $event = Event::where('slug', $slug)->firstOrFail();
+
+        // Check if event is private and access is granted
+        if ($event->is_private && !session()->has('event_access_' . $event->id) && $event->user_id !== auth()->id()) {
+            abort(403, 'Kein Zugriff auf dieses Event');
+        }
+
+        $calendarService = app(\App\Services\CalendarService::class);
+        $icalContent = $calendarService->generateEventIcal($event);
+        $filename = $calendarService->getFilename($event);
+
+        return response($icalContent)
+            ->header('Content-Type', 'text/calendar; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
 }
 

@@ -281,6 +281,28 @@ class BookingController extends Controller
 
         $pdfService = app(TicketPdfService::class);
         return $pdfService->downloadTicket($booking);
-        return $invoiceService->downloadInvoice($booking);
+    }
+
+    public function downloadCertificate($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event', 'items.ticketType'])
+            ->firstOrFail();
+
+        // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
+        if (!auth()->check() ||
+            (auth()->id() !== $booking->user_id &&
+             !session()->has('booking_access_' . $booking->id))) {
+            abort(403, 'Kein Zugriff auf dieses Zertifikat');
+        }
+
+        $certificateService = app(\App\Services\CertificateService::class);
+
+        // Check if certificate can be generated
+        if (!$certificateService->canGenerateCertificate($booking)) {
+            return back()->with('error', 'Zertifikat kann nur für bestätigte und abgeschlossene Veranstaltungen heruntergeladen werden.');
+        }
+
+        return $certificateService->downloadCertificate($booking);
     }
 }

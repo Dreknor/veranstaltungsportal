@@ -2,6 +2,7 @@
 namespace App\Mail;
 use App\Models\Booking;
 use App\Services\InvoiceService;
+use App\Services\TicketPdfService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
@@ -29,10 +30,22 @@ class BookingConfirmation extends Mailable
     public function attachments(): array
     {
         $invoiceService = app(InvoiceService::class);
+        $ticketPdfService = app(TicketPdfService::class);
+
         $invoiceNumber = $invoiceService->generateInvoiceNumber($this->booking);
+
         return [
-            Attachment::fromData(fn () => $invoiceService->getInvoiceOutput($this->booking), "Rechnung_{$invoiceNumber}.pdf")
-                ->withMime('application/pdf'),
+            // Rechnung anhängen
+            Attachment::fromData(
+                fn () => $invoiceService->getInvoiceOutput($this->booking),
+                "Rechnung_{$invoiceNumber}.pdf"
+            )->withMime('application/pdf'),
+
+            // Ticket-PDF anhängen
+            Attachment::fromData(
+                fn () => $ticketPdfService->getTicketContent($this->booking),
+                "Ticket_{$this->booking->booking_number}.pdf"
+            )->withMime('application/pdf'),
         ];
     }
 }

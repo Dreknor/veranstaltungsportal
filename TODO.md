@@ -57,46 +57,86 @@
 - [x] **Review-System UI in Event Show View integriert**
 - [x] **Icon-Komponenten (17 SVG-Icons für UI)**
 - [x] **Veranstaltungskategorien für Bildungsbereich angepasst (15 Kategorien)**
+- [x] **QR-Code Service (vollständig implementiert)**
+- [x] **Ticket PDF Service (vollständig implementiert)**
+- [x] **PDF-Ticket-Views (ticket.blade.php, tickets-multiple.blade.php)**
+- [x] **Email-Anhänge für Tickets und Rechnungen**
+- [x] **User Dashboard (DashboardController)**
+- [x] **Favorites System (FavoriteController, Migration, Views)**
+- [x] **Booking History, Upcoming & Past Events Views**
 
 ## 🔄 In Arbeit / Fehlend
 
 ### 1. Core Features (Hohe Priorität)
-- [ ] **Payment Integration **
-- [ ] **QR-Code & PDF Generator**
-  - [ ] PDF-Download nach Buchung
-  - [ ] PDF-Tickets mit QR-Code
-- [ ] **QR-Code & PDF Generator**
-  - [ ] QR-Code Generator für Tickets
-  - [ ] PDF-Tickets mit QR-Code
-  - [ ] PDF-Download nach Buchung
-  - [ ] Email-Anhang (PDF-Ticket)
+- [x] **QR-Code & PDF Generator**
+  - [x] QR-Code Generator für Tickets
+  - [x] PDF-Tickets mit QR-Code
+  - [x] PDF-Download nach Buchung
+  - [x] Email-Anhang (PDF-Ticket)
+  - [x] QrCodeService implementiert
+  - [x] TicketPdfService implementiert
+  - [x] PDF-Views erstellt (ticket.blade.php, tickets-multiple.blade.php)
+  - [x] Integration in BookingController
+  - [x] Email-Anhänge in BookingConfirmation Mail
 
-- [ ] **Email-System aktivieren**
-  - [ ] SMTP/Mail-Service konfigurieren
-  - [ ] Email-Versand in Controllern aktivieren
-  - [ ] Queue-Worker für Emails
-  - [ ] Email-Templates testen
-  - [ ] Queue-Worker für Emails
-  - [ ] Email-Templates testen
-  - [ ] Email-Templates testen
-  - [ ] SMTP/Mail-Service konfigurieren
-  - [ ] Email-Versand in Controllern aktivieren
-  - [ ] Queue-Worker für Emails
-  - [ ] Email-Templates testen
+### 2. Benutzer Features
+- [x] User Registration & Login (bereits vorhanden)
+- [x] Password Reset (bereits vorhanden)
+- [x] User Profile Management (bereits vorhanden)
+- [x] Event Booking Flow (bereits vorhanden)
+- [x] Booking Management (View, Cancel) (bereits vorhanden)
+- [x] Review System (Event Reviews) (bereits vorhanden)
+- [x] **User Dashboard mit Statistiken**
+- [x] **Booking History View**
+- [x] **Upcoming Events View**
+- [x] **Past Events View**
+- [x] **Wishlist/Favorites System**
+- [x] **Favorite Toggle Button auf Event Show**
+- [x] **Favorites View**
+- [ ] Notification System (Email & In-App)
+- [x] Discount Codes Anwendung beim Booking (bereits vorhanden)
+- [x] Multi-Ticket Booking (bereits vorhanden)
+- [ ] Mobile Responsive Design (teilweise)
+- [ ] Download von Tickets & Rechnungen
+- [ ] Download von Teilnahmezertifikaten
+- [ ] Kalender-Integration (Google Calendar, iCal)
 
-### 2. UI/UX Verbesserungen
-- [x] Review-System UI in Event Show View integrieren
-- [ ] Image Upload UI für Events verbessern (Drag & Drop)
-- [ ] Organizer Event Create View komplettieren (Ticket-Typ-Formular inline)
-- [ ] Responsive Design für Mobile optimieren
-- [ ] Loading States & Animations
-- [ ] Dark Mode Support
-- [ ] Dashboard Charts/Graphs (Event-Statistiken)
+### 3. Organizer Features
+- [ ] Organizer Registration & Login
+- [ ] Organizer Dashboard
+- [ ] Event Management (Create, Edit, Delete)
+- [ ] Booking Management (View, Export)
+- [ ] Ticket Type Management
+- [ ] Discount Code Management
+- [ ] Event Reviews Management
+- [ ] Check-In System (QR-Code Scanning)
+- [ ] Organizer Profile Management
+- [ ] Email Notifications für Organizer
+- [ ] Event Statistics & Analytics
+- [ ] Teilnehmerlisten Export (CSV, Excel)
+- [ ] Event Promotion Tools (Share Links, Social Media)
+- [ ] Anwesenheitszertifikate generieren und verwalten
+- [ ] Kalender-Integration (Google Calendar, iCal)
+- [ ] Automatisierte Erinnerungs-Emails an Teilnehmer
+- [ ] Recurring Events (Wiederkehrende Events)
 
-### 3. Erweiterte Features
+
+
+### 4. Admin Features
+- [ ] Admin Dashboard (Super-Admin)
+- [ ] User-Management (Admin)
+- [ ] Event-Moderation
+- [ ] Reporting/Analytics
+- [ ] System Settings
+- [ ] Audit Log
+- [ ] Role & Permission Management
+- [ ] Content Management (CMS für statische Seiten)
+- [ ] Support Ticket System
+
+
+### 5. Erweiterte Features
 - [ ] Multi-Language Support (i18n)
 - [ ] Event-Duplikation (Clone Event)
-- [ ] Recurring Events (Wiederkehrende Events)
 - [ ] Warteliste für ausverkaufte Events
 - [ ] Social Media Integration (Share Events)
 - [ ] Event-Favoriten für User
@@ -105,7 +145,7 @@
 - [ ] Analytics Dashboard (Google Analytics)
 - [ ] SEO-Optimierung
 
-### 4. Testing & Qualität
+### 6. Testing & Qualität
 - [ ] Weitere Unit Tests für Models
   - [ ] Booking Model Tests
   - [ ] TicketType Model Tests
@@ -117,15 +157,17 @@
 - [ ] Security Audit
 - [ ] Code Coverage > 80%
 
-### 5. Admin Features
-- [ ] Admin Dashboard (Super-Admin)
-- [ ] User-Management (Admin)
-- [ ] Event-Moderation
-- [ ] Reporting/Analytics
-- [ ] System Settings
-- [ ] Audit Log
+### 7. UI/UX Verbesserungen
+- [x] Review-System UI in Event Show View integrieren
+- [ ] Image Upload UI für Events verbessern (Drag & Drop)
+- [ ] Organizer Event Create View komplettieren (Ticket-Typ-Formular inline)
+- [ ] Responsive Design für Mobile optimieren
+- [ ] Loading States & Animations
+- [ ] Dark Mode Support
+- [ ] Dashboard Charts/Graphs (Event-Statistiken)
 
-### 6. Dokumentation
+
+### 8. Dokumentation
 - [ ] User Manual (Endbenutzer)
 - [ ] Organizer Guide
 - [ ] Admin Guide
@@ -133,92 +175,21 @@
 - [ ] API Client Examples
 - [ ] Video Tutorials
 
-### 7. DevOps
-- [ ] Docker Setup
-- [ ] CI/CD Pipeline (GitHub Actions)
-- [ ] Staging Environment
-- [ ] Production Deployment Scripts
-- [ ] Monitoring Setup (Sentry, etc.)
-- [ ] Backup Strategy
-- [ ] CDN Integration
-
-## 📝 Nächste Schritte (Priorität)
-
-### Sprint 1: Payment & Emails ✅ ABGESCHLOSSEN
-1. ✅ EventController vervollständigen ✓
-2. ✅ BookingController vervollständigen ✓
-3. ✅ Booking-Views erstellen ✓
-4. ✅ Organizer Controller implementieren ✓
-5. ✅ Factories & Seeders erstellen ✓
-6. ✅ Tests schreiben ✓
-7. ✅ Payment Integration (Rechnungen) ✓
-8. ✅ Email-System aktivieren ✓
-
-### Sprint 2: PDF & QR-Codes (1 Woche)
-1. QR-Code Generator implementieren
-2. PDF-Ticket-Generator
-3. Email-Anhänge aktivieren
-4. Testing
-
-### Sprint 3: UI Polish (1 Woche)
-1. Review-System UI
-2. Image Upload verbessern
-3. Responsive Design
-4. Loading States
-
-### Sprint 4: Testing & Launch Prep (1 Woche)
-1. Vollständige Test-Suite
-2. Security Audit
-3. Performance-Optimierung
-4. Deployment vorbereiten
-
-- Sprint 1: Payment & Notifications (Rechnungen, Email-Versand)
-## 🎯 Sprint-Ziele
-
-**🔄 AKTUELL:**
-
-**📋 GEPLANT:**
-- Sprint 1: Payment & Notifications
-
-**📋 GEPLANT:**
-- Sprint 2: PDF & QR-Codes
-**Gesamt-Fortschritt:** ~80% der Kern-Features implementiert
-- Sprint 4: Testing & Launch
-
-- Backend: 95%
-- Frontend: 65%
-**Gesamt-Fortschritt:** ~70% der Kern-Features implementiert
-- Dokumentation: 85%
-**Bereiche:**
-- Backend: 85%
-1. ~~Email-Versand nur vorbereitet, nicht aktiv~~ ✅ BEHOBEN
-2. ~~Payment-Integration fehlt~~ ✅ BEHOBEN (Rechnungssystem implementiert)
-- Dokumentation: 80%
-- DevOps: 10%
-5. SMTP-Konfiguration muss für Production eingerichtet werden
-
 ## 🐛 Bekannte Issues
+1. PDF-Layout könnte verbessert werden
+2. Mobile Responsive könnte verbessert werden
+3. Organizer Event Create View unvollständig
+4. Fehlende Tests für einige Models
+5. Fehlende Dokumentation für einige Features
 
-1. Email-Versand nur vorbereitet, nicht aktiv
-2. Payment-Integration fehlt
-3. Mobile Responsive könnte verbessert werden
-4. Image Upload UI basic
 
 ## 💡 Feature-Ideen (Backlog)
 
 - Event-Serien/Festivals mit mehreren Tagen
-- Live-Chat Support
 - Push-Notifications
-- Mobile App (React Native/Flutter)
 - Event-Empfehlungen basierend auf User-Interesse
 - Gamification (Badges für User)
 - Social Features (User können sich connecten)
-- Event-Streaming Integration (Zoom, YouTube Live)
+- Event-Streaming Integration (Hinterlegung von Online-Events)
 
-## 📞 Support & Fragen
-
-Bei Fragen zum Code oder zur Weiterentwicklung siehe:
-- `README_DETAILED.md` - Installation & Setup
-- `API_DOCUMENTATION.md` - API-Endpunkte
-- `DEVELOPMENT_SUMMARY.md` - Aktuelle Entwicklung
 

@@ -16,7 +16,7 @@
         "laravel/tinker": "^2.10.1",
         "owenvoke/blade-fontawesome": "^2.9",
         "simplesoftwareio/simple-qrcode": "^4.2",
-        "spatie/laravel-medialibrary": "*",
+        "spatie/laravel-medialibrary": "^11.17",
         "spatie/laravel-permission": "*"
     },
     "require-dev": {
