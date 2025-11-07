@@ -264,7 +264,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($bookingItems as $item)
+                    @foreach($items as $item)
                     <tr>
                         <td>{{ $item->ticketType->name }}</td>
                         <td>{{ $item->quantity }}</td>
