@@ -68,6 +68,11 @@ class Event extends Model implements HasMedia
         return $this->belongsTo(User::class);
     }
 
+    public function organizer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(EventCategory::class, 'event_category_id');
@@ -109,6 +114,16 @@ class Event extends Model implements HasMedia
     public function averageRating(): float
     {
         return $this->reviews()->where('is_approved', true)->avg('rating') ?? 0;
+    }
+
+    public function getLocationAttribute(): string
+    {
+        $parts = array_filter([
+            $this->venue_name,
+            $this->venue_address,
+            $this->venue_city,
+        ]);
+        return implode(', ', $parts);
     }
 
     public function scopePublished($query)

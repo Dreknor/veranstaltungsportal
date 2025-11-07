@@ -236,16 +236,16 @@
             <div class="info-grid">
                 <div class="info-row">
                     <div class="info-label">Name:</div>
-                    <div class="info-value">{{ $booking->attendee_name }}</div>
+                    <div class="info-value">{{ $booking->customer_name }}</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">E-Mail:</div>
-                    <div class="info-value">{{ $booking->attendee_email }}</div>
+                    <div class="info-value">{{ $booking->customer_email }}</div>
                 </div>
-                @if($booking->attendee_phone)
+                @if($booking->customer_phone)
                 <div class="info-row">
                     <div class="info-label">Telefon:</div>
-                    <div class="info-value">{{ $booking->attendee_phone }}</div>
+                    <div class="info-value">{{ $booking->customer_phone }}</div>
                 </div>
                 @endif
             </div>
@@ -302,7 +302,7 @@
             <p><strong>Wichtige Hinweise:</strong></p>
             <p>• Bitte bringen Sie dieses Ticket (ausgedruckt oder digital) zur Veranstaltung mit.</p>
             <p>• Der Check-In erfolgt über den QR-Code am Eingang.</p>
-            <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organizer->email ?? 'support@bildungsportal.de' }}</p>
+            <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organizer_email ?? $event->organizer->email ?? 'support@bildungsportal.de' }}</p>
             @if($event->special_instructions)
             <p>• {{ $event->special_instructions }}</p>
             @endif

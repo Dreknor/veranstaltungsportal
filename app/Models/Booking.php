@@ -73,6 +73,17 @@ class Booking extends Model
         return $this->hasMany(BookingItem::class);
     }
 
+    public function getTotalAmountAttribute(): float
+    {
+        return $this->total;
+    }
+
+    public function getVerificationCodeAttribute(): string
+    {
+        // Generate a verification code from booking_number (last 8 chars)
+        return strtoupper(substr($this->booking_number, -8));
+    }
+
     public function scopeConfirmed($query)
     {
         return $query->where('status', 'confirmed');
