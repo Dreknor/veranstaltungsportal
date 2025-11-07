@@ -93,7 +93,12 @@
 - [x] **Wishlist/Favorites System**
 - [x] **Favorite Toggle Button auf Event Show**
 - [x] **Favorites View**
-- [ ] Notification System (Email & In-App)
+- [x] Notification System (Email & In-App)
+  - [x] NotificationController implementiert
+  - [x] Notification Views (index.blade.php)
+  - [x] Notification Routes konfiguriert
+  - [x] Database Migration für Notifications
+  - [x] Notification Classes (BookingConfirmedNotification, EventReminderNotification)
 - [x] Discount Codes Anwendung beim Booking (bereits vorhanden)
 - [x] Multi-Ticket Booking (bereits vorhanden)
 - [ ] Mobile Responsive Design (teilweise)
@@ -123,9 +128,27 @@
 
 
 ### 4. Admin Features
-- [ ] Admin Dashboard (Super-Admin)
-- [ ] User-Management (Admin)
-- [ ] Event-Moderation
+- [x] Admin Dashboard (Super-Admin)
+  - [x] Admin DashboardController implementiert
+  - [x] Admin Dashboard View (dashboard.blade.php)
+  - [x] Statistiken (Benutzer, Events, Buchungen, Umsatz)
+  - [x] Recent Users und Events Übersicht
+- [x] User-Management (Admin)
+  - [x] Admin UserManagementController implementiert
+  - [x] Users Index View (index.blade.php)
+  - [x] Users Edit View (edit.blade.php)
+  - [x] User Suche und Filter
+  - [x] Toggle Organizer/Admin Status
+  - [x] User löschen
+- [x] Event-Moderation
+  - [x] Admin EventManagementController implementiert
+  - [x] Events Index View (index.blade.php)
+  - [x] Event Suche und Filter
+  - [x] Toggle Publish/Featured Status
+  - [x] Events löschen
+- [x] Admin Middleware (AdminMiddleware.php)
+- [x] Admin Routes konfiguriert
+- [x] is_admin Feld in User Model
 - [ ] Reporting/Analytics
 - [ ] System Settings
 - [ ] Audit Log
