@@ -1,0 +1,58 @@
+<footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div>
+                <h3 class="text-xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    📚 Bildungsportal
+                </h3>
+                <p class="text-gray-400">
+                    Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen.
+                </p>
+                <div class="mt-4">
+                    <a href="https://www.ev-schulen-sachsen.de/hauptfach-mensch-1" target="_blank" rel="noopener" class="text-sm text-blue-400 hover:text-blue-300 transition">
+                        → Mehr zur Aktion Hauptfach Mensch
+                    </a>
+                </div>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Veranstaltungen</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="{{ route('events.index') }}" class="hover:text-white transition">Alle Veranstaltungen</a></li>
+                    <li><a href="{{ route('events.calendar') }}" class="hover:text-white transition">Kalender</a></li>
+                    @foreach(\App\Models\EventCategory::where('is_active', true)->limit(3)->get() as $cat)
+                        <li><a href="{{ route('events.index', ['category' => $cat->id]) }}" class="hover:text-white transition">{{ $cat->name }}</a></li>
+                    @endforeach
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Für Veranstalter</h4>
+                <ul class="space-y-2 text-gray-400">
+                    @auth
+                        @if(auth()->user()->is_organizer)
+                            <li><a href="{{ route('organizer.dashboard') }}" class="hover:text-white transition">Dashboard</a></li>
+                            <li><a href="{{ route('organizer.events.index') }}" class="hover:text-white transition">Meine Veranstaltungen</a></li>
+                        @endif
+                    @else
+                        <li><a href="{{ route('register') }}" class="hover:text-white transition">Als Veranstalter registrieren</a></li>
+                    @endauth
+                    <li><a href="#" class="hover:text-white transition">Informationen für Anbieter</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-4">Hilfe & Support</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white transition">FAQ</a></li>
+                    <li><a href="#" class="hover:text-white transition">Kontakt</a></li>
+                    <li><a href="#" class="hover:text-white transition">AGB</a></li>
+                    <li><a href="#" class="hover:text-white transition">Datenschutz</a></li>
+                    <li><a href="#" class="hover:text-white transition">Impressum</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+            <p>&copy; {{ date('Y') }} Bildungsportal. Alle Rechte vorbehalten.</p>
+            <p class="text-sm mt-2">Eine Initiative für evangelische Schulen in Sachsen</p>
+        </div>
+    </div>
+</footer>
+
