@@ -55,10 +55,6 @@ test('event upcoming scope works', function () {
 
     expect($upcomingEvents)->toHaveCount(1);
 });
-<?php
-
-use App\Models\Event;
-use App\Models\EventCategory;
 use App\Models\User;
 
 test('events index page displays published events', function () {

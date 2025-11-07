@@ -161,14 +161,19 @@
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">Aktionen</h2>
                         <div class="space-y-3">
+                            <a href="{{ route('bookings.ticket', $booking->booking_number) }}"
+                               class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition block text-center">
+                                🎫 Ticket herunterladen (PDF)
+                            </a>
+
                             <a href="{{ route('bookings.invoice', $booking->booking_number) }}"
                                class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition block text-center">
                                 📄 Rechnung herunterladen (PDF)
                             </a>
 
                             <button onclick="window.print()"
-                                    class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                🖨️ Tickets drucken
+                                    class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                                🖨️ Diese Seite drucken
                             </button>
 
                             @if($booking->status !== 'cancelled' && $booking->event->start_date->isFuture())

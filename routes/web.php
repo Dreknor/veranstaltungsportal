@@ -29,6 +29,7 @@ Route::get('/events/{event}/book', [BookingController::class, 'create'])->name('
 Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store');
 Route::get('/bookings/{bookingNumber}', [BookingController::class, 'show'])->name('bookings.show');
 Route::get('/bookings/{bookingNumber}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
+Route::get('/bookings/{bookingNumber}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
 Route::get('/bookings/{bookingNumber}/verify', [BookingController::class, 'verify'])->name('bookings.verify');
 Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->name('bookings.verify-email');
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');

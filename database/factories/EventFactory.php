@@ -63,7 +63,7 @@ class EventFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'event_category_id' => EventCategory::inRandomOrder()->first()?->id ?? EventCategory::factory(),
+            'event_category_id' => EventCategory::factory(),
             'title' => $title,
             'slug' => Str::slug($title) . '-' . Str::random(6),
             'description' => $this->faker->paragraphs(3, true),

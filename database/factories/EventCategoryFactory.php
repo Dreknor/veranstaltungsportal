@@ -34,21 +34,7 @@ class EventCategoryFactory extends Factory
         ];
     }
 }
-<?php
 
-namespace Database\Factories;
-
-use App\Models\Event;
-use App\Models\EventCategory;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-
-class EventFactory extends Factory
-{
-    protected $model = Event::class;
-
-    public function definition(): array
     {
         $title = $this->faker->sentence(3);
         $startDate = $this->faker->dateTimeBetween('+1 week', '+3 months');

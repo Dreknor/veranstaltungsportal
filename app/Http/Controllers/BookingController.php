@@ -8,6 +8,7 @@ use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\TicketType;
 use App\Services\InvoiceService;
+use App\Services\TicketPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -261,8 +262,25 @@ class BookingController extends Controller
              !session()->has('booking_access_' . $booking->id))) {
             abort(403, 'Kein Zugriff auf diese Rechnung');
         }
+        $pdfService = app(TicketPdfService::class);
+        return $pdfService->downloadInvoice($booking);
+    }
 
-        $invoiceService = app(InvoiceService::class);
+    public function downloadTicket($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event', 'items.ticketType'])
+            ->firstOrFail();
+
+        // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
+        if (!auth()->check() ||
+            (auth()->id() !== $booking->user_id &&
+             !session()->has('booking_access_' . $booking->id))) {
+            abort(403, 'Kein Zugriff auf dieses Ticket');
+        }
+
+        $pdfService = app(TicketPdfService::class);
+        return $pdfService->downloadTicket($booking);
         return $invoiceService->downloadInvoice($booking);
     }
 }
