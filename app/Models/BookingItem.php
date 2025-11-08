@@ -52,4 +52,9 @@ class BookingItem extends Model
     {
         return $this->belongsTo(TicketType::class);
     }
+
+    public function getSubtotalAttribute(): float
+    {
+        return $this->price * $this->quantity;
+    }
 }
