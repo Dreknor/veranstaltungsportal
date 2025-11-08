@@ -182,48 +182,6 @@
                     </div>
                 </div>
 
-                <!-- Ticket-Typen -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Typen</h2>
-
-                    @if($ticketTypes->isEmpty())
-                        <p class="text-gray-600 mb-4">Noch keine Ticket-Typen definiert.</p>
-                    @else
-                        <div class="space-y-4 mb-4">
-                            @foreach($ticketTypes as $ticketType)
-                                <div class="border border-gray-200 rounded-lg p-4">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="font-semibold text-gray-900">{{ $ticketType->name }}</h3>
-                                            <p class="text-sm text-gray-600">{{ $ticketType->description }}</p>
-                                            <div class="mt-2 text-sm text-gray-500">
-                                                Preis: {{ number_format($ticketType->price, 2, ',', '.') }} € |
-                                                Verfügbar: {{ $ticketType->availableQuantity() }} von {{ $ticketType->quantity ?? '∞' }} |
-                                                Verkauft: {{ $ticketType->quantity_sold }}
-                                            </div>
-                                        </div>
-                                        <form action="{{ route('organizer.events.tickets.delete', [$event, $ticketType]) }}" method="POST" onsubmit="return confirm('Wirklich löschen?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-
-                    <button type="button" onclick="document.getElementById('add-ticket-form').classList.toggle('hidden')"
-                            class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
-                        Ticket-Typ hinzufügen
-                    </button>
-
-                    <div id="add-ticket-form" class="hidden mt-4 p-4 border border-gray-200 rounded-lg">
-                        <h3 class="font-semibold mb-4">Neuer Ticket-Typ</h3>
-                        <!-- Hier würde ein separates Formular für Ticket-Typen kommen -->
-                    </div>
-                </div>
-
                 <div class="flex justify-end space-x-4">
                     <a href="{{ route('organizer.events.index') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
                         Abbrechen
@@ -233,6 +191,114 @@
                     </button>
                 </div>
             </form>
+
+            <!-- Ticket-Typen (außerhalb des Hauptformulars) -->
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Typen</h2>
+
+                @if($ticketTypes->isEmpty())
+                    <p class="text-gray-600 mb-4">Noch keine Ticket-Typen definiert.</p>
+                @else
+                    <div class="space-y-4 mb-4">
+                        @foreach($ticketTypes as $ticketType)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-900">{{ $ticketType->name }}</h3>
+                                        <p class="text-sm text-gray-600">{{ $ticketType->description }}</p>
+                                        <div class="mt-2 text-sm text-gray-500">
+                                            Preis: {{ number_format($ticketType->price, 2, ',', '.') }} € |
+                                            Verfügbar: {{ $ticketType->availableQuantity() }} von {{ $ticketType->quantity ?? '∞' }} |
+                                            Verkauft: {{ $ticketType->quantity_sold }}
+                                        </div>
+                                    </div>
+                                    <form action="{{ route('organizer.events.ticket-types.destroy', [$event, $ticketType]) }}" method="POST" onsubmit="return confirm('Wirklich löschen?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <a href="{{ route('organizer.events.ticket-types.create', $event) }}"
+                   class="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                    Ticket-Typ hinzufügen
+                </a>
+
+                <button type="button" onclick="document.getElementById('add-ticket-form').classList.toggle('hidden')"
+                        class="ml-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                    Schnell hinzufügen
+                </button>
+
+                <div id="add-ticket-form" class="hidden mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h3 class="font-semibold mb-4 text-gray-900">Neuen Ticket-Typ hinzufügen</h3>
+
+                    <form action="{{ route('organizer.events.ticket-types.store', $event) }}" method="POST" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="redirect_to_edit" value="1">
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="ticket_name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                                <input type="text" id="ticket_name" name="name" required
+                                       placeholder="z.B. Standard, VIP, Ermäßigt"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label for="ticket_price" class="block text-sm font-medium text-gray-700 mb-1">Preis (€) *</label>
+                                <input type="number" id="ticket_price" name="price" required min="0" step="0.01"
+                                       placeholder="0.00"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="ticket_description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+                            <textarea id="ticket_description" name="description" rows="2"
+                                      placeholder="Optional: Beschreibung des Ticket-Typs"
+                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="ticket_quantity" class="block text-sm font-medium text-gray-700 mb-1">Verfügbare Anzahl</label>
+                                <input type="number" id="ticket_quantity" name="quantity" min="1"
+                                       placeholder="Leer = unbegrenzt"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Leer lassen für unbegrenzte Tickets</p>
+                            </div>
+
+                            <div>
+                                <label for="ticket_max_per_order" class="block text-sm font-medium text-gray-700 mb-1">Max. pro Buchung</label>
+                                <input type="number" id="ticket_max_per_order" name="max_per_order" min="1"
+                                       placeholder="z.B. 10"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <p class="text-xs text-gray-500 mt-1">Maximal buchbare Anzahl</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" id="ticket_is_available" name="is_available" value="1" checked
+                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <label for="ticket_is_available" class="ml-2 text-sm text-gray-700">Ticket-Typ aktivieren</label>
+                        </div>
+
+                        <div class="flex justify-end space-x-2 pt-2 border-t">
+                            <button type="button" onclick="document.getElementById('add-ticket-form').classList.add('hidden')"
+                                    class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
+                                Abbrechen
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                Ticket-Typ speichern
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -241,96 +307,5 @@
             document.getElementById('access-code-field').classList.toggle('hidden', !this.checked);
         });
     </script>
-</x-layouts.app>
-<x-layouts.app title="Meine Events">
-    <div class="min-h-screen bg-gray-50 py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Meine Events</h1>
-                <a href="{{ route('organizer.events.create') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-                    Neues Event erstellen
-                </a>
-            </div>
-
-            @if(session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if($events->isEmpty())
-                <div class="bg-white rounded-lg shadow-md p-12 text-center">
-                    <p class="text-gray-600 text-lg mb-4">Sie haben noch keine Events erstellt.</p>
-                    <a href="{{ route('organizer.events.create') }}" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-                        Erstes Event erstellen
-                    </a>
-                </div>
-            @else
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategorie</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buchungen</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($events as $event)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div>
-                                                <div class="text-sm font-medium text-gray-900">{{ $event->title }}</div>
-                                                <div class="text-sm text-gray-500">{{ $event->venue_city }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                            {{ $event->category->name }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $event->start_date->format('d.m.Y H:i') }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $event->bookings->count() }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($event->is_published)
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                Veröffentlicht
-                                            </span>
-                                        @else
-                                            <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                Entwurf
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <a href="{{ route('events.show', $event->slug) }}" class="text-blue-600 hover:text-blue-900 mr-3">Ansehen</a>
-                                        <a href="{{ route('organizer.events.edit', $event) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Bearbeiten</a>
-                                        <form action="{{ route('organizer.events.destroy', $event) }}" method="POST" class="inline" onsubmit="return confirm('Wirklich löschen?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-6">
-                    {{ $events->links() }}
-                </div>
-            @endif
-        </div>
-    </div>
 </x-layouts.app>
 

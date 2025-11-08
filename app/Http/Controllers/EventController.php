@@ -51,7 +51,10 @@ class EventController extends Controller
         $events = $query->paginate(12);
         $categories = EventCategory::where('is_active', true)->get();
 
-        return view('events.index', compact('events', 'categories'));
+        // Unterscheide zwischen angemeldeten und nicht-angemeldeten Benutzern
+        $view = auth()->check() ? 'events.index-auth' : 'events.index';
+
+        return view($view, compact('events', 'categories'));
     }
 
     public function calendar(Request $request)
@@ -66,7 +69,10 @@ class EventController extends Controller
             ->with('category')
             ->get();
 
-        return view('events.calendar', compact('events', 'month', 'year'));
+        // Unterscheide zwischen angemeldeten und nicht-angemeldeten Benutzern
+        $view = auth()->check() ? 'events.calendar-auth' : 'events.calendar';
+
+        return view($view, compact('events', 'month', 'year'));
     }
 
     public function show($slug)
@@ -91,7 +97,10 @@ class EventController extends Controller
             ->limit(3)
             ->get();
 
-        return view('events.show', compact('event', 'relatedEvents'));
+        // Unterscheide zwischen angemeldeten und nicht-angemeldeten Benutzern
+        $view = auth()->check() ? 'events.show-auth' : 'events.show';
+
+        return view($view, compact('event', 'relatedEvents'));
     }
 
     public function access($slug)

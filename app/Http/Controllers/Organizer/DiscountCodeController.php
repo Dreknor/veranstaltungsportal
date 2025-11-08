@@ -10,10 +10,6 @@ use Illuminate\Support\Str;
 
 class DiscountCodeController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth']);
-    }
 
     public function index(Event $event)
     {

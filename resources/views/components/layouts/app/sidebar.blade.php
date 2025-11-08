@@ -1,66 +1,188 @@
-            <aside :class="{ 'w-full md:w-64': sidebarOpen, 'w-0 md:w-16 hidden md:block': !sidebarOpen }"
-                class="bg-sidebar text-sidebar-foreground border-r border-gray-200 dark:border-gray-700 sidebar-transition overflow-hidden">
-                <!-- Sidebar Content -->
-                <div class="h-full flex flex-col">
-                    <!-- Sidebar Menu -->
-                    <nav class="flex-1 overflow-y-auto custom-scrollbar py-4">
-                        <ul class="space-y-1 px-2">
-                            <!-- Dashboard -->
-                            <x-layouts.sidebar-link href="{{ route('dashboard') }}" icon='fas-house'
-                                :active="request()->routeIs('dashboard')">Dashboard</x-layouts.sidebar-link>
+<!-- Modern Sidebar with Smooth Animations -->
+<aside :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full md:translate-x-0': !sidebarOpen, 'md:w-64': sidebarOpen, 'md:w-20': !sidebarOpen }"
+    class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out shadow-xl md:shadow-none">
 
-                            <!-- My Events -->
-                            <x-layouts.sidebar-link href="{{ route('events.index') }}" icon='fas-calendar'
-                                :active="request()->routeIs('events.index', 'events.show')">Alle Events</x-layouts.sidebar-link>
+    <!-- Overlay for mobile -->
+    <div x-show="sidebarOpen"
+         @click="toggleSidebar"
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm md:hidden z-30"></div>
 
-                            <!-- My Bookings -->
-                            <x-layouts.sidebar-link href="{{ route('user.bookings') }}" icon='fas-ticket'
-                                :active="request()->routeIs('user.bookings')">Meine Buchungen</x-layouts.sidebar-link>
+    <!-- Sidebar Content -->
+    <div class="relative h-full flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
 
-                            <!-- Favorites -->
-                            <x-layouts.sidebar-link href="{{ route('favorites.index') }}" icon='fas-heart'
-                                :active="request()->routeIs('favorites.index')">Favoriten</x-layouts.sidebar-link>
 
-                            <!-- Notifications -->
-                            <x-layouts.sidebar-link href="{{ route('notifications.index') }}" icon='fas-bell'
-                                :active="request()->routeIs('notifications.*')">Benachrichtigungen</x-layouts.sidebar-link>
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto py-4 px-3 custom-scrollbar">
+            <ul class="space-y-1">
+                <!-- Dashboard -->
+                <x-layouts.sidebar-link href="{{ route('dashboard') }}" icon='fas-house'
+                    :active="request()->routeIs('dashboard')">
+                    Dashboard
+                </x-layouts.sidebar-link>
 
-                            @if(auth()->user()->is_organizer)
-                                <!-- Organizer Section -->
-                                <li class="pt-4 pb-2 px-2">
-                                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Veranstalter
-                                    </h3>
-                                </li>
+                <!-- My Events -->
+                <x-layouts.sidebar-link href="{{ route('events.index') }}" icon='fas-calendar'
+                    :active="request()->routeIs('events.index', 'events.show')">
+                    Alle Events
+                </x-layouts.sidebar-link>
 
-                                <x-layouts.sidebar-link href="{{ route('organizer.dashboard') }}" icon='fas-chart-line'
-                                    :active="request()->routeIs('organizer.dashboard')">Veranstalter Dashboard</x-layouts.sidebar-link>
+                <!-- My Bookings -->
+                <x-layouts.sidebar-link href="{{ route('user.bookings') }}" icon='fas-ticket'
+                    :active="request()->routeIs('user.bookings')">
+                    Meine Buchungen
+                </x-layouts.sidebar-link>
 
-                                <x-layouts.sidebar-link href="{{ route('organizer.events.index') }}" icon='fas-calendar-days'
-                                    :active="request()->routeIs('organizer.events.*')">Meine Events</x-layouts.sidebar-link>
+                <!-- Favorites -->
+                <x-layouts.sidebar-link href="{{ route('favorites.index') }}" icon='fas-heart'
+                    :active="request()->routeIs('favorites.index')">
+                    Favoriten
+                </x-layouts.sidebar-link>
 
-                                <x-layouts.sidebar-link href="{{ route('organizer.bookings.index') }}" icon='fas-receipt'
-                                    :active="request()->routeIs('organizer.bookings.*')">Event Buchungen</x-layouts.sidebar-link>
+                <!-- Notifications with Badge -->
+                <li>
+                    <a href="{{ route('notifications.index') }}"
+                       class="group relative flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 ease-in-out
+                              {{ request()->routeIs('notifications.*')
+                                  ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30 dark:shadow-blue-400/20'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400' }}"
+                       :class="{ 'justify-center': !sidebarOpen, 'justify-start': sidebarOpen }">
+                        <!-- Active Indicator -->
+                        @if(request()->routeIs('notifications.*'))
+                        <span class="absolute left-0 w-1 h-8 bg-white rounded-r-full"></span>
+                        @endif
+
+                        <!-- Icon Container -->
+                        <span class="flex items-center justify-center w-5 h-5 transition-transform duration-200 relative"
+                              :class="{ 'group-hover:scale-110': !{{ request()->routeIs('notifications.*') ? 'true' : 'false' }} }">
+                            <svg class="h-5 w-5 {{ request()->routeIs('notifications.*') ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                            <!-- Notification Badge (always visible if unread) -->
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
+                                {{ auth()->user()->unreadNotifications->count() > 9 ? '9+' : auth()->user()->unreadNotifications->count() }}
+                            </span>
                             @endif
+                        </span>
 
-                            @if(auth()->user()->is_admin)
-                                <!-- Admin Section -->
-                                <li class="pt-4 pb-2 px-2">
-                                    <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Administration
-                                    </h3>
-                                </li>
+                        <!-- Text -->
+                        <span x-show="sidebarOpen"
+                              x-transition:enter="transition ease-out duration-200"
+                              x-transition:enter-start="opacity-0 -translate-x-2"
+                              x-transition:enter-end="opacity-100 translate-x-0"
+                              x-transition:leave="transition ease-in duration-150"
+                              x-transition:leave-start="opacity-100 translate-x-0"
+                              x-transition:leave-end="opacity-0 -translate-x-2"
+                              class="ml-3 font-medium text-sm whitespace-nowrap flex-1">
+                            Benachrichtigungen
+                        </span>
 
-                                <x-layouts.sidebar-link href="{{ route('admin.dashboard') }}" icon='fas-gauge'
-                                    :active="request()->routeIs('admin.dashboard')">Admin Dashboard</x-layouts.sidebar-link>
+                        <!-- Hover Effect -->
+                        @if(!request()->routeIs('notifications.*'))
+                        <span class="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 dark:group-hover:from-blue-500/10 dark:group-hover:to-purple-500/10 transition-all duration-200"></span>
+                        @endif
+                    </a>
+                </li>
 
-                                <x-layouts.sidebar-link href="{{ route('admin.users.index') }}" icon='fas-users'
-                                    :active="request()->routeIs('admin.users.*')">Benutzerverwaltung</x-layouts.sidebar-link>
+                @if(auth()->user()->is_organizer || auth()->user()->isOrganizer())
+                    <!-- Organizer Section -->
+                    <li class="pt-6 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Veranstalter
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
 
-                                <x-layouts.sidebar-link href="{{ route('admin.events.index') }}" icon='fas-calendar-check'
-                                    :active="request()->routeIs('admin.events.*')">Event-Verwaltung</x-layouts.sidebar-link>
-                            @endif
-                        </ul>
-                    </nav>
+                    <x-layouts.sidebar-link href="{{ route('organizer.dashboard') }}" icon='fas-chart-line'
+                        :active="request()->routeIs('organizer.dashboard')">
+                        Veranstalter Dashboard
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('organizer.events.index') }}" icon='fas-calendar-days'
+                        :active="request()->routeIs('organizer.events.*')">
+                        Meine Events
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('organizer.bookings.index') }}" icon='fas-receipt'
+                        :active="request()->routeIs('organizer.bookings.*')">
+                        Event Buchungen
+                    </x-layouts.sidebar-link>
+                @endif
+
+                @if(auth()->user()->hasRole('admin'))
+                    <!-- Admin Section -->
+                    <li class="pt-6 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Administration
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.dashboard') }}" icon='fas-gauge'
+                        :active="request()->routeIs('admin.dashboard')">
+                        Admin Dashboard
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.users.index') }}" icon='fas-users'
+                        :active="request()->routeIs('admin.users.*')">
+                        Benutzerverwaltung
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.events.index') }}" icon='fas-calendar-check'
+                        :active="request()->routeIs('admin.events.*')">
+                        Event-Verwaltung
+                    </x-layouts.sidebar-link>
+                @endif
+            </ul>
+        </nav>
+
+        <!-- Footer: Settings & Appearance -->
+        <div class="p-3 border-t border-gray-200 dark:border-gray-700 space-y-1">
+            <!-- Appearance Toggle -->
+            <div x-data="{ appearance: localStorage.getItem('appearance') || 'system' }"
+                 class="flex items-center justify-between"
+                 :class="{ 'px-2': sidebarOpen }">
+                <span x-show="sidebarOpen" class="text-xs font-medium text-gray-700 dark:text-gray-300">Design</span>
+                <div class="flex items-center space-x-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                    <button @click="setAppearance('light'); appearance = 'light'"
+                            :class="{ 'bg-white dark:bg-gray-600 shadow-sm': appearance === 'light' }"
+                            class="p-1.5 rounded transition-all duration-200"
+                            title="Hell">
+                        <svg class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </button>
+                    <button @click="setAppearance('dark'); appearance = 'dark'"
+                            :class="{ 'bg-white dark:bg-gray-600 shadow-sm': appearance === 'dark' }"
+                            class="p-1.5 rounded transition-all duration-200"
+                            title="Dunkel">
+                        <svg class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </button>
+                    <button @click="setAppearance('system'); appearance = 'system'"
+                            :class="{ 'bg-white dark:bg-gray-600 shadow-sm': appearance === 'system' }"
+                            class="p-1.5 rounded transition-all duration-200"
+                            title="System">
+                        <svg class="h-4 w-4 text-gray-600 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </button>
                 </div>
-            </aside>
+            </div>
+        </div>
+    </div>
+</aside>

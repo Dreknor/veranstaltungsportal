@@ -12,6 +12,11 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Account Types Info Page
+Route::get('/account-types', function () {
+    return view('account-types');
+})->name('account-types');
+
 // Event Routes (Public)
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/calendar', [EventController::class, 'calendar'])->name('events.calendar');
@@ -33,8 +38,10 @@ Route::get('/bookings/{bookingNumber}', [BookingController::class, 'show'])->nam
 Route::get('/bookings/{bookingNumber}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
 Route::get('/bookings/{bookingNumber}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
 Route::get('/bookings/{bookingNumber}/certificate', [BookingController::class, 'downloadCertificate'])->name('bookings.certificate');
+Route::get('/bookings/{bookingNumber}/ical', [BookingController::class, 'downloadIcal'])->name('bookings.ical');
 Route::get('/bookings/{bookingNumber}/verify', [BookingController::class, 'verify'])->name('bookings.verify');
 Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->name('bookings.verify-email');
+Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController::class, 'verifyEmailToken'])->name('bookings.verify-email-token');
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])->name('api.validate-discount-code');
 
@@ -44,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-bookings', [DashboardController::class, 'bookingHistory'])->name('user.bookings');
     Route::get('/my-events/upcoming', [DashboardController::class, 'upcomingEvents'])->name('user.events.upcoming');
     Route::get('/my-events/past', [DashboardController::class, 'pastEvents'])->name('user.events.past');
+    Route::get('/my-statistics', [DashboardController::class, 'statistics'])->name('user.statistics');
 
     // Favorites
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
@@ -57,7 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Organizer Routes
-Route::middleware(['auth'])->prefix('organizer')->name('organizer.')->group(function () {
+Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
     Route::get('/dashboard', [Organizer\DashboardController::class, 'index'])->name('dashboard');
 
     // Event Management
@@ -99,10 +107,13 @@ Route::middleware(['auth'])->prefix('organizer')->name('organizer.')->group(func
 Route::middleware(['auth'])->group(function () {
     Route::get('settings/profile', [Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
     Route::put('settings/profile', [Settings\ProfileController::class, 'update'])->name('settings.profile.update');
+    Route::delete('settings/profile/photo', [Settings\ProfileController::class, 'deletePhoto'])->name('settings.profile.photo.delete');
     Route::delete('settings/profile', [Settings\ProfileController::class, 'destroy'])->name('settings.profile.destroy');
     Route::get('settings/password', [Settings\PasswordController::class, 'edit'])->name('settings.password.edit');
     Route::put('settings/password', [Settings\PasswordController::class, 'update'])->name('settings.password.update');
     Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
+    Route::get('settings/notifications', [Settings\NotificationController::class, 'edit'])->name('settings.notifications.edit');
+    Route::put('settings/notifications', [Settings\NotificationController::class, 'update'])->name('settings.notifications.update');
 });
 
 // Admin Routes
@@ -116,6 +127,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/users/{user}', [\App\Http\Controllers\Admin\UserManagementController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{user}/toggle-organizer', [\App\Http\Controllers\Admin\UserManagementController::class, 'toggleOrganizer'])->name('users.toggle-organizer');
     Route::post('/users/{user}/toggle-admin', [\App\Http\Controllers\Admin\UserManagementController::class, 'toggleAdmin'])->name('users.toggle-admin');
+    Route::post('/users/{user}/assign-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'assignRole'])->name('users.assign-role');
+    Route::post('/users/{user}/remove-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'removeRole'])->name('users.remove-role');
+
+    // Role & Permission Management
+    Route::get('/roles', [\App\Http\Controllers\Admin\RoleManagementController::class, 'index'])->name('roles.index');
+    Route::get('/roles/{role}/edit', [\App\Http\Controllers\Admin\RoleManagementController::class, 'edit'])->name('roles.edit');
+    Route::put('/roles/{role}', [\App\Http\Controllers\Admin\RoleManagementController::class, 'update'])->name('roles.update');
+    Route::get('/permissions', [\App\Http\Controllers\Admin\RoleManagementController::class, 'permissions'])->name('roles.permissions');
 
     // Event Management
     Route::get('/events', [\App\Http\Controllers\Admin\EventManagementController::class, 'index'])->name('events.index');

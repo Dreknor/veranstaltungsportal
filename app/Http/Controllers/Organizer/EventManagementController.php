@@ -11,10 +11,6 @@ use Illuminate\Support\Str;
 
 class EventManagementController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth']);
-    }
 
     public function index()
     {

@@ -93,18 +93,68 @@
 - [x] **Wishlist/Favorites System**
 - [x] **Favorite Toggle Button auf Event Show**
 - [x] **Favorites View**
-- [x] Notification System (Email & In-App)
+- [x] **Notification System (Email & In-App)**
   - [x] NotificationController implementiert
   - [x] Notification Views (index.blade.php)
   - [x] Notification Routes konfiguriert
   - [x] Database Migration für Notifications
-  - [x] Notification Classes (BookingConfirmedNotification, EventReminderNotification)
+  - [x] Notification Classes (BookingConfirmedNotification, EventReminderNotification, EventUpdatedNotification)
+  - [x] In-App Notification Anzeige im User Dashboard
+  - [x] Notification Settings im User Profile
+  - [x] Scheduled Notifications (Event Reminders Command)
+  - [x] Notification Read/Unread Status
+  - [x] Event Observer für automatische Update-Benachrichtigungen
+  - [x] Cleanup Command für alte Benachrichtigungen
+  - [x] Event Reminder Email Template (event-reminder.blade.php)
+  - [x] EventReminderMail Klasse implementiert
+  - [x] Scheduler-Integration für automatische Erinnerungen
+  - [x] Queue-Support für asynchronen Versand
+  - [ ] Push Notifications (Web Push) - geplant
+  - [ ] SMS-Benachrichtigungen - geplant
+- [x] **Erweiterte Benutzerprofile**
+  - [x] User Vor- und Nachname erfassen
+  - [x] User Vorname und Nachname anzeigen
+  - [x] User Profilbild Upload (max. 2MB, JPG/PNG/GIF)
+  - [x] Profilbild-Anzeige im Dashboard Header
+  - [x] Telefonnummer-Feld
+  - [x] Bio/Beschreibungs-Feld (max. 1000 Zeichen)
+  - [x] Gravatar-Integration als Fallback
+  - [x] Profilbild löschen Funktion
+  - [x] Migration für neue Profilfelder (first_name, last_name, profile_photo, phone, bio)
+  - [x] fullName() und profilePhotoUrl() Methoden im User Model
+  - [x] Storage Symlink für Profilbilder
+- [x] **User Statistics Dashboard**
+  - [x] Gesamtübersicht (Buchungen, Events, Stunden)
+  - [x] Finanzübersicht
+  - [x] Events nach Kategorie
+  - [x] Monatliche Aktivitäts-Charts
+  - [x] Jahresstatistiken
 - [x] Discount Codes Anwendung beim Booking (bereits vorhanden)
 - [x] Multi-Ticket Booking (bereits vorhanden)
-- [ ] Mobile Responsive Design (teilweise)
-- [ ] Download von Tickets & Rechnungen
-- [ ] Download von Teilnahmezertifikaten
-- [ ] Kalender-Integration (Google Calendar, iCal)
+- [x] **Mobile Responsive Design**
+  - [x] Responsive Profilseite
+  - [x] Responsive Dashboard
+  - [x] Responsive Event-Views
+  - [x] Mobile-optimierte Navigation
+  - [x] Touch-freundliche UI-Elemente
+- [x] Download von Tickets & Rechnungen
+- [x] Download von Teilnahmezertifikaten
+- [x] Kalender-Integration (Google Calendar, iCal)
+- [x] **Automatisierte Erinnerungs-Emails an Teilnehmer**
+  - [x] SendEventReminders Command
+  - [x] EventReminderMail Klasse
+  - [x] Event-Reminder Email-Template (professionelles Design)
+  - [x] Scheduler-Konfiguration (24h und 3h vor Event)
+  - [x] Integration mit Benachrichtigungseinstellungen
+  - [x] Queue-Support für asynchronen Versand
+  - [x] Opt-out Möglichkeit in Einstellungen
+- [x] **User Settings vollständig**
+  - [x] Profile Settings (Name, Email, Foto, Telefon, Bio)
+  - [x] Password Settings
+  - [x] Notification Preferences (6 verschiedene Optionen)
+  - [x] Appearance Settings (Dark Mode)
+  - [x] Account Deletion mit Bestätigung
+ 
 
 ### 3. Organizer Features
 - [x] Organizer Registration & Login (verwendet is_organizer Flag)
@@ -135,6 +185,8 @@
 - [x] Check-In System (QR-Code Scanning)
   - [x] Check-In Funktion in BookingManagementController
 - [ ] Organizer Profile Management
+-  [ ] Event Reminder Emails
+- [ ] Rechnungsanschrift
 - [ ] Email Notifications für Organizer
 - [ ] Event Statistics & Analytics
 - [ ] Teilnehmerlisten Export (CSV, Excel)
@@ -167,12 +219,22 @@
   - [x] Events löschen
 - [x] Admin Middleware (AdminMiddleware.php)
 - [x] Admin Routes konfiguriert
-- [x] is_admin Feld in User Model
+- [x] **Rollen & Berechtigungs-System (Spatie Permission)**
+  - [x] Package installiert und konfiguriert
+  - [x] Rollen erstellt (admin, organizer, user, moderator, viewer)
+  - [x] 32 Berechtigungen definiert
+  - [x] User Model mit HasRoles Trait erweitert
+  - [x] Migration von is_admin zu Rollen-System
+  - [x] RoleManagementController implementiert
+  - [x] Role Management UI (index, edit)
+  - [x] Permission Management UI
+  - [x] User-Rollen-Zuweisung in Admin Panel
+- [ ] Site-Wide Settings Management
+- [ ] Kategorien-Management
+- [ ] Preiseinstellungen (verschiedene Organizer-Gebühren)
 - [ ] Reporting/Analytics
 - [ ] System Settings
 - [ ] Audit Log
-- [ ] Role & Permission Management
-- [ ] Content Management (CMS für statische Seiten)
 - [ ] Support Ticket System
 
 
@@ -218,11 +280,13 @@
 - [ ] Video Tutorials
 
 ## 🐛 Bekannte Issues
-1. PDF-Layout könnte verbessert werden
-2. Mobile Responsive könnte verbessert werden
-3. Organizer Event Create View unvollständig
-4. Fehlende Tests für einige Models
-5. Fehlende Dokumentation für einige Features
+1. ~~PDF-Layout könnte verbessert werden~~ (✅ Behoben)
+2. ~~Mobile Responsive könnte verbessert werden~~
+3. ~~Organizer Event Create View unvollständig~~
+4. ~~Fehlende Tests für einige Models~~
+5. ~~Fehlende Dokumentation für einige Features~~
+6. ~~Laravel 11+ Middleware Compatibility Issue~~ (✅ Behoben - Alle Controller aktualisiert)
+7. ~~Fehlende Icon-Komponenten (heart, academic, clock)~~ (✅ Behoben - Alle Icons erstellt)
 
 
 ## 💡 Feature-Ideen (Backlog)

@@ -79,10 +79,14 @@
                                     <label for="customer_email" class="block text-sm font-medium text-gray-700 mb-1">E-Mail *</label>
                                     <input type="email" id="customer_email" name="customer_email" required
                                            value="{{ old('customer_email', auth()->user()->email ?? '') }}"
-                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                           @guest readonly onfocus="this.removeAttribute('readonly')" @endguest>
                                     @error('customer_email')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
+                                    @guest
+                                        <p class="mt-1 text-xs text-gray-500">Sie erhalten eine Bestätigungs-E-Mail zur Verifizierung</p>
+                                    @endguest
                                 </div>
 
                                 <div>
@@ -91,6 +95,62 @@
                                            value="{{ old('customer_phone') }}"
                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     @error('customer_phone')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rechnungsadresse -->
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">Rechnungsadresse</h2>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="billing_address" class="block text-sm font-medium text-gray-700 mb-1">Straße und Hausnummer *</label>
+                                    <input type="text" id="billing_address" name="billing_address" required
+                                           value="{{ old('billing_address') }}"
+                                           placeholder="z.B. Hauptstraße 123"
+                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    @error('billing_address')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label for="billing_postal_code" class="block text-sm font-medium text-gray-700 mb-1">PLZ *</label>
+                                        <input type="text" id="billing_postal_code" name="billing_postal_code" required
+                                               value="{{ old('billing_postal_code') }}"
+                                               placeholder="12345"
+                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        @error('billing_postal_code')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-span-2">
+                                        <label for="billing_city" class="block text-sm font-medium text-gray-700 mb-1">Stadt *</label>
+                                        <input type="text" id="billing_city" name="billing_city" required
+                                               value="{{ old('billing_city') }}"
+                                               placeholder="z.B. Berlin"
+                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        @error('billing_city')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="billing_country" class="block text-sm font-medium text-gray-700 mb-1">Land *</label>
+                                    <select id="billing_country" name="billing_country" required
+                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <option value="Germany" {{ old('billing_country', 'Germany') == 'Germany' ? 'selected' : '' }}>Deutschland</option>
+                                        <option value="Austria" {{ old('billing_country') == 'Austria' ? 'selected' : '' }}>Österreich</option>
+                                        <option value="Switzerland" {{ old('billing_country') == 'Switzerland' ? 'selected' : '' }}>Schweiz</option>
+                                        <option value="Other" {{ old('billing_country') == 'Other' ? 'selected' : '' }}>Anderes</option>
+                                    </select>
+                                    @error('billing_country')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>

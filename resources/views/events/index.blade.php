@@ -3,7 +3,13 @@
         <!-- Header mit Suche und Filter -->
         <div class="bg-white shadow-sm border-b">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-6">Veranstaltungen entdecken</h1>
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-bold text-gray-900">Veranstaltungen entdecken</h1>
+                    <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                        <x-icon.user class="w-5 h-5 inline-block mr-1" />
+                        Anmelden für mehr Funktionen
+                    </a>
+                </div>
 
                 <form method="GET" action="{{ route('events.index') }}" class="space-y-4">
                     <!-- Suchleiste -->

@@ -1,22 +1,21 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Benachrichtigungen
-            </h2>
-            @if(auth()->user()->unreadNotifications->count() > 0)
-                <form action="{{ route('notifications.mark-all-read') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="text-sm text-blue-600 hover:text-blue-800">
-                        Alle als gelesen markieren
-                    </button>
-                </form>
-            @endif
-        </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+<x-layouts.app title="Benachrichtigungen">
+    <div class="min-h-screen bg-gray-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="mb-8 flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900">Benachrichtigungen</h1>
+                    <p class="text-gray-600 mt-2">Alle Ihre Benachrichtigungen und Updates</p>
+                </div>
+                @if(auth()->user()->unreadNotifications->count() > 0)
+                    <form action="{{ route('notifications.mark-all-read') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                            Alle als gelesen markieren
+                        </button>
+                    </form>
+                @endif
+            </div>
             @if (session('success'))
                 <div class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
                     <span class="block sm:inline">{{ session('success') }}</span>
@@ -82,7 +81,7 @@
                         </div>
                     @else
                         <div class="text-center py-12">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                             </svg>
                             <h3 class="mt-2 text-sm font-medium text-gray-900">Keine Benachrichtigungen</h3>
@@ -93,5 +92,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
 

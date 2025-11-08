@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Mail\EventReminderMail;
+use App\Models\Booking;
 use App\Models\Event;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,31 +14,27 @@ class EventReminderNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    protected $event;
-    protected $booking;
-
-    public function __construct($event, $booking)
-    {
-        $this->event = $event;
-        $this->booking = $booking;
-    }
+    public function __construct(
+        protected Event $event,
+        protected Booking $booking,
+    ) {}
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+
+        // Check if user wants email notifications
+        $preferences = $notifiable->notification_preferences ?? [];
+        if (!isset($preferences['email_event_reminder']) || $preferences['email_event_reminder']) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toMail($notifiable)
     {
-        return (new MailMessage)
-            ->subject('Erinnerung: ' . $this->event->title . ' beginnt bald!')
-            ->greeting('Hallo ' . $this->booking->customer_name . ',')
-            ->line('Dies ist eine Erinnerung an Ihre bevorstehende Veranstaltung.')
-            ->line('Event: ' . $this->event->title)
-            ->line('Datum: ' . $this->event->start_date->format('d.m.Y H:i'))
-            ->line('Ort: ' . $this->event->venue_name . ', ' . $this->event->venue_city)
-            ->action('Event-Details ansehen', route('events.show', $this->event->slug))
-            ->line('Wir freuen uns auf Sie!');
+        return new EventReminderMail($this->event, $this->booking);
     }
 
     public function toArray($notifiable)

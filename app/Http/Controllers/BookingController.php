@@ -17,16 +17,57 @@ class BookingController extends Controller
 {
     public function create(Event $event)
     {
+        // Check if event has any ticket types, if not create a default one
+        if ($event->ticketTypes()->count() === 0) {
+            // Create default ticket type based on event price_from or make it free
+            $price = $event->price_from ?? 0;
+
+            TicketType::create([
+                'event_id' => $event->id,
+                'name' => $price > 0 ? 'Standard-Ticket' : 'Kostenlose Teilnahme',
+                'description' => 'Regulärer Zugang zur Veranstaltung',
+                'price' => $price,
+                'quantity' => $event->max_attendees,
+                'quantity_sold' => 0,
+                'is_available' => true,
+                'min_per_order' => 1,
+                'max_per_order' => $event->max_attendees ? min(10, $event->max_attendees) : 10,
+            ]);
+        }
+
         $ticketTypes = $event->ticketTypes()
             ->where('is_available', true)
             ->get()
             ->filter(function ($ticket) {
-                return $ticket->isOnSale();
+                return $ticket->isOnSale() && $ticket->availableQuantity() > 0;
             });
 
         if ($ticketTypes->isEmpty()) {
+            // Check why no tickets are available
+            $allTickets = $event->ticketTypes;
+            $reasons = [];
+
+            foreach ($allTickets as $ticket) {
+                if (!$ticket->is_available) {
+                    $reasons[] = "{$ticket->name}: Nicht verfügbar";
+                } elseif (!$ticket->isOnSale()) {
+                    if ($ticket->sale_start && now()->lt($ticket->sale_start)) {
+                        $reasons[] = "{$ticket->name}: Verkauf beginnt am {$ticket->sale_start->format('d.m.Y')}";
+                    } elseif ($ticket->sale_end && now()->gt($ticket->sale_end)) {
+                        $reasons[] = "{$ticket->name}: Verkauf endete am {$ticket->sale_end->format('d.m.Y')}";
+                    }
+                } elseif ($ticket->availableQuantity() === 0) {
+                    $reasons[] = "{$ticket->name}: Ausverkauft";
+                }
+            }
+
+            $message = 'Keine Tickets verfügbar.';
+            if (!empty($reasons)) {
+                $message .= ' Gründe: ' . implode(' | ', $reasons);
+            }
+
             return redirect()->route('events.show', $event->slug)
-                ->with('error', 'Keine Tickets verfügbar.');
+                ->with('error', $message);
         }
 
         return view('bookings.create', compact('event', 'ticketTypes'));
@@ -38,6 +79,10 @@ class BookingController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'nullable|string|max:50',
+            'billing_address' => 'required|string|max:255',
+            'billing_postal_code' => 'required|string|max:20',
+            'billing_city' => 'required|string|max:255',
+            'billing_country' => 'required|string|max:100',
             'tickets' => 'required|array',
             'tickets.*.ticket_type_id' => 'required|exists:ticket_types,id',
             'tickets.*.quantity' => 'required|integer|min:1',
@@ -102,6 +147,12 @@ class BookingController extends Controller
 
                 $total = $subtotal - $discount;
 
+                // Generiere E-Mail-Verifizierungs-Token für Gäste (ohne Account)
+                $emailVerificationToken = null;
+                if (!auth()->check()) {
+                    $emailVerificationToken = \Illuminate\Support\Str::random(60);
+                }
+
                 // Erstelle Buchung
                 $booking = Booking::create([
                     'event_id' => $event->id,
@@ -109,13 +160,18 @@ class BookingController extends Controller
                     'customer_name' => $request->customer_name,
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $request->customer_phone,
+                    'billing_address' => $request->billing_address,
+                    'billing_postal_code' => $request->billing_postal_code,
+                    'billing_city' => $request->billing_city,
+                    'billing_country' => $request->billing_country,
+                    'email_verification_token' => $emailVerificationToken,
                     'subtotal' => $subtotal,
                     'discount' => $discount,
                     'total' => $total,
                     'status' => 'pending',
                     'payment_status' => 'pending',
                     'discount_code_id' => $discountCodeId,
-                    'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'discount_code']),
+                    'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code']),
                 ]);
 
                 // Erstelle Buchungspositionen
@@ -136,8 +192,15 @@ class BookingController extends Controller
                 // Sende Bestätigungs-Email mit Rechnung
                 Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
 
+                $successMessage = 'Buchung erfolgreich erstellt! Eine Bestätigungs-Email mit Rechnung wurde versendet.';
+
+                // Zusätzliche Info für Gäste
+                if (!auth()->check()) {
+                    $successMessage .= ' Bitte verifizieren Sie Ihre E-Mail-Adresse über den Link in der E-Mail.';
+                }
+
                 return redirect()->route('bookings.show', $booking->booking_number)
-                    ->with('success', 'Buchung erfolgreich erstellt! Eine Bestätigungs-Email mit Rechnung wurde versendet.');
+                    ->with('success', $successMessage);
             });
         } catch (\Exception $e) {
             return back()->withInput()
@@ -151,13 +214,24 @@ class BookingController extends Controller
             ->with(['event', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff
-        if (!auth()->check() ||
-            (auth()->id() !== $booking->user_id &&
-             $booking->customer_email !== request()->get('email'))) {
-            if (!session()->has('booking_access_' . $booking->id)) {
-                return redirect()->route('bookings.verify', $bookingNumber);
-            }
+        // Prüfe Zugriff - erlaube wenn:
+        // 1. Eingeloggt UND Eigentümer der Buchung (user_id match)
+        // 2. Gast mit Session-Zugriff (nach E-Mail-Verifizierung)
+        $hasAccess = false;
+
+        // Eingeloggte User mit matching user_id
+        if (auth()->check() && auth()->id() === $booking->user_id) {
+            $hasAccess = true;
+        }
+
+        // Gäste mit Session-Zugriff (nach E-Mail-Verifizierung)
+        if (session()->has('booking_access_' . $booking->id)) {
+            $hasAccess = true;
+        }
+
+        if (!$hasAccess) {
+            return redirect()->route('bookings.verify', $bookingNumber)
+                ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse, um auf die Buchungsdetails zuzugreifen.');
         }
 
         return view('bookings.show', compact('booking'));
@@ -256,12 +330,21 @@ class BookingController extends Controller
             ->with(['event', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
-        if (!auth()->check() ||
-            (auth()->id() !== $booking->user_id &&
-             !session()->has('booking_access_' . $booking->id))) {
+        // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
+        $hasAccess = false;
+
+        if (auth()->check() && auth()->id() === $booking->user_id) {
+            $hasAccess = true;
+        }
+
+        if (session()->has('booking_access_' . $booking->id)) {
+            $hasAccess = true;
+        }
+
+        if (!$hasAccess) {
             abort(403, 'Kein Zugriff auf diese Rechnung');
         }
+
         $pdfService = app(TicketPdfService::class);
         return $pdfService->downloadInvoice($booking);
     }
@@ -272,10 +355,18 @@ class BookingController extends Controller
             ->with(['event', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
-        if (!auth()->check() ||
-            (auth()->id() !== $booking->user_id &&
-             !session()->has('booking_access_' . $booking->id))) {
+        // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
+        $hasAccess = false;
+
+        if (auth()->check() && auth()->id() === $booking->user_id) {
+            $hasAccess = true;
+        }
+
+        if (session()->has('booking_access_' . $booking->id)) {
+            $hasAccess = true;
+        }
+
+        if (!$hasAccess) {
             abort(403, 'Kein Zugriff auf dieses Ticket');
         }
 
@@ -304,5 +395,53 @@ class BookingController extends Controller
         }
 
         return $certificateService->downloadCertificate($booking);
+    }
+
+    /**
+     * Download iCal file for booking
+     */
+    public function downloadIcal($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event'])
+            ->firstOrFail();
+
+        // Prüfe Zugriff (nur für Buchungsinhaber)
+        if (!auth()->check() ||
+            (auth()->id() !== $booking->user_id &&
+             !session()->has('booking_access_' . $booking->id))) {
+            abort(403, 'Kein Zugriff auf diesen Kalender-Export');
+        }
+
+        $calendarService = app(\App\Services\CalendarService::class);
+        return $calendarService->generateIcal($booking);
+    }
+
+    /**
+     * Verify email address for guest booking via token (from email link)
+     */
+    public function verifyEmailToken($bookingNumber, $token)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->where('email_verification_token', $token)
+            ->firstOrFail();
+
+        // Check if already verified
+        if ($booking->email_verified_at) {
+            return redirect()->route('bookings.show', $booking->booking_number)
+                ->with('info', 'E-Mail-Adresse wurde bereits verifiziert.');
+        }
+
+        // Verify email
+        $booking->update([
+            'email_verified_at' => now(),
+            'email_verification_token' => null,
+        ]);
+
+        // Allow access to booking details via session
+        session()->put('booking_access_' . $booking->id, true);
+
+        return redirect()->route('bookings.show', $booking->booking_number)
+            ->with('success', 'E-Mail-Adresse erfolgreich verifiziert! Sie können nun auf Ihre Buchungsdetails zugreifen.');
     }
 }

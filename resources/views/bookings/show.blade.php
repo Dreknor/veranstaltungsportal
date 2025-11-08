@@ -1,4 +1,4 @@
-<x-layouts.app :title="'Buchung ' . $booking->booking_number">
+<x-layouts.public :title="'Buchung ' . $booking->booking_number">
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Success Message -->
@@ -213,5 +213,5 @@
             </div>
         </div>
     </div>
-</x-layouts.app>
+</x-layouts.public>
 

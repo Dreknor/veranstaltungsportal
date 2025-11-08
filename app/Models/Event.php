@@ -99,11 +99,36 @@ class Event extends Model implements HasMedia
             return PHP_INT_MAX;
         }
 
+        // Calculate sold tickets through booking items
         $sold = $this->bookings()
             ->whereIn('status', ['confirmed', 'completed'])
+            ->with('items')
+            ->get()
+            ->flatMap(function ($booking) {
+                return $booking->items;
+            })
             ->sum('quantity');
 
         return max(0, $this->max_attendees - $sold);
+    }
+
+    /**
+     * Check if event has available tickets
+     */
+    public function hasAvailableTickets(): bool
+    {
+        // If event has ticket types, check if any ticket type has availability and is on sale
+        if ($this->ticketTypes()->exists()) {
+            return $this->ticketTypes()
+                ->where('is_available', true)
+                ->get()
+                ->contains(function ($ticketType) {
+                    return $ticketType->availableQuantity() > 0 && $ticketType->isOnSale();
+                });
+        }
+
+        // Otherwise check general availability based on max_attendees
+        return $this->availableTickets() > 0;
     }
 
     public function averageRating(): float

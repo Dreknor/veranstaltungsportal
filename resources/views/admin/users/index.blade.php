@@ -11,13 +11,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                               placeholder="Name oder E-Mail..." 
+                        <input type="text" name="search" id="search" value="{{ request('search') }}"
+                               placeholder="Name oder E-Mail..."
                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     <div>
                         <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rolle</label>
-                        <select name="role" id="role" 
+                        <select name="role" id="role"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Alle</option>
                             <option value="organizer" {{ request('role') === 'organizer' ? 'selected' : '' }}>Veranstalter</option>
@@ -79,19 +79,25 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="space-y-1">
-                                    @if($user->is_admin)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                                            Admin
-                                        </span>
-                                    @endif
-                                    @if($user->is_organizer)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                            Veranstalter
-                                        </span>
-                                    @endif
-                                    @if(!$user->is_admin && !$user->is_organizer)
+                                    @if($user->roles->count() > 0)
+                                        @foreach($user->roles as $role)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                                {{ $role->name === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : '' }}
+                                                {{ $role->name === 'organizer' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : '' }}
+                                                {{ $role->name === 'moderator' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' : '' }}
+                                                {{ $role->name === 'user' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : '' }}
+                                                {{ $role->name === 'viewer' ? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200' : '' }}">
+                                                {{ ucfirst($role->name) }}
+                                            </span>
+                                        @endforeach
+                                    @else
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                                            Benutzer
+                                            Keine Rolle
+                                        </span>
+                                    @endif
+                                    @if($user->is_organizer && !$user->hasRole('organizer'))
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                            Legacy Organizer
                                         </span>
                                     @endif
                                 </div>
@@ -107,11 +113,11 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end space-x-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}" 
+                                    <a href="{{ route('admin.users.edit', $user) }}"
                                        class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
                                         Bearbeiten
                                     </a>
-                                    
+
                                     <form action="{{ route('admin.users.toggle-organizer', $user) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300">
@@ -127,7 +133,7 @@
                                             </button>
                                         </form>
 
-                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" 
+                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
                                               class="inline" onsubmit="return confirm('Benutzer wirklich löschen?');">
                                             @csrf
                                             @method('DELETE')

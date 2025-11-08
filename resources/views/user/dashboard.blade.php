@@ -7,53 +7,10 @@
                 <p class="text-gray-600 mt-2">Verwalten Sie Ihre Buchungen und Fortbildungen</p>
             </div>
 
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Alle Buchungen</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total_bookings'] }}</p>
-                        </div>
-                        <x-icon.ticket class="w-10 h-10 text-blue-500" />
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-green-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Anstehend</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['upcoming_events'] }}</p>
-                        </div>
-                        <x-icon.calendar class="w-10 h-10 text-green-500" />
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Abgeschlossen</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['past_events'] }}</p>
-                        </div>
-                        <x-icon.check class="w-10 h-10 text-purple-500" />
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-sm p-6 border-l-4 border-yellow-500">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm font-medium text-gray-600">Investiert</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ number_format($stats['total_spent'], 2, ',', '.') }} €</p>
-                        </div>
-                        <x-icon.currency class="w-10 h-10 text-yellow-500" />
-                    </div>
-                </div>
-            </div>
-
             <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Schnellaktionen</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <a href="{{ route('events.index') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                         <x-icon.search class="w-8 h-8 text-blue-600 mr-3" />
                         <div>
@@ -77,12 +34,76 @@
                             <p class="text-sm text-gray-600">Gespeicherte Veranstaltungen</p>
                         </div>
                     </a>
+
+                    <a href="{{ route('user.statistics') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <x-icon.chart class="w-8 h-8 text-purple-600 mr-3" />
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Statistiken</h3>
+                            <p class="text-sm text-gray-600">Meine Aktivitäten</p>
+                        </div>
+                    </a>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <!-- Upcoming Events -->
-                <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Notifications Widget -->
+                <div class="lg:col-span-1 bg-white rounded-lg shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold text-gray-900">
+                            <x-icon.bell class="inline w-5 h-5 mr-2" />
+                            Benachrichtigungen
+                        </h2>
+                        @if($unreadNotificationsCount > 0)
+                            <span class="px-2 py-1 text-xs font-bold rounded-full bg-red-500 text-white">
+                                {{ $unreadNotificationsCount }}
+                            </span>
+                        @endif
+                    </div>
+
+                    @if($notifications->count() > 0)
+                        <div class="space-y-3">
+                            @foreach($notifications as $notification)
+                                <div class="border-l-4 {{ $notification->read_at ? 'border-gray-300' : 'border-blue-500 bg-blue-50' }} rounded-r p-3">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900">
+                                                {{ $notification->data['title'] ?? 'Neue Benachrichtigung' }}
+                                            </p>
+                                            <p class="text-xs text-gray-600 mt-1">
+                                                {{ $notification->data['message'] ?? '' }}
+                                            </p>
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                {{ $notification->created_at->diffForHumans() }}
+                                            </p>
+                                        </div>
+                                        @if(!$notification->read_at)
+                                            <form action="{{ route('notifications.mark-read', $notification->id) }}" method="POST">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="text-blue-600 hover:text-blue-800 text-xs">
+                                                    Gelesen
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-4 text-center">
+                            <a href="{{ route('notifications.index') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                Alle Benachrichtigungen →
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <x-icon.bell class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                            <p class="text-gray-500 text-sm">Keine Benachrichtigungen</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Upcoming Events - now 2 columns -->
+                <div class="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-gray-900">Anstehende Veranstaltungen</h2>
                         <a href="{{ route('user.events.upcoming') }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
@@ -133,7 +154,9 @@
                         </div>
                     @endif
                 </div>
+            </div>
 
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-8">
                 <!-- Recent Bookings -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">

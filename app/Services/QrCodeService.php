@@ -12,7 +12,7 @@ class QrCodeService
      *
      * @param Booking $booking
      * @param string $format Format: 'svg', 'png', 'eps', 'pdf'
-     * @param int $size Size in pixels (for PNG)
+     * @param int $size Size in pixels (for PNG/SVG)
      * @return string
      */
     public function generateBookingQrCode(Booking $booking, string $format = 'svg', int $size = 300): string
@@ -20,9 +20,8 @@ class QrCodeService
         $data = $this->getBookingQrData($booking);
 
         return match($format) {
-            'png' => QrCode::format('png')->size($size)->generate($data),
+            'svg' => QrCode::format('svg')->size($size)->generate($data),
             'eps' => QrCode::format('eps')->generate($data),
-            'pdf' => QrCode::format('pdf')->generate($data),
             default => QrCode::format('svg')->size($size)->generate($data),
         };
     }
@@ -38,13 +37,15 @@ class QrCodeService
     {
         $data = $this->getBookingQrData($booking);
 
-        // Generate PNG and encode as base64 data URI
-        $qrCode = QrCode::format('png')
-            ->size($size)
+        // Generate SVG instead of PNG (no Imagick required)
+        // Generate SVG instead of PNG (no Imagick required)
+        $qrCode = QrCode::format('svg')
             ->errorCorrection('H')
             ->generate($data);
 
-        return 'data:image/png;base64,' . base64_encode($qrCode);
+        // Return as data URI for SVG
+        // Return as data URI for SVG
+        return 'data:image/svg+xml;base64,' . base64_encode($qrCode);
     }
 
     /**
@@ -60,9 +61,8 @@ class QrCodeService
         $url = route('bookings.verify', ['bookingNumber' => $booking->booking_number]);
 
         return match($format) {
-            'png' => QrCode::format('png')->size($size)->generate($url),
+            'svg' => QrCode::format('svg')->size($size)->generate($url),
             'eps' => QrCode::format('eps')->generate($url),
-            'pdf' => QrCode::format('pdf')->generate($url),
             default => QrCode::format('svg')->size($size)->generate($url),
         };
     }

@@ -264,5 +264,46 @@ class CalendarService
 
         return 'https://calendar.google.com/calendar/render?' . http_build_query($params);
     }
+
+    /**
+     * Generate iCal download response for a booking
+     *
+     * @param Booking $booking
+     * @return \Illuminate\Http\Response
+     */
+    public function generateIcal(Booking $booking): \Illuminate\Http\Response
+    {
+        $icalContent = $this->generateBookingIcal($booking);
+        $filename = $this->getFilename($booking);
+
+        return response($icalContent, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
+    }
+
+    /**
+     * Generate iCal download response for an event
+     *
+     * @param Event $event
+     * @return \Illuminate\Http\Response
+     */
+    public function generateEventIcalResponse(Event $event): \Illuminate\Http\Response
+    {
+        $icalContent = $this->generateEventIcal($event);
+        $filename = $this->getFilename($event);
+
+        return response($icalContent, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ]);
+    }
 }
+
 

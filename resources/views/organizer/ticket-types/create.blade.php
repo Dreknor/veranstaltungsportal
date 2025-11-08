@@ -1,16 +1,12 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Ticket-Typ erstellen für "{{ $event->title }}"
-        </h2>
-    </x-slot>
-
+<x-layouts.app title="Ticket-Typ erstellen">
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
                 <a href="{{ route('organizer.events.ticket-types.index', $event) }}" class="text-blue-600 hover:text-blue-800">
                     ← Zurück zur Übersicht
                 </a>
+                <h1 class="text-2xl font-bold text-gray-900 mt-4">Ticket-Typ erstellen</h1>
+                <p class="text-gray-600 mt-1">für "{{ $event->title }}"</p>
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -109,5 +105,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
 

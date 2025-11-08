@@ -240,6 +240,76 @@
 
                 <!-- Sidebar -->
                 <div class="space-y-6">
+                    <!-- Buchungs-Box -->
+                    <div class="bg-white rounded-lg shadow-lg p-6 border-2 border-blue-500 sticky top-4">
+                        <div class="text-center mb-4">
+                            @if($event->price_from && $event->price_from > 0)
+                                <div class="text-sm text-gray-600">Ab</div>
+                                <div class="text-4xl font-bold text-blue-600">{{ number_format($event->price_from, 2, ',', '.') }} €</div>
+                                <div class="text-sm text-gray-600">pro Person</div>
+                            @else
+                                <div class="text-3xl font-bold text-green-600">Kostenlos</div>
+                            @endif
+                        </div>
+
+                        @if($event->hasAvailableTickets())
+                            <a href="{{ route('bookings.create', $event) }}"
+                               class="block w-full text-center px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-bold text-lg shadow-md hover:shadow-lg">
+                                <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                                </svg>
+                                Jetzt buchen
+                            </a>
+
+                            @if($event->ticketTypes->count() > 0)
+                                <div class="mt-4 pt-4 border-t">
+                                    <div class="text-sm font-medium text-gray-700 mb-2">Verfügbare Tickets:</div>
+                                    <div class="space-y-2">
+                                        @foreach($event->ticketTypes->where('is_available', true) as $ticket)
+                                            <div class="flex justify-between text-sm">
+                                                <span class="text-gray-600">{{ $ticket->name }}</span>
+                                                <span class="font-medium text-gray-900">{{ number_format($ticket->price, 2, ',', '.') }} €</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if($event->max_attendees)
+                                <div class="mt-4 text-center">
+                                    <div class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                                        </svg>
+                                        Noch {{ $event->availableTickets() }} Plätze frei
+                                    </div>
+                                </div>
+                            @endif
+                        @else
+                            <div class="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
+                                <svg class="w-12 h-12 mx-auto text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="font-medium text-red-900">Ausgebucht</p>
+                                <p class="text-sm text-red-700 mt-1">Keine Tickets mehr verfügbar</p>
+                            </div>
+                        @endif
+
+                        @auth
+                            <button onclick="toggleFavorite({{ $event->id }})"
+                                    id="favorite-btn-sidebar-{{ $event->id }}"
+                                    class="block w-full text-center px-4 py-2 border-2 rounded-lg transition font-medium mt-3
+                                           {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
+                                <svg class="w-5 h-5 inline-block mr-2" fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                </svg>
+                                <span id="favorite-text-sidebar-{{ $event->id }}">
+                                    {{ auth()->user()->hasFavorited($event) ? 'Favorit' : 'Zu Favoriten' }}
+                                </span>
+                            </button>
+                        @endauth
+                    </div>
+
                     <!-- Datum & Zeit -->
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h3 class="font-bold text-gray-900 mb-4">Datum & Zeit</h3>
