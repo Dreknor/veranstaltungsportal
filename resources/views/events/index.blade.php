@@ -74,7 +74,7 @@
 
         <!-- Events Liste -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            @if($events->isEmpty())
+            @if($items->isEmpty())
                 <div class="text-center py-12">
                     <div class="text-gray-400 mb-4">
                         <x-icon.calendar class="w-16 h-16 mx-auto" />
@@ -84,71 +84,136 @@
                 </div>
             @else
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($events as $event)
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                            <!-- Event Bild -->
-                            <div class="aspect-w-16 aspect-h-9 bg-gray-200">
-                                @if($event->featured_image)
-                                    <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
-                                @else
-                                    <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                                        <x-icon.calendar class="w-16 h-16 text-white opacity-50" />
-                                    </div>
-                                @endif
-
-                                @if($event->is_featured)
-                                    <span class="absolute top-2 right-2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                        Featured
-                                    </span>
-                                @endif
-                            </div>
-
-                            <!-- Event Details -->
-                            <div class="p-5">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                          style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
-                                        {{ $event->category->name }}
-                                    </span>
-                                </div>
-
-                                <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                    <a href="{{ route('events.show', $event->slug) }}" class="hover:text-blue-600">
-                                        {{ $event->title }}
-                                    </a>
-                                </h3>
-
-                                <div class="space-y-2 mb-4">
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <x-icon.calendar class="w-4 h-4 mr-2" />
-                                        {{ $event->start_date->format('d.m.Y H:i') }} Uhr
-                                    </div>
-
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <x-icon.location class="w-4 h-4 mr-2" />
-                                        {{ $event->venue_city }}
-                                    </div>
-
-                                    @if($event->price_from)
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.ticket class="w-4 h-4 mr-2" />
-                                            ab {{ number_format($event->price_from, 2, ',', '.') }} €
+                    @foreach($items as $itemData)
+                        @if($itemData['type'] === 'event')
+                            @php $event = $itemData['item']; @endphp
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+                                <!-- Event Bild -->
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 relative">
+                                    @if($event->featured_image)
+                                        <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
+                                    @else
+                                        <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                            <x-icon.calendar class="w-16 h-16 text-white opacity-50" />
                                         </div>
+                                    @endif
+
+                                    @if($event->is_featured)
+                                        <span class="absolute top-2 right-2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                            Featured
+                                        </span>
                                     @endif
                                 </div>
 
-                                <a href="{{ route('events.show', $event->slug) }}"
-                                   class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                    Details ansehen
-                                </a>
+                                <!-- Event Details -->
+                                <div class="p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                              style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
+                                            {{ $event->category->name }}
+                                        </span>
+                                    </div>
+
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                                        <a href="{{ route('events.show', $event->slug) }}" class="hover:text-blue-600">
+                                            {{ $event->title }}
+                                        </a>
+                                    </h3>
+
+                                    <div class="space-y-2 mb-4">
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <x-icon.calendar class="w-4 h-4 mr-2" />
+                                            {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                                        </div>
+
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <x-icon.location class="w-4 h-4 mr-2" />
+                                            {{ $event->venue_city }}
+                                        </div>
+
+                                        @if($event->price_from)
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <x-icon.ticket class="w-4 h-4 mr-2" />
+                                                ab {{ number_format($event->price_from, 2, ',', '.') }} €
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <a href="{{ route('events.show', $event->slug) }}"
+                                       class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                        Details ansehen
+                                    </a>
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            @php $series = $itemData['item']; @endphp
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition border-2 border-purple-200">
+                                <!-- Series Bild -->
+                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 relative">
+                                    <div class="w-full h-48 bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
+                                        <div class="text-center text-white">
+                                            <x-icon.calendar class="w-12 h-12 mx-auto mb-2 opacity-75" />
+                                            <div class="text-sm font-semibold">Veranstaltungsreihe</div>
+                                        </div>
+                                    </div>
+
+                                    <span class="absolute top-2 left-2 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                        {{ $series->events->count() }} Termine
+                                    </span>
+                                </div>
+
+                                <!-- Series Details -->
+                                <div class="p-5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                              style="background-color: {{ $series->category->color }}20; color: {{ $series->category->color }}">
+                                            {{ $series->category->name }}
+                                        </span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                            Reihe
+                                        </span>
+                                    </div>
+
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                                        <a href="{{ route('series.show', $series->id) }}" class="hover:text-purple-600">
+                                            {{ $series->title }}
+                                        </a>
+                                    </h3>
+
+                                    <div class="space-y-2 mb-4">
+                                        @if($series->events->first())
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <x-icon.calendar class="w-4 h-4 mr-2" />
+                                                Start: {{ $series->events->first()->start_date->format('d.m.Y') }}
+                                            </div>
+                                        @endif
+
+                                        <div class="flex items-center text-sm text-gray-600">
+                                            <x-icon.list class="w-4 h-4 mr-2" />
+                                            {{ $series->events->count() }} Termine
+                                        </div>
+
+                                        @if($series->events->first() && $series->events->first()->venue_city)
+                                            <div class="flex items-center text-sm text-gray-600">
+                                                <x-icon.location class="w-4 h-4 mr-2" />
+                                                {{ $series->events->first()->venue_city }}
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <a href="{{ route('series.show', $series->id) }}"
+                                       class="block w-full text-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                                        Reihe ansehen
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                     @endforeach
                 </div>
 
                 <!-- Pagination -->
                 <div class="mt-8">
-                    {{ $events->links() }}
+                    {{ $items->links() }}
                 </div>
             @endif
         </div>

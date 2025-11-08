@@ -30,22 +30,25 @@ class BookingConfirmation extends Mailable
     public function attachments(): array
     {
         $invoiceService = app(InvoiceService::class);
-        $ticketPdfService = app(TicketPdfService::class);
-
         $invoiceNumber = $invoiceService->generateInvoiceNumber($this->booking);
 
-        return [
-            // Rechnung anhängen
+        $attachments = [
+            // Rechnung anhängen (immer)
             Attachment::fromData(
                 fn () => $invoiceService->getInvoiceOutput($this->booking),
                 "Rechnung_{$invoiceNumber}.pdf"
             )->withMime('application/pdf'),
+        ];
 
-            // Ticket-PDF anhängen
-            Attachment::fromData(
+        // Ticket-PDF nur anhängen, wenn Buchung bezahlt ist UND Event NICHT rein online ist
+        if ($this->booking->payment_status === 'paid' && !$this->booking->event->isOnline()) {
+            $ticketPdfService = app(TicketPdfService::class);
+            $attachments[] = Attachment::fromData(
                 fn () => $ticketPdfService->getTicketContent($this->booking),
                 "Ticket_{$this->booking->booking_number}.pdf"
-            )->withMime('application/pdf'),
-        ];
+            )->withMime('application/pdf');
+        }
+
+        return $attachments;
     }
 }

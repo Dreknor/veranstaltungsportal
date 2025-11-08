@@ -1,4 +1,9 @@
-<x-layouts.app :title="$event->title">
+<x-layouts.public :title="$event->title">
+    <!-- SEO & Social Media Meta Tags -->
+    @push('meta')
+        <x-meta-tags :event="$event" />
+    @endpush
+
     <div class="min-h-screen bg-gray-50">
         <!-- Hero Section mit Featured Image -->
         <div class="relative bg-gray-900">
@@ -305,10 +310,19 @@
                                 @endforeach
                             </div>
 
-                            <a href="{{ route('bookings.create', $event) }}"
-                               class="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold mt-4">
-                                Jetzt Tickets buchen
-                            </a>
+                            <!-- Waitlist if sold out -->
+                            <x-waitlist-join :event="$event" />
+
+                            @php
+                                $hasAvailableTickets = $event->ticketTypes->some(fn($ticket) => $ticket->availableQuantity() > 0);
+                            @endphp
+
+                            @if($hasAvailableTickets)
+                                <a href="{{ route('bookings.create', $event) }}"
+                                   class="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold mt-4">
+                                    Jetzt Tickets buchen
+                                </a>
+                            @endif
 
                             @auth
                                 <button onclick="toggleFavorite({{ $event->id }})"
@@ -354,6 +368,12 @@
                             </div>
                         </div>
                     @endif
+
+                    <!-- Social Share -->
+                    <x-social-share :event="$event" :shareUrls="$shareUrls" :shareableLink="$shareableLink" />
+
+                    <!-- Calendar Export -->
+                    <x-calendar-export :event="$event" />
                 </div>
             </div>
         </div>

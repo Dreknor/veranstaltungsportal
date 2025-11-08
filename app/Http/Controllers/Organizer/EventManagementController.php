@@ -33,17 +33,20 @@ class EventManagementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'event_category_id' => 'required|exists:event_categories,id',
+            'event_type' => 'required|in:physical,online,hybrid',
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'venue_name' => 'required|string|max:255',
-            'venue_address' => 'required|string',
-            'venue_city' => 'required|string|max:255',
-            'venue_postal_code' => 'required|string|max:20',
-            'venue_country' => 'required|string|max:100',
+            'venue_name' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
+            'venue_address' => 'required_if:event_type,physical,hybrid|nullable|string',
+            'venue_city' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
+            'venue_postal_code' => 'required_if:event_type,physical,hybrid|nullable|string|max:20',
+            'venue_country' => 'required_if:event_type,physical,hybrid|nullable|string|max:100',
             'venue_latitude' => 'nullable|numeric',
             'venue_longitude' => 'nullable|numeric',
             'directions' => 'nullable|string',
+            'online_url' => 'required_if:event_type,online,hybrid|nullable|url',
+            'online_access_code' => 'nullable|string|max:255',
             'featured_image' => 'nullable|image|max:2048',
             'video_url' => 'nullable|url',
             'livestream_url' => 'nullable|url',
@@ -91,17 +94,20 @@ class EventManagementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'event_category_id' => 'required|exists:event_categories,id',
+            'event_type' => 'required|in:physical,online,hybrid',
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'venue_name' => 'required|string|max:255',
-            'venue_address' => 'required|string',
-            'venue_city' => 'required|string|max:255',
-            'venue_postal_code' => 'required|string|max:20',
-            'venue_country' => 'required|string|max:100',
+            'venue_name' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
+            'venue_address' => 'required_if:event_type,physical,hybrid|nullable|string',
+            'venue_city' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
+            'venue_postal_code' => 'required_if:event_type,physical,hybrid|nullable|string|max:20',
+            'venue_country' => 'required_if:event_type,physical,hybrid|nullable|string|max:100',
             'venue_latitude' => 'nullable|numeric',
             'venue_longitude' => 'nullable|numeric',
             'directions' => 'nullable|string',
+            'online_url' => 'required_if:event_type,online,hybrid|nullable|url',
+            'online_access_code' => 'nullable|string|max:255',
             'featured_image' => 'nullable|image|max:2048',
             'video_url' => 'nullable|url',
             'livestream_url' => 'nullable|url',
@@ -137,6 +143,40 @@ class EventManagementController extends Controller
 
         return redirect()->route('organizer.events.index')
             ->with('success', 'Event erfolgreich gelöscht!');
+    }
+
+    public function duplicate(Event $event)
+    {
+        $this->authorize('view', $event);
+
+        // Dupliziere Event
+        $newEvent = $event->replicate();
+        $newEvent->title = $event->title . ' (Kopie)';
+        $newEvent->slug = Str::slug($newEvent->title) . '-' . Str::random(6);
+        $newEvent->is_published = false;
+        $newEvent->is_featured = false;
+        $newEvent->created_at = now();
+        $newEvent->updated_at = now();
+        $newEvent->save();
+
+        // Dupliziere Ticket-Typen
+        foreach ($event->ticketTypes as $ticketType) {
+            $newTicketType = $ticketType->replicate();
+            $newTicketType->event_id = $newEvent->id;
+            $newTicketType->quantity_sold = 0;
+            $newTicketType->save();
+        }
+
+        // Dupliziere Rabattcodes
+        foreach ($event->discountCodes as $discountCode) {
+            $newDiscountCode = $discountCode->replicate();
+            $newDiscountCode->event_id = $newEvent->id;
+            $newDiscountCode->usage_count = 0;
+            $newDiscountCode->save();
+        }
+
+        return redirect()->route('organizer.events.edit', $newEvent)
+            ->with('success', 'Event erfolgreich dupliziert! Bitte aktualisieren Sie die Daten.');
     }
 
     public function addTicketType(Request $request, Event $event)

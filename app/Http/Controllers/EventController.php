@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\EventSeries;
 use App\Models\EventCategory;
 use Illuminate\Http\Request;
 
@@ -10,51 +11,110 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Event::query()
+        // Einzelne Events (keine Serie-Teile)
+        $eventsQuery = Event::query()
             ->with(['category', 'user'])
-            ->published();
+            ->published()
+            ->where(function($q) {
+                $q->where('is_series_part', false)
+                  ->orWhereNull('is_series_part');
+            });
+
+        // Aktive Veranstaltungsreihen
+        $seriesQuery = EventSeries::query()
+            ->with(['category', 'user', 'events'])
+            ->where('is_active', true);
 
         // Filter nach Kategorie
-        if ($request->has('category')) {
-            $query->where('event_category_id', $request->category);
+        if ($request->filled('category')) {
+            $eventsQuery->where('event_category_id', $request->category);
+            $seriesQuery->where('event_category_id', $request->category);
         }
 
-        // Filter nach Stadt
-        if ($request->has('city')) {
-            $query->where('venue_city', 'LIKE', '%' . $request->city . '%');
+        // Filter nach Stadt (nur für Events)
+        if ($request->filled('city')) {
+            $eventsQuery->where('venue_city', 'LIKE', '%' . $request->city . '%');
         }
 
         // Suche
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $eventsQuery->where(function ($q) use ($search) {
                 $q->where('title', 'LIKE', "%{$search}%")
                     ->orWhere('description', 'LIKE', "%{$search}%")
                     ->orWhere('venue_name', 'LIKE', "%{$search}%");
             });
+            $seriesQuery->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', "%{$search}%")
+                    ->orWhere('description', 'LIKE', "%{$search}%");
+            });
         }
 
-        // Datum Filter
-        if ($request->has('date_from')) {
-            $query->where('start_date', '>=', $request->date_from);
+        // Datum Filter (nur für Events)
+        if ($request->filled('date_from')) {
+            $eventsQuery->where('start_date', '>=', $request->date_from);
         }
 
-        if ($request->has('date_to')) {
-            $query->where('end_date', '<=', $request->date_to);
+        if ($request->filled('date_to')) {
+            $eventsQuery->where('end_date', '<=', $request->date_to);
+        }
+
+        // Events und Serien abrufen
+        $events = $eventsQuery->get();
+        $series = $seriesQuery->get();
+
+        // Kombiniere Events und Serien für die Anzeige
+        // Erstelle eine Collection mit beiden Typen
+        $allItems = collect([]);
+
+        foreach ($events as $event) {
+            $allItems->push([
+                'type' => 'event',
+                'item' => $event,
+                'date' => $event->start_date,
+            ]);
+        }
+
+        foreach ($series as $seriesItem) {
+            // Nehme das Datum des ersten Events in der Serie
+            $firstEvent = $seriesItem->events->first();
+            $allItems->push([
+                'type' => 'series',
+                'item' => $seriesItem,
+                'date' => $firstEvent ? $firstEvent->start_date : now(),
+            ]);
         }
 
         // Sortierung
-        $sortBy = $request->get('sort', 'start_date');
+        $sortBy = $request->get('sort', 'date');
         $sortOrder = $request->get('order', 'asc');
-        $query->orderBy($sortBy, $sortOrder);
 
-        $events = $query->paginate(12);
+        $allItems = $sortOrder === 'asc'
+            ? $allItems->sortBy('date')
+            : $allItems->sortByDesc('date');
+
+        // Manuelle Paginierung
+        $perPage = 12;
+        $currentPage = $request->get('page', 1);
+        $items = $allItems->forPage($currentPage, $perPage)->values();
+
+        $paginatedItems = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $allItems->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $categories = EventCategory::where('is_active', true)->get();
 
         // Unterscheide zwischen angemeldeten und nicht-angemeldeten Benutzern
         $view = auth()->check() ? 'events.index-auth' : 'events.index';
 
-        return view($view, compact('events', 'categories'));
+        return view($view, [
+            'items' => $paginatedItems,
+            'categories' => $categories,
+        ]);
     }
 
     public function calendar(Request $request)
@@ -64,6 +124,10 @@ class EventController extends Controller
 
         $events = Event::query()
             ->published()
+            ->where(function($q) {
+                $q->where('is_series_part', false)
+                  ->orWhereNull('is_series_part');
+            }) // Keine Serien-Termine im Kalender
             ->whereYear('start_date', $year)
             ->whereMonth('start_date', $month)
             ->with('category')
@@ -78,8 +142,14 @@ class EventController extends Controller
     public function show($slug)
     {
         $event = Event::where('slug', $slug)
-            ->with(['category', 'user', 'ticketTypes', 'reviews.user'])
+            ->with(['category', 'user', 'series', 'ticketTypes', 'reviews.user'])
             ->firstOrFail();
+
+        // Wenn Event Teil einer Serie ist, zur Serie umleiten
+        if ($event->isPartOfSeries() && $event->series) {
+            return redirect()->route('series.show', $event->series->id)
+                ->with('info', 'Dieses Event ist Teil einer Veranstaltungsreihe. Bitte buchen Sie die gesamte Reihe.');
+        }
 
         // Prüfe ob Event privat ist und Access Code benötigt
         if ($event->is_private && !session()->has('event_access_' . $event->id)) {
@@ -92,15 +162,24 @@ class EventController extends Controller
         }
 
         $relatedEvents = Event::published()
+            ->where(function($q) {
+                $q->where('is_series_part', false)
+                  ->orWhereNull('is_series_part');
+            }) // Keine Serien-Teile
             ->where('event_category_id', $event->event_category_id)
             ->where('id', '!=', $event->id)
             ->limit(3)
             ->get();
 
+        // Social Share URLs
+        $socialShareService = app(\App\Services\SocialShareService::class);
+        $shareUrls = $socialShareService->getAllShareUrls($event);
+        $shareableLink = $socialShareService->getShareableLink($event);
+
         // Unterscheide zwischen angemeldeten und nicht-angemeldeten Benutzern
         $view = auth()->check() ? 'events.show-auth' : 'events.show';
 
-        return view($view, compact('event', 'relatedEvents'));
+        return view($view, compact('event', 'relatedEvents', 'shareUrls', 'shareableLink'));
     }
 
     public function access($slug)
@@ -141,12 +220,7 @@ class EventController extends Controller
         }
 
         $calendarService = app(\App\Services\CalendarService::class);
-        $icalContent = $calendarService->generateEventIcal($event);
-        $filename = $calendarService->getFilename($event);
-
-        return response($icalContent)
-            ->header('Content-Type', 'text/calendar; charset=utf-8')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        return $calendarService->downloadEventIcal($event);
     }
 }
 

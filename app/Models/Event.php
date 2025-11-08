@@ -16,7 +16,11 @@ class Event extends Model implements HasMedia
 
     protected $fillable = [
         'user_id',
+        'series_id',
+        'series_position',
+        'is_series_part',
         'event_category_id',
+        'event_type',
         'title',
         'slug',
         'description',
@@ -34,11 +38,14 @@ class Event extends Model implements HasMedia
         'gallery_images',
         'video_url',
         'livestream_url',
+        'online_url',
+        'online_access_code',
         'price_from',
         'max_attendees',
         'is_published',
         'is_featured',
         'is_private',
+        'registration_required',
         'access_code',
         'organizer_info',
         'organizer_email',
@@ -56,10 +63,12 @@ class Event extends Model implements HasMedia
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             'is_private' => 'boolean',
+            'registration_required' => 'boolean',
             'meta_data' => 'array',
             'price_from' => 'decimal:2',
             'venue_latitude' => 'decimal:7',
             'venue_longitude' => 'decimal:7',
+            'is_series_part' => 'boolean',
         ];
     }
 
@@ -76,6 +85,11 @@ class Event extends Model implements HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(EventCategory::class, 'event_category_id');
+    }
+
+    public function series(): BelongsTo
+    {
+        return $this->belongsTo(EventSeries::class, 'series_id');
     }
 
     public function ticketTypes(): HasMany
@@ -96,6 +110,11 @@ class Event extends Model implements HasMedia
     public function discountCodes(): HasMany
     {
         return $this->hasMany(DiscountCode::class);
+    }
+
+    public function isPartOfSeries(): bool
+    {
+        return $this->is_series_part && $this->series_id !== null;
     }
 
     public function availableTickets(): int
@@ -164,5 +183,61 @@ class Event extends Model implements HasMedia
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+    /**
+     * Check if this event can be booked individually
+     */
+    public function canBeBookedIndividually(): bool
+    {
+        return !$this->isPartOfSeries();
+    }
+
+    /**
+     * Get the series this event belongs to
+     */
+    public function getParentSeries(): ?EventSeries
+    {
+        return $this->isPartOfSeries() ? $this->series : null;
+    }
+
+    /**
+     * Check if event is an online event
+     */
+    public function isOnline(): bool
+    {
+        return $this->event_type === 'online';
+    }
+
+    /**
+     * Check if event is a physical event
+     */
+    public function isPhysical(): bool
+    {
+        return $this->event_type === 'physical';
+    }
+
+    /**
+     * Check if event is a hybrid event (both online and physical)
+     */
+    public function isHybrid(): bool
+    {
+        return $this->event_type === 'hybrid';
+    }
+
+    /**
+     * Check if the event requires venue information
+     */
+    public function requiresVenue(): bool
+    {
+        return $this->event_type === 'physical' || $this->event_type === 'hybrid';
+    }
+
+    /**
+     * Check if the event requires online information
+     */
+    public function requiresOnlineInfo(): bool
+    {
+        return $this->event_type === 'online' || $this->event_type === 'hybrid';
     }
 }

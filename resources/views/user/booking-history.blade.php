@@ -11,6 +11,7 @@
                 <!-- Bookings List -->
                 <div class="space-y-4">
                     @foreach($bookings as $booking)
+                        @if($booking->event)
                         <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
                             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                 <!-- Event Info -->
@@ -99,6 +100,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                     @endforeach
                 </div>
 

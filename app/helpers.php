@@ -107,6 +107,20 @@ if (!function_exists('event_status')) {
     }
 }
 
+if (!function_exists('settings')) {
+    /**
+     * Get setting value by key or all settings
+     */
+    function settings(string $key = null, $default = null)
+    {
+        if ($key === null) {
+            return \App\Models\Setting::getAllAsArray();
+        }
+
+        return \App\Models\Setting::getValue($key, $default);
+    }
+}
+
 if (!function_exists('can_book_event')) {
     /**
      * Check if event can be booked

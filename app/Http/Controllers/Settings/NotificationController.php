@@ -38,26 +38,26 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'email_booking_confirmed' => 'boolean',
-            'email_booking_cancelled' => 'boolean',
-            'email_event_reminder' => 'boolean',
-            'email_event_updated' => 'boolean',
-            'email_new_review' => 'boolean',
-            'email_marketing' => 'boolean',
-            'push_booking_confirmed' => 'boolean',
-            'push_event_reminder' => 'boolean',
-            'push_event_updated' => 'boolean',
-        ]);
-
-        // Convert to booleans
-        foreach ($validated as $key => $value) {
-            $validated[$key] = (bool) $value;
-        }
+        // Checkboxen senden nur Werte wenn aktiviert, daher müssen wir alle explizit setzen
+        $preferences = [
+            'email_booking_confirmed' => $request->has('email_booking_confirmed'),
+            'email_booking_cancelled' => $request->has('email_booking_cancelled'),
+            'email_event_reminder' => $request->has('email_event_reminder'),
+            'email_event_updated' => $request->has('email_event_updated'),
+            'email_new_review' => $request->has('email_new_review'),
+            'email_marketing' => $request->has('email_marketing'),
+            'push_booking_confirmed' => $request->has('push_booking_confirmed'),
+            'push_event_reminder' => $request->has('push_event_reminder'),
+            'push_event_updated' => $request->has('push_event_updated'),
+            // Für den BookingController
+            'booking_notifications' => $request->has('email_booking_confirmed'),
+            'event_updates' => $request->has('email_event_updated'),
+            'reminder_notifications' => $request->has('email_event_reminder'),
+        ];
 
         // Update user preferences
         $user->update([
-            'notification_preferences' => $validated,
+            'notification_preferences' => $preferences,
         ]);
 
         return back()->with('success', 'Benachrichtigungseinstellungen wurden aktualisiert.');

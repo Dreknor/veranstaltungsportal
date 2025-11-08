@@ -1,17 +1,47 @@
 <x-layouts.app>
     <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Meine Events</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Ihre Veranstaltungen</p>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Einzelveranstaltungen und Veranstaltungsreihen</p>
             </div>
-            <a href="{{ route('organizer.events.create') }}" 
-               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Neues Event erstellen
-            </a>
+            <div class="flex gap-3">
+                <a href="{{ route('organizer.series.index') }}"
+                   class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center">
+                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                    Eventreihen
+                </a>
+                <a href="{{ route('organizer.series.create') }}"
+                   class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center">
+                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Eventreihe erstellen
+                </a>
+                <a href="{{ route('organizer.events.create') }}"
+                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
+                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Einzelnes Event
+                </a>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8">
+                <a href="{{ route('organizer.events.index') }}"
+                   class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600 dark:text-blue-400">
+                    Alle Events
+                </a>
+                <a href="{{ route('organizer.series.index') }}"
+                   class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300">
+                    Eventreihen
+                </a>
+            </nav>
         </div>
 
         @if (session('success'))
@@ -34,7 +64,7 @@
                         <!-- Event Image -->
                         @if($event->image)
                             <div class="h-48 overflow-hidden">
-                                <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}" 
+                                <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}"
                                      class="w-full h-full object-cover">
                             </div>
                         @else
@@ -98,11 +128,19 @@
                                    class="flex-1 px-3 py-2 text-center bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
                                     Bearbeiten
                                 </a>
-                                <form action="{{ route('organizer.events.destroy', $event) }}" method="POST" 
+                                <form action="{{ route('organizer.events.duplicate', $event) }}" method="POST"
+                                      class="flex-1">
+                                    @csrf
+                                    <button type="submit"
+                                            class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                                        Duplizieren
+                                    </button>
+                                </form>
+                                <form action="{{ route('organizer.events.destroy', $event) }}" method="POST"
                                       class="flex-1" onsubmit="return confirm('Event wirklich löschen?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
+                                    <button type="submit"
                                             class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
                                         Löschen
                                     </button>
@@ -130,7 +168,7 @@
                     Erstellen Sie Ihr erstes Event, um loszulegen.
                 </p>
                 <div class="mt-6">
-                    <a href="{{ route('organizer.events.create') }}" 
+                    <a href="{{ route('organizer.events.create') }}"
                        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>

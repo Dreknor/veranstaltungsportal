@@ -180,7 +180,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
                 <a href="{{ route('organizer.events.create') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
                     <div class="flex items-center">
                         <div class="p-3 bg-blue-100 rounded-full">
@@ -189,6 +189,20 @@
                         <div class="ml-4">
                             <h3 class="font-semibold text-gray-900">Neues Event erstellen</h3>
                             <p class="text-sm text-gray-600">Event anlegen und veröffentlichen</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('organizer.series.create') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-indigo-100 rounded-full">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-semibold text-gray-900">Eventreihe erstellen</h3>
+                            <p class="text-sm text-gray-600">Veranstaltung mit mehreren Terminen</p>
                         </div>
                     </div>
                 </a>

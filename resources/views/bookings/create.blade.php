@@ -21,43 +21,52 @@
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Tickets auswählen</h2>
 
-                            <div class="space-y-4" id="ticket-selection">
-                                @foreach($ticketTypes as $index => $ticketType)
-                                    <div class="border rounded-lg p-4 ticket-type" data-price="{{ $ticketType->price }}" data-id="{{ $ticketType->id }}">
-                                        <div class="flex justify-between items-start mb-3">
-                                            <div class="flex-1">
-                                                <h3 class="font-semibold text-gray-900">{{ $ticketType->name }}</h3>
-                                                @if($ticketType->description)
-                                                    <p class="text-sm text-gray-600 mt-1">{{ $ticketType->description }}</p>
-                                                @endif
-                                                @if($ticketType->quantity)
-                                                    <p class="text-xs text-gray-500 mt-1">Verfügbar: {{ $ticketType->availableQuantity() }}</p>
-                                                @endif
+                            @if($ticketTypes->isEmpty())
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <p class="text-yellow-800">
+                                        <strong>Hinweis:</strong> Für diese Veranstaltung sind derzeit keine Tickets verfügbar.
+                                        Bitte kontaktieren Sie den Veranstalter oder versuchen Sie es später erneut.
+                                    </p>
+                                </div>
+                            @else
+                                <div class="space-y-4" id="ticket-selection">
+                                    @foreach($ticketTypes as $index => $ticketType)
+                                        <div class="border rounded-lg p-4 ticket-type" data-price="{{ $ticketType->price }}" data-id="{{ $ticketType->id }}">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <div class="flex-1">
+                                                    <h3 class="font-semibold text-gray-900">{{ $ticketType->name }}</h3>
+                                                    @if($ticketType->description)
+                                                        <p class="text-sm text-gray-600 mt-1">{{ $ticketType->description }}</p>
+                                                    @endif
+                                                    @if($ticketType->quantity)
+                                                        <p class="text-xs text-gray-500 mt-1">Verfügbar: {{ $ticketType->availableQuantity() }}</p>
+                                                    @endif
+                                                </div>
+                                                <div class="text-right ml-4">
+                                                    <div class="text-xl font-bold text-blue-600">{{ number_format($ticketType->price, 2, ',', '.') }} €</div>
+                                                </div>
                                             </div>
-                                            <div class="text-right ml-4">
-                                                <div class="text-xl font-bold text-blue-600">{{ number_format($ticketType->price, 2, ',', '.') }} €</div>
-                                            </div>
-                                        </div>
 
-                                        <div class="flex items-center gap-4">
-                                            <label for="ticket_{{ $ticketType->id }}" class="text-sm font-medium text-gray-700">Anzahl:</label>
-                                            <div class="flex items-center">
-                                                <button type="button" class="quantity-minus px-3 py-1 border border-gray-300 rounded-l-lg hover:bg-gray-50" data-ticket="{{ $ticketType->id }}">-</button>
-                                                <input type="number"
-                                                       id="ticket_{{ $ticketType->id }}"
-                                                       name="tickets[{{ $index }}][quantity]"
-                                                       value="0"
-                                                       min="0"
-                                                       max="{{ $ticketType->availableQuantity() }}"
-                                                       class="quantity-input w-16 text-center border-t border-b border-gray-300 focus:outline-none"
-                                                       data-ticket="{{ $ticketType->id }}">
-                                                <button type="button" class="quantity-plus px-3 py-1 border border-gray-300 rounded-r-lg hover:bg-gray-50" data-ticket="{{ $ticketType->id }}" data-max="{{ $ticketType->availableQuantity() }}">+</button>
+                                            <div class="flex items-center gap-4">
+                                                <label for="ticket_{{ $ticketType->id }}" class="text-sm font-medium text-gray-700">Anzahl:</label>
+                                                <div class="flex items-center">
+                                                    <button type="button" class="quantity-minus px-3 py-1 border border-gray-300 rounded-l-lg hover:bg-gray-50" data-ticket="{{ $ticketType->id }}">-</button>
+                                                    <input type="number"
+                                                           id="ticket_{{ $ticketType->id }}"
+                                                           name="tickets[{{ $index }}][quantity]"
+                                                           value="0"
+                                                           min="0"
+                                                           max="{{ $ticketType->availableQuantity() }}"
+                                                           class="quantity-input w-16 text-center border-t border-b border-gray-300 focus:outline-none"
+                                                           data-ticket="{{ $ticketType->id }}">
+                                                    <button type="button" class="quantity-plus px-3 py-1 border border-gray-300 rounded-r-lg hover:bg-gray-50" data-ticket="{{ $ticketType->id }}" data-max="{{ $ticketType->availableQuantity() }}">+</button>
+                                                </div>
+                                                <input type="hidden" name="tickets[{{ $index }}][ticket_type_id]" value="{{ $ticketType->id }}">
                                             </div>
-                                            <input type="hidden" name="tickets[{{ $index }}][ticket_type_id]" value="{{ $ticketType->id }}">
                                         </div>
-                                    </div>
-                                @endforeach
-                            </div>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
 
                         <!-- Kundendaten -->
@@ -198,9 +207,9 @@
                                 </div>
                             </div>
 
-                            <button type="submit" id="submit-button" disabled
+                            <button type="submit" id="submit-button" {{ $ticketTypes->isEmpty() ? 'disabled' : 'disabled' }}
                                     class="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed">
-                                Kostenpflichtig buchen
+                                {{ $ticketTypes->isEmpty() ? 'Keine Tickets verfügbar' : 'Kostenpflichtig buchen' }}
                             </button>
 
                             <p class="text-xs text-gray-500 mt-4 text-center">
@@ -217,6 +226,37 @@
     <script>
         let subtotal = 0;
         let discountAmount = 0;
+
+        // Form submit handler um nur ausgewählte Tickets zu senden
+        document.getElementById('booking-form').addEventListener('submit', function(e) {
+            // Deaktiviere alle Ticket-Inputs mit quantity = 0, damit sie nicht gesendet werden
+            document.querySelectorAll('.ticket-type').forEach(ticketType => {
+                const quantityInput = ticketType.querySelector('.quantity-input');
+                const quantity = parseInt(quantityInput.value) || 0;
+
+                if (quantity === 0) {
+                    // Deaktiviere alle inputs in diesem Ticket-Container
+                    ticketType.querySelectorAll('input').forEach(input => {
+                        input.disabled = true;
+                    });
+                }
+            });
+
+            // Prüfe ob mindestens ein Ticket ausgewählt wurde
+            const hasTickets = Array.from(document.querySelectorAll('.quantity-input:not([disabled])')).some(input => {
+                return parseInt(input.value) > 0;
+            });
+
+            if (!hasTickets) {
+                e.preventDefault();
+                // Reaktiviere alle Inputs für weitere Versuche
+                document.querySelectorAll('.ticket-type input').forEach(input => {
+                    input.disabled = false;
+                });
+                alert('Bitte wählen Sie mindestens ein Ticket aus.');
+                return false;
+            }
+        });
 
         function updateSummary() {
             subtotal = 0;

@@ -11,12 +11,19 @@ use App\Services\InvoiceService;
 use App\Services\TicketPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class BookingController extends Controller
 {
     public function create(Event $event)
     {
+        // Check if event is part of a series - redirect to series booking
+        if ($event->isPartOfSeries()) {
+            return redirect()->route('series.show', $event->series_id)
+                ->with('info', 'Dies ist ein Termin einer Veranstaltungsreihe. Bitte buchen Sie die gesamte Reihe.');
+        }
+
         // Check if event has any ticket types, if not create a default one
         if ($event->ticketTypes()->count() === 0) {
             // Create default ticket type based on event price_from or make it free
@@ -27,12 +34,17 @@ class BookingController extends Controller
                 'name' => $price > 0 ? 'Standard-Ticket' : 'Kostenlose Teilnahme',
                 'description' => 'Regulärer Zugang zur Veranstaltung',
                 'price' => $price,
-                'quantity' => $event->max_attendees,
+                'quantity' => $event->max_attendees ?? null,
                 'quantity_sold' => 0,
                 'is_available' => true,
                 'min_per_order' => 1,
                 'max_per_order' => $event->max_attendees ? min(10, $event->max_attendees) : 10,
+                'sale_start' => null,
+                'sale_end' => null,
             ]);
+
+            // Lade die Ticket-Types neu
+            $event->load('ticketTypes');
         }
 
         $ticketTypes = $event->ticketTypes()
@@ -83,9 +95,9 @@ class BookingController extends Controller
             'billing_postal_code' => 'required|string|max:20',
             'billing_city' => 'required|string|max:255',
             'billing_country' => 'required|string|max:100',
-            'tickets' => 'required|array',
+            'tickets' => 'required|array|min:1',
             'tickets.*.ticket_type_id' => 'required|exists:ticket_types,id',
-            'tickets.*.quantity' => 'required|integer|min:1',
+            'tickets.*.quantity' => 'required|integer|min:0',
             'discount_code' => 'nullable|string',
         ]);
 
@@ -94,13 +106,41 @@ class BookingController extends Controller
                 $subtotal = 0;
                 $ticketData = [];
 
+                // Log die eingehenden Ticket-Daten für Debugging
+                Log::info('Booking store - Incoming tickets data', [
+                    'tickets' => $request->tickets,
+                    'event_id' => $event->id,
+                ]);
+
                 // Validiere und berechne Tickets
-                foreach ($request->tickets as $ticketInput) {
-                    if ($ticketInput['quantity'] < 1) {
+                foreach ($request->tickets as $index => $ticketInput) {
+                    // Überspringe wenn ticketInput null ist
+                    if ($ticketInput === null || !is_array($ticketInput)) {
+                        Log::warning('Skipping invalid ticket input', ['index' => $index, 'value' => $ticketInput]);
                         continue;
                     }
 
-                    $ticketType = TicketType::findOrFail($ticketInput['ticket_type_id']);
+                    // Überspringe wenn quantity nicht gesetzt ist oder 0 ist
+                    if (!isset($ticketInput['quantity']) || $ticketInput['quantity'] < 1) {
+                        Log::debug('Skipping ticket with zero quantity', ['index' => $index, 'ticket' => $ticketInput]);
+                        continue;
+                    }
+
+                    // Überspringe wenn ticket_type_id nicht gesetzt ist oder null ist
+                    if (!isset($ticketInput['ticket_type_id']) || $ticketInput['ticket_type_id'] === null) {
+                        Log::warning('Skipping ticket with null ticket_type_id', ['index' => $index, 'ticket' => $ticketInput]);
+                        continue;
+                    }
+
+                    try {
+                        $ticketType = TicketType::findOrFail($ticketInput['ticket_type_id']);
+                    } catch (\Exception $e) {
+                        Log::error('Ticket type not found', [
+                            'ticket_type_id' => $ticketInput['ticket_type_id'],
+                            'error' => $e->getMessage()
+                        ]);
+                        throw new \Exception("Ungültiger Ticket-Typ ausgewählt.");
+                    }
 
                     // Prüfe Verfügbarkeit
                     if ($ticketType->availableQuantity() < $ticketInput['quantity']) {
@@ -124,6 +164,11 @@ class BookingController extends Controller
                         'quantity' => $ticketInput['quantity'],
                         'price' => $ticketType->price,
                     ];
+                }
+
+                // Prüfe ob mindestens ein Ticket ausgewählt wurde
+                if (empty($ticketData)) {
+                    throw new \Exception("Bitte wählen Sie mindestens ein Ticket aus.");
                 }
 
                 // Rabattcode prüfen
@@ -153,6 +198,12 @@ class BookingController extends Controller
                     $emailVerificationToken = \Illuminate\Support\Str::random(60);
                 }
 
+                // Bei kostenlosen Tickets direkt bestätigen
+                $isFree = $total == 0;
+                $initialStatus = $isFree ? 'confirmed' : 'pending';
+                $initialPaymentStatus = $isFree ? 'paid' : 'pending';
+                $confirmedAt = $isFree ? now() : null;
+
                 // Erstelle Buchung
                 $booking = Booking::create([
                     'event_id' => $event->id,
@@ -168,8 +219,9 @@ class BookingController extends Controller
                     'subtotal' => $subtotal,
                     'discount' => $discount,
                     'total' => $total,
-                    'status' => 'pending',
-                    'payment_status' => 'pending',
+                    'status' => $initialStatus,
+                    'payment_status' => $initialPaymentStatus,
+                    'confirmed_at' => $confirmedAt,
                     'discount_code_id' => $discountCodeId,
                     'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code']),
                 ]);
@@ -189,10 +241,25 @@ class BookingController extends Controller
                     $data['ticket_type']->increment('quantity_sold', $data['quantity']);
                 }
 
-                // Sende Bestätigungs-Email mit Rechnung
-                Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+                // Sende entsprechende E-Mail
+                if ($isFree) {
+                    // Bei kostenlosen Tickets: Direkt Tickets versenden
+                    Mail::to($booking->customer_email)->send(new \App\Mail\PaymentConfirmed($booking));
+                    $successMessage = 'Buchung erfolgreich! Ihre Tickets wurden per E-Mail versendet.';
+                } else {
+                    // Bei kostenpflichtigen Tickets: Zahlungsaufforderung mit Rechnung
+                    Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+                    $successMessage = 'Buchung erfolgreich erstellt! Eine Rechnung mit Zahlungsinformationen wurde per E-Mail versendet.';
+                }
 
-                $successMessage = 'Buchung erfolgreich erstellt! Eine Bestätigungs-Email mit Rechnung wurde versendet.';
+                // Benachrichtige Organizer über neue Buchung
+                if ($event->user) {
+                    $notificationPreferences = $event->user->notification_preferences ?? [];
+                    if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
+                        $event->user->notify(new \App\Notifications\NewBookingNotification($booking));
+                    }
+                }
+
 
                 // Zusätzliche Info für Gäste
                 if (!auth()->check()) {
@@ -203,15 +270,23 @@ class BookingController extends Controller
                     ->with('success', $successMessage);
             });
         } catch (\Exception $e) {
+            Log::error('Booking store error', [
+                'event_id' => $event->id,
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['_token']),
+            ]);
             return back()->withInput()
-                ->with('error', $e->getMessage());
+                ->with('error', 'Fehler beim Erstellen der Buchung: ' . $e->getMessage());
         }
     }
 
     public function show($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event', 'items.ticketType'])
+            ->with(['event.user', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff - erlaube wenn:
@@ -281,6 +356,14 @@ class BookingController extends Controller
         // Sende Stornierungsbestätigung per Email
         Mail::to($booking->customer_email)->send(new \App\Mail\BookingCancellation($booking));
 
+        // Benachrichtige Organizer über Stornierung
+        if ($booking->event->user) {
+            $notificationPreferences = $booking->event->user->notification_preferences ?? [];
+            if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
+                $booking->event->user->notify(new \App\Notifications\BookingCancelledNotification($booking));
+            }
+        }
+
         return back()->with('success', 'Buchung erfolgreich storniert.');
     }
 
@@ -327,7 +410,7 @@ class BookingController extends Controller
     public function downloadInvoice($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event', 'items.ticketType'])
+            ->with(['event.user', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
@@ -352,7 +435,7 @@ class BookingController extends Controller
     public function downloadTicket($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event', 'items.ticketType'])
+            ->with(['event.user', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
@@ -377,7 +460,7 @@ class BookingController extends Controller
     public function downloadCertificate($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event', 'items.ticketType'])
+            ->with(['event.user', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
@@ -403,7 +486,7 @@ class BookingController extends Controller
     public function downloadIcal($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event'])
+            ->with(['event.user'])
             ->firstOrFail();
 
         // Prüfe Zugriff (nur für Buchungsinhaber)
@@ -414,7 +497,7 @@ class BookingController extends Controller
         }
 
         $calendarService = app(\App\Services\CalendarService::class);
-        return $calendarService->generateIcal($booking);
+        return $calendarService->downloadBookingIcal($booking);
     }
 
     /**

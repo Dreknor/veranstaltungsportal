@@ -21,8 +21,18 @@ Route::get('/account-types', function () {
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/calendar', [EventController::class, 'calendar'])->name('events.calendar');
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
+Route::get('/events/{slug}/calendar', [EventController::class, 'exportToCalendar'])->name('events.calendar.export');
 Route::get('/events/{slug}/access', [EventController::class, 'access'])->name('events.access');
 Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])->name('events.verify-access');
+
+// Event Series Routes (Public)
+Route::get('/series/{series}', [\App\Http\Controllers\SeriesController::class, 'show'])->name('series.show');
+Route::get('/series/{series}/book', [\App\Http\Controllers\SeriesController::class, 'book'])->name('series.book');
+Route::post('/series/{series}/book', [\App\Http\Controllers\SeriesController::class, 'store'])->name('series.book.store');
+
+// Waitlist Routes
+Route::post('/events/{event}/waitlist/join', [\App\Http\Controllers\WaitlistController::class, 'join'])->name('waitlist.join');
+Route::post('/events/{event}/waitlist/leave', [\App\Http\Controllers\WaitlistController::class, 'leave'])->name('waitlist.leave');
 
 // Event Review Routes
 Route::middleware(['auth'])->group(function () {
@@ -68,6 +78,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
     Route::get('/dashboard', [Organizer\DashboardController::class, 'index'])->name('dashboard');
 
+    // Profile Management
+    Route::get('/profile', [Organizer\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [Organizer\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile/photo', [Organizer\ProfileController::class, 'deletePhoto'])->name('profile.delete-photo');
+
     // Event Management
     Route::get('/events', [Organizer\EventManagementController::class, 'index'])->name('events.index');
     Route::get('/events/create', [Organizer\EventManagementController::class, 'create'])->name('events.create');
@@ -75,6 +90,7 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::get('/events/{event}/edit', [Organizer\EventManagementController::class, 'edit'])->name('events.edit');
     Route::put('/events/{event}', [Organizer\EventManagementController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [Organizer\EventManagementController::class, 'destroy'])->name('events.destroy');
+    Route::post('/events/{event}/duplicate', [Organizer\EventManagementController::class, 'duplicate'])->name('events.duplicate');
 
     // Ticket Type Management
     Route::get('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'index'])->name('events.ticket-types.index');
@@ -102,6 +118,34 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
     Route::get('/bookings/export', [Organizer\BookingManagementController::class, 'export'])->name('bookings.export');
     Route::post('/bookings/{booking}/check-in', [Organizer\BookingManagementController::class, 'checkIn'])->name('bookings.check-in');
+
+    // Statistics & Analytics
+    Route::get('/statistics', [Organizer\StatisticsController::class, 'index'])->name('statistics.index');
+    Route::get('/statistics/event/{event}', [Organizer\StatisticsController::class, 'eventStatistics'])->name('statistics.event');
+
+    // Waitlist Management
+    Route::get('/events/{event}/waitlist', [\App\Http\Controllers\WaitlistController::class, 'index'])->name('events.waitlist.index');
+    Route::post('/events/{event}/waitlist/notify', [\App\Http\Controllers\WaitlistController::class, 'notifyNext'])->name('events.waitlist.notify');
+    Route::delete('/events/{event}/waitlist/{waitlist}', [\App\Http\Controllers\WaitlistController::class, 'remove'])->name('events.waitlist.remove');
+
+    // Certificate Management
+    Route::get('/events/{event}/certificates', [Organizer\CertificateController::class, 'index'])->name('events.certificates.index');
+    Route::post('/events/{event}/certificates/{booking}/generate', [Organizer\CertificateController::class, 'generate'])->name('events.certificates.generate');
+    Route::post('/events/{event}/certificates/bulk', [Organizer\CertificateController::class, 'generateBulk'])->name('events.certificates.bulk');
+    Route::get('/events/{event}/certificates/{booking}/download', [Organizer\CertificateController::class, 'download'])->name('events.certificates.download');
+    Route::post('/events/{event}/certificates/{booking}/email', [Organizer\CertificateController::class, 'sendEmail'])->name('events.certificates.email');
+    Route::delete('/events/{event}/certificates/{booking}', [Organizer\CertificateController::class, 'destroy'])->name('events.certificates.destroy');
+
+    // Event Series Management
+    Route::get('/series', [Organizer\SeriesController::class, 'index'])->name('series.index');
+    Route::get('/series/create', [Organizer\SeriesController::class, 'create'])->name('series.create');
+    Route::post('/series', [Organizer\SeriesController::class, 'store'])->name('series.store');
+    Route::get('/series/{series}', [Organizer\SeriesController::class, 'show'])->name('series.show');
+    Route::get('/series/{series}/edit', [Organizer\SeriesController::class, 'edit'])->name('series.edit');
+    Route::put('/series/{series}', [Organizer\SeriesController::class, 'update'])->name('series.update');
+    Route::delete('/series/{series}', [Organizer\SeriesController::class, 'destroy'])->name('series.destroy');
+    Route::post('/series/{series}/regenerate', [Organizer\SeriesController::class, 'regenerate'])->name('series.regenerate');
+    Route::post('/series/{series}/add-event', [Organizer\SeriesController::class, 'addEvent'])->name('series.add-event');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -141,6 +185,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/events/{event}/toggle-publish', [\App\Http\Controllers\Admin\EventManagementController::class, 'togglePublish'])->name('events.toggle-publish');
     Route::post('/events/{event}/toggle-featured', [\App\Http\Controllers\Admin\EventManagementController::class, 'toggleFeatured'])->name('events.toggle-featured');
     Route::delete('/events/{event}', [\App\Http\Controllers\Admin\EventManagementController::class, 'destroy'])->name('events.destroy');
+
+    // Category Management
+    Route::get('/categories', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'index'])->name('categories.index');
+    Route::get('/categories/create', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'create'])->name('categories.create');
+    Route::post('/categories', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'store'])->name('categories.store');
+    Route::get('/categories/{category}/edit', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'edit'])->name('categories.edit');
+    Route::put('/categories/{category}', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'destroy'])->name('categories.destroy');
+    Route::post('/categories/{category}/toggle-active', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'toggleActive'])->name('categories.toggle-active');
+
+    // Settings Management
+    Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'store'])->name('settings.store');
+    Route::delete('/settings/{setting}', [\App\Http\Controllers\Admin\SettingsController::class, 'destroy'])->name('settings.destroy');
+    Route::post('/settings/initialize', [\App\Http\Controllers\Admin\SettingsController::class, 'initializeDefaults'])->name('settings.initialize');
 });
 
 require __DIR__.'/auth.php';

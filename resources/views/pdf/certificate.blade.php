@@ -2,8 +2,14 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teilnahmezertifikat</title>
     <style>
+        @page {
+            margin: 0;
+            size: A4 landscape;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,227 +19,199 @@
         body {
             font-family: 'DejaVu Sans', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 0;
-            margin: 0;
+            width: 297mm;
+            height: 210mm;
+            position: relative;
+            color: #333;
         }
 
         .certificate-container {
-            width: 297mm;
-            height: 210mm;
-            background: white;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
             position: relative;
-            overflow: hidden;
         }
 
         .certificate-border {
-            position: absolute;
-            top: 15mm;
-            left: 15mm;
-            right: 15mm;
-            bottom: 15mm;
-            border: 4px solid #2563eb;
-            border-radius: 8px;
-        }
-
-        .certificate-inner-border {
-            position: absolute;
-            top: 18mm;
-            left: 18mm;
-            right: 18mm;
-            bottom: 18mm;
-            border: 1px solid #93c5fd;
+            border: 8px solid #fff;
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
         }
 
         .certificate-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            padding: 40mm 30mm;
             text-align: center;
-            z-index: 10;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
         }
 
-        .certificate-header {
-            margin-bottom: 15mm;
+        .header {
+            margin-bottom: 30px;
         }
 
-        .certificate-logo {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 5mm;
-        }
-
-        .certificate-title {
+        .header h1 {
             font-size: 48px;
-            font-weight: bold;
-            color: #1e40af;
-            text-transform: uppercase;
+            color: #667eea;
             letter-spacing: 3px;
-            margin-bottom: 3mm;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
         }
 
-        .certificate-subtitle {
+        .header p {
+            font-size: 16px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        .awarded-to {
+            margin: 40px 0 20px;
             font-size: 18px;
-            color: #64748b;
+            color: #666;
             font-style: italic;
         }
 
-        .certificate-body {
-            margin: 15mm 0;
-        }
-
-        .certificate-text {
-            font-size: 16px;
-            color: #334155;
-            line-height: 1.8;
-            margin-bottom: 8mm;
-        }
-
         .attendee-name {
-            font-size: 36px;
+            font-size: 56px;
+            color: #333;
             font-weight: bold;
-            color: #1e293b;
-            margin: 8mm 0;
-            padding: 5mm 0;
-            border-bottom: 2px solid #2563eb;
+            margin: 20px 0;
+            padding: 20px;
+            border-bottom: 3px solid #667eea;
             display: inline-block;
-            min-width: 60%;
-        }
-
-        .event-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2563eb;
-            margin: 5mm 0;
+            min-width: 500px;
         }
 
         .event-details {
-            font-size: 14px;
-            color: #64748b;
-            margin: 3mm 0;
+            margin: 40px 0;
         }
 
-        .certificate-footer {
-            margin-top: 15mm;
-            display: table;
-            width: 100%;
+        .completion-text {
+            font-size: 18px;
+            color: #666;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+
+        .event-title {
+            font-size: 28px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .event-info {
+            font-size: 16px;
+            color: #666;
+            margin: 10px 0;
+        }
+
+        .footer {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 50px;
         }
 
         .signature-block {
-            display: table-cell;
-            width: 50%;
-            padding: 0 20px;
             text-align: center;
+            flex: 1;
         }
 
         .signature-line {
-            width: 80%;
-            border-top: 2px solid #94a3b8;
-            margin: 5mm auto 2mm;
+            border-top: 2px solid #333;
+            width: 200px;
+            margin: 40px auto 10px;
         }
 
         .signature-label {
             font-size: 12px;
-            color: #64748b;
-            font-weight: bold;
+            color: #666;
         }
 
-        .certificate-meta {
-            margin-top: 8mm;
-            font-size: 10px;
-            color: #94a3b8;
-            text-align: center;
-        }
-
-        .watermark {
+        .certificate-number {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 120px;
-            color: rgba(37, 99, 235, 0.03);
-            font-weight: bold;
-            z-index: 1;
-            white-space: nowrap;
-        }
-
-        .decorative-element {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            opacity: 0.1;
-        }
-
-        .element-1 {
-            top: 20mm;
-            left: 20mm;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .element-2 {
-            bottom: 20mm;
-            right: 20mm;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            bottom: 20px;
+            right: 40px;
+            font-size: 11px;
+            color: #999;
         }
 
         .seal {
             position: absolute;
-            bottom: 25mm;
-            right: 35mm;
-            width: 60px;
-            height: 60px;
-            border: 3px solid #2563eb;
+            bottom: 80px;
+            left: 60px;
+            width: 100px;
+            height: 100px;
+            border: 4px solid #667eea;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: white;
-            z-index: 20;
+            flex-direction: column;
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .seal-text {
-            font-size: 8px;
+            font-size: 10px;
+            color: #667eea;
             font-weight: bold;
-            color: #2563eb;
             text-align: center;
             line-height: 1.2;
+        }
+
+        .seal-year {
+            font-size: 16px;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        .ornament {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .ornament-line {
+            display: inline-block;
+            width: 60px;
+            height: 3px;
+            background: #667eea;
+            margin: 0 15px;
+            vertical-align: middle;
+        }
+
+        .ornament-icon {
+            display: inline-block;
+            font-size: 24px;
+            color: #667eea;
+            vertical-align: middle;
         }
     </style>
 </head>
 <body>
     <div class="certificate-container">
-        <!-- Decorative Elements -->
-        <div class="decorative-element element-1"></div>
-        <div class="decorative-element element-2"></div>
-        <div class="watermark">BILDUNGSPORTAL</div>
+        <div class="certificate-border">
+            <div class="certificate-content">
+                <div class="header">
+                    <h1>Teilnahmezertifikat</h1>
+                    <p>Certificate of Attendance</p>
+                </div>
 
-        <!-- Borders -->
-        <div class="certificate-border"></div>
-        <div class="certificate-inner-border"></div>
+                <div class="ornament">
+                    <span class="ornament-line"></span>
+                    <span class="ornament-icon">★</span>
+                    <span class="ornament-line"></span>
+                </div>
 
-        <!-- Official Seal -->
-        <div class="seal">
-            <div class="seal-text">
-                OFFIZIELL<br>
-                ZERTIFIZIERT<br>
-                {{ date('Y') }}
-            </div>
-        </div>
-
-        <!-- Content -->
-        <div class="certificate-content">
-            <div class="certificate-header">
-                <div class="certificate-logo">Bildungsportal</div>
-                <div class="certificate-title">Teilnahmezertifikat</div>
-                <div class="certificate-subtitle">Certificate of Attendance</div>
-            </div>
-
-            <div class="certificate-body">
-                <div class="certificate-text">
+                <div class="awarded-to">
                     Hiermit wird bestätigt, dass
                 </div>
 
@@ -241,50 +219,58 @@
                     {{ $attendee_name }}
                 </div>
 
-                <div class="certificate-text">
-                    erfolgreich an der Fortbildung
-                </div>
-
-                <div class="event-title">
-                    „{{ $event_title }}"
-                </div>
-
                 <div class="event-details">
-                    am {{ $event_date->format('d.m.Y') }}
-                    @if($duration > 0)
-                        ({{ $duration }} Unterrichtsstunden)
-                    @endif
-                </div>
+                    <p class="completion-text">
+                        erfolgreich an der folgenden Fortbildungsveranstaltung teilgenommen hat:
+                    </p>
 
-                <div class="certificate-text" style="margin-top: 5mm;">
-                    teilgenommen hat.
-                </div>
-            </div>
+                    <div class="event-title">
+                        {{ $event_title }}
+                    </div>
 
-            <div class="certificate-footer">
-                <div class="signature-block">
-                    <div class="signature-line"></div>
-                    <div class="signature-label">Ort, Datum</div>
-                    <div style="font-size: 11px; margin-top: 2mm;">
-                        {{ $event->venue_city }}, {{ $issue_date->format('d.m.Y') }}
+                    <div class="event-info">
+                        <strong>Datum:</strong> {{ $event_date->format('d. F Y') }}
+                        <br>
+                        <strong>Dauer:</strong> {{ $duration }}
+                        @if($event->venue_city)
+                            <br>
+                            <strong>Ort:</strong> {{ $event->venue_city }}
+                        @endif
+                    </div>
+
+                    <div class="ornament">
+                        <span class="ornament-line"></span>
+                        <span class="ornament-icon">★</span>
+                        <span class="ornament-line"></span>
                     </div>
                 </div>
 
-                <div class="signature-block">
-                    <div class="signature-line"></div>
-                    <div class="signature-label">Unterschrift Veranstalter</div>
-                    @if($event->organizer_info)
-                        <div style="font-size: 11px; margin-top: 2mm;">
-                            {{ $event->user->name }}
+                <div class="footer">
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Datum</div>
+                        <div style="margin-top: 5px; font-size: 14px;">
+                            {{ $issue_date->format('d.m.Y') }}
                         </div>
-                    @endif
-                </div>
-            </div>
+                    </div>
 
-            <div class="certificate-meta">
-                Zertifikat-Nr.: {{ $certificate_number }}<br>
-                Ausgestellt am: {{ $issue_date->format('d.m.Y H:i') }} Uhr<br>
-                Veranstaltungs-ID: {{ $event->id }} | Buchungs-Nr.: {{ $booking->booking_number }}
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">Veranstalter</div>
+                        <div style="margin-top: 5px; font-size: 14px;">
+                            {{ $event->user->organization_name ?? $event->user->fullName() }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="seal">
+                    <div class="seal-text">BESTÄTIGT</div>
+                    <div class="seal-year">{{ $event_date->format('Y') }}</div>
+                </div>
+
+                <div class="certificate-number">
+                    Zertifikatsnummer: {{ $certificate_number }}
+                </div>
             </div>
         </div>
     </div>

@@ -34,6 +34,8 @@ class Booking extends Model
         'additional_data',
         'confirmed_at',
         'cancelled_at',
+        'certificate_generated_at',
+        'certificate_path',
     ];
 
     protected function casts(): array
@@ -46,6 +48,7 @@ class Booking extends Model
             'email_verified_at' => 'datetime',
             'confirmed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'certificate_generated_at' => 'datetime',
         ];
     }
 

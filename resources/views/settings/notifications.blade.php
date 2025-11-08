@@ -1,31 +1,31 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Benachrichtigungseinstellungen') }}
-        </h2>
-    </x-slot>
+<x-layouts.app title="Benachrichtigungseinstellungen">
+    <div class="min-h-screen bg-gray-50 py-8">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">Benachrichtigungseinstellungen</h1>
+                <p class="text-gray-600 mt-2">Verwalten Sie Ihre E-Mail- und Push-Benachrichtigungen</p>
+            </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if(session('success'))
-                        <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                            <span class="block sm:inline">{{ session('success') }}</span>
-                        </div>
-                    @endif
+            @if(session('success'))
+                <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                    <form method="POST" action="{{ route('settings.notifications.update') }}">
-                        @csrf
-                        @method('PUT')
+            <form method="POST" action="{{ route('settings.notifications.update') }}">
+                @csrf
+                @method('PUT')
 
-                        <!-- Email Notifications -->
-                        <div class="mb-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                <x-icon-mail class="inline w-5 h-5 mr-2" />
-                                E-Mail Benachrichtigungen
-                            </h3>
-                            <div class="space-y-4">
+                <!-- Email Notifications -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        E-Mail Benachrichtigungen
+                    </h3>
+                    <div class="space-y-4">
                                 <div class="flex items-center justify-between py-3 border-b">
                                     <div>
                                         <label class="font-medium text-gray-700">Buchungsbestätigung</label>
@@ -117,15 +117,18 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Push Notifications -->
-                        <div class="mb-8">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                                <x-icon-bell class="inline w-5 h-5 mr-2" />
-                                Push-Benachrichtigungen
-                            </h3>
-                            <p class="text-sm text-gray-600 mb-4">Browser-Benachrichtigungen (in Entwicklung)</p>
-                            <div class="space-y-4 opacity-50">
+                <!-- Push Notifications -->
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        Push-Benachrichtigungen
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Browser-Benachrichtigungen (in Entwicklung)</p>
+                    <div class="space-y-4 opacity-50">
                                 <div class="flex items-center justify-between py-3 border-b">
                                     <div>
                                         <label class="font-medium text-gray-700">Buchungsbestätigung</label>
@@ -170,18 +173,18 @@
                                         </label>
                                     </div>
                                 </div>
-                            </div>
                         </div>
-
-                        <div class="flex items-center justify-end">
-                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Einstellungen speichern
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Submit Button -->
+                <div class="flex items-center justify-end">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+                        Einstellungen speichern
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
 

@@ -1,8 +1,26 @@
 <x-layouts.app>
     <div class="container mx-auto px-4 py-8">
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Buchungen für Ihre Events</p>
+        <div class="mb-8 flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Buchungen für Ihre Events</p>
+            </div>
+            <div class="flex gap-2">
+                <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'csv'])) }}"
+                   class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    CSV Export
+                </a>
+                <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'excel'])) }}"
+                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Excel Export
+                </a>
+            </div>
         </div>
 
         <!-- Filters -->
@@ -11,13 +29,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                               placeholder="Buchungsnummer, Name, E-Mail..." 
+                        <input type="text" name="search" id="search" value="{{ request('search') }}"
+                               placeholder="Buchungsnummer, Name, E-Mail..."
                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     <div>
                         <label for="event_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event</label>
-                        <select name="event_id" id="event_id" 
+                        <select name="event_id" id="event_id"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Alle Events</option>
                             @foreach($events as $event)
@@ -29,7 +47,7 @@
                     </div>
                     <div>
                         <label for="payment_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zahlungsstatus</label>
-                        <select name="payment_status" id="payment_status" 
+                        <select name="payment_status" id="payment_status"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Alle</option>
                             <option value="pending" {{ request('payment_status') === 'pending' ? 'selected' : '' }}>Ausstehend</option>
@@ -136,7 +154,7 @@
                                 {{ $booking->created_at->format('d.m.Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('organizer.bookings.show', $booking) }}" 
+                                <a href="{{ route('organizer.bookings.show', $booking) }}"
                                    class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
                                     Details
                                 </a>

@@ -114,6 +114,7 @@
                     @if($upcomingBookings->count() > 0)
                         <div class="space-y-4">
                             @foreach($upcomingBookings as $booking)
+                                @if($booking->event)
                                 <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
@@ -142,6 +143,7 @@
                                         </a>
                                     </div>
                                 </div>
+                                @endif
                             @endforeach
                         </div>
                     @else
@@ -169,6 +171,7 @@
                     @if($bookings->count() > 0)
                         <div class="space-y-4">
                             @foreach($bookings->take(5) as $booking)
+                                @if($booking->event)
                                 <div class="border border-gray-200 rounded-lg p-4">
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
@@ -193,6 +196,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endif
                             @endforeach
                         </div>
                     @else

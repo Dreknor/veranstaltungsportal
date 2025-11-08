@@ -51,7 +51,8 @@ class CalendarService
                "CALSCALE:GREGORIAN\r\n" .
                "METHOD:PUBLISH\r\n" .
                "X-WR-CALNAME:Bildungsportal Events\r\n" .
-               "X-WR-TIMEZONE:Europe/Berlin\r\n";
+               "X-WR-TIMEZONE:Europe/Berlin\r\n" .
+               "X-WR-CALDESC:Fort- und Weiterbildungen\r\n";
     }
 
     /**
@@ -73,32 +74,38 @@ class CalendarService
     protected function generateEventEntry(Event $event): string
     {
         $uid = $this->generateUid($event->id, 'event');
+        $summary = $this->escapeString($event->title);
+        $description = $this->escapeString(strip_tags($event->description));
+        $location = $this->escapeString($this->formatLocation($event));
+        $url = route('events.show', $event->slug);
+
         $dtstart = $this->formatDateTime($event->start_date);
         $dtend = $this->formatDateTime($event->end_date);
         $dtstamp = $this->formatDateTime(now());
         $created = $this->formatDateTime($event->created_at);
         $modified = $this->formatDateTime($event->updated_at);
 
-        $location = $this->formatLocation($event);
-        $description = $this->formatDescription($event->description);
-        $url = route('events.show', $event->slug);
+        $ical = "BEGIN:VEVENT\r\n";
+        $ical .= "UID:{$uid}\r\n";
+        $ical .= "DTSTAMP:{$dtstamp}\r\n";
+        $ical .= "DTSTART:{$dtstart}\r\n";
+        $ical .= "DTEND:{$dtend}\r\n";
+        $ical .= "SUMMARY:{$summary}\r\n";
+        $ical .= "DESCRIPTION:{$description}\r\n";
+        $ical .= "LOCATION:{$location}\r\n";
+        $ical .= "URL:{$url}\r\n";
+        $ical .= "STATUS:CONFIRMED\r\n";
+        $ical .= "CREATED:{$created}\r\n";
+        $ical .= "LAST-MODIFIED:{$modified}\r\n";
 
-        return "BEGIN:VEVENT\r\n" .
-               "UID:{$uid}\r\n" .
-               "DTSTAMP:{$dtstamp}\r\n" .
-               "DTSTART:{$dtstart}\r\n" .
-               "DTEND:{$dtend}\r\n" .
-               "CREATED:{$created}\r\n" .
-               "LAST-MODIFIED:{$modified}\r\n" .
-               "SUMMARY:{$this->escapeString($event->title)}\r\n" .
-               "DESCRIPTION:{$description}\r\n" .
-               "LOCATION:{$location}\r\n" .
-               "URL:{$url}\r\n" .
-               "STATUS:CONFIRMED\r\n" .
-               "SEQUENCE:0\r\n" .
-               "CATEGORIES:{$event->category->name}\r\n" .
-               "ORGANIZER;CN={$this->escapeString($event->user->name)}:mailto:{$event->user->email}\r\n" .
-               "END:VEVENT\r\n";
+        if ($event->organizer_email) {
+            $ical .= "ORGANIZER;CN=\"{$event->user->fullName()}\":MAILTO:{$event->organizer_email}\r\n";
+        }
+
+        $ical .= "CATEGORIES:{$event->category->name}\r\n";
+        $ical .= "END:VEVENT\r\n";
+
+        return $ical;
     }
 
     /**
@@ -111,52 +118,42 @@ class CalendarService
     {
         $event = $booking->event;
         $uid = $this->generateUid($booking->id, 'booking');
+        $summary = $this->escapeString($event->title . ' - ' . $booking->booking_number);
+        $description = $this->escapeString(
+            strip_tags($event->description) . "\n\n" .
+            "Buchungsnummer: {$booking->booking_number}\n" .
+            "Teilnehmer: {$booking->customer_name}"
+        );
+        $location = $this->escapeString($this->formatLocation($event));
+
         $dtstart = $this->formatDateTime($event->start_date);
         $dtend = $this->formatDateTime($event->end_date);
         $dtstamp = $this->formatDateTime(now());
 
-        $location = $this->formatLocation($event);
-        $description = $this->formatBookingDescription($booking);
-        $url = route('bookings.show', $booking->booking_number);
+        $ical = "BEGIN:VEVENT\r\n";
+        $ical .= "UID:{$uid}\r\n";
+        $ical .= "DTSTAMP:{$dtstamp}\r\n";
+        $ical .= "DTSTART:{$dtstart}\r\n";
+        $ical .= "DTEND:{$dtend}\r\n";
+        $ical .= "SUMMARY:{$summary}\r\n";
+        $ical .= "DESCRIPTION:{$description}\r\n";
+        $ical .= "LOCATION:{$location}\r\n";
+        $ical .= "STATUS:CONFIRMED\r\n";
 
-        // Add reminder 1 day before
-        $alarm = "BEGIN:VALARM\r\n" .
-                 "TRIGGER:-P1D\r\n" .
-                 "ACTION:DISPLAY\r\n" .
-                 "DESCRIPTION:Erinnerung: {$this->escapeString($event->title)} morgen\r\n" .
-                 "END:VALARM\r\n";
+        // Reminder 24h before
+        $ical .= "BEGIN:VALARM\r\n";
+        $ical .= "TRIGGER:-PT24H\r\n";
+        $ical .= "ACTION:DISPLAY\r\n";
+        $ical .= "DESCRIPTION:Erinnerung: {$summary}\r\n";
+        $ical .= "END:VALARM\r\n";
 
-        return "BEGIN:VEVENT\r\n" .
-               "UID:{$uid}\r\n" .
-               "DTSTAMP:{$dtstamp}\r\n" .
-               "DTSTART:{$dtstart}\r\n" .
-               "DTEND:{$dtend}\r\n" .
-               "SUMMARY:📚 {$this->escapeString($event->title)}\r\n" .
-               "DESCRIPTION:{$description}\r\n" .
-               "LOCATION:{$location}\r\n" .
-               "URL:{$url}\r\n" .
-               "STATUS:CONFIRMED\r\n" .
-               "SEQUENCE:0\r\n" .
-               "CATEGORIES:Fortbildung\r\n" .
-               "ORGANIZER;CN={$this->escapeString($event->user->name)}:mailto:{$event->user->email}\r\n" .
-               "ATTENDEE;CN={$this->escapeString($booking->customer_name)};RSVP=FALSE:mailto:{$booking->customer_email}\r\n" .
-               $alarm .
-               "END:VEVENT\r\n";
+        $ical .= "END:VEVENT\r\n";
+
+        return $ical;
     }
 
     /**
-     * Format DateTime for iCal
-     *
-     * @param \Carbon\Carbon $dateTime
-     * @return string
-     */
-    protected function formatDateTime($dateTime): string
-    {
-        return $dateTime->setTimezone('Europe/Berlin')->format('Ymd\THis');
-    }
-
-    /**
-     * Format location for iCal
+     * Format location string
      *
      * @param Event $event
      * @return string
@@ -167,11 +164,135 @@ class CalendarService
             $event->venue_name,
             $event->venue_address,
             $event->venue_postal_code . ' ' . $event->venue_city,
-            $event->venue_country
+            $event->venue_country,
         ]);
 
-        return $this->escapeString(implode(', ', $parts));
+        return implode(', ', $parts);
     }
+
+    /**
+     * Format datetime for iCal
+     *
+     * @param \Carbon\Carbon $datetime
+     * @return string
+     */
+    protected function formatDateTime($datetime): string
+    {
+        return $datetime->format('Ymd\THis\Z');
+    }
+
+    /**
+     * Generate unique ID for calendar entry
+     *
+     * @param int $id
+     * @param string $type
+     * @return string
+     */
+    protected function generateUid(int $id, string $type): string
+    {
+        return "{$type}-{$id}@bildungsportal.de";
+    }
+
+    /**
+     * Escape special characters for iCal
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function escapeString(string $string): string
+    {
+        // Replace line breaks with \n
+        $string = str_replace(["\r\n", "\n", "\r"], "\\n", $string);
+
+        // Escape special characters
+        $string = str_replace(['\\', ',', ';'], ['\\\\', '\\,', '\\;'], $string);
+
+        // Limit length and fold long lines
+        if (strlen($string) > 75) {
+            $string = wordwrap($string, 75, "\r\n ", true);
+        }
+
+        return $string;
+    }
+
+    /**
+     * Get Google Calendar URL
+     *
+     * @param Event $event
+     * @return string
+     */
+    public function getGoogleCalendarUrl(Event $event): string
+    {
+        $params = [
+            'action' => 'TEMPLATE',
+            'text' => $event->title,
+            'dates' => $event->start_date->format('Ymd\THis\Z') . '/' . $event->end_date->format('Ymd\THis\Z'),
+            'details' => strip_tags($event->description),
+            'location' => $this->formatLocation($event),
+            'ctz' => 'Europe/Berlin',
+        ];
+
+        return 'https://calendar.google.com/calendar/render?' . http_build_query($params);
+    }
+
+    /**
+     * Get Outlook Calendar URL
+     *
+     * @param Event $event
+     * @return string
+     */
+    public function getOutlookCalendarUrl(Event $event): string
+    {
+        $params = [
+            'path' => '/calendar/action/compose',
+            'rru' => 'addevent',
+            'subject' => $event->title,
+            'startdt' => $event->start_date->toIso8601String(),
+            'enddt' => $event->end_date->toIso8601String(),
+            'body' => strip_tags($event->description),
+            'location' => $this->formatLocation($event),
+        ];
+
+        return 'https://outlook.live.com/calendar/0/deeplink/compose?' . http_build_query($params);
+    }
+
+    /**
+     * Download iCal file for event
+     *
+     * @param Event $event
+     * @return \Illuminate\Http\Response
+     */
+    public function downloadEventIcal(Event $event)
+    {
+        $ical = $this->generateEventIcal($event);
+        $filename = Str::slug($event->title) . '.ics';
+
+        return response($ical, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-cache, must-revalidate',
+        ]);
+    }
+
+    /**
+     * Download iCal file for booking
+     *
+     * @param Booking $booking
+     * @return \Illuminate\Http\Response
+     */
+    public function downloadBookingIcal(Booking $booking)
+    {
+        $ical = $this->generateBookingIcal($booking);
+        $filename = 'booking-' . $booking->booking_number . '.ics';
+
+        return response($ical, 200, [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Cache-Control' => 'no-cache, must-revalidate',
+        ]);
+    }
+
+
 
     /**
      * Format description for iCal
@@ -203,30 +324,7 @@ class CalendarService
         return $this->formatDescription($desc);
     }
 
-    /**
-     * Generate unique UID
-     *
-     * @param int $id
-     * @param string $type
-     * @return string
-     */
-    protected function generateUid(int $id, string $type): string
-    {
-        return "{$type}-{$id}@bildungsportal.de";
-    }
 
-    /**
-     * Escape string for iCal format
-     *
-     * @param string $string
-     * @return string
-     */
-    protected function escapeString(string $string): string
-    {
-        $string = str_replace(["\r\n", "\n", "\r"], '\n', $string);
-        $string = str_replace([',', ';', '\\'], ['\\,', '\\;', '\\\\'], $string);
-        return $string;
-    }
 
     /**
      * Get proper filename for iCal download
@@ -244,25 +342,6 @@ class CalendarService
         }
 
         return "calendar-event.ics";
-    }
-
-    /**
-     * Get Google Calendar URL for event
-     *
-     * @param Event $event
-     * @return string
-     */
-    public function getGoogleCalendarUrl(Event $event): string
-    {
-        $params = [
-            'action' => 'TEMPLATE',
-            'text' => $event->title,
-            'dates' => $this->formatDateTime($event->start_date) . '/' . $this->formatDateTime($event->end_date),
-            'details' => Str::limit(strip_tags($event->description), 1000),
-            'location' => $this->formatLocation($event),
-        ];
-
-        return 'https://calendar.google.com/calendar/render?' . http_build_query($params);
     }
 
     /**

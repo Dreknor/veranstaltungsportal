@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -27,12 +28,21 @@ class User extends Authenticatable
         'password',
         'user_type',
         'organization_name',
+        'organization_website',
         'organization_description',
         'profile_photo',
         'phone',
         'bio',
         'is_organizer',
         'notification_preferences',
+        'billing_company',
+        'billing_address',
+        'billing_address_line2',
+        'billing_postal_code',
+        'billing_city',
+        'billing_state',
+        'billing_country',
+        'tax_id',
     ];
 
     /**
@@ -58,6 +68,16 @@ class User extends Authenticatable
             'is_organizer' => 'boolean',
             'notification_preferences' => 'array',
         ];
+    }
+
+    /**
+     * Get notification preferences with default values
+     */
+    protected function notificationPreferences(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => is_array($value) ? $value : [],
+        );
     }
 
     /**
