@@ -113,10 +113,10 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
 
     // Booking Management
     Route::get('/bookings', [Organizer\BookingManagementController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/export', [Organizer\BookingManagementController::class, 'export'])->name('bookings.export');
     Route::get('/bookings/{booking}', [Organizer\BookingManagementController::class, 'show'])->name('bookings.show');
     Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
     Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
-    Route::get('/bookings/export', [Organizer\BookingManagementController::class, 'export'])->name('bookings.export');
     Route::post('/bookings/{booking}/check-in', [Organizer\BookingManagementController::class, 'checkIn'])->name('bookings.check-in');
 
     // Statistics & Analytics
