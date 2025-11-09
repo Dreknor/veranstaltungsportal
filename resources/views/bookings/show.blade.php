@@ -47,14 +47,22 @@
                             <div class="flex-1">
                                 <h3 class="font-semibold text-gray-900 mb-2">{{ $booking->event->title }}</h3>
                                 <div class="space-y-1 text-sm text-gray-600">
+                                    @if($booking->event->start_date)
                                     <div class="flex items-center">
                                         <x-icon.calendar class="w-4 h-4 mr-2" />
                                         {{ $booking->event->start_date->format('d.m.Y H:i') }} Uhr
                                     </div>
+                                    @endif
+                                    @if($booking->event->venue_name || $booking->event->location)
                                     <div class="flex items-center">
                                         <x-icon.location class="w-4 h-4 mr-2" />
-                                        {{ $booking->event->venue_name }}, {{ $booking->event->venue_city }}
+                                        @if($booking->event->venue_name)
+                                            {{ $booking->event->venue_name }}@if($booking->event->venue_city), {{ $booking->event->venue_city }}@endif
+                                        @elseif($booking->event->location)
+                                            {{ $booking->event->location }}
+                                        @endif
                                     </div>
+                                    @endif
                                 </div>
                                 <a href="{{ route('events.show', $booking->event->slug) }}"
                                    class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">

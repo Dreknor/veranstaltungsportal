@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventWaitlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class WaitlistController extends Controller
 {
@@ -102,6 +103,12 @@ class WaitlistController extends Controller
 
         $quantity = $request->input('quantity', 1);
 
+        Log::info('Manual waitlist notification started', [
+            'event_id' => $event->id,
+            'event_title' => $event->title,
+            'requested_quantity' => $quantity
+        ]);
+
         $nextEntries = EventWaitlist::where('event_id', $event->id)
             ->waiting()
             ->notExpired()
@@ -110,6 +117,16 @@ class WaitlistController extends Controller
             ->limit(5)
             ->get();
 
+        Log::info('Found waitlist entries', [
+            'count' => $nextEntries->count(),
+            'entries' => $nextEntries->map(fn($e) => [
+                'id' => $e->id,
+                'email' => $e->email,
+                'quantity' => $e->quantity,
+                'status' => $e->status
+            ])
+        ]);
+
         $notifiedCount = 0;
 
         foreach ($nextEntries as $entry) {
@@ -117,7 +134,21 @@ class WaitlistController extends Controller
                 $entry->markAsNotified();
 
                 // Send notification email
-                // Mail::to($entry->email)->send(new WaitlistTicketAvailable($entry));
+                try {
+                    Mail::to($entry->email)->send(new \App\Mail\WaitlistTicketAvailable($entry));
+                    Log::info('Waitlist notification sent', [
+                        'waitlist_id' => $entry->id,
+                        'email' => $entry->email,
+                        'event_id' => $event->id
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send waitlist notification', [
+                        'waitlist_id' => $entry->id,
+                        'email' => $entry->email,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
 
                 $quantity -= $entry->quantity;
                 $notifiedCount++;

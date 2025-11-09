@@ -1,8 +1,4 @@
-@extends('layouts.app')
-
-@section('title', 'Rechnungsverwaltung')
-
-@section('content')
+<x-layouts.app title="Rechnungsverwaltung">
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Rechnungsverwaltung</h1>
@@ -121,7 +117,7 @@
                     </td>
                     <td class="px-6 py-4 text-sm">
                         @if($invoice->event)
-                            <a href="{{ route('admin.events.show', $invoice->event) }}" class="text-blue-600 hover:underline">
+                            <a href="{{ route('events.show', $invoice->event->slug) }}" class="text-blue-600 hover:underline">
                                 {{ Str::limit($invoice->event->title, 30) }}
                             </a>
                         @else
@@ -181,5 +177,4 @@ document.querySelector('input[name="search"]').addEventListener('input', functio
     }, 500);
 });
 </script>
-@endsection
-
+</x-layouts.app>
