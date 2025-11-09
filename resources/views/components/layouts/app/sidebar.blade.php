@@ -66,12 +66,14 @@
                                  stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
-                            <!-- Notification Badge (always visible if unread) -->
-                            @if(auth()->user()->unreadNotifications->count() > 0)
-                            <span class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
-                                {{ auth()->user()->unreadNotifications->count() > 9 ? '9+' : auth()->user()->unreadNotifications->count() }}
-                            </span>
-                            @endif
+                            <!-- Notification Badge (only visible for authenticated users) -->
+                            @auth
+                                @if(auth()->user()->unreadNotifications->count() > 0)
+                                <span class="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
+                                    {{ auth()->user()->unreadNotifications->count() > 9 ? '9+' : auth()->user()->unreadNotifications->count() }}
+                                </span>
+                                @endif
+                            @endauth
                         </span>
 
                         <!-- Text -->
@@ -93,7 +95,8 @@
                     </a>
                 </li>
 
-                @if(auth()->user()->is_organizer || auth()->user()->isOrganizer())
+                @auth
+                @if(auth()->user()->hasRole('organizer'))
                     <!-- Organizer Section -->
                     <li class="pt-6 pb-2">
                         <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
@@ -118,8 +121,25 @@
                         :active="request()->routeIs('organizer.bookings.*')">
                         Event Buchungen
                     </x-layouts.sidebar-link>
-                @endif
 
+                    <x-layouts.sidebar-link href="{{ route('organizer.reviews.index') }}" icon='fas-star'
+                        :active="request()->routeIs('organizer.reviews.*')">
+                        Bewertungen
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('organizer.invoices.index') }}" icon='fas-file-invoice-dollar'
+                        :active="request()->routeIs('organizer.invoices.*')">
+                        Rechnungen
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('organizer.bank-account.index') }}" icon='fas-building-columns'
+                        :active="request()->routeIs('organizer.bank-account.*')">
+                        Kontoverbindung
+                    </x-layouts.sidebar-link>
+                @endif
+                @endauth
+
+                @auth
                 @if(auth()->user()->hasRole('admin'))
                     <!-- Admin Section -->
                     <li class="pt-6 pb-2">
@@ -145,7 +165,23 @@
                         :active="request()->routeIs('admin.events.*')">
                         Event-Verwaltung
                     </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.reviews.index') }}" icon='fas-star'
+                        :active="request()->routeIs('admin.reviews.*')">
+                        Bewertungen
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.invoices.index') }}" icon='fas-file-invoice-dollar'
+                        :active="request()->routeIs('admin.invoices.*')">
+                        Rechnungen
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.monetization.index') }}" icon='fas-coins'
+                        :active="request()->routeIs('admin.monetization.*')">
+                        Monetarisierung
+                    </x-layouts.sidebar-link>
                 @endif
+                @endauth
             </ul>
         </nav>
 

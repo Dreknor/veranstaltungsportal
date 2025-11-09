@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventReview;
+use App\Notifications\NewReviewNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -33,13 +34,14 @@ class EventReviewController extends Controller
 
         $validated['user_id'] = auth()->id();
         $validated['event_id'] = $event->id;
+        $validated['is_approved'] = false; // Review muss moderiert werden
 
-        EventReview::create($validated);
+        $review = EventReview::create($validated);
 
-        // Aktualisiere durchschnittliche Bewertung des Events
-        $this->updateEventAverageRating($event);
+        // Benachrichtige den Veranstalter über neue Review
+        $event->user->notify(new NewReviewNotification($review));
 
-        return back()->with('success', 'Vielen Dank für deine Bewertung!');
+        return back()->with('success', 'Vielen Dank für deine Bewertung! Sie wird nach Prüfung freigegeben.');
     }
 
     public function update(Request $request, EventReview $review)

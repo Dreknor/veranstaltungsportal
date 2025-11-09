@@ -31,14 +31,6 @@
                         @enderror
                     </div>
 
-                    <!-- Is Organizer -->
-                    <div>
-                        <label class="flex items-center">
-                            <input type="checkbox" name="is_organizer" value="1" {{ old('is_organizer', $user->is_organizer) ? 'checked' : '' }}
-                                   class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Veranstalter (Legacy)</span>
-                        </label>
-                    </div>
 
                     <!-- Roles -->
                     <div>
@@ -57,6 +49,10 @@
                                         @endif
                                     </span>
                                 </label>
+                                {{-- Hidden field to preserve admin role when editing self --}}
+                                @if(auth()->id() === $user->id && $role->name === 'admin' && in_array($role->name, $userRoles))
+                                    <input type="hidden" name="roles[]" value="admin">
+                                @endif
                             @endforeach
                         </div>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -66,10 +62,20 @@
 
                     <!-- Buttons -->
                     <div class="flex justify-between pt-4">
-                        <a href="{{ route('admin.users.index') }}"
-                           class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
-                            Abbrechen
-                        </a>
+                    <!-- Buttons -->
+                    <div class="flex justify-between pt-4">
+                        <div class="flex gap-3">
+                            <a href="{{ route('admin.users.index') }}"
+                               class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
+                                Abbrechen
+                            </a>
+                            @if($user->hasRole('organizer'))
+                                <a href="{{ route('admin.organizer-fees.edit', $user) }}"
+                                   class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    💰 Individuelle Gebühren
+                                </a>
+                            @endif
+                        </div>
                         <button type="submit"
                                 class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             Speichern

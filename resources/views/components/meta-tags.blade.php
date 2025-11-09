@@ -44,8 +44,11 @@
     <meta property="event:location" content="{{ $eventLocation }}">
     @endif
 
-    @if(isset($event->price_from) && $event->price_from)
-        <meta property="event:price" content="{{ $event->price_from }}">
+    @php
+        $eventMinPrice = $event->getMinimumPrice();
+    @endphp
+    @if($eventMinPrice)
+        <meta property="event:price" content="{{ $eventMinPrice }}">
         <meta property="event:price_currency" content="EUR">
     @endif
 @endif
@@ -97,11 +100,12 @@
         ],
     ];
 
-    if (isset($event->price_from) && $event->price_from) {
+    $eventMinPrice = $event->getMinimumPrice();
+    if ($eventMinPrice) {
         $schemaData['offers'] = [
             '@type' => 'Offer',
             'url' => route('events.show', $event->slug ?? 'event'),
-            'price' => $event->price_from,
+            'price' => $eventMinPrice,
             'priceCurrency' => 'EUR',
             'availability' => 'https://schema.org/InStock',
             'validFrom' => now()->toIso8601String(),

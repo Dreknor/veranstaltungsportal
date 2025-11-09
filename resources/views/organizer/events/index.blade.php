@@ -81,15 +81,21 @@
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                     {{ $event->category->name }}
                                 </span>
-                                @if($event->is_published)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        Veröffentlicht
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                        Entwurf
-                                    </span>
-                                @endif
+                                <div class="flex gap-2">
+                                    @if($event->is_cancelled)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                                            Abgesagt
+                                        </span>
+                                    @elseif($event->is_published)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                            Veröffentlicht
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                            Entwurf
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
 
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -128,26 +134,83 @@
                                    class="flex-1 px-3 py-2 text-center bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
                                     Bearbeiten
                                 </a>
-                                <form action="{{ route('organizer.events.duplicate', $event) }}" method="POST"
-                                      class="flex-1">
-                                    @csrf
-                                    <button type="submit"
-                                            class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
-                                        Duplizieren
-                                    </button>
-                                </form>
-                                <form action="{{ route('organizer.events.destroy', $event) }}" method="POST"
-                                      class="flex-1" onsubmit="return confirm('Event wirklich löschen?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit"
-                                            class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                        Löschen
-                                    </button>
-                                </form>
+                                @if(!$event->is_cancelled)
+                                    <form action="{{ route('organizer.events.duplicate', $event) }}" method="POST"
+                                          class="flex-1">
+                                        @csrf
+                                        <button type="submit"
+                                                class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
+                                            Duplizieren
+                                        </button>
+                                    </form>
+
+                                    @if($event->hasAttendees())
+                                        <!-- Absagen Button wenn Teilnehmer vorhanden -->
+                                        <button type="button" onclick="showCancelModal{{ $event->id }}()"
+                                                class="flex-1 px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm">
+                                            Absagen
+                                        </button>
+                                    @else
+                                        <!-- Löschen Button wenn keine Teilnehmer vorhanden -->
+                                        <form action="{{ route('organizer.events.destroy', $event) }}" method="POST"
+                                              class="flex-1" onsubmit="return confirm('Event wirklich löschen?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                    class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
+                                                Löschen
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modal für Event-Absage -->
+                    @if($event->hasAttendees() && !$event->is_cancelled)
+                        <div id="cancelModal{{ $event->id }}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+                            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                                <div class="mt-3">
+                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Event absagen</h3>
+                                    <p class="text-sm text-gray-600 mb-4">
+                                        Dieses Event hat {{ $event->getAttendeesCount() }} Teilnehmer.
+                                        Alle Teilnehmer werden per E-Mail über die Absage informiert.
+                                    </p>
+                                    <form action="{{ route('organizer.events.cancel', $event) }}" method="POST">
+                                        @csrf
+                                        <div class="mb-4">
+                                            <label for="cancellation_reason{{ $event->id }}" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Grund der Absage (optional)
+                                            </label>
+                                            <textarea id="cancellation_reason{{ $event->id }}" name="cancellation_reason" rows="3"
+                                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                      placeholder="Teilen Sie den Teilnehmern mit, warum das Event abgesagt wird..."></textarea>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button type="button" onclick="hideCancelModal{{ $event->id }}()"
+                                                    class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                                                Abbrechen
+                                            </button>
+                                            <button type="submit"
+                                                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                                                Event absagen
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                            function showCancelModal{{ $event->id }}() {
+                                document.getElementById('cancelModal{{ $event->id }}').classList.remove('hidden');
+                            }
+                            function hideCancelModal{{ $event->id }}() {
+                                document.getElementById('cancelModal{{ $event->id }}').classList.add('hidden');
+                            }
+                        </script>
+                    @endif
                 @endforeach
             </div>
 

@@ -28,7 +28,7 @@
                 <h4 class="font-semibold mb-4">Für Veranstalter</h4>
                 <ul class="space-y-2 text-gray-400">
                     @auth
-                        @if(auth()->user()->is_organizer)
+                        @if(auth()->user()->hasRole('organizer'))
                             <li><a href="{{ route('organizer.dashboard') }}" class="hover:text-white transition">Dashboard</a></li>
                             <li><a href="{{ route('organizer.events.index') }}" class="hover:text-white transition">Meine Veranstaltungen</a></li>
                         @endif

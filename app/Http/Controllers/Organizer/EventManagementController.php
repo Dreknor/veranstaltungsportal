@@ -234,5 +234,139 @@ class EventManagementController extends Controller
 
         return back()->with('success', 'Ticket-Typ erfolgreich gelöscht!');
     }
-}
 
+    /**
+     * Cancel an event
+     */
+    public function cancel(Request $request, Event $event)
+    {
+        $this->authorize('update', $event);
+
+        $validated = $request->validate([
+            'cancellation_reason' => 'nullable|string|max:1000',
+        ]);
+
+        $event->update([
+            'is_cancelled' => true,
+            'cancelled_at' => now(),
+            'cancellation_reason' => $validated['cancellation_reason'] ?? null,
+        ]);
+
+        // Notify all attendees about the cancellation
+        $attendees = $event->getAttendees();
+
+        foreach ($attendees as $booking) {
+            // Send dedicated email
+            \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                ->send(new \App\Mail\EventCancelledMail($event, $booking));
+
+            // Also send notification for in-app notifications
+            if ($booking->user) {
+                $booking->user->notify(new \App\Notifications\EventCancelledNotification($event, $booking));
+            }
+
+            // Update booking status to cancelled
+            $booking->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+            ]);
+        }
+
+        return redirect()->route('organizer.events.index')
+            ->with('success', 'Event wurde abgesagt und alle ' . $attendees->count() . ' Teilnehmer wurden per E-Mail benachrichtigt.');
+    }
+
+    /**
+     * Download attendees list as CSV
+     */
+    public function downloadAttendees(Event $event)
+    {
+        $this->authorize('view', $event);
+
+        $attendees = $event->getAttendees();
+
+        $filename = 'teilnehmerliste-' . Str::slug($event->title) . '-' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($attendees) {
+            $file = fopen('php://output', 'w');
+
+            // Add UTF-8 BOM for proper Excel encoding
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Header row
+            fputcsv($file, [
+                'Buchungsnummer',
+                'Name',
+                'E-Mail',
+                'Telefon',
+                'Anzahl Tickets',
+                'Betrag',
+                'Status',
+                'Buchungsdatum',
+            ], ';');
+
+            // Data rows
+            foreach ($attendees as $booking) {
+                fputcsv($file, [
+                    $booking->booking_number,
+                    $booking->customer_name,
+                    $booking->customer_email,
+                    $booking->customer_phone ?? '-',
+                    $booking->items->sum('quantity'),
+                    number_format($booking->total, 2, ',', '.') . ' €',
+                    $booking->status,
+                    $booking->created_at->format('d.m.Y H:i'),
+                ], ';');
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Show form to contact attendees
+     */
+    public function contactAttendeesForm(Event $event)
+    {
+        $this->authorize('view', $event);
+
+        $attendeesCount = $event->getAttendeesCount();
+
+        return view('organizer.events.contact-attendees', compact('event', 'attendeesCount'));
+    }
+
+    /**
+     * Send message to all attendees
+     */
+    public function contactAttendees(Request $request, Event $event)
+    {
+        $this->authorize('view', $event);
+
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:5000',
+        ]);
+
+        $attendees = $event->getAttendees();
+
+        foreach ($attendees as $booking) {
+            $email = $booking->customer_email;
+
+            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $validated, $event) {
+                $message->to($email)
+                    ->subject($validated['subject'])
+                    ->html(nl2br(e($validated['message'])) . '<br><br>---<br>Diese Nachricht bezieht sich auf die Veranstaltung: ' . $event->title . '<br>Datum: ' . $event->start_date->format('d.m.Y H:i') . ' Uhr');
+            });
+        }
+
+        return redirect()->route('organizer.events.edit', $event)
+            ->with('success', 'Nachricht wurde an ' . $attendees->count() . ' Teilnehmer gesendet.');
+    }
+}

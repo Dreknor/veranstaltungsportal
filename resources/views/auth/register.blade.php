@@ -27,7 +27,7 @@
                     <div class="grid grid-cols-2 gap-3">
                         <label class="relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all"
                                :class="userType === 'participant' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'">
-                            <input type="radio" name="user_type" value="participant"
+                            <input type="radio" name="account_type" value="participant"
                                    x-model="userType"
                                    class="sr-only"
                                    checked>
@@ -42,7 +42,7 @@
 
                         <label class="relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all"
                                :class="userType === 'organizer' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'">
-                            <input type="radio" name="user_type" value="organizer"
+                            <input type="radio" name="account_type" value="organizer"
                                    x-model="userType"
                                    class="sr-only">
                             <div class="flex items-center justify-center mb-2">
@@ -54,7 +54,7 @@
                             <span class="text-xs text-gray-600 dark:text-gray-400 text-center mt-1">{{ __('Ich möchte Events erstellen') }}</span>
                         </label>
                     </div>
-                    @error('user_type')
+                    @error('account_type')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
                 </div>

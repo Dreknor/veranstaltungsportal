@@ -26,15 +26,17 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
-        'user_type',
         'organization_name',
         'organization_website',
         'organization_description',
         'profile_photo',
         'phone',
         'bio',
-        'is_organizer',
         'notification_preferences',
+        'payout_settings',
+        'bank_account',
+        'organizer_billing_data',
+        'custom_platform_fee',
         'billing_company',
         'billing_address',
         'billing_address_line2',
@@ -65,8 +67,11 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'is_organizer' => 'boolean',
             'notification_preferences' => 'array',
+            'payout_settings' => 'array',
+            'bank_account' => 'array',
+            'organizer_billing_data' => 'array',
+            'custom_platform_fee' => 'array',
         ];
     }
 
@@ -163,31 +168,35 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if user is organizer (by user_type or role)
+     * Check if user is organizer
      */
     public function isOrganizer(): bool
     {
-        return $this->user_type === 'organizer' || $this->hasRole('organizer') || $this->is_organizer;
+        return $this->hasRole('organizer');
     }
 
     /**
-     * Check if user is participant
+     * Check if user is participant (has user role but not organizer/admin)
      */
     public function isParticipant(): bool
     {
-        return $this->user_type === 'participant';
+        return $this->hasRole('user') && !$this->hasRole(['organizer', 'admin']);
     }
 
     /**
-     * Get user type label
+     * Get user type label based on roles
      */
     public function userTypeLabel(): string
     {
-        return match($this->user_type) {
-            'organizer' => 'Organisator',
-            'participant' => 'Teilnehmer',
-            default => 'Benutzer',
-        };
+        if ($this->hasRole('admin')) {
+            return 'Administrator';
+        }
+
+        if ($this->hasRole('organizer')) {
+            return 'Organisator';
+        }
+
+        return 'Teilnehmer';
     }
 
     /**
@@ -195,7 +204,7 @@ class User extends Authenticatable
      */
     public function canManageEvents(): bool
     {
-        return $this->hasPermissionTo('manage events') || $this->hasRole(['admin', 'organizer']) || $this->isOrganizer();
+        return $this->hasPermissionTo('manage events') || $this->hasRole(['admin', 'organizer']);
     }
 
     /**

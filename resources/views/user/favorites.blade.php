@@ -53,10 +53,13 @@
                                         {{ $event->venue_city }}
                                     </div>
 
-                                    @if($event->price_from)
+                                    @php
+                                        $minPrice = $event->getMinimumPrice();
+                                    @endphp
+                                    @if($minPrice)
                                         <div class="flex items-center text-sm text-gray-600">
                                             <x-icon.currency class="w-4 h-4 mr-2" />
-                                            ab {{ number_format($event->price_from, 2, ',', '.') }} €
+                                            ab {{ number_format($minPrice, 2, ',', '.') }} €
                                         </div>
                                     @endif
                                 </div>

@@ -52,6 +52,9 @@ class Event extends Model implements HasMedia
         'organizer_phone',
         'organizer_website',
         'meta_data',
+        'is_cancelled',
+        'cancelled_at',
+        'cancellation_reason',
     ];
 
     protected function casts(): array
@@ -69,6 +72,8 @@ class Event extends Model implements HasMedia
             'venue_latitude' => 'decimal:7',
             'venue_longitude' => 'decimal:7',
             'is_series_part' => 'boolean',
+            'is_cancelled' => 'boolean',
+            'cancelled_at' => 'datetime',
         ];
     }
 
@@ -102,6 +107,11 @@ class Event extends Model implements HasMedia
         return $this->hasMany(Booking::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(EventReview::class);
@@ -124,8 +134,9 @@ class Event extends Model implements HasMedia
         }
 
         // Calculate sold tickets through booking items
+        // Include pending, confirmed and completed bookings
         $sold = $this->bookings()
-            ->whereIn('status', ['confirmed', 'completed'])
+            ->whereIn('status', ['pending', 'confirmed', 'completed'])
             ->with('items')
             ->get()
             ->flatMap(function ($booking) {
@@ -141,6 +152,11 @@ class Event extends Model implements HasMedia
      */
     public function hasAvailableTickets(): bool
     {
+        // First, check if event has reached max_attendees limit
+        if ($this->max_attendees && $this->availableTickets() <= 0) {
+            return false;
+        }
+
         // If event has ticket types, check if any ticket type has availability and is on sale
         if ($this->ticketTypes()->exists()) {
             return $this->ticketTypes()
@@ -158,6 +174,25 @@ class Event extends Model implements HasMedia
     public function averageRating(): float
     {
         return $this->reviews()->where('is_approved', true)->avg('rating') ?? 0;
+    }
+
+    /**
+     * Get the minimum price for this event
+     * Returns price_from if set, otherwise the cheapest available ticket type
+     */
+    public function getMinimumPrice(): ?float
+    {
+        // If price_from is set, use it
+        if ($this->price_from !== null && $this->price_from > 0) {
+            return (float) $this->price_from;
+        }
+
+        // Otherwise, get the minimum price from available ticket types
+        $minTicketPrice = $this->ticketTypes()
+            ->available()
+            ->min('price');
+
+        return $minTicketPrice ? (float) $minTicketPrice : null;
     }
 
     public function getLocationAttribute(): string
@@ -239,5 +274,45 @@ class Event extends Model implements HasMedia
     public function requiresOnlineInfo(): bool
     {
         return $this->event_type === 'online' || $this->event_type === 'hybrid';
+    }
+
+    /**
+     * Get confirmed attendees count
+     */
+    public function getAttendeesCount(): int
+    {
+        return $this->bookings()
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->count();
+    }
+
+    /**
+     * Check if event has any attendees
+     */
+    public function hasAttendees(): bool
+    {
+        return $this->getAttendeesCount() > 0;
+    }
+
+    /**
+     * Get all confirmed attendees with their booking details
+     */
+    public function getAttendees()
+    {
+        return $this->bookings()
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->with('user')
+            ->get();
+    }
+
+    /**
+     * Check if event can be booked
+     */
+    public function canBeBooked(): bool
+    {
+        return !$this->is_cancelled
+            && $this->is_published
+            && $this->start_date->isFuture()
+            && $this->hasAvailableTickets();
     }
 }

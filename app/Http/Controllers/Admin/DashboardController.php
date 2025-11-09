@@ -16,7 +16,7 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_users' => User::count(),
-            'total_organizers' => User::where('is_organizer', true)->count(),
+            'total_organizers' => User::role('organizer')->count(),
             'total_events' => Event::count(),
             'published_events' => Event::where('is_published', true)->count(),
             'total_bookings' => Booking::count(),

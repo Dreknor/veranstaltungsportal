@@ -92,6 +92,11 @@ class SeriesController extends Controller
                 $bookings = [];
 
                 foreach ($series->events as $event) {
+                    // Prüfe ob Event noch Plätze hat
+                    if ($event->max_attendees && $event->availableTickets() <= 0) {
+                        throw new \Exception("Der Termin '{$event->title}' am {$event->start_date->format('d.m.Y')} ist bereits ausgebucht.");
+                    }
+
                     // Erstelle oder hole Standard-Ticket-Type für das Event
                     $ticketType = $event->ticketTypes()->first();
 
@@ -108,6 +113,11 @@ class SeriesController extends Controller
                             'min_per_order' => 1,
                             'max_per_order' => 1,
                         ]);
+                    }
+
+                    // Zusätzliche Prüfung: Verfügbarkeit des Tickets
+                    if ($ticketType->availableQuantity() <= 0) {
+                        throw new \Exception("Für den Termin '{$event->title}' am {$event->start_date->format('d.m.Y')} sind keine Tickets mehr verfügbar.");
                     }
 
                     // Bei kostenlosen Tickets direkt bestätigen

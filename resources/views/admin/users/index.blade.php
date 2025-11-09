@@ -95,17 +95,12 @@
                                             Keine Rolle
                                         </span>
                                     @endif
-                                    @if($user->is_organizer && !$user->hasRole('organizer'))
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                            Legacy Organizer
-                                        </span>
-                                    @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                 {{ $user->events_count }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $user->bookings_count }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -118,12 +113,6 @@
                                         Bearbeiten
                                     </a>
 
-                                    <form action="{{ route('admin.users.toggle-organizer', $user) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300">
-                                            {{ $user->is_organizer ? 'Veranstalter entfernen' : 'Zu Veranstalter' }}
-                                        </button>
-                                    </form>
 
                                     @if(auth()->id() !== $user->id)
                                         <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline">

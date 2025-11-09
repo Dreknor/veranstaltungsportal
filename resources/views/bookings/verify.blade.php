@@ -1,27 +1,5 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buchung verifizieren</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="text-2xl font-bold text-blue-600">EventPortal</a>
-                </div>
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('events.index') }}" class="text-gray-700 hover:text-gray-900">Events</a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
+<x-layouts.public :title="'Buchung ' . $booking->booking_number">
+<!-- Main Content -->
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-md w-full">
             <div class="bg-white rounded-lg shadow-lg p-8">
@@ -78,6 +56,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
-
+</x-layouts.public>

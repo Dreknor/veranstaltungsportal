@@ -49,7 +49,7 @@
                             <div>
                                 <label for="waitlist_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
                                 <input type="text" name="name" id="waitlist_name" required
-                                       value="{{ auth()->user()->fullName() ?? old('name') }}"
+                                       value="{{ auth()->check() ? auth()->user()->fullName() : old('name') }}"
                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
                                 @error('name')
                                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -59,7 +59,7 @@
                             <div>
                                 <label for="waitlist_email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-Mail *</label>
                                 <input type="email" name="email" id="waitlist_email" required
-                                       value="{{ auth()->user()->email ?? old('email') }}"
+                                       value="{{ auth()->check() ? auth()->user()->email : old('email') }}"
                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
                                 @error('email')
                                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
@@ -69,7 +69,7 @@
                             <div>
                                 <label for="waitlist_phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefon</label>
                                 <input type="tel" name="phone" id="waitlist_phone"
-                                       value="{{ auth()->user()->phone ?? old('phone') }}"
+                                       value="{{ auth()->check() ? auth()->user()->phone : old('phone') }}"
                                        class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
                             </div>
 

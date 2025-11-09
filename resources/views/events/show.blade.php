@@ -21,7 +21,14 @@
                               style="background-color: {{ $event->category->color }}; color: white;">
                             {{ $event->category->name }}
                         </span>
-                        @if($event->is_featured)
+                        @if($event->is_cancelled)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500 text-white">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Abgesagt
+                            </span>
+                        @elseif($event->is_featured)
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-500 text-white">
                                 Featured
                             </span>
@@ -40,6 +47,31 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Hauptinhalt -->
                 <div class="lg:col-span-2 space-y-6">
+                    @if($event->is_cancelled)
+                        <!-- Absage-Hinweis -->
+                        <div class="bg-red-50 border-2 border-red-500 rounded-lg p-6">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-red-900 mb-2">Diese Veranstaltung wurde abgesagt</h3>
+                                    <p class="text-red-800">
+                                        Diese Veranstaltung findet nicht wie geplant statt.
+                                        @if($event->cancellation_reason)
+                                            <br><strong>Grund:</strong> {{ $event->cancellation_reason }}
+                                        @endif
+                                    </p>
+                                    <p class="text-sm text-red-700 mt-2">
+                                        Abgesagt am: {{ $event->cancelled_at->format('d.m.Y H:i') }} Uhr
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Event Details -->
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-2xl font-bold text-gray-900 mb-4">Über die Veranstaltung</h2>
@@ -247,57 +279,77 @@
                 <div class="space-y-6">
                     <!-- Buchungs-Box -->
                     <div class="bg-white rounded-lg shadow-lg p-6 border-2 border-blue-500 sticky top-4">
-                        <div class="text-center mb-4">
-                            @if($event->price_from && $event->price_from > 0)
-                                <div class="text-sm text-gray-600">Ab</div>
-                                <div class="text-4xl font-bold text-blue-600">{{ number_format($event->price_from, 2, ',', '.') }} €</div>
-                                <div class="text-sm text-gray-600">pro Person</div>
-                            @else
-                                <div class="text-3xl font-bold text-green-600">Kostenlos</div>
-                            @endif
-                        </div>
-
-                        @if($event->hasAvailableTickets())
-                            <a href="{{ route('bookings.create', $event) }}"
-                               class="block w-full text-center px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-bold text-lg shadow-md hover:shadow-lg">
-                                <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                        @if($event->is_cancelled)
+                            <!-- Abgesagt-Meldung -->
+                            <div class="text-center p-6 bg-red-50 border border-red-200 rounded-lg">
+                                <svg class="w-16 h-16 mx-auto text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Jetzt buchen
-                            </a>
-
-                            @if($event->ticketTypes->count() > 0)
-                                <div class="mt-4 pt-4 border-t">
-                                    <div class="text-sm font-medium text-gray-700 mb-2">Verfügbare Tickets:</div>
-                                    <div class="space-y-2">
-                                        @foreach($event->ticketTypes->where('is_available', true) as $ticket)
-                                            <div class="flex justify-between text-sm">
-                                                <span class="text-gray-600">{{ $ticket->name }}</span>
-                                                <span class="font-medium text-gray-900">{{ number_format($ticket->price, 2, ',', '.') }} €</span>
-                                            </div>
-                                        @endforeach
+                                <p class="font-bold text-red-900 text-lg mb-2">Event wurde abgesagt</p>
+                                <p class="text-sm text-red-700">Diese Veranstaltung findet nicht statt.</p>
+                                @if($event->cancellation_reason)
+                                    <div class="mt-3 pt-3 border-t border-red-200">
+                                        <p class="text-sm text-red-700 font-medium mb-1">Grund:</p>
+                                        <p class="text-sm text-red-600">{{ $event->cancellation_reason }}</p>
                                     </div>
-                                </div>
-                            @endif
-
-                            @if($event->max_attendees)
-                                <div class="mt-4 text-center">
-                                    <div class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-                                        </svg>
-                                        Noch {{ $event->availableTickets() }} Plätze frei
-                                    </div>
-                                </div>
-                            @endif
-                        @else
-                            <div class="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
-                                <svg class="w-12 h-12 mx-auto text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <p class="font-medium text-red-900">Ausgebucht</p>
-                                <p class="text-sm text-red-700 mt-1">Keine Tickets mehr verfügbar</p>
+                                @endif
                             </div>
+                        @else
+                            <div class="text-center mb-4">
+                                @php
+                                    $minPrice = $event->getMinimumPrice();
+                                @endphp
+                                @if($minPrice && $minPrice > 0)
+                                    <div class="text-sm text-gray-600">Ab</div>
+                                    <div class="text-4xl font-bold text-blue-600">{{ number_format($minPrice, 2, ',', '.') }} €</div>
+                                    <div class="text-sm text-gray-600">pro Person</div>
+                                @else
+                                    <div class="text-3xl font-bold text-green-600">Kostenlos</div>
+                                @endif
+                            </div>
+
+                            @if($event->hasAvailableTickets())
+                                <a href="{{ route('bookings.create', $event) }}"
+                                   class="block w-full text-center px-6 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-bold text-lg shadow-md hover:shadow-lg">
+                                    <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path>
+                                    </svg>
+                                    Jetzt buchen
+                                </a>
+
+                                @if($event->ticketTypes->count() > 0)
+                                    <div class="mt-4 pt-4 border-t">
+                                        <div class="text-sm font-medium text-gray-700 mb-2">Verfügbare Tickets:</div>
+                                        <div class="space-y-2">
+                                            @foreach($event->ticketTypes->where('is_available', true) as $ticket)
+                                                <div class="flex justify-between text-sm">
+                                                    <span class="text-gray-600">{{ $ticket->name }}</span>
+                                                    <span class="font-medium text-gray-900">{{ number_format($ticket->price, 2, ',', '.') }} €</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if($event->max_attendees)
+                                    <div class="mt-4 text-center">
+                                        <div class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                                            </svg>
+                                            Noch {{ $event->availableTickets() }} Plätze frei
+                                        </div>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
+                                    <svg class="w-12 h-12 mx-auto text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-medium text-red-900">Ausgebucht</p>
+                                    <p class="text-sm text-red-700 mt-1">Keine Tickets mehr verfügbar</p>
+                                </div>
+                            @endif
                         @endif
 
                         @auth

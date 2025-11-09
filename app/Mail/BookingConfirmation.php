@@ -30,7 +30,7 @@ class BookingConfirmation extends Mailable
     public function attachments(): array
     {
         $invoiceService = app(InvoiceService::class);
-        $invoiceNumber = $invoiceService->generateInvoiceNumber($this->booking);
+        $invoiceNumber = $invoiceService->generateInvoiceNumber('TN');
 
         $attachments = [
             // Rechnung anhängen (immer)

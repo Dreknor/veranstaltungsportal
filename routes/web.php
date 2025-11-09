@@ -91,6 +91,10 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::put('/events/{event}', [Organizer\EventManagementController::class, 'update'])->name('events.update');
     Route::delete('/events/{event}', [Organizer\EventManagementController::class, 'destroy'])->name('events.destroy');
     Route::post('/events/{event}/duplicate', [Organizer\EventManagementController::class, 'duplicate'])->name('events.duplicate');
+    Route::post('/events/{event}/cancel', [Organizer\EventManagementController::class, 'cancel'])->name('events.cancel');
+    Route::get('/events/{event}/attendees/download', [Organizer\EventManagementController::class, 'downloadAttendees'])->name('events.attendees.download');
+    Route::get('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendeesForm'])->name('events.attendees.contact');
+    Route::post('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendees'])->name('events.attendees.contact.send');
 
     // Ticket Type Management
     Route::get('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'index'])->name('events.ticket-types.index');
@@ -146,6 +150,26 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::delete('/series/{series}', [Organizer\SeriesController::class, 'destroy'])->name('series.destroy');
     Route::post('/series/{series}/regenerate', [Organizer\SeriesController::class, 'regenerate'])->name('series.regenerate');
     Route::post('/series/{series}/add-event', [Organizer\SeriesController::class, 'addEvent'])->name('series.add-event');
+
+    // Bank Account & Billing Data
+    Route::get('/bank-account', [Organizer\BankAccountController::class, 'index'])->name('bank-account.index');
+    Route::put('/bank-account', [Organizer\BankAccountController::class, 'update'])->name('bank-account.update');
+    Route::get('/bank-account/billing-data', [Organizer\BankAccountController::class, 'billingData'])->name('bank-account.billing-data');
+    Route::put('/bank-account/billing-data', [Organizer\BankAccountController::class, 'updateBillingData'])->name('bank-account.billing-data.update');
+
+    // Invoice Management (Platform-Fee Rechnungen)
+    Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}', [Organizer\InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/download', [Organizer\InvoiceController::class, 'download'])->name('invoices.download');
+    Route::get('/invoices/export', [Organizer\InvoiceController::class, 'export'])->name('invoices.export');
+    Route::get('/platform-fees', [Organizer\InvoiceController::class, 'platformFees'])->name('invoices.platform-fees');
+
+    // Review Management
+    Route::get('/reviews', [Organizer\ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/{review}/moderate', [Organizer\ReviewController::class, 'moderate'])->name('reviews.moderate');
+    Route::patch('/reviews/{review}/approve', [Organizer\ReviewController::class, 'approve'])->name('reviews.approve');
+    Route::patch('/reviews/{review}/reject', [Organizer\ReviewController::class, 'reject'])->name('reviews.reject');
+    Route::delete('/reviews/{review}', [Organizer\ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -201,6 +225,35 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'store'])->name('settings.store');
     Route::delete('/settings/{setting}', [\App\Http\Controllers\Admin\SettingsController::class, 'destroy'])->name('settings.destroy');
     Route::post('/settings/initialize', [\App\Http\Controllers\Admin\SettingsController::class, 'initializeDefaults'])->name('settings.initialize');
+
+    // Monetization Settings (Admin Only)
+    Route::get('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'index'])->name('monetization.index');
+    Route::put('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'update'])->name('monetization.update');
+    Route::get('/monetization/billing-data', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'billingData'])->name('monetization.billing-data');
+    Route::put('/monetization/billing-data', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'updateBillingData'])->name('monetization.billing-data.update');
+
+    // Individual Organizer Fees
+    Route::get('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'edit'])->name('organizer-fees.edit');
+    Route::put('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'update'])->name('organizer-fees.update');
+    Route::delete('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'destroy'])->name('organizer-fees.destroy');
+
+    // Invoice Management
+    Route::get('/invoices', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/export', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'export'])->name('invoices.export');
+    Route::get('/invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'download'])->name('invoices.download');
+    Route::patch('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'markAsPaid'])->name('invoices.mark-paid');
+    Route::patch('/invoices/{invoice}/mark-overdue', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'markAsOverdue'])->name('invoices.mark-overdue');
+    Route::post('/invoices/{invoice}/resend', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'resend'])->name('invoices.resend');
+    Route::delete('/invoices/{invoice}', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'destroy'])->name('invoices.destroy');
+
+    // Review Management
+    Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'index'])->name('reviews.index');
+    Route::patch('/reviews/{review}/approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'approve'])->name('reviews.approve');
+    Route::patch('/reviews/{review}/reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'reject'])->name('reviews.reject');
+    Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'destroy'])->name('reviews.destroy');
+    Route::post('/reviews/bulk-approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'bulkApprove'])->name('reviews.bulk-approve');
+    Route::post('/reviews/bulk-reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'bulkReject'])->name('reviews.bulk-reject');
 });
 
 require __DIR__.'/auth.php';

@@ -36,8 +36,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="flex items-center">
-                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ config('app.name') }}</span>
+                    <a href="/" class="flex items-center gap-2">
+                        <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            {{ config('app.name') }}
+                        </span>
                     </a>
                 </div>
                 <div class="flex items-center space-x-4">

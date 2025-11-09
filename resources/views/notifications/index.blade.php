@@ -47,6 +47,12 @@
                                         <p class="text-sm text-gray-600 mt-1">
                                             {{ $notification->data['message'] ?? '' }}
                                         </p>
+                                        @if($notification->data['url'] ?? false)
+                                            <a href="{{ $notification->data['url'] }}" class="text-blue-600 hover:text-blue-800 text-sm mt-2 inline-block">
+                                                Mehr erfahren
+                                            </a>
+
+                                        @endif
                                         <p class="text-xs text-gray-500 mt-2">
                                             {{ $notification->created_at->diffForHumans() }}
                                         </p>

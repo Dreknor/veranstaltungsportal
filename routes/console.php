@@ -20,6 +20,18 @@ Schedule::command('events:send-reminders --hours=3')
     ->timezone('Europe/Berlin')
     ->description('Send last-minute event reminders');
 
+// Clean expired waitlist entries every hour
+Schedule::command('waitlist:clean-expired')
+    ->hourly()
+    ->timezone('Europe/Berlin')
+    ->description('Mark expired waitlist entries as expired');
+
+// Automatische Rechnungserstellung für beendete Events
+Schedule::command('invoices:generate-event-invoices')
+    ->dailyAt('03:00')
+    ->timezone('Europe/Berlin')
+    ->description('Generate platform fee invoices for ended events');
+
 // Cleanup old notifications weekly
 Schedule::command('notifications:cleanup --days=30')
     ->weekly()

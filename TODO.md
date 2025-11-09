@@ -99,6 +99,40 @@
 - [x] **Email-Anhänge für Tickets und Rechnungen**
 - [x] **User Dashboard (DashboardController)**
 - [x] **Favorites System (FavoriteController, Migration, Views)**
+- [x] **Event Lifecycle Simulation Command**
+  - [x] Kompletter Veranstaltungsablauf simulierbar
+  - [x] Automatische Erstellung von Event, Tickets, Buchungen
+  - [x] Zahlungsbestätigung und E-Mail-Versand
+  - [x] Event-Erinnerungen
+  - [x] Abrechnung nach Event-Ende
+  - [x] Benachrichtigungen an Veranstalter (Neue Buchung, Zahlung)
+  - [x] **Production-Schutz** - Befehl nicht in Production ausführbar
+  - [x] **E-Mail-Versand für Platform-Fee Rechnungen**
+  - [x] Dokumentation erstellt (docs/SIMULATE_EVENT_LIFECYCLE.md)
+  - [x] Option für vorhandenen Veranstalter (--user=ID)
+  - [x] Option für vorhandenen Teilnehmer (--participant=ID)
+  - [x] **Monetarisierungs-Abrechnung für Organizer**
+    - [x] InvoiceController für Organizer erstellt
+    - [x] Rechnungsübersicht mit Filterung
+    - [x] Platform-Fee Übersicht
+    - [x] PDF-Download
+    - [x] CSV-Export
+    - [x] E-Mail-Versand der Rechnungen
+    - [x] **Automatische Rechnungserstellung nach Event-Ende**
+    - [x] **Täglicher Scheduler (03:00 Uhr)**
+    - [x] **CC an Buchhaltung beim E-Mail-Versand**
+    - [x] **Admin-Übersicht über alle Rechnungen**
+    - [x] Nutzt bestehende Controller-Funktionen
+    - [x] Integration in Simulation
+  - [x] Alle Bugfixes implementiert (siehe CHANGELOG_BUGFIXES.md)
+    - [x] event_type SQL-Fehler behoben
+    - [x] InvoiceService::generateInvoiceNumber() public gemacht
+    - [x] InvoiceService::getInvoiceOutput() Methode hinzugefügt
+    - [x] BookingConfirmation Parameter-Fix
+    - [x] booking-pdf.blade.php Template erstellt
+    - [x] Carbon TypeError behoben (refresh, null-checks, copy, integer-cast)
+    - [x] Platform-Fee PDF Template erstellt
+    - [x] E-Mail-Versand Config-basiert gelöst
 - [x] **Booking History, Upcoming & Past Events Views**
 
 ## 🔄 In Arbeit / Fehlend
@@ -219,6 +253,18 @@
   - [x] Toggle aktiv/inaktiv
   - [x] Code Generator
 - [x] Event Reviews Management (über EventReviewController)
+- [x] **Review-Moderation & Freigabe**
+  - [x] Admin ReviewManagementController
+  - [x] Organizer ReviewController
+  - [x] Review Freigabe/Ablehnung
+  - [x] Bulk-Aktionen für Admins
+  - [x] NewReviewNotification für Veranstalter
+  - [x] E-Mail-Benachrichtigung bei neuer Review
+  - [x] In-App Benachrichtigung
+  - [x] Admin Review Management View
+  - [x] Organizer Review Management View
+  - [x] Filter & Suche
+  - [x] Statistiken (Gesamt, Pending, Approved, Ø Rating)
 - [x] Check-In System (QR-Code Scanning)
   - [x] Check-In Funktion in BookingManagementController
 - [x] **Organizer Profile Management**

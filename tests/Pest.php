@@ -13,7 +13,7 @@
 
 pest()->extend(Tests\TestCase::class)
     ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature', 'Unit');
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +30,11 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
+expect()->extend('toBeWithinRange', function (int $min, int $max) {
+    return $this->toBeGreaterThanOrEqual($min)
+        ->toBeLessThanOrEqual($max);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -41,7 +46,30 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function createUser(array $attributes = []): \App\Models\User
 {
-    // ..
+    return \App\Models\User::factory()->create($attributes);
+}
+
+function createEvent(array $attributes = []): \App\Models\Event
+{
+    return \App\Models\Event::factory()->create($attributes);
+}
+
+function createBooking(array $attributes = []): \App\Models\Booking
+{
+    return \App\Models\Booking::factory()->create($attributes);
+}
+
+function createOrganizer(array $attributes = []): \App\Models\User
+{
+    return \App\Models\User::factory()->create(array_merge(['user_type' => 'organizer'], $attributes));
+}
+
+function createAdmin(array $attributes = []): \App\Models\User
+{
+    $admin = \App\Models\User::factory()->create($attributes);
+    $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin']);
+    $admin->assignRole($role);
+    return $admin;
 }

@@ -1,0 +1,181 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Event;
+use App\Models\User;
+use App\Models\EventCategory;
+use App\Models\TicketType;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class EventManagementTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    public function authenticated_organizer_can_view_event_create_page()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+
+        $response = $this->actingAs($organizer)->get(route('organizer.events.create'));
+
+        $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function authenticated_organizer_can_create_event()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $category = EventCategory::factory()->create();
+
+        $eventData = [
+            'title' => 'Test Event',
+            'description' => 'This is a test event',
+            'event_type' => 'physical',
+            'event_category_id' => $category->id,
+            'start_date' => now()->addWeek()->format('Y-m-d H:i:s'),
+            'end_date' => now()->addWeek()->addHours(2)->format('Y-m-d H:i:s'),
+            'venue_name' => 'Test Venue',
+            'venue_address' => 'Test Address',
+            'venue_city' => 'Berlin',
+            'venue_postal_code' => '10115',
+            'venue_country' => 'Germany',
+            'max_attendees' => 100,
+            'is_published' => true,
+        ];
+
+        $response = $this->actingAs($organizer)->post(route('organizer.events.store'), $eventData);
+
+        $this->assertDatabaseHas('events', [
+            'title' => 'Test Event',
+            'user_id' => $organizer->id,
+        ]);
+    }
+
+    /** @test */
+    public function authenticated_organizer_can_view_their_events()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        Event::factory()->count(3)->create(['user_id' => $organizer->id]);
+
+        $response = $this->actingAs($organizer)->get(route('organizer.events.index'));
+
+        $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function authenticated_organizer_can_edit_their_event()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer->id]);
+
+        $response = $this->actingAs($organizer)->get(route('organizer.events.edit', $event));
+
+        $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function authenticated_organizer_can_update_their_event()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer->id]);
+
+        $updateData = [
+            'title' => 'Updated Event Title',
+            'description' => $event->description,
+            'event_type' => $event->event_type,
+            'event_category_id' => $event->event_category_id,
+            'start_date' => $event->start_date->format('Y-m-d H:i:s'),
+            'end_date' => $event->end_date->format('Y-m-d H:i:s'),
+            'venue_name' => $event->venue_name,
+            'venue_city' => $event->venue_city,
+            'is_published' => $event->is_published,
+        ];
+
+        $response = $this->actingAs($organizer)->put(route('organizer.events.update', $event), $updateData);
+
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'title' => 'Updated Event Title',
+        ]);
+    }
+
+    /** @test */
+    public function authenticated_organizer_can_delete_their_event()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer->id]);
+
+        $response = $this->actingAs($organizer)->delete(route('organizer.events.destroy', $event));
+
+        $this->assertSoftDeleted('events', ['id' => $event->id]);
+    }
+
+    /** @test */
+    public function organizer_cannot_edit_other_organizers_events()
+    {
+        $organizer1 = User::factory()->create(['user_type' => 'organizer']);
+        $organizer2 = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer2->id]);
+
+        $response = $this->actingAs($organizer1)->get(route('organizer.events.edit', $event));
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function guests_can_view_published_events()
+    {
+        $event = Event::factory()->create([
+            'is_published' => true,
+            'start_date' => now()->addWeek(),
+        ]);
+
+        $response = $this->get(route('events.show', $event));
+
+        $response->assertStatus(200)
+            ->assertSee($event->title);
+    }
+
+    /** @test */
+    public function guests_cannot_view_unpublished_events()
+    {
+        $event = Event::factory()->create(['is_published' => false]);
+
+        $response = $this->get(route('events.show', $event));
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function events_list_shows_only_published_events()
+    {
+        Event::factory()->count(3)->create(['is_published' => true]);
+        Event::factory()->count(2)->create(['is_published' => false]);
+
+        $response = $this->get(route('events.index'));
+
+        $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function organizer_can_cancel_event_with_reason()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create([
+            'user_id' => $organizer->id,
+            'is_cancelled' => false,
+        ]);
+
+        $response = $this->actingAs($organizer)->post(route('organizer.events.cancel', $event), [
+            'cancellation_reason' => 'Weather conditions',
+        ]);
+
+        $this->assertDatabaseHas('events', [
+            'id' => $event->id,
+            'is_cancelled' => true,
+            'cancellation_reason' => 'Weather conditions',
+        ]);
+    }
+}

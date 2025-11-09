@@ -101,7 +101,7 @@
                                     <p class="text-xs text-gray-500 dark:text-gray-400">{{ $user->email }}</p>
                                 </div>
                                 <div class="text-right">
-                                    @if($user->is_organizer)
+                                    @if($user->hasRole('organizer'))
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                             Veranstalter
                                         </span>

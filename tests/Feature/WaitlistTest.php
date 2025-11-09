@@ -1,0 +1,121 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\User;
+use App\Models\Event;
+use App\Models\EventWaitlist;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class WaitlistTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /** @test */
+    public function user_can_join_waitlist_for_sold_out_event()
+    {
+        $user = User::factory()->create();
+        $event = Event::factory()->create([
+            'is_published' => true,
+            'max_attendees' => 10,
+        ]);
+
+        // Fill all available tickets
+        $booking = \App\Models\Booking::factory()->create([
+            'event_id' => $event->id,
+            'status' => 'confirmed',
+        ]);
+        $booking->items()->create(['quantity' => 10, 'price' => 50]);
+
+        $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
+            'email' => $user->email,
+            'quantity' => 1,
+        ]);
+
+        $this->assertDatabaseHas('event_waitlists', [
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+        ]);
+    }
+
+    /** @test */
+    public function user_cannot_join_waitlist_for_available_event()
+    {
+        $user = User::factory()->create();
+        $event = Event::factory()->create([
+            'is_published' => true,
+            'max_attendees' => 100,
+        ]);
+
+        $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
+            'email' => $user->email,
+            'quantity' => 1,
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    /** @test */
+    public function user_can_leave_waitlist()
+    {
+        $user = User::factory()->create();
+        $event = Event::factory()->create();
+
+        $waitlist = EventWaitlist::create([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'quantity' => 1,
+        ]);
+
+        $response = $this->actingAs($user)->delete(route('events.waitlist.leave', [$event, $waitlist]));
+
+        $this->assertDatabaseMissing('event_waitlists', [
+            'id' => $waitlist->id,
+        ]);
+    }
+
+    /** @test */
+    public function organizer_can_view_waitlist_for_their_event()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer->id]);
+
+        EventWaitlist::factory()->count(5)->create(['event_id' => $event->id]);
+
+        $response = $this->actingAs($organizer)->get(route('organizer.events.waitlist', $event));
+
+        $response->assertStatus(200);
+    }
+
+    /** @test */
+    public function user_cannot_join_waitlist_twice()
+    {
+        $user = User::factory()->create();
+        $event = Event::factory()->create(['max_attendees' => 1]);
+
+        // Fill event
+        $booking = \App\Models\Booking::factory()->create([
+            'event_id' => $event->id,
+            'status' => 'confirmed',
+        ]);
+        $booking->items()->create(['quantity' => 1, 'price' => 50]);
+
+        // Join waitlist first time
+        EventWaitlist::create([
+            'event_id' => $event->id,
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'quantity' => 1,
+        ]);
+
+        // Try to join again
+        $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
+            'email' => $user->email,
+            'quantity' => 1,
+        ]);
+
+        $response->assertSessionHasErrors();
+    }
+}

@@ -5,8 +5,89 @@
                 <a href="{{ route('organizer.events.index') }}" class="text-blue-600 hover:text-blue-800 mb-4 inline-flex items-center">
                     ← Zurück zur Übersicht
                 </a>
-                <h1 class="text-3xl font-bold text-gray-900 mt-4">Event bearbeiten</h1>
+                <div class="flex items-center justify-between mt-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Event bearbeiten</h1>
+                        @if($event->is_cancelled)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500 text-white mt-2">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                ABGESAGT
+                            </span>
+                        @endif
+                    </div>
+                </div>
             </div>
+
+            @if($event->is_cancelled)
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-medium text-red-900">Dieses Event wurde abgesagt</p>
+                            <p class="text-sm text-red-700 mt-1">Abgesagt am: {{ $event->cancelled_at->format('d.m.Y H:i') }} Uhr</p>
+                            @if($event->cancellation_reason)
+                                <p class="text-sm text-red-700 mt-1"><strong>Grund:</strong> {{ $event->cancellation_reason }}</p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Teilnehmer-Management -->
+            @if($event->hasAttendees())
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Teilnehmer-Management</h2>
+
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                            </svg>
+                            <span class="text-gray-700 font-medium">{{ $event->getAttendeesCount() }} bestätigte Teilnehmer</span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('organizer.events.attendees.download', $event) }}"
+                           class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Teilnehmerliste herunterladen
+                        </a>
+
+                        <a href="{{ route('organizer.events.attendees.contact', $event) }}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Teilnehmer kontaktieren
+                        </a>
+
+                        <a href="{{ route('organizer.events.waitlist.index', $event) }}"
+                           class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Warteliste verwalten
+                            @php
+                                $waitlistCount = \App\Models\EventWaitlist::where('event_id', $event->id)
+                                    ->where('status', 'waiting')
+                                    ->count();
+                            @endphp
+                            @if($waitlistCount > 0)
+                                <span class="ml-2 px-2 py-0.5 bg-yellow-800 text-white rounded-full text-xs font-semibold">
+                                    {{ $waitlistCount }}
+                                </span>
+                            @endif
+                        </a>
+                    </div>
+                </div>
+            @endif
 
             @if(session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">

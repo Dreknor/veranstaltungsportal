@@ -38,7 +38,15 @@ class WaitlistController extends Controller
         $waitlistEntry = EventWaitlist::create($validated);
 
         // Send confirmation email
-        // Mail::to($validated['email'])->send(new WaitlistConfirmation($waitlistEntry));
+        Mail::to($validated['email'])->send(new \App\Mail\WaitlistConfirmation($waitlistEntry));
+
+        // Notify organizer
+        if ($event->user) {
+            $notificationPreferences = $event->user->notification_preferences ?? [];
+            if (is_array($notificationPreferences) && ($notificationPreferences['waitlist_notifications'] ?? true)) {
+                $event->user->notify(new \App\Notifications\NewWaitlistEntryNotification($waitlistEntry));
+            }
+        }
 
         return back()->with('success', 'Sie wurden erfolgreich zur Warteliste hinzugefügt. Wir benachrichtigen Sie, sobald Tickets verfügbar sind.');
     }

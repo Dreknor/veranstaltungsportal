@@ -18,6 +18,12 @@ class BookingController extends Controller
 {
     public function create(Event $event)
     {
+        // Check if event is cancelled
+        if ($event->is_cancelled) {
+            return redirect()->route('events.show', $event->slug)
+                ->with('error', 'Diese Veranstaltung wurde abgesagt und kann nicht mehr gebucht werden.');
+        }
+
         // Check if event is part of a series - redirect to series booking
         if ($event->isPartOfSeries()) {
             return redirect()->route('series.show', $event->series_id)
@@ -87,6 +93,12 @@ class BookingController extends Controller
 
     public function store(Request $request, Event $event)
     {
+        // Check if event is cancelled
+        if ($event->is_cancelled) {
+            return redirect()->route('events.show', $event->slug)
+                ->with('error', 'Diese Veranstaltung wurde abgesagt und kann nicht mehr gebucht werden.');
+        }
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
@@ -169,6 +181,15 @@ class BookingController extends Controller
                 // Prüfe ob mindestens ein Ticket ausgewählt wurde
                 if (empty($ticketData)) {
                     throw new \Exception("Bitte wählen Sie mindestens ein Ticket aus.");
+                }
+
+                // Prüfe die Gesamtanzahl gegen max_attendees der Veranstaltung
+                $totalQuantity = array_sum(array_column($ticketData, 'quantity'));
+                if ($event->max_attendees) {
+                    $availableSlots = $event->availableTickets();
+                    if ($totalQuantity > $availableSlots) {
+                        throw new \Exception("Nicht genügend Plätze verfügbar. Noch {$availableSlots} von {$event->max_attendees} Plätzen frei.");
+                    }
                 }
 
                 // Rabattcode prüfen
@@ -257,6 +278,18 @@ class BookingController extends Controller
                     $notificationPreferences = $event->user->notification_preferences ?? [];
                     if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
                         $event->user->notify(new \App\Notifications\NewBookingNotification($booking));
+                    }
+                }
+
+                // Mark waitlist entry as converted if user came from waitlist
+                if (auth()->check() || $booking->customer_email) {
+                    $waitlistEntry = \App\Models\EventWaitlist::where('event_id', $event->id)
+                        ->where('email', $booking->customer_email)
+                        ->where('status', 'notified')
+                        ->first();
+
+                    if ($waitlistEntry) {
+                        $waitlistEntry->markAsConverted();
                     }
                 }
 
@@ -363,6 +396,9 @@ class BookingController extends Controller
                 $booking->event->user->notify(new \App\Notifications\BookingCancelledNotification($booking));
             }
         }
+
+        // Notify waitlist - Fallback if observer doesn't trigger
+        $this->notifyWaitlist($booking);
 
         return back()->with('success', 'Buchung erfolgreich storniert.');
     }
@@ -526,5 +562,61 @@ class BookingController extends Controller
 
         return redirect()->route('bookings.show', $booking->booking_number)
             ->with('success', 'E-Mail-Adresse erfolgreich verifiziert! Sie können nun auf Ihre Buchungsdetails zugreifen.');
+    }
+
+    /**
+     * Notify waitlist when booking is cancelled
+     */
+    protected function notifyWaitlist(Booking $booking)
+    {
+        $event = $booking->event;
+
+        // Calculate freed tickets
+        $freedTickets = $booking->items->sum('quantity');
+
+        if ($freedTickets > 0) {
+            // Find waiting entries that could fit
+            $waitingEntries = \App\Models\EventWaitlist::where('event_id', $event->id)
+                ->waiting()
+                ->notExpired()
+                ->where('quantity', '<=', $freedTickets)
+                ->orderBy('created_at')
+                ->limit(5)
+                ->get();
+
+            $remainingTickets = $freedTickets;
+            $notifiedCount = 0;
+
+            foreach ($waitingEntries as $entry) {
+                if ($remainingTickets >= $entry->quantity) {
+                    $entry->markAsNotified();
+
+                    // Send notification
+                    try {
+                        Mail::to($entry->email)->send(new \App\Mail\WaitlistTicketAvailable($entry));
+                        $remainingTickets -= $entry->quantity;
+                        $notifiedCount++;
+                    } catch (\Exception $e) {
+                        Log::error('Failed to send waitlist notification', [
+                            'waitlist_id' => $entry->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                }
+
+                if ($remainingTickets <= 0) {
+                    break;
+                }
+            }
+
+            if ($notifiedCount > 0) {
+                Log::info("Waitlist notifications sent from BookingController", [
+                    'event_id' => $event->id,
+                    'booking_id' => $booking->id,
+                    'freed_tickets' => $freedTickets,
+                    'notified' => $notifiedCount
+                ]);
+            }
+        }
     }
 }

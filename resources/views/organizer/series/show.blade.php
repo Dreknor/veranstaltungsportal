@@ -78,22 +78,26 @@
                         </div>
 
                         <div class="space-y-3">
-                    @else
-                        <p class="text-gray-500 text-center py-8">Noch keine Termine vorhanden.</p>
-                    @endif
-                    <div class="space-y-3">
                     @foreach($series->events as $event)
-                        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                        <div class="flex items-center justify-between p-4 border rounded-lg {{ $event->is_cancelled ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:bg-gray-50' }} transition">
                             <div class="flex items-center gap-4 flex-1">
                                 <div class="flex-shrink-0">
-                                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
+                                    <div class="w-12 h-12 {{ $event->is_cancelled ? 'bg-red-100' : 'bg-blue-100' }} rounded-lg flex items-center justify-center">
+                                        @if($event->is_cancelled)
+                                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        @else
+                                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="flex-1">
-                                    <div class="font-medium text-gray-900">Termin {{ $event->series_position }}: {{ $event->start_date->format('d.m.Y') }}</div>
+                                    <div class="font-medium {{ $event->is_cancelled ? 'text-red-900 line-through' : 'text-gray-900' }}">
+                                        Termin {{ $event->series_position }}: {{ $event->start_date->format('d.m.Y') }}
+                                    </div>
                                     <div class="text-sm text-gray-500 mt-1">
                                         <span class="inline-flex items-center">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,9 +114,21 @@
                                             </span>
                                         @endif
                                     </div>
+                                    @if($event->is_cancelled && $event->cancellation_reason)
+                                        <div class="text-xs text-red-600 mt-2">
+                                            <strong>Absagegrund:</strong> {{ Str::limit($event->cancellation_reason, 100) }}
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    @if($event->is_published)
+                                    @if($event->is_cancelled)
+                                        <span class="inline-flex items-center rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            Abgesagt
+                                        </span>
+                                    @elseif($event->is_published)
                                         <span class="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
                                             ✓ Veröffentlicht
                                         </span>
@@ -136,7 +152,10 @@
                             </div>
                         </div>
                     @endforeach
-                    </div>
+                        </div>
+                    @else
+                        <p class="text-gray-500 text-center py-8">Noch keine Termine vorhanden.</p>
+                    @endif
                 </div>
             </div>
         </div>

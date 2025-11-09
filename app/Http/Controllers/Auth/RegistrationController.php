@@ -25,17 +25,20 @@ class RegistrationController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'user_type' => ['required', 'in:participant,organizer'],
-            'organization_name' => ['required_if:user_type,organizer', 'nullable', 'string', 'max:255'],
+            'account_type' => ['required', 'in:participant,organizer'],
+            'organization_name' => ['required_if:account_type,organizer', 'nullable', 'string', 'max:255'],
             'organization_description' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $accountType = $validated['account_type'];
+        unset($validated['account_type']);
 
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
 
-        // Assign appropriate role based on user_type
-        if ($user->user_type === 'organizer') {
+        // Assign appropriate role based on account_type
+        if ($accountType === 'organizer') {
             $user->assignRole('organizer');
         } else {
             $user->assignRole('user');

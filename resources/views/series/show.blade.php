@@ -1,4 +1,7 @@
-<x-layouts.app title="{{ $series->title }}">
+@php
+    $layout = auth()->check() ? 'layouts.app' : 'layouts.public';
+@endphp
+<x-dynamic-component :component="$layout" title="{{ $series->title }}">
     <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -74,21 +77,36 @@
 
                 <div class="space-y-3">
                     @foreach($series->events->sortBy('series_position') as $event)
-                        <div class="flex items-center p-4 border border-gray-200 rounded-lg">
+                        <div class="flex items-center p-4 border rounded-lg {{ $event->is_cancelled ? 'border-red-300 bg-red-50' : 'border-gray-200' }}">
                             <div class="flex-shrink-0 w-16 text-center">
-                                <div class="text-2xl font-bold text-blue-600">{{ $event->series_position }}</div>
+                                <div class="text-2xl font-bold {{ $event->is_cancelled ? 'text-red-600' : 'text-blue-600' }}">{{ $event->series_position }}</div>
                                 <div class="text-xs text-gray-500">Termin</div>
                             </div>
                             <div class="flex-1 ml-4">
-                                <div class="font-semibold text-gray-900">
-                                    {{ $event->start_date->format('d.m.Y') }}
+                                <div class="flex items-center gap-2">
+                                    <div class="font-semibold {{ $event->is_cancelled ? 'text-red-900 line-through' : 'text-gray-900' }}">
+                                        {{ $event->start_date->format('d.m.Y') }}
+                                    </div>
+                                    @if($event->is_cancelled)
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                            Abgesagt
+                                        </span>
+                                    @endif
                                 </div>
-                                <div class="text-sm text-gray-600">
+                                <div class="text-sm {{ $event->is_cancelled ? 'text-red-700' : 'text-gray-600' }}">
                                     {{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }} Uhr
                                     ({{ $event->start_date->diffInMinutes($event->end_date) }} Minuten)
                                 </div>
+                                @if($event->is_cancelled && $event->cancellation_reason)
+                                    <div class="text-xs text-red-600 mt-1">
+                                        <strong>Grund:</strong> {{ Str::limit($event->cancellation_reason, 80) }}
+                                    </div>
+                                @endif
                             </div>
-                            <div class="text-gray-500">
+                            <div class="{{ $event->is_cancelled ? 'text-red-400' : 'text-gray-500' }}">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                                 </svg>
@@ -138,5 +156,4 @@
 
         </div>
     </div>
-</x-layouts.app>
-
+</x-dynamic-component>

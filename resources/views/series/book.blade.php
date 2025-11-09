@@ -1,5 +1,7 @@
-<x-layouts.app title="Veranstaltungsreihe buchen - {{ $series->title }}">
-    <div class="min-h-screen bg-gray-50 py-8">
+@php
+    $layout = auth()->check() ? 'layouts.app' : 'layouts.public';
+@endphp
+<x-dynamic-component :component="$layout" title="{{ $series->title }}">    <div class="min-h-screen bg-gray-50 py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
             <!-- Header -->

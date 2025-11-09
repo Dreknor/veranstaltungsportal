@@ -15,16 +15,15 @@
                 <div class="flex items-center">
                     <a href="/" class="flex items-center gap-2">
                         <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            📚 Bildungsportal
+                            {{ config('app.name') }}
                         </span>
-                        <span class="hidden md:inline text-sm text-gray-600">Fort- & Weiterbildung</span>
                     </a>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('events.index') }}" class="text-gray-700 hover:text-blue-600 transition">Veranstaltungen</a>
                     <a href="{{ route('events.calendar') }}" class="text-gray-700 hover:text-blue-600 transition">Kalender</a>
                     @auth
-                        @if(auth()->user()->is_organizer)
+                        @if(auth()->user()->hasRole('organizer'))
                             <a href="{{ route('organizer.dashboard') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
                         @endif
                         <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
@@ -190,7 +189,7 @@
                                         {{ $event->location ?? $event->venue_city }}
                                     </div>
                                     @php
-                                        $minPrice = $event->ticketTypes()->min('price');
+                                        $minPrice = $event->getMinimumPrice();
                                     @endphp
                                     @if($minPrice)
                                         <div class="flex items-center text-sm text-gray-700">
@@ -326,7 +325,7 @@
                         Als Veranstalter registrieren
                     </a>
                 @else
-                    @if(auth()->user()->is_organizer)
+                    @if(auth()->user()->hasRole('organizer'))
                         <a href="{{ route('organizer.events.create') }}"
                            class="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 font-semibold shadow-lg hover:shadow-xl transition">
                             Veranstaltung erstellen
