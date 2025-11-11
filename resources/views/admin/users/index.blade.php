@@ -8,7 +8,7 @@
         <!-- Search and Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
             <form action="{{ route('admin.users.index') }}" method="GET" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
                         <input type="text" name="search" id="search" value="{{ request('search') }}"
@@ -22,6 +22,19 @@
                             <option value="">Alle</option>
                             <option value="organizer" {{ request('role') === 'organizer' ? 'selected' : '' }}>Veranstalter</option>
                             <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Administratoren</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="sso_provider" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">SSO-Provider</label>
+                        <select name="sso_provider" id="sso_provider"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">Alle</option>
+                            <option value="none" {{ request('sso_provider') === 'none' ? 'selected' : '' }}>Nur normale Benutzer</option>
+                            @foreach($ssoProviders ?? [] as $provider)
+                                <option value="{{ $provider }}" {{ request('sso_provider') === $provider ? 'selected' : '' }}>
+                                    {{ ucfirst($provider) }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="flex items-end">
@@ -72,7 +85,18 @@
                                         </div>
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
+                                        <div class="flex items-center gap-2">
+                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
+                                            @if($user->isSsoUser())
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                                      title="SSO-Benutzer via {{ $user->ssoProviderName() }}">
+                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    {{ $user->ssoProviderName() }}
+                                                </span>
+                                            @endif
+                                        </div>
                                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
                                     </div>
                                 </div>
@@ -113,12 +137,33 @@
                                         Bearbeiten
                                     </a>
 
-
                                     @if(auth()->id() !== $user->id)
+                                        <!-- Quick Promote/Demote for Organizer -->
+                                        @if(!$user->hasRole('organizer') && !$user->hasRole('admin'))
+                                            <form action="{{ route('admin.users.promote-organizer', $user) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
+                                                        title="Zum Organisator befördern">
+                                                    ↑ Organisator
+                                                </button>
+                                            </form>
+                                        @elseif($user->hasRole('organizer') && !$user->hasRole('admin'))
+                                            <form action="{{ route('admin.users.demote-participant', $user) }}" method="POST" class="inline"
+                                                  onsubmit="return confirm('Organisator-Rechte wirklich entfernen?');">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="text-orange-600 dark:text-orange-400 hover:text-orange-900 dark:hover:text-orange-300"
+                                                        title="Zum Teilnehmer degradieren">
+                                                    ↓ Teilnehmer
+                                                </button>
+                                            </form>
+                                        @endif
+
                                         <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline">
                                             @csrf
                                             <button type="submit" class="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300">
-                                                {{ $user->is_admin ? 'Admin entfernen' : 'Zu Admin' }}
+                                                {{ $user->hasRole('admin') ? 'Admin entfernen' : 'Zu Admin' }}
                                             </button>
                                         </form>
 

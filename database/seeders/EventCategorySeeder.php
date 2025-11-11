@@ -10,6 +10,7 @@ class EventCategorySeeder extends Seeder
 {
     public function run(): void
     {
+
         $categories = [
             [
                 'name' => 'Hauptfach Mensch',
@@ -118,9 +119,14 @@ class EventCategorySeeder extends Seeder
             ],
         ];
 
-        foreach ($categories as $category) {
-            EventCategory::create($category);
+        try {
+            foreach ($categories as $category) {
+                EventCategory::create($category);
+            }
+        } catch (\Exception $e) {
+
         }
+
     }
 }
 

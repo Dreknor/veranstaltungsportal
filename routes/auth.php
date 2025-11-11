@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegistrationController;
+use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\Auth\VerificationController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,14 @@ Route::middleware('guest')->group(function () {
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+
+    // SSO Routes (Generic for multiple providers)
+    Route::get('sso/{provider}', [SsoController::class, 'redirectToProvider'])->name('sso.redirect');
+    Route::get('sso/{provider}/callback', [SsoController::class, 'handleProviderCallback'])->name('sso.callback');
+
+    // Legacy KeyCloak routes for backward compatibility
+    Route::get('sso/keycloak', [SsoController::class, 'redirectToProvider'])->defaults('provider', 'keycloak')->name('sso.keycloak');
+    Route::get('sso/keycloak/callback', [SsoController::class, 'handleProviderCallback'])->defaults('provider', 'keycloak')->name('sso.keycloak.callback');
 });
 
 Route::middleware('auth')->group(function () {

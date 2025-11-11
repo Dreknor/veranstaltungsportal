@@ -34,6 +34,22 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
                     <div class="p-6">
+                        @if($user->isSsoUser())
+                            <!-- SSO User Notice -->
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+                                <div class="flex items-start">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-100">{{ __('SSO-Konto') }}</h3>
+                                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                                            {{ __('Sie sind über') }} <strong>{{ $user->ssoProviderName() }}</strong> {{ __('angemeldet. Passwortänderungen müssen über Ihren SSO-Provider vorgenommen werden.') }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
                         <!-- Profile Form -->
                         <form class="max-w-md mb-10" action="{{ route('settings.password.update') }}" method="POST">
                             @csrf
@@ -54,6 +70,7 @@
                                 <x-button type="primary">{{ __('Update Password') }}</x-button>
                             </div>
                         </form>
+                        @endif
                     </div>
                 </div>
             </div>

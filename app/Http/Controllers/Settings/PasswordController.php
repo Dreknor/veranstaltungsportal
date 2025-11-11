@@ -11,8 +11,14 @@ use Illuminate\View\View;
 
 class PasswordController extends Controller
 {
-    public function edit(Request $request): View
+    public function edit(Request $request): View|RedirectResponse
     {
+        // Redirect SSO users - they cannot change password
+        if ($request->user()->sso_provider) {
+            return redirect()->route('settings.profile.edit')
+                ->with('error', 'SSO-Benutzer können ihr Passwort nicht über diese Anwendung ändern. Bitte verwenden Sie Ihren SSO-Provider (' . ucfirst($request->user()->sso_provider) . ').');
+        }
+
         return view('settings.password', [
             'user' => $request->user(),
         ]);
@@ -20,6 +26,11 @@ class PasswordController extends Controller
 
     public function update(Request $request): RedirectResponse
     {
+        // Prevent SSO users from changing password
+        if ($request->user()->sso_provider) {
+            return back()->with('error', 'SSO-Benutzer können ihr Passwort nicht über diese Anwendung ändern.');
+        }
+
         $validated = $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', Rules\Password::defaults(), 'confirmed'],
