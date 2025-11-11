@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\TicketType;
+use App\Services\EventCostCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -25,7 +26,18 @@ class EventManagementController extends Controller
     public function create()
     {
         $categories = EventCategory::where('is_active', true)->get();
-        return view('organizer.events.create', compact('categories'));
+
+        // Create empty event for cost estimation
+        $event = new Event();
+        $event->max_attendees = 50; // Default
+        $event->price_from = 0;
+        $event->is_featured = false;
+
+        // Calculate initial costs
+        $costCalculationService = app(EventCostCalculationService::class);
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+
+        return view('organizer.events.create', compact('categories', 'publishingCosts'));
     }
 
     public function store(Request $request)
@@ -73,8 +85,40 @@ class EventManagementController extends Controller
 
         $event = Event::create($validated);
 
+        // Create featured event booking if requested
+        if ($request->boolean('is_featured') && $request->filled('featured_duration_type')) {
+            $this->createFeaturedBooking($event, $request);
+        }
+
         return redirect()->route('organizer.events.edit', $event)
             ->with('success', 'Event erfolgreich erstellt!');
+    }
+
+    /**
+     * Create featured event booking
+     */
+    private function createFeaturedBooking(Event $event, Request $request)
+    {
+        $durationType = $request->input('featured_duration_type');
+        $customDays = $request->input('featured_custom_days');
+        $startDate = \Carbon\Carbon::parse($request->input('featured_start_date', now()));
+
+        $featuredService = app(\App\Services\FeaturedEventService::class);
+
+        try {
+            $featuredFee = $featuredService->createFeaturedRequest(
+                $event,
+                auth()->user(),
+                $durationType,
+                $startDate,
+                $durationType === 'custom' ? (int)$customDays : null
+            );
+
+            // Store fee ID in session for redirect to payment
+            session()->put('pending_featured_fee_id', $featuredFee->id);
+        } catch (\Exception $e) {
+            \Log::error('Failed to create featured booking: ' . $e->getMessage());
+        }
     }
 
     public function edit(Event $event)
@@ -84,7 +128,11 @@ class EventManagementController extends Controller
         $categories = EventCategory::where('is_active', true)->get();
         $ticketTypes = $event->ticketTypes;
 
-        return view('organizer.events.edit', compact('event', 'categories', 'ticketTypes'));
+        // Calculate publishing costs
+        $costCalculationService = app(EventCostCalculationService::class);
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+
+        return view('organizer.events.edit', compact('event', 'categories', 'ticketTypes', 'publishingCosts'));
     }
 
     public function update(Request $request, Event $event)
@@ -130,6 +178,14 @@ class EventManagementController extends Controller
         }
 
         $event->update($validated);
+
+        // Create featured event booking if newly requested
+        $wasFeatured = $event->getOriginal('is_featured');
+        $isFeaturedNow = $request->boolean('is_featured');
+
+        if ($isFeaturedNow && !$wasFeatured && $request->filled('featured_duration_type')) {
+            $this->createFeaturedBooking($event, $request);
+        }
 
         return redirect()->route('organizer.events.edit', $event)
             ->with('success', 'Event erfolgreich aktualisiert!');
@@ -368,5 +424,27 @@ class EventManagementController extends Controller
 
         return redirect()->route('organizer.events.edit', $event)
             ->with('success', 'Nachricht wurde an ' . $attendees->count() . ' Teilnehmer gesendet.');
+    }
+
+    /**
+     * Calculate costs for event publishing (AJAX)
+     */
+    public function calculateCosts(Request $request, Event $event)
+    {
+        $this->authorize('update', $event);
+
+        // Temporarily update event with form data (without saving)
+        $event->is_featured = $request->boolean('is_featured');
+        $event->max_attendees = $request->input('max_attendees', $event->max_attendees);
+        $event->price_from = $request->input('price_from', $event->price_from);
+
+        // Calculate costs
+        $costCalculationService = app(EventCostCalculationService::class);
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+
+        return response()->json([
+            'success' => true,
+            'costs' => $publishingCosts,
+        ]);
     }
 }

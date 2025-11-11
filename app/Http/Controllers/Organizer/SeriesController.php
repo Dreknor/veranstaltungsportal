@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EventSeries;
 use App\Models\EventCategory;
 use App\Models\Event;
+use App\Services\EventCostCalculationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -38,7 +39,21 @@ class SeriesController extends Controller
     public function create()
     {
         $categories = EventCategory::where('is_active', true)->get();
-        return view('organizer.series.create', compact('categories'));
+
+        // Create empty event for cost estimation
+        $event = new Event();
+        $event->max_attendees = 50; // Default
+        $event->price_from = 0;
+        $event->is_featured = false;
+
+        // Calculate initial costs (will be multiplied by event count)
+        $costCalculationService = app(EventCostCalculationService::class);
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+
+        // Get platform fee info for display when no specific costs available
+        $platformFeeInfo = $costCalculationService->getPlatformFeeInfo(auth()->user());
+
+        return view('organizer.series.create', compact('categories', 'publishingCosts', 'platformFeeInfo'));
     }
 
     /**
@@ -131,7 +146,22 @@ class SeriesController extends Controller
         $this->authorize('update', $series);
 
         $categories = EventCategory::where('is_active', true)->get();
-        return view('organizer.series.edit', compact('series', 'categories'));
+
+        // Create sample event from series template for cost estimation
+        $event = new Event();
+        $templateData = $series->template_data ?? [];
+        $event->max_attendees = $templateData['max_attendees'] ?? 50;
+        $event->price_from = $templateData['price_from'] ?? 0;
+        $event->is_featured = $templateData['is_featured'] ?? false;
+
+        // Calculate costs per event
+        $costCalculationService = app(EventCostCalculationService::class);
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+
+        // Get platform fee info for display when no specific costs available
+        $platformFeeInfo = $costCalculationService->getPlatformFeeInfo(auth()->user());
+
+        return view('organizer.series.edit', compact('series', 'categories', 'publishingCosts', 'platformFeeInfo'));
     }
 
     /**

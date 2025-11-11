@@ -123,6 +123,21 @@ class Event extends Model implements HasMedia
         return $this->hasMany(DiscountCode::class);
     }
 
+    public function featuredFees(): HasMany
+    {
+        return $this->hasMany(FeaturedEventFee::class);
+    }
+
+    public function activeFeaturedFee()
+    {
+        return $this->featuredFees()
+            ->where('payment_status', 'paid')
+            ->where('featured_start_date', '<=', now())
+            ->where('featured_end_date', '>=', now())
+            ->latest()
+            ->first();
+    }
+
     public function isPartOfSeries(): bool
     {
         return $this->is_series_part && $this->series_id !== null;

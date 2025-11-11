@@ -12,8 +12,10 @@
         @endif
 
         <!-- Icon Container -->
-        <span class="flex items-center justify-center w-5 h-5 transition-transform duration-200"
-              :class="{ 'group-hover:scale-110': !active }">
+        <span @class([
+            'flex items-center justify-center w-5 h-5 transition-transform duration-200',
+            'group-hover:scale-110' => !$active
+        ])>
             @svg($icon, $active ? 'w-5 h-5 text-white' : 'w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400')
         </span>
 

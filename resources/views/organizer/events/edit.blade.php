@@ -92,6 +92,15 @@
             @if(session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
                     {{ session('success') }}
+
+                    @if(session('pending_featured_fee_id'))
+                        <div class="mt-2">
+                            <a href="{{ route('organizer.featured-events.payment', session('pending_featured_fee_id')) }}"
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                → Zur Zahlung der Featured Event Gebühr
+                            </a>
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -347,6 +356,69 @@
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <h2 class="text-xl font-bold text-gray-900 mb-4">Einstellungen</h2>
 
+                    <!-- Cost Overview (shown when about to publish) -->
+                    @if(isset($publishingCosts) && ($publishingCosts['total'] > 0 || !$event->is_published))
+                    <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded" id="cost-overview">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h3 class="text-sm font-medium text-blue-800">Geschätzte Kosten bei Veröffentlichung</h3>
+                                <div class="mt-2 text-sm text-blue-700">
+                                    @if(count($publishingCosts['breakdown']) > 0)
+                                        <div class="space-y-2">
+                                            @foreach($publishingCosts['breakdown'] as $item)
+                                                <div class="flex justify-between items-start">
+                                                    <div class="flex-1">
+                                                        <div class="font-medium">{{ $item['label'] }}</div>
+                                                        @if(isset($item['description']))
+                                                            <div class="text-xs text-blue-600">{{ $item['description'] }}</div>
+                                                        @endif
+                                                        @if(isset($item['status']) && $item['status'] === 'pending')
+                                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">
+                                                                Zahlung ausstehend
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="font-semibold ml-4 whitespace-nowrap">
+                                                        {{ number_format($item['amount'], 2, ',', '.') }} €
+                                                    </div>
+                                                </div>
+                                            @endforeach
+
+                                            <div class="border-t border-blue-200 pt-2 mt-2">
+                                                <div class="flex justify-between items-center">
+                                                    <div class="font-bold text-blue-900">Geschätzte Gesamtkosten (netto):</div>
+                                                    <div class="font-bold text-blue-900 text-lg">
+                                                        {{ number_format($publishingCosts['total'], 2, ',', '.') }} €
+                                                    </div>
+                                                </div>
+                                                <div class="text-xs text-blue-600 mt-1">
+                                                    + {{ number_format($publishingCosts['total'] * 0.19, 2, ',', '.') }} € MwSt. (19%) =
+                                                    {{ number_format($publishingCosts['total'] * 1.19, 2, ',', '.') }} € brutto
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <p>Die Kosten werden nach Event-Ende basierend auf den tatsächlichen Buchungen abgerechnet.</p>
+                                    @endif
+
+                                    <div class="mt-3 text-xs">
+                                        <strong>Hinweis:</strong> Die Plattformgebühren sind Schätzungen basierend auf Ihren Ticket-Einstellungen.
+                                        Die tatsächliche Abrechnung erfolgt nach Event-Ende basierend auf den realen Buchungen.
+                                        @if($publishingCosts['featured_fees']['active'] && $publishingCosts['featured_fees']['total'] > 0)
+                                            Featured Event Gebühren müssen vor der Veröffentlichung bezahlt werden.
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <div class="space-y-4">
                         <div class="flex items-center">
                             <input type="checkbox" id="is_published" name="is_published" value="1"
@@ -361,6 +433,10 @@
                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <label for="is_featured" class="ml-2 text-sm text-gray-700">Als Featured markieren</label>
                         </div>
+
+                        <input type="hidden" id="featured_duration_type" name="featured_duration_type" value="">
+                        <input type="hidden" id="featured_custom_days" name="featured_custom_days" value="">
+                        <input type="hidden" id="featured_start_date" name="featured_start_date" value="">
 
                         <div class="flex items-center">
                             <input type="checkbox" id="is_private" name="is_private" value="1"
@@ -595,6 +671,159 @@
 
         // Initialize on page load
         updateSections();
+
+        // Dynamic cost calculation when featured checkbox changes
+        const featuredCheckbox = document.getElementById('is_featured');
+        const costOverview = document.getElementById('cost-overview');
+
+        if (featuredCheckbox && costOverview) {
+            const wasInitiallyFeatured = featuredCheckbox.checked;
+
+            featuredCheckbox.addEventListener('change', function() {
+                if (this.checked && !wasInitiallyFeatured) {
+                    // Opening modal to book featured
+                    window.dispatchEvent(new CustomEvent('featured-modal-open'));
+                } else if (this.checked) {
+                    // Already featured, just update costs
+                    updateCostEstimate();
+                } else {
+                    // Unchecked, clear booking data and update costs
+                    document.getElementById('featured_duration_type').value = '';
+                    document.getElementById('featured_custom_days').value = '';
+                    document.getElementById('featured_start_date').value = '';
+                    updateCostEstimate();
+                }
+            });
+        }
+
+        // Listen for featured booking confirmation
+        window.addEventListener('featured-booking-confirm', function(e) {
+            const { durationType, customDays, startDate } = e.detail;
+
+            // Store in hidden fields
+            document.getElementById('featured_duration_type').value = durationType;
+            document.getElementById('featured_custom_days').value = customDays;
+            document.getElementById('featured_start_date').value = startDate;
+
+            // Keep checkbox checked
+            featuredCheckbox.checked = true;
+
+            // Update cost estimate
+            updateCostEstimate();
+        });
+
+        async function updateCostEstimate() {
+            const isFeatured = featuredCheckbox.checked;
+            const maxAttendees = document.getElementById('max_attendees')?.value || '';
+            const priceFrom = document.getElementById('price_from')?.value || '';
+
+            try {
+                const response = await fetch('{{ route('organizer.events.calculate-costs', $event) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        is_featured: isFeatured,
+                        max_attendees: maxAttendees,
+                        price_from: priceFrom,
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.costs) {
+                    updateCostOverviewUI(data.costs);
+                }
+            } catch (error) {
+                console.error('Error updating cost estimate:', error);
+            }
+        }
+
+        function updateCostOverviewUI(costs) {
+            if (!costOverview) return;
+
+            // Build the HTML for the breakdown
+            let breakdownHTML = '';
+
+            if (costs.breakdown && costs.breakdown.length > 0) {
+                breakdownHTML = '<div class="space-y-2">';
+
+                costs.breakdown.forEach(item => {
+                    let statusBadge = '';
+                    if (item.status === 'pending') {
+                        statusBadge = '<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 mt-1">Zahlung ausstehend</span>';
+                    }
+
+                    breakdownHTML += `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="font-medium">${item.label}</div>
+                                ${item.description ? `<div class="text-xs text-blue-600">${item.description}</div>` : ''}
+                                ${statusBadge}
+                            </div>
+                            <div class="font-semibold ml-4 whitespace-nowrap">
+                                ${formatCurrency(item.amount)}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                const vatAmount = costs.total * 0.19;
+                const totalWithVat = costs.total * 1.19;
+
+                breakdownHTML += `
+                    <div class="border-t border-blue-200 pt-2 mt-2">
+                        <div class="flex justify-between items-center">
+                            <div class="font-bold text-blue-900">Geschätzte Gesamtkosten (netto):</div>
+                            <div class="font-bold text-blue-900 text-lg">
+                                ${formatCurrency(costs.total)}
+                            </div>
+                        </div>
+                        <div class="text-xs text-blue-600 mt-1">
+                            + ${formatCurrency(vatAmount)} MwSt. (19%) = ${formatCurrency(totalWithVat)} brutto
+                        </div>
+                    </div>
+                `;
+                breakdownHTML += '</div>';
+            } else {
+                breakdownHTML = '<p>Die Kosten werden nach Event-Ende basierend auf den tatsächlichen Buchungen abgerechnet.</p>';
+            }
+
+            // Find the content area and update it
+            const contentArea = costOverview.querySelector('.text-sm.text-blue-700');
+            if (contentArea) {
+                contentArea.innerHTML = breakdownHTML + `
+                    <div class="mt-3 text-xs">
+                        <strong>Hinweis:</strong> Die Plattformgebühren sind Schätzungen basierend auf Ihren Ticket-Einstellungen.
+                        Die tatsächliche Abrechnung erfolgt nach Event-Ende basierend auf den realen Buchungen.
+                        ${costs.featured_fees && costs.featured_fees.active && costs.featured_fees.total > 0 ?
+                            'Featured Event Gebühren müssen vor der Veröffentlichung bezahlt werden.' : ''}
+                    </div>
+                `;
+            }
+
+            // Show/hide the cost overview based on whether there are costs
+            if (costs.total > 0 || !{{ $event->is_published ? 'true' : 'false' }}) {
+                costOverview.style.display = 'block';
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount);
+        }
     </script>
+
+    <!-- Featured Booking Modal -->
+    <x-featured-booking-modal :event="$event" />
 </x-layouts.app>
 

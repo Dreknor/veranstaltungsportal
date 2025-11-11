@@ -252,6 +252,21 @@
 
     <div class="totals">
         <table>
+            @if(isset($invoice->billing_data['breakdown']))
+                @php $breakdown = $invoice->billing_data['breakdown']; @endphp
+                @if($breakdown['booking_fees'] > 0)
+                <tr>
+                    <td>Buchungsgebühren (netto):</td>
+                    <td>{{ number_format($breakdown['booking_fees'], 2, ',', '.') }} €</td>
+                </tr>
+                @endif
+                @if($breakdown['featured_fees'] > 0)
+                <tr>
+                    <td>Featured Event Gebühren (netto):</td>
+                    <td>{{ number_format($breakdown['featured_fees'], 2, ',', '.') }} €</td>
+                </tr>
+                @endif
+            @endif
             <tr>
                 <td>Zwischensumme (netto):</td>
                 <td>{{ number_format($invoice->amount, 2, ',', '.') }} €</td>

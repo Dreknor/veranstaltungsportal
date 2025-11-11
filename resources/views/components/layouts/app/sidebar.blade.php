@@ -65,8 +65,10 @@
                         @endif
 
                         <!-- Icon Container -->
-                        <span class="flex items-center justify-center w-5 h-5 transition-transform duration-200 relative"
-                              :class="{ 'group-hover:scale-110': !{{ request()->routeIs('notifications.*') ? 'true' : 'false' }} }">
+                        <span @class([
+                            'flex items-center justify-center w-5 h-5 transition-transform duration-200 relative',
+                            'group-hover:scale-110' => !request()->routeIs('notifications.*')
+                        ])>
                             <svg class="h-5 w-5 {{ request()->routeIs('notifications.*') ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400' }}"
                                  fill="none"
                                  viewBox="0 0 24 24"

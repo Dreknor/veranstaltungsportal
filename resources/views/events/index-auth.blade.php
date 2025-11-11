@@ -107,13 +107,12 @@
 
                                     <!-- Favorite Button -->
                                     <div class="absolute top-2 right-2">
-                                        <form action="{{ route('favorites.toggle', $event) }}" method="POST">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="p-2 rounded-full {{ auth()->user()->hasFavorited($event) ? 'bg-red-500' : 'bg-white' }} shadow-lg hover:scale-110 transition">
-                                                <x-icon.heart class="w-5 h-5 {{ auth()->user()->hasFavorited($event) ? 'text-white' : 'text-gray-400' }}" />
-                                            </button>
-                                        </form>
+                                        <button type="button"
+                                                onclick="toggleFavorite({{ $event->id }}, this)"
+                                                data-favorited="{{ auth()->user()->hasFavorited($event) ? 'true' : 'false' }}"
+                                                class="p-2 rounded-full {{ auth()->user()->hasFavorited($event) ? 'bg-red-500' : 'bg-white' }} shadow-lg hover:scale-110 transition">
+                                            <x-icon.heart class="w-5 h-5 {{ auth()->user()->hasFavorited($event) ? 'text-white' : 'text-gray-400' }}" />
+                                        </button>
                                     </div>
                                 </div>
 
@@ -241,5 +240,38 @@
             @endif
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function toggleFavorite(eventId, button) {
+            const icon = button.querySelector('svg');
+
+            fetch(`/events/${eventId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.favorited) {
+                    button.className = 'p-2 rounded-full bg-red-500 shadow-lg hover:scale-110 transition';
+                    icon.className = 'w-5 h-5 text-white';
+                    button.setAttribute('data-favorited', 'true');
+                } else {
+                    button.className = 'p-2 rounded-full bg-white shadow-lg hover:scale-110 transition';
+                    icon.className = 'w-5 h-5 text-gray-400';
+                    button.setAttribute('data-favorited', 'false');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+            });
+        }
+    </script>
+    @endpush
 </x-layouts.app>
 

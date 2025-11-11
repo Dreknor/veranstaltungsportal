@@ -28,7 +28,7 @@
             <!-- Global Settings Info -->
             <div class="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h3 class="text-sm font-medium text-blue-800 mb-3">Globale Plattform-Einstellungen</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-700">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-blue-700">
                     <div>
                         <span class="font-medium">Typ:</span>
                         {{ $globalSettings['fee_type'] === 'percentage' ? 'Prozentual' : 'Festbetrag' }}
@@ -44,6 +44,10 @@
                             {{ number_format($globalSettings['fee_fixed_amount'], 2, ',', '.') }} €
                         </div>
                     @endif
+                    <div>
+                        <span class="font-medium">Mindestgebühr:</span>
+                        {{ number_format($globalSettings['minimum_fee'], 2, ',', '.') }} €
+                    </div>
                     <div>
                         <span class="font-medium">Gilt für:</span>
                         Alle Organisatoren
@@ -139,6 +143,28 @@
                                     Fester Betrag pro Buchung
                                 </p>
                                 @error('custom_fee_fixed_amount')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Minimum Fee Field -->
+                            <div>
+                                <label for="custom_minimum_fee" class="block text-sm font-medium text-gray-700">
+                                    Mindestgebühr pro Buchung
+                                </label>
+                                <div class="mt-1 relative rounded-md shadow-sm">
+                                    <input type="number" name="custom_minimum_fee" id="custom_minimum_fee"
+                                           step="0.01" min="0"
+                                           value="{{ old('custom_minimum_fee', $customFee['minimum_fee'] ?? $globalSettings['minimum_fee']) }}"
+                                           class="block w-full pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                        <span class="text-gray-500 sm:text-sm">€</span>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500">
+                                    Mindestgebühr pro Buchung - wichtig für kostenlose Tickets. Standard: {{ number_format($globalSettings['minimum_fee'], 2, ',', '.') }} €
+                                </p>
+                                @error('custom_minimum_fee')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

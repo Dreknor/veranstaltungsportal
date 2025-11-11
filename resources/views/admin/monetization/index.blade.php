@@ -26,6 +26,16 @@
                     <a href="{{ route('admin.monetization.billing-data') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-4 text-sm font-medium">
                         Plattform-Rechnungsdaten
                     </a>
+                    @if($featuredStats['total_featured_fees'] > 0 || $settings['featured_event_enabled'])
+                    <a href="{{ route('admin.monetization.featured-events') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-4 text-sm font-medium">
+                        Featured Events Übersicht
+                        @if($featuredStats['pending_payments'] > 0)
+                        <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            {{ $featuredStats['pending_payments'] }}
+                        </span>
+                        @endif
+                    </a>
+                    @endif
                 </nav>
             </div>
 
@@ -93,6 +103,24 @@
                             </p>
                         </div>
 
+                        <div>
+                            <label for="platform_fee_minimum" class="block text-sm font-medium text-gray-700">
+                                Mindestgebühr pro Buchung *
+                            </label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <input type="number" name="platform_fee_minimum" id="platform_fee_minimum"
+                                       step="0.01" min="0"
+                                       value="{{ old('platform_fee_minimum', $settings['platform_fee_minimum']) }}"
+                                       class="block w-full pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">€</span>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">
+                                Mindestgebühr pro Buchung - wichtig für kostenlose Tickets. Die höhere von berechneter Gebühr oder Mindestgebühr wird verwendet.
+                            </p>
+                        </div>
+
                         <div class="border-t border-gray-200 pt-6">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">Rechnungseinstellungen</h3>
 
@@ -135,6 +163,144 @@
                             </div>
                         </div>
 
+                        <div class="border-t border-gray-200 pt-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Featured Events Monetarisierung</h3>
+
+                            <div class="flex items-start mb-6">
+                                <div class="flex items-center h-5">
+                                    <input type="checkbox" name="featured_event_enabled" id="featured_event_enabled" value="1"
+                                           {{ old('featured_event_enabled', $settings['featured_event_enabled']) ? 'checked' : '' }}
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="featured_event_enabled" class="font-medium text-gray-700">Featured Events aktivieren</label>
+                                    <p class="text-gray-500">Veranstalter können Events gegen Gebühr als "Featured" markieren lassen</p>
+                                </div>
+                            </div>
+
+                            <div id="featured_settings" class="space-y-6">
+                                <!-- Statistics -->
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg">
+                                    <div>
+                                        <div class="text-sm text-gray-600">Aktive Featured Events</div>
+                                        <div class="text-2xl font-bold text-purple-600">{{ $featuredStats['active_featured_events'] }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-gray-600">Gesamt-Umsatz</div>
+                                        <div class="text-2xl font-bold text-green-600">{{ number_format($featuredStats['total_revenue'], 2, ',', '.') }} €</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm text-gray-600">Umsatz diesen Monat</div>
+                                        <div class="text-2xl font-bold text-blue-600">{{ number_format($featuredStats['this_month_revenue'], 2, ',', '.') }} €</div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div>
+                                        <label for="featured_event_daily_rate" class="block text-sm font-medium text-gray-700">
+                                            Tagespreis *
+                                        </label>
+                                        <div class="mt-1 relative rounded-md shadow-sm">
+                                            <input type="number" name="featured_event_daily_rate" id="featured_event_daily_rate"
+                                                   step="0.01" min="0"
+                                                   value="{{ old('featured_event_daily_rate', $settings['featured_event_daily_rate']) }}"
+                                                   class="block w-full pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">€</span>
+                                            </div>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Gebühr für 1 Tag Featured</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="featured_event_weekly_rate" class="block text-sm font-medium text-gray-700">
+                                            Wochenpreis *
+                                        </label>
+                                        <div class="mt-1 relative rounded-md shadow-sm">
+                                            <input type="number" name="featured_event_weekly_rate" id="featured_event_weekly_rate"
+                                                   step="0.01" min="0"
+                                                   value="{{ old('featured_event_weekly_rate', $settings['featured_event_weekly_rate']) }}"
+                                                   class="block w-full pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">€</span>
+                                            </div>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Gebühr für 7 Tage Featured</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="featured_event_monthly_rate" class="block text-sm font-medium text-gray-700">
+                                            Monatspreis *
+                                        </label>
+                                        <div class="mt-1 relative rounded-md shadow-sm">
+                                            <input type="number" name="featured_event_monthly_rate" id="featured_event_monthly_rate"
+                                                   step="0.01" min="0"
+                                                   value="{{ old('featured_event_monthly_rate', $settings['featured_event_monthly_rate']) }}"
+                                                   class="block w-full pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">€</span>
+                                            </div>
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Gebühr für 30 Tage Featured</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="featured_event_max_duration_days" class="block text-sm font-medium text-gray-700">
+                                            Maximale Dauer (Tage) *
+                                        </label>
+                                        <input type="number" name="featured_event_max_duration_days" id="featured_event_max_duration_days"
+                                               min="1" max="365"
+                                               value="{{ old('featured_event_max_duration_days', $settings['featured_event_max_duration_days']) }}"
+                                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            Maximale Anzahl Tage, die ein Event Featured sein kann
+                                        </p>
+                                    </div>
+
+                                    <div class="flex items-center h-full">
+                                        <div class="flex items-start">
+                                            <div class="flex items-center h-5 mt-1">
+                                                <input type="checkbox" name="featured_event_auto_disable_on_expiry" id="featured_event_auto_disable_on_expiry" value="1"
+                                                       {{ old('featured_event_auto_disable_on_expiry', $settings['featured_event_auto_disable_on_expiry']) ? 'checked' : '' }}
+                                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                            </div>
+                                            <div class="ml-3 text-sm">
+                                                <label for="featured_event_auto_disable_on_expiry" class="font-medium text-gray-700">Automatisch deaktivieren</label>
+                                                <p class="text-gray-500">Featured Status automatisch nach Ablauf entfernen</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Featured Events Overview -->
+                                @if($featuredStats['pending_payments'] > 0 || $featuredStats['total_featured_fees'] > 0)
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-yellow-800">Featured Events Status</h3>
+                                            <div class="mt-2 text-sm text-yellow-700">
+                                                <ul class="list-disc list-inside space-y-1">
+                                                    @if($featuredStats['pending_payments'] > 0)
+                                                    <li>{{ $featuredStats['pending_payments'] }} Zahlung(en) ausstehend</li>
+                                                    @endif
+                                                    <li>{{ $featuredStats['total_featured_fees'] }} bezahlte Featured-Perioden insgesamt</li>
+                                                    <li>Nächste automatische Prüfung: Täglich um 00:00 Uhr</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-end pt-6 border-t border-gray-200">
                             <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                 Einstellungen speichern
@@ -155,9 +321,11 @@
                         <h3 class="text-sm font-medium text-blue-800">Wichtige Hinweise</h3>
                         <div class="mt-2 text-sm text-blue-700">
                             <ul class="list-disc list-inside space-y-1">
-                                <li>Änderungen gelten für alle neuen Buchungen</li>
+                                <li>Änderungen an Plattformgebühren gelten für alle neuen Buchungen</li>
+                                <li>Featured Events Gebühren gelten für neue Featured-Anträge</li>
                                 <li>Bestehende Rechnungen bleiben unverändert</li>
                                 <li>Die Einstellungen werden in der .env-Datei gespeichert</li>
+                                <li>Featured Events werden automatisch deaktiviert wenn diese Option aktiv ist</li>
                             </ul>
                         </div>
                     </div>
@@ -302,6 +470,33 @@
         fixedRadio.addEventListener('change', toggleFeeFields);
 
         toggleFeeFields();
+
+        // Featured Events Toggle
+        const featuredEnabledCheckbox = document.getElementById('featured_event_enabled');
+        const featuredSettingsDiv = document.getElementById('featured_settings');
+
+        function toggleFeaturedSettings() {
+            if (featuredEnabledCheckbox.checked) {
+                featuredSettingsDiv.style.display = 'block';
+            } else {
+                featuredSettingsDiv.style.display = 'none';
+            }
+        }
+
+        if (featuredEnabledCheckbox) {
+            featuredEnabledCheckbox.addEventListener('change', toggleFeaturedSettings);
+            toggleFeaturedSettings();
+        }
+
+        // Scroll to Featured Events section
+        function scrollToFeatured(event) {
+            event.preventDefault();
+            // Scroll to the featured events checkbox area
+            const featuredCheckbox = document.getElementById('featured_event_enabled');
+            if (featuredCheckbox) {
+                featuredCheckbox.closest('.border-t').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
     </script>
     @endpush
 </x-layouts.app>

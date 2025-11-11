@@ -11,6 +11,22 @@ return [
     'platform_fee_percentage' => env('PLATFORM_FEE_PERCENTAGE', 5.0),
     'platform_fee_type' => env('PLATFORM_FEE_TYPE', 'percentage'), // percentage or fixed
     'platform_fee_fixed_amount' => env('PLATFORM_FEE_FIXED_AMOUNT', 0),
+    'platform_fee_minimum' => env('PLATFORM_FEE_MINIMUM', 1.00), // Minimum fee per booking/ticket
+
+    /*
+    |--------------------------------------------------------------------------
+    | Featured Event Settings
+    |--------------------------------------------------------------------------
+    */
+
+    'featured_event_enabled' => env('FEATURED_EVENT_ENABLED', true),
+    'featured_event_rates' => [
+        'daily' => env('FEATURED_EVENT_DAILY_RATE', 5.00),
+        'weekly' => env('FEATURED_EVENT_WEEKLY_RATE', 25.00),
+        'monthly' => env('FEATURED_EVENT_MONTHLY_RATE', 80.00),
+    ],
+    'featured_event_max_duration_days' => env('FEATURED_EVENT_MAX_DURATION_DAYS', 90),
+    'featured_event_auto_disable_on_expiry' => env('FEATURED_EVENT_AUTO_DISABLE_ON_EXPIRY', true),
 
     /*
     |--------------------------------------------------------------------------

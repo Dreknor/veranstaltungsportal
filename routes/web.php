@@ -105,6 +105,7 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::get('/events/{event}/attendees/download', [Organizer\EventManagementController::class, 'downloadAttendees'])->name('events.attendees.download');
     Route::get('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendeesForm'])->name('events.attendees.contact');
     Route::post('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendees'])->name('events.attendees.contact.send');
+    Route::post('/events/{event}/calculate-costs', [Organizer\EventManagementController::class, 'calculateCosts'])->name('events.calculate-costs');
 
     // Ticket Type Management
     Route::get('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'index'])->name('events.ticket-types.index');
@@ -188,6 +189,16 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::patch('/reviews/{review}/approve', [Organizer\ReviewController::class, 'approve'])->name('reviews.approve');
     Route::patch('/reviews/{review}/reject', [Organizer\ReviewController::class, 'reject'])->name('reviews.reject');
     Route::delete('/reviews/{review}', [Organizer\ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // Featured Events Management
+    Route::get('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'create'])->name('featured-events.create');
+    Route::post('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'store'])->name('featured-events.store');
+    Route::get('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'payment'])->name('featured-events.payment');
+    Route::post('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'processPayment'])->name('featured-events.process-payment');
+    Route::get('/featured-events/history', [\App\Http\Controllers\FeaturedEventController::class, 'history'])->name('featured-events.history');
+    Route::get('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'extend'])->name('featured-events.extend');
+    Route::post('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'processExtension'])->name('featured-events.process-extension');
+    Route::delete('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'cancel'])->name('featured-events.cancel');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -257,6 +268,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'update'])->name('monetization.update');
     Route::get('/monetization/billing-data', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'billingData'])->name('monetization.billing-data');
     Route::put('/monetization/billing-data', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'updateBillingData'])->name('monetization.billing-data.update');
+    Route::get('/monetization/featured-events', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'featuredEvents'])->name('monetization.featured-events');
 
     // Individual Organizer Fees
     Route::get('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'edit'])->name('organizer-fees.edit');

@@ -17,9 +17,17 @@ class MonetizationSettingsController extends Controller
             'platform_fee_percentage' => config('monetization.platform_fee_percentage', 5.0),
             'platform_fee_type' => config('monetization.platform_fee_type', 'percentage'), // percentage or fixed
             'platform_fee_fixed_amount' => config('monetization.platform_fee_fixed_amount', 0),
+            'platform_fee_minimum' => config('monetization.platform_fee_minimum', 1.00),
             'auto_invoice' => config('monetization.auto_invoice', true),
             'invoice_cc_email' => config('monetization.invoice_cc_email', ''),
             'payment_deadline_days' => config('monetization.payment_deadline_days', 14),
+            // Featured Event Settings
+            'featured_event_enabled' => config('monetization.featured_event_enabled', true),
+            'featured_event_daily_rate' => config('monetization.featured_event_rates.daily', 5.00),
+            'featured_event_weekly_rate' => config('monetization.featured_event_rates.weekly', 25.00),
+            'featured_event_monthly_rate' => config('monetization.featured_event_rates.monthly', 80.00),
+            'featured_event_max_duration_days' => config('monetization.featured_event_max_duration_days', 90),
+            'featured_event_auto_disable_on_expiry' => config('monetization.featured_event_auto_disable_on_expiry', true),
         ];
 
         // Get organizers with custom fees
@@ -31,7 +39,19 @@ class MonetizationSettingsController extends Controller
                 return !empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false);
             });
 
-        return view('admin.monetization.index', compact('settings', 'organizersWithCustomFees'));
+        // Get Featured Event Statistics
+        $featuredStats = [
+            'active_featured_events' => \App\Models\Event::where('is_featured', true)->count(),
+            'total_featured_fees' => \App\Models\FeaturedEventFee::where('payment_status', 'paid')->count(),
+            'pending_payments' => \App\Models\FeaturedEventFee::where('payment_status', 'pending')->count(),
+            'total_revenue' => \App\Models\FeaturedEventFee::where('payment_status', 'paid')->sum('fee_amount'),
+            'this_month_revenue' => \App\Models\FeaturedEventFee::where('payment_status', 'paid')
+                ->whereMonth('paid_at', now()->month)
+                ->whereYear('paid_at', now()->year)
+                ->sum('fee_amount'),
+        ];
+
+        return view('admin.monetization.index', compact('settings', 'organizersWithCustomFees', 'featuredStats'));
     }
 
     /**
@@ -43,9 +63,17 @@ class MonetizationSettingsController extends Controller
             'platform_fee_percentage' => 'required|numeric|min:0|max:100',
             'platform_fee_type' => 'required|in:percentage,fixed',
             'platform_fee_fixed_amount' => 'nullable|numeric|min:0',
+            'platform_fee_minimum' => 'required|numeric|min:0',
             'auto_invoice' => 'boolean',
             'invoice_cc_email' => 'nullable|email',
             'payment_deadline_days' => 'required|integer|min:1|max:90',
+            // Featured Event Validation
+            'featured_event_enabled' => 'boolean',
+            'featured_event_daily_rate' => 'required|numeric|min:0',
+            'featured_event_weekly_rate' => 'required|numeric|min:0',
+            'featured_event_monthly_rate' => 'required|numeric|min:0',
+            'featured_event_max_duration_days' => 'required|integer|min:1|max:365',
+            'featured_event_auto_disable_on_expiry' => 'boolean',
         ]);
 
         try {
@@ -53,9 +81,17 @@ class MonetizationSettingsController extends Controller
                 'PLATFORM_FEE_PERCENTAGE' => $validated['platform_fee_percentage'],
                 'PLATFORM_FEE_TYPE' => $validated['platform_fee_type'],
                 'PLATFORM_FEE_FIXED_AMOUNT' => $validated['platform_fee_fixed_amount'] ?? 0,
+                'PLATFORM_FEE_MINIMUM' => $validated['platform_fee_minimum'],
                 'AUTO_INVOICE' => $validated['auto_invoice'] ?? false,
                 'INVOICE_CC_EMAIL' => $validated['invoice_cc_email'] ?? '',
                 'PAYMENT_DEADLINE_DAYS' => $validated['payment_deadline_days'],
+                // Featured Event Settings
+                'FEATURED_EVENT_ENABLED' => $validated['featured_event_enabled'] ?? false,
+                'FEATURED_EVENT_DAILY_RATE' => $validated['featured_event_daily_rate'],
+                'FEATURED_EVENT_WEEKLY_RATE' => $validated['featured_event_weekly_rate'],
+                'FEATURED_EVENT_MONTHLY_RATE' => $validated['featured_event_monthly_rate'],
+                'FEATURED_EVENT_MAX_DURATION_DAYS' => $validated['featured_event_max_duration_days'],
+                'FEATURED_EVENT_AUTO_DISABLE_ON_EXPIRY' => $validated['featured_event_auto_disable_on_expiry'] ?? false,
             ]);
 
             Cache::forget('monetization_settings');
@@ -202,6 +238,33 @@ class MonetizationSettingsController extends Controller
                 ->with('error', 'Fehler beim Speichern: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Show Featured Events overview
+     */
+    public function featuredEvents()
+    {
+        $featuredFees = \App\Models\FeaturedEventFee::with(['event', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        $stats = [
+            'total_revenue' => \App\Models\FeaturedEventFee::where('payment_status', 'paid')->sum('fee_amount'),
+            'pending_revenue' => \App\Models\FeaturedEventFee::where('payment_status', 'pending')->sum('fee_amount'),
+            'active_featured' => \App\Models\Event::where('is_featured', true)->count(),
+            'pending_payments' => \App\Models\FeaturedEventFee::where('payment_status', 'pending')->count(),
+            'this_month' => \App\Models\FeaturedEventFee::where('payment_status', 'paid')
+                ->whereMonth('paid_at', now()->month)
+                ->whereYear('paid_at', now()->year)
+                ->sum('fee_amount'),
+            'last_month' => \App\Models\FeaturedEventFee::where('payment_status', 'paid')
+                ->whereMonth('paid_at', now()->subMonth()->month)
+                ->whereYear('paid_at', now()->subMonth()->year)
+                ->sum('fee_amount'),
+        ];
+
+        return view('admin.monetization.featured-events', compact('featuredFees', 'stats'));
     }
 }
 

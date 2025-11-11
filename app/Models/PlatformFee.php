@@ -16,6 +16,7 @@ class PlatformFee extends Model
         'fee_percentage',
         'booking_amount',
         'fee_amount',
+        'minimum_fee',
         'status',
         'paid_at',
     ];
@@ -24,6 +25,7 @@ class PlatformFee extends Model
         'fee_percentage' => 'decimal:2',
         'booking_amount' => 'decimal:2',
         'fee_amount' => 'decimal:2',
+        'minimum_fee' => 'decimal:2',
         'paid_at' => 'datetime',
     ];
 

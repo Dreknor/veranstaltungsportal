@@ -27,8 +27,16 @@ class InvoiceService
             return Invoice::where('event_id', $event->id)->where('type', 'platform_fee')->first();
         }
 
-        // Calculate total platform fees
-        $totalFees = PlatformFee::where('event_id', $event->id)->sum('fee_amount');
+        // Calculate total platform fees from bookings
+        $totalBookingFees = PlatformFee::where('event_id', $event->id)->sum('fee_amount');
+
+        // Calculate total featured event fees (paid ones)
+        $totalFeaturedFees = \App\Models\FeaturedEventFee::where('event_id', $event->id)
+            ->where('payment_status', 'paid')
+            ->sum('fee_amount');
+
+        // Total amount to invoice
+        $totalFees = $totalBookingFees + $totalFeaturedFees;
 
         if ($totalFees <= 0) {
             return null;
@@ -36,6 +44,12 @@ class InvoiceService
 
         // Get platform fee percentage (check for custom fee first)
         $feePercentage = $this->getOrganizerFeePercentage($event->user);
+
+        // Combine both fee types into items
+        $invoiceItems = array_merge(
+            $this->getPlatformFeeItems($event, $feePercentage),
+            $this->getFeaturedEventFeeItems($event)
+        );
 
         // Create invoice
         $invoice = Invoice::create([
@@ -57,7 +71,12 @@ class InvoiceService
             'billing_data' => [
                 'platform' => $this->getPlatformBillingData(),
                 'organizer' => $this->getOrganizerBillingData($event->user),
-                'items' => $this->getPlatformFeeItems($event, $feePercentage),
+                'items' => $invoiceItems,
+                'breakdown' => [
+                    'booking_fees' => $totalBookingFees,
+                    'featured_fees' => $totalFeaturedFees,
+                    'total' => $totalFees,
+                ],
             ],
         ]);
 
@@ -218,6 +237,47 @@ class InvoiceService
                 'details' => "Gebühr: " . number_format($actualFeePercentage, 2) . "% pro Buchung",
             ]
         ];
+    }
+
+    /**
+     * Get featured event fee items for invoice
+     */
+    private function getFeaturedEventFeeItems($event)
+    {
+        $featuredFees = \App\Models\FeaturedEventFee::where('event_id', $event->id)
+            ->where('payment_status', 'paid')
+            ->get();
+
+        if ($featuredFees->isEmpty()) {
+            return [];
+        }
+
+        $items = [];
+
+        foreach ($featuredFees as $fee) {
+            $durationLabel = match($fee->duration_type) {
+                'daily' => '1 Tag',
+                'weekly' => '7 Tage (1 Woche)',
+                'monthly' => '30 Tage (1 Monat)',
+                'custom' => $fee->duration_days . ' Tage',
+                default => 'Custom',
+            };
+
+            $items[] = [
+                'description' => "Featured Event Gebühr",
+                'quantity' => 1,
+                'unit_price' => $fee->fee_amount,
+                'total' => $fee->fee_amount,
+                'details' => sprintf(
+                    "Zeitraum: %s - %s (%s)",
+                    $fee->featured_start_date->format('d.m.Y'),
+                    $fee->featured_end_date->format('d.m.Y'),
+                    $durationLabel
+                ),
+            ];
+        }
+
+        return $items;
     }
 
     /**

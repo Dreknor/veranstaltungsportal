@@ -12,11 +12,33 @@
             <form method="POST" action="{{ route('organizer.events.store') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
-                <!-- Grunddaten -->
+                <!-- Einstellungen -->
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Grunddaten</h2>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Einstellungen</h2>
 
-                    <div class="space-y-4">
+                    <!-- Cost Overview -->
+                    @if(isset($publishingCosts))
+                    <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded" id="cost-overview">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-3 flex-1">
+                                <h3 class="text-sm font-medium text-blue-800">Geschätzte Kosten bei Veröffentlichung</h3>
+                                <div class="mt-2 text-sm text-blue-700" id="cost-breakdown-content">
+                                    <p>Die Kosten werden nach Event-Ende basierend auf den tatsächlichen Buchungen abgerechnet.</p>
+                                    <div class="mt-3 text-xs">
+                                        <strong>Hinweis:</strong> Wenn Sie "Als Featured markieren" wählen, können Sie direkt den Zeitraum buchen.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <div class="space-y-3">
                         <div>
                             <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titel *</label>
                             <input type="text" id="title" name="title" required value="{{ old('title') }}"
@@ -242,10 +264,14 @@
                             </label>
 
                             <label class="flex items-center">
-                                <input type="checkbox" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}
+                                <input type="checkbox" id="is_featured" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}
                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 <span class="ml-2 text-sm font-medium text-gray-700">Als Featured markieren</span>
                             </label>
+
+                            <input type="hidden" id="featured_duration_type" name="featured_duration_type" value="">
+                            <input type="hidden" id="featured_custom_days" name="featured_custom_days" value="">
+                            <input type="hidden" id="featured_start_date" name="featured_start_date" value="">
 
                             <label class="flex items-center">
                                 <input type="checkbox" name="is_private" value="1" id="is_private" {{ old('is_private') ? 'checked' : '' }}
@@ -367,7 +393,103 @@
 
         // Initialize on page load
         updateSections();
+
+        // Featured Event Handling
+        const featuredCheckbox = document.getElementById('is_featured');
+
+        if (featuredCheckbox) {
+            featuredCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    // Open modal for booking
+                    window.dispatchEvent(new CustomEvent('featured-modal-open'));
+                } else {
+                    // Clear hidden fields
+                    document.getElementById('featured_duration_type').value = '';
+                    document.getElementById('featured_custom_days').value = '';
+                    document.getElementById('featured_start_date').value = '';
+                }
+            });
+        }
+
+        // Listen for featured booking confirmation
+        window.addEventListener('featured-booking-confirm', function(e) {
+            const { durationType, customDays, startDate } = e.detail;
+
+            // Store in hidden fields
+            document.getElementById('featured_duration_type').value = durationType;
+            document.getElementById('featured_custom_days').value = customDays;
+            document.getElementById('featured_start_date').value = startDate;
+
+            // Update cost overview
+            updateCostEstimateForFeatured(durationType, customDays);
+        });
+
+        function updateCostEstimateForFeatured(durationType, customDays) {
+            const rates = {
+                'daily': {{ config('monetization.featured_event_rates.daily', 5.00) }},
+                'weekly': {{ config('monetization.featured_event_rates.weekly', 25.00) }},
+                'monthly': {{ config('monetization.featured_event_rates.monthly', 80.00) }},
+                'custom': customDays * {{ config('monetization.featured_event_rates.daily', 5.00) }}
+            };
+
+            const amount = rates[durationType];
+            const vatAmount = amount * 0.19;
+            const totalAmount = amount * 1.19;
+
+            const durationLabels = {
+                'daily': '1 Tag',
+                'weekly': '7 Tage',
+                'monthly': '30 Tage',
+                'custom': customDays + ' Tage'
+            };
+
+            const content = document.getElementById('cost-breakdown-content');
+            if (content) {
+                content.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="font-medium">Featured Event Gebühr (geschätzt)</div>
+                                <div class="text-xs text-blue-600">Standardpreis für ${durationLabels[durationType]} Featured-Zeitraum</div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                                    Wird bei Erstellung gebucht
+                                </span>
+                            </div>
+                            <div class="font-semibold ml-4 whitespace-nowrap">
+                                ${formatCurrency(amount)}
+                            </div>
+                        </div>
+
+                        <div class="border-t border-blue-200 pt-2 mt-2">
+                            <div class="flex justify-between items-center">
+                                <div class="font-bold text-blue-900">Geschätzte Gesamtkosten (netto):</div>
+                                <div class="font-bold text-blue-900 text-lg">
+                                    ${formatCurrency(amount)}
+                                </div>
+                            </div>
+                            <div class="text-xs text-blue-600 mt-1">
+                                + ${formatCurrency(vatAmount)} MwSt. (19%) = ${formatCurrency(totalAmount)} brutto
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-xs">
+                        <strong>Hinweis:</strong> Die Featured Event Gebühr wird nach der Event-Erstellung zur Zahlung fällig.
+                        Plattformgebühren für Buchungen werden nach Event-Ende abgerechnet.
+                    </div>
+                `;
+            }
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('de-DE', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(amount);
+        }
     </script>
     @endpush
+
+    <!-- Featured Booking Modal -->
+    <x-featured-booking-modal :event="new \App\Models\Event()" />
 </x-layouts.app>
 

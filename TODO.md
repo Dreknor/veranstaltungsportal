@@ -134,6 +134,32 @@
     - [x] Platform-Fee PDF Template erstellt
     - [x] E-Mail-Versand Config-basiert gelöst
 - [x] **Booking History, Upcoming & Past Events Views**
+- [x] **Featured Events Monetarisierung** ⭐ NEU
+  - [x] FeaturedEventFee Model erstellt
+  - [x] Migration für featured_event_fees Tabelle
+  - [x] FeaturedEventService mit Gebührenberechnung
+  - [x] FeaturedEventController für Antragstellung und Zahlung
+  - [x] Event Model um featuredFees Beziehung erweitert
+  - [x] Konfiguration in monetization.php erweitert
+  - [x] Console Command für automatische Deaktivierung
+  - [x] Scheduler-Integration (täglich 00:00 Uhr)
+  - [x] Routen für Featured Event Management
+  - [x] Dokumentation erstellt (docs/FEATURED_EVENTS.md)
+  - [x] **Integration in Rechnungsstellung** ✅ NEU
+    - [x] InvoiceService erweitert um Featured Event Gebühren
+    - [x] Automatische Einbeziehung in Platform-Fee Rechnungen
+    - [x] Aufschlüsselung nach Gebührentyp (Booking vs Featured)
+    - [x] PDF-Template erweitert um Breakdown-Anzeige
+    - [x] Dokumentation (docs/FEATURED_EVENTS_INVOICING.md)
+  - [x] **Admin-Interface für Featured Events** ✅ NEU
+    - [x] Einstellungen in Monetarisierungs-Ansicht integriert
+    - [x] Statistik-Dashboard (Aktive, Umsatz, Ausstehend)
+    - [x] Konfiguration aller Gebühren (täglich, wöchentlich, monatlich)
+    - [x] Übersichtsseite aller Transaktionen
+    - [x] Tab-Navigation mit Badge für ausstehende Zahlungen
+  - [ ] Views für Featured Event Antragstellung (Organizer)
+  - [ ] Views für Zahlungsabwicklung (Organizer)
+  - [ ] Benachrichtigungen 3 Tage vor Ablauf
 
 ## 🔄 In Arbeit / Fehlend
 
@@ -579,6 +605,4 @@
 ## 💡 Feature-Ideen (Backlog)
 
 - Push-Notifications
-
-
 

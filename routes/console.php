@@ -40,3 +40,8 @@ Schedule::command('notifications:cleanup --days=30')
     ->timezone('Europe/Berlin')
     ->description('Delete old read notifications');
 
+// Deaktiviere abgelaufene Featured Events täglich
+Schedule::command('featured:disable-expired')
+    ->dailyAt('00:00')
+    ->timezone('Europe/Berlin')
+    ->description('Disable expired featured events');
