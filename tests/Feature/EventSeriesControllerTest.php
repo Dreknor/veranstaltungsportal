@@ -8,7 +8,7 @@ use App\Models\EventSeries;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class EventSeriesTest extends TestCase
+class EventSeriesControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -126,4 +126,5 @@ class EventSeriesTest extends TestCase
         $response->assertStatus(403);
     }
 }
+
 

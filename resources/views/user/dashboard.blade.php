@@ -211,6 +211,63 @@
                 </div>
             </div>
         </div>
+
+        <!-- Recommended Events Section -->
+        @if(isset($recommendedEvents) && $recommendedEvents->count() > 0)
+        <div class="mt-8">
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">💡 Empfohlene Fortbildungen</h2>
+                    <a href="{{ route('settings.interests.edit') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                        Interessen anpassen
+                    </a>
+                </div>
+                <p class="text-gray-600 mb-6">Basierend auf Ihren Interessen haben wir diese Veranstaltungen für Sie ausgewählt:</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach($recommendedEvents as $event)
+                    <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
+                        <a href="{{ route('events.show', $event) }}">
+                            @if($event->featured_image)
+                                <img src="{{ asset('storage/' . $event->featured_image) }}"
+                                     alt="{{ $event->title }}"
+                                     class="w-full h-40 object-cover">
+                            @else
+                                <div class="w-full h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
+                                    <i class="fas fa-calendar-alt text-white text-4xl"></i>
+                                </div>
+                            @endif
+                        </a>
+                        <div class="p-4">
+                            <div class="flex items-center mb-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                                      style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
+                                    {{ $event->category->name }}
+                                </span>
+                            </div>
+                            <h3 class="font-semibold text-gray-900 mb-2">
+                                <a href="{{ route('events.show', $event) }}" class="hover:text-blue-600">
+                                    {{ $event->title }}
+                                </a>
+                            </h3>
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                <i class="far fa-calendar mr-2"></i>
+                                {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600 mb-3">
+                                <i class="far fa-map-marker-alt mr-2"></i>
+                                {{ $event->isOnline() ? 'Online-Veranstaltung' : $event->venue_city }}
+                            </div>
+                            <a href="{{ route('events.show', $event) }}" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Mehr erfahren
+                            </a>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 </x-layouts.app>
 

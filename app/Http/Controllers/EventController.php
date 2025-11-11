@@ -145,6 +145,9 @@ class EventController extends Controller
             ->with(['category', 'user', 'series', 'ticketTypes', 'reviews.user'])
             ->firstOrFail();
 
+        // Increment view count
+        $event->incrementViews();
+
         // Wenn Event Teil einer Serie ist, zur Serie umleiten
         if ($event->isPartOfSeries() && $event->series) {
             return redirect()->route('series.show', $event->series->id)

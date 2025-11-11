@@ -37,6 +37,11 @@ class Booking extends Model
         'cancelled_at',
         'certificate_generated_at',
         'certificate_path',
+        'checked_in',
+        'checked_in_at',
+        'checked_in_by',
+        'check_in_method',
+        'check_in_notes',
     ];
 
     protected function casts(): array
@@ -50,6 +55,8 @@ class Booking extends Model
             'confirmed_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'certificate_generated_at' => 'datetime',
+            'checked_in' => 'boolean',
+            'checked_in_at' => 'datetime',
         ];
     }
 
@@ -86,6 +93,62 @@ class Booking extends Model
     public function platformFee(): HasOne
     {
         return $this->hasOne(PlatformFee::class);
+    }
+
+    public function checkedInBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'checked_in_by');
+    }
+
+    /**
+     * Check in this booking
+     */
+    public function checkIn(?User $checkedInBy = null, string $method = 'manual', ?string $notes = null): void
+    {
+        $this->update([
+            'checked_in' => true,
+            'checked_in_at' => now(),
+            'checked_in_by' => $checkedInBy?->id,
+            'check_in_method' => $method,
+            'check_in_notes' => $notes,
+        ]);
+    }
+
+    /**
+     * Undo check-in
+     */
+    public function undoCheckIn(): void
+    {
+        $this->update([
+            'checked_in' => false,
+            'checked_in_at' => null,
+            'checked_in_by' => null,
+            'check_in_method' => null,
+            'check_in_notes' => null,
+        ]);
+    }
+
+    /**
+     * Check if booking can be checked in
+     */
+    public function canCheckIn(): bool
+    {
+        // Must be confirmed and paid
+        if ($this->status !== 'confirmed' || $this->payment_status !== 'paid') {
+            return false;
+        }
+
+        // Cannot check in if already checked in
+        if ($this->checked_in) {
+            return false;
+        }
+
+        // Event must not be in the future (allow check-in on event day)
+        if ($this->event->start_date->isFuture() && !$this->event->start_date->isToday()) {
+            return false;
+        }
+
+        return true;
     }
 
 

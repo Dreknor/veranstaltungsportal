@@ -26,6 +26,7 @@ class Event extends Model implements HasMedia
         'description',
         'start_date',
         'end_date',
+        'duration',
         'venue_name',
         'venue_address',
         'venue_city',
@@ -306,6 +307,45 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Calculate and update the event duration in minutes
+     */
+    public function calculateDuration(): void
+    {
+        if ($this->start_date && $this->end_date) {
+            $this->duration = $this->start_date->diffInMinutes($this->end_date);
+        }
+    }
+
+    /**
+     * Get duration in hours
+     */
+    public function getDurationInHours(): float
+    {
+        return $this->duration ? round($this->duration / 60, 2) : 0;
+    }
+
+    /**
+     * Get formatted duration string
+     */
+    public function getFormattedDuration(): string
+    {
+        if (!$this->duration) {
+            return '0 Minuten';
+        }
+
+        $hours = floor($this->duration / 60);
+        $minutes = $this->duration % 60;
+
+        if ($hours > 0 && $minutes > 0) {
+            return "{$hours} Stunden {$minutes} Minuten";
+        } elseif ($hours > 0) {
+            return "{$hours} " . ($hours === 1 ? 'Stunde' : 'Stunden');
+        } else {
+            return "{$minutes} " . ($minutes === 1 ? 'Minute' : 'Minuten');
+        }
+    }
+
+    /**
      * Check if event can be booked
      */
     public function canBeBooked(): bool
@@ -314,5 +354,21 @@ class Event extends Model implements HasMedia
             && $this->is_published
             && $this->start_date->isFuture()
             && $this->hasAvailableTickets();
+    }
+
+    /**
+     * Increment the view count for this event
+     */
+    public function incrementViews(): void
+    {
+        $this->increment('views');
+    }
+
+    /**
+     * Scope to order by popularity (views)
+     */
+    public function scopePopular($query)
+    {
+        return $query->orderBy('views', 'desc');
     }
 }

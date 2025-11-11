@@ -3,10 +3,53 @@
 namespace App\Observers;
 
 use App\Models\Event;
+use App\Models\User;
 use App\Notifications\EventUpdatedNotification;
+use App\Notifications\NewEventInCategoryNotification;
 
 class EventObserver
 {
+    /**
+     * Handle the Event "creating" event.
+     */
+    public function creating(Event $event): void
+    {
+        // Calculate duration before creating
+        if ($event->start_date && $event->end_date && !$event->duration) {
+            $event->calculateDuration();
+        }
+    }
+
+    /**
+     * Handle the Event "created" event.
+     */
+    public function created(Event $event): void
+    {
+        // Only notify if event is published
+        if (!$event->is_published) {
+            return;
+        }
+
+        // Notify users interested in this category
+        if ($event->event_category_id) {
+            User::whereJsonContains('interested_category_ids', $event->event_category_id)
+                ->each(function ($user) use ($event) {
+                    $user->notify(new NewEventInCategoryNotification($event));
+                });
+        }
+    }
+
+    /**
+     * Handle the Event "updating" event.
+     */
+    public function updating(Event $event): void
+    {
+        // Recalculate duration if start_date or end_date changed
+        if ($event->isDirty(['start_date', 'end_date'])) {
+            $event->calculateDuration();
+        }
+    }
+
     /**
      * Handle the Event "updated" event.
      */

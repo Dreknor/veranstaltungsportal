@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Models;
+namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\User;
@@ -11,7 +11,7 @@ use App\Models\Booking;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class EventTest extends TestCase
+class EventControllerTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -274,3 +274,4 @@ class EventTest extends TestCase
         $this->assertCount(2, Event::featured()->get());
     }
 }
+

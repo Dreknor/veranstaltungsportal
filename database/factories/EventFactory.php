@@ -69,6 +69,7 @@ class EventFactory extends Factory
             'description' => $this->faker->paragraphs(3, true),
             'start_date' => $startDate,
             'end_date' => $endDate,
+            'duration' => $startDate->diffInMinutes($endDate),
             'venue_name' => $location['name'],
             'venue_address' => $this->faker->streetAddress(),
             'venue_city' => $location['city'],

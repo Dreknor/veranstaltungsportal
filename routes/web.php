@@ -12,6 +12,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// SEO Routes
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+
 // Account Types Info Page
 Route::get('/account-types', function () {
     return view('account-types');
@@ -72,6 +76,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+
+    // Badges
+    Route::get('/badges', [\App\Http\Controllers\BadgeController::class, 'index'])->name('badges.index');
+    Route::get('/badges/leaderboard', [\App\Http\Controllers\BadgeController::class, 'leaderboard'])->name('badges.leaderboard');
+    Route::get('/badges/{badge}', [\App\Http\Controllers\BadgeController::class, 'show'])->name('badges.show');
+    Route::post('/badges/{badge}/toggle-highlight', [\App\Http\Controllers\BadgeController::class, 'toggleHighlight'])->name('badges.toggle-highlight');
 });
 
 // Organizer Routes
@@ -121,7 +131,15 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::get('/bookings/{booking}', [Organizer\BookingManagementController::class, 'show'])->name('bookings.show');
     Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
     Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
-    Route::post('/bookings/{booking}/check-in', [Organizer\BookingManagementController::class, 'checkIn'])->name('bookings.check-in');
+
+    // Check-In System
+    Route::get('/events/{event}/check-in', [Organizer\CheckInController::class, 'index'])->name('check-in.index');
+    Route::post('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.store');
+    Route::delete('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'undoCheckIn'])->name('check-in.undo');
+    Route::post('/events/{event}/check-in/scan', [Organizer\CheckInController::class, 'scanQr'])->name('check-in.scan');
+    Route::post('/events/{event}/check-in/bulk', [Organizer\CheckInController::class, 'bulkCheckIn'])->name('check-in.bulk');
+    Route::get('/events/{event}/check-in/export', [Organizer\CheckInController::class, 'exportCheckInList'])->name('check-in.export');
+
 
     // Statistics & Analytics
     Route::get('/statistics', [Organizer\StatisticsController::class, 'index'])->name('statistics.index');
@@ -182,6 +200,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
     Route::get('settings/notifications', [Settings\NotificationController::class, 'edit'])->name('settings.notifications.edit');
     Route::put('settings/notifications', [Settings\NotificationController::class, 'update'])->name('settings.notifications.update');
+
+    // Newsletter & Interests
+    Route::get('settings/interests', [\App\Http\Controllers\NewsletterController::class, 'edit'])->name('settings.interests.edit');
+    Route::post('newsletter/subscribe', [\App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('newsletter/unsubscribe', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+    Route::post('newsletter/interests', [\App\Http\Controllers\NewsletterController::class, 'updateInterests'])->name('newsletter.interests');
 });
 
 // Admin Routes
@@ -254,6 +278,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'destroy'])->name('reviews.destroy');
     Route::post('/reviews/bulk-approve', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'bulkApprove'])->name('reviews.bulk-approve');
     Route::post('/reviews/bulk-reject', [\App\Http\Controllers\Admin\ReviewManagementController::class, 'bulkReject'])->name('reviews.bulk-reject');
+
+    // Newsletter Management
+    Route::get('/newsletter', [\App\Http\Controllers\Admin\NewsletterController::class, 'index'])->name('newsletter.index');
+    Route::get('/newsletter/compose', [\App\Http\Controllers\Admin\NewsletterController::class, 'compose'])->name('newsletter.compose');
+    Route::get('/newsletter/preview', [\App\Http\Controllers\Admin\NewsletterController::class, 'preview'])->name('newsletter.preview');
+    Route::post('/newsletter/send', [\App\Http\Controllers\Admin\NewsletterController::class, 'send'])->name('newsletter.send');
+    Route::get('/newsletter/subscribers', [\App\Http\Controllers\Admin\NewsletterController::class, 'subscribers'])->name('newsletter.subscribers');
+    Route::get('/newsletter/export', [\App\Http\Controllers\Admin\NewsletterController::class, 'export'])->name('newsletter.export');
 });
 
 require __DIR__.'/auth.php';

@@ -44,6 +44,12 @@
                     Favoriten
                 </x-layouts.sidebar-link>
 
+                <!-- Badges -->
+                <x-layouts.sidebar-link href="{{ route('badges.index') }}" icon='fas-medal'
+                    :active="request()->routeIs('badges.*')">
+                    Abzeichen
+                </x-layouts.sidebar-link>
+
                 <!-- Notifications with Badge -->
                 <li>
                     <a href="{{ route('notifications.index') }}"

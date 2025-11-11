@@ -108,4 +108,47 @@
         </div>
     </div>
 
+    <!-- Badges Section -->
+    @if(auth()->user()->badges()->count() > 0)
+    <div class="mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                    <i class="fas fa-medal text-yellow-500 mr-2"></i>Ihre Abzeichen
+                </h2>
+                <a href="{{ route('badges.index') }}" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                    Alle ansehen <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                @foreach(auth()->user()->badges()->latest('user_badges.earned_at')->limit(6)->get() as $badge)
+                <a href="{{ route('badges.show', $badge) }}"
+                   class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-2"
+                         style="background-color: {{ $badge->color }}20;">
+                        <i class="fas fa-medal text-3xl" style="color: {{ $badge->color }};"></i>
+                    </div>
+                    <span class="text-xs font-medium text-gray-800 dark:text-gray-200 text-center line-clamp-2">
+                        {{ $badge->name }}
+                    </span>
+                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        +{{ $badge->points }}
+                    </span>
+                </a>
+                @endforeach
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">Gesamt:</span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-200">
+                        {{ auth()->user()->badges()->count() }} Abzeichen · {{ auth()->user()->getTotalBadgePoints() }} Punkte
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
 </x-layouts.app>

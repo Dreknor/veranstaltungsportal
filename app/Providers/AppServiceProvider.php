@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Booking;
 use App\Models\Event;
 use App\Observers\BookingObserver;
+use App\Observers\BookingObserverForBadges;
 use App\Observers\EventObserver;
 use Illuminate\Support\ServiceProvider;
 
@@ -25,5 +26,6 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::observe(EventObserver::class);
         Booking::observe(BookingObserver::class);
+        Booking::observe(BookingObserverForBadges::class);
     }
 }

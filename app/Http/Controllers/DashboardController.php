@@ -51,6 +51,9 @@ class DashboardController extends Controller
 
         $unreadNotificationsCount = $user->unreadNotifications()->count();
 
+        // Get recommended events based on user interests
+        $recommendedEvents = $user->getRecommendedEvents(6);
+
         // Calculate statistics
         $stats = [
             'total_bookings' => $user->bookings()->count(),
@@ -58,7 +61,7 @@ class DashboardController extends Controller
             'past_events' => $pastBookings->count(),
         ];
 
-        return view('user.dashboard', compact('user', 'bookings', 'upcomingBookings', 'pastBookings', 'stats', 'notifications', 'unreadNotificationsCount'));
+        return view('user.dashboard', compact('user', 'bookings', 'upcomingBookings', 'pastBookings', 'stats', 'notifications', 'unreadNotificationsCount', 'recommendedEvents'));
     }
 
     /**

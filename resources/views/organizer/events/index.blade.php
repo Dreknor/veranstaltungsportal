@@ -134,6 +134,12 @@
                                    class="flex-1 px-3 py-2 text-center bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
                                     Bearbeiten
                                 </a>
+                                @if($event->hasAttendees())
+                                    <a href="{{ route('organizer.check-in.index', $event) }}"
+                                       class="flex-1 px-3 py-2 text-center bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
+                                        <i class="fas fa-qrcode mr-1"></i> Check-In
+                                    </a>
+                                @endif
                                 @if(!$event->is_cancelled)
                                     <form action="{{ route('organizer.events.duplicate', $event) }}" method="POST"
                                           class="flex-1">

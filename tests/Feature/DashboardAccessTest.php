@@ -8,7 +8,7 @@ use App\Models\Booking;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class DashboardTest extends TestCase
+class DashboardAccessTest extends TestCase
 {
     use RefreshDatabase;
 
