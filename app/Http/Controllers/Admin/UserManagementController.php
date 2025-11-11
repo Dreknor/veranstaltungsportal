@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Role;
 
 class UserManagementController extends Controller
@@ -26,13 +27,37 @@ class UserManagementController extends Controller
             $query->role($request->role);
         }
 
+        // Filter by SSO provider (with error handling if column doesn't exist)
+        if ($request->filled('sso_provider')) {
+            try {
+                if ($request->sso_provider === 'none') {
+                    $query->whereNull('sso_provider');
+                } else {
+                    $query->where('sso_provider', $request->sso_provider);
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to filter by SSO provider: ' . $e->getMessage());
+            }
+        }
+
         $users = $query->withCount(['events', 'bookings'])
                        ->latest()
                        ->paginate(20);
 
         $roles = Role::all();
 
-        return view('admin.users.index', compact('users', 'roles'));
+        // Get unique SSO providers for filter
+        try {
+            $ssoProviders = User::whereNotNull('sso_provider')
+                                ->distinct()
+                                ->pluck('sso_provider');
+        } catch (\Exception $e) {
+            // If column doesn't exist or query fails, use empty collection
+            $ssoProviders = collect();
+            Log::warning('Failed to fetch SSO providers: ' . $e->getMessage());
+        }
+
+        return view('admin.users.index', compact('users', 'roles', 'ssoProviders'));
     }
 
     public function edit(User $user)
@@ -156,6 +181,44 @@ class UserManagementController extends Controller
         $user->removeRole($validated['role']);
 
         return back()->with('success', 'Rolle erfolgreich entfernt.');
+    }
+
+    /**
+     * Promote user to organizer (especially useful for SSO users)
+     */
+    public function promoteToOrganizer(User $user)
+    {
+        if ($user->hasRole('organizer')) {
+            return back()->with('error', 'Benutzer ist bereits Organisator.');
+        }
+
+        $user->assignRole('organizer');
+
+        return back()->with('success', 'Benutzer erfolgreich zum Organisator befördert.');
+    }
+
+    /**
+     * Demote organizer to participant
+     */
+    public function demoteToParticipant(User $user)
+    {
+        // Prevent demotion of admins
+        if ($user->hasRole('admin')) {
+            return back()->with('error', 'Administratoren können nicht degradiert werden.');
+        }
+
+        if (!$user->hasRole('organizer')) {
+            return back()->with('error', 'Benutzer ist kein Organisator.');
+        }
+
+        $user->removeRole('organizer');
+
+        // Ensure user has at least the participant role
+        if (!$user->hasRole('user')) {
+            $user->assignRole('user');
+        }
+
+        return back()->with('success', 'Benutzer wurde zum Teilnehmer degradiert.');
     }
 }
 

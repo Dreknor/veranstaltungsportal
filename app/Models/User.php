@@ -26,6 +26,10 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'keycloak_id',
+        'google_id',
+        'github_id',
+        'sso_provider',
         'organization_name',
         'organization_website',
         'organization_description',
@@ -219,6 +223,32 @@ class User extends Authenticatable
     {
         return $this->hasPermissionTo('manage users') || $this->hasRole('admin');
     }
+
+    /**
+     * Check if user is authenticated via SSO
+     */
+    public function isSsoUser(): bool
+    {
+        return !empty($this->sso_provider);
+    }
+
+    /**
+     * Check if user can change password
+     * SSO users cannot change password through the app
+     */
+    public function canChangePassword(): bool
+    {
+        return !$this->isSsoUser();
+    }
+
+    /**
+     * Get SSO provider display name
+     */
+    public function ssoProviderName(): ?string
+    {
+        return $this->sso_provider ? ucfirst($this->sso_provider) : null;
+    }
+
 
     /**
      * Get user's interested categories

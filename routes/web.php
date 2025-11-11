@@ -221,6 +221,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/users/{user}/toggle-admin', [\App\Http\Controllers\Admin\UserManagementController::class, 'toggleAdmin'])->name('users.toggle-admin');
     Route::post('/users/{user}/assign-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'assignRole'])->name('users.assign-role');
     Route::post('/users/{user}/remove-role', [\App\Http\Controllers\Admin\UserManagementController::class, 'removeRole'])->name('users.remove-role');
+    Route::post('/users/{user}/promote-organizer', [\App\Http\Controllers\Admin\UserManagementController::class, 'promoteToOrganizer'])->name('users.promote-organizer');
+    Route::post('/users/{user}/demote-participant', [\App\Http\Controllers\Admin\UserManagementController::class, 'demoteToParticipant'])->name('users.demote-participant');
 
     // Role & Permission Management
     Route::get('/roles', [\App\Http\Controllers\Admin\RoleManagementController::class, 'index'])->name('roles.index');
