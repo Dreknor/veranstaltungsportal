@@ -1,31 +1,35 @@
-<x-app-layout>
-    <x-slot name="header">
+<x-layouts.app>
+    <!-- Page Header -->
+    <div class="mb-6">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Kategorien verwalten
-            </h2>
-            <a href="{{ route('admin.categories.create') }}" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Kategorien verwalten</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Verwalten Sie Event-Kategorien</p>
+            </div>
+            <a href="{{ route('admin.categories.create') }}" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition">
+                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
                 Neue Kategorie
             </a>
         </div>
-    </x-slot>
+    </div>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            @if (session('success'))
-                <div class="mb-4 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
-                    <p class="text-sm font-medium text-green-800 dark:text-green-200">{{ session('success') }}</p>
-                </div>
-            @endif
+    <div class="space-y-6">
+        @if (session('success'))
+            <div class="mb-4 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
+                <p class="text-sm font-medium text-green-800 dark:text-green-200">{{ session('success') }}</p>
+            </div>
+        @endif
 
-            @if (session('error'))
-                <div class="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
-                    <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ session('error') }}</p>
-                </div>
-            @endif
+        @if (session('error'))
+            <div class="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
+                <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ session('error') }}</p>
+            </div>
+        @endif
 
-            <!-- Search -->
-            <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
+        <!-- Search -->
+        <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
                 <div class="p-6">
                     <form method="GET" action="{{ route('admin.categories.index') }}" class="flex gap-4">
                         <input type="text" name="search" placeholder="Kategorie suchen..." value="{{ request('search') }}" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
@@ -110,5 +114,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
 

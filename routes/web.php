@@ -82,6 +82,25 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/badges/leaderboard', [\App\Http\Controllers\BadgeController::class, 'leaderboard'])->name('badges.leaderboard');
     Route::get('/badges/{badge}', [\App\Http\Controllers\BadgeController::class, 'show'])->name('badges.show');
     Route::post('/badges/{badge}/toggle-highlight', [\App\Http\Controllers\BadgeController::class, 'toggleHighlight'])->name('badges.toggle-highlight');
+
+    // Connections (Social Features)
+    Route::get('/connections', [\App\Http\Controllers\ConnectionController::class, 'index'])->name('connections.index');
+    Route::get('/connections/requests', [\App\Http\Controllers\ConnectionController::class, 'requests'])->name('connections.requests');
+    Route::get('/connections/suggestions', [\App\Http\Controllers\ConnectionController::class, 'suggestions'])->name('connections.suggestions');
+    Route::get('/connections/search', [\App\Http\Controllers\ConnectionController::class, 'search'])->name('connections.search');
+    Route::get('/connections/blocked', [\App\Http\Controllers\ConnectionController::class, 'blocked'])->name('connections.blocked');
+    Route::post('/connections/{user}/send', [\App\Http\Controllers\ConnectionController::class, 'send'])->name('connections.send');
+    Route::post('/connections/{user}/accept', [\App\Http\Controllers\ConnectionController::class, 'accept'])->name('connections.accept');
+    Route::post('/connections/{user}/decline', [\App\Http\Controllers\ConnectionController::class, 'decline'])->name('connections.decline');
+    Route::post('/connections/{user}/cancel', [\App\Http\Controllers\ConnectionController::class, 'cancel'])->name('connections.cancel');
+    Route::delete('/connections/{user}/remove', [\App\Http\Controllers\ConnectionController::class, 'remove'])->name('connections.remove');
+    Route::post('/connections/{user}/block', [\App\Http\Controllers\ConnectionController::class, 'block'])->name('connections.block');
+    Route::delete('/connections/{user}/unblock', [\App\Http\Controllers\ConnectionController::class, 'unblock'])->name('connections.unblock');
+
+    // User Profiles
+    Route::get('/users/{user}', [\App\Http\Controllers\UserProfileController::class, 'show'])->name('users.show');
+    Route::get('/users/{user}/followers', [\App\Http\Controllers\UserProfileController::class, 'followers'])->name('users.followers');
+    Route::get('/users/{user}/following', [\App\Http\Controllers\UserProfileController::class, 'following'])->name('users.following');
 });
 
 // Organizer Routes
@@ -211,6 +230,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
     Route::get('settings/notifications', [Settings\NotificationController::class, 'edit'])->name('settings.notifications.edit');
     Route::put('settings/notifications', [Settings\NotificationController::class, 'update'])->name('settings.notifications.update');
+    Route::get('settings/privacy', [Settings\PrivacyController::class, 'edit'])->name('settings.privacy.edit');
+    Route::put('settings/privacy', [Settings\PrivacyController::class, 'update'])->name('settings.privacy.update');
 
     // Newsletter & Interests
     Route::get('settings/interests', [\App\Http\Controllers\NewsletterController::class, 'edit'])->name('settings.interests.edit');
@@ -300,6 +321,36 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/newsletter/send', [\App\Http\Controllers\Admin\NewsletterController::class, 'send'])->name('newsletter.send');
     Route::get('/newsletter/subscribers', [\App\Http\Controllers\Admin\NewsletterController::class, 'subscribers'])->name('newsletter.subscribers');
     Route::get('/newsletter/export', [\App\Http\Controllers\Admin\NewsletterController::class, 'export'])->name('newsletter.export');
+
+    // Reporting & Analytics
+    Route::get('/reporting', [\App\Http\Controllers\Admin\ReportingController::class, 'index'])->name('reporting.index');
+    Route::get('/reporting/users', [\App\Http\Controllers\Admin\ReportingController::class, 'users'])->name('reporting.users');
+    Route::get('/reporting/events', [\App\Http\Controllers\Admin\ReportingController::class, 'events'])->name('reporting.events');
+    Route::get('/reporting/revenue', [\App\Http\Controllers\Admin\ReportingController::class, 'revenue'])->name('reporting.revenue');
+    Route::get('/reporting/export', [\App\Http\Controllers\Admin\ReportingController::class, 'export'])->name('reporting.export');
+
+    // Audit Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
+    Route::delete('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
+    Route::post('/audit-logs/clear', [\App\Http\Controllers\Admin\AuditLogController::class, 'clear'])->name('audit-logs.clear');
+    Route::get('/audit-logs/export', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
+
+    // Impersonate User
+    Route::post('/users/{user}/impersonate', [\App\Http\Controllers\Admin\ImpersonateController::class, 'impersonate'])->name('users.impersonate');
+});
+
+// Impersonate Leave (available for all authenticated users)
+Route::middleware(['auth'])->post('/impersonate/leave', [\App\Http\Controllers\Admin\ImpersonateController::class, 'leave'])->name('impersonate.leave');
+
+// Data Privacy & DSGVO
+Route::middleware(['auth'])->prefix('data-privacy')->name('data-privacy.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\DataPrivacyController::class, 'index'])->name('index');
+    Route::get('/export', [\App\Http\Controllers\DataPrivacyController::class, 'exportData'])->name('export');
+    Route::get('/download-files', [\App\Http\Controllers\DataPrivacyController::class, 'downloadFiles'])->name('download-files');
+    Route::post('/request-deletion', [\App\Http\Controllers\DataPrivacyController::class, 'requestDeletion'])->name('request-deletion');
+    Route::get('/settings', [\App\Http\Controllers\DataPrivacyController::class, 'settings'])->name('settings');
+    Route::put('/settings', [\App\Http\Controllers\DataPrivacyController::class, 'updateSettings'])->name('settings.update');
 });
 
 require __DIR__.'/auth.php';

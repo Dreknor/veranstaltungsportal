@@ -100,6 +100,11 @@ class Booking extends Model
         return $this->belongsTo(User::class, 'checked_in_by');
     }
 
+    public function review(): HasOne
+    {
+        return $this->hasOne(EventReview::class);
+    }
+
     /**
      * Check in this booking
      */

@@ -36,6 +36,10 @@ class User extends Authenticatable
         'profile_photo',
         'phone',
         'bio',
+        'allow_connections',
+        'show_profile_publicly',
+        'show_email_to_connections',
+        'show_phone_to_connections',
         'notification_preferences',
         'interested_category_ids',
         'newsletter_subscribed',
@@ -52,6 +56,9 @@ class User extends Authenticatable
         'billing_state',
         'billing_country',
         'tax_id',
+        'allow_networking',
+        'show_profile_public',
+        'allow_data_analytics',
     ];
 
     /**
@@ -81,6 +88,13 @@ class User extends Authenticatable
             'bank_account' => 'array',
             'organizer_billing_data' => 'array',
             'custom_platform_fee' => 'array',
+            'allow_connections' => 'boolean',
+            'show_profile_publicly' => 'boolean',
+            'show_email_to_connections' => 'boolean',
+            'show_phone_to_connections' => 'boolean',
+            'allow_networking' => 'boolean',
+            'show_profile_public' => 'boolean',
+            'allow_data_analytics' => 'boolean',
         ];
     }
 
@@ -497,5 +511,265 @@ class User extends Authenticatable
         }
 
         return true;
+    }
+
+    /**
+     * Get users that this user is following
+     */
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'user_connections', 'follower_id', 'following_id')
+            ->wherePivot('status', 'accepted')
+            ->withPivot(['status', 'accepted_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get users that are following this user
+     */
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'user_connections', 'following_id', 'follower_id')
+            ->wherePivot('status', 'accepted')
+            ->withPivot(['status', 'accepted_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get pending connection requests sent by this user
+     */
+    public function pendingFollowingRequests()
+    {
+        return $this->hasMany(UserConnection::class, 'follower_id')
+            ->where('status', 'pending');
+    }
+
+    /**
+     * Get pending connection requests received by this user
+     */
+    public function pendingFollowerRequests()
+    {
+        return $this->hasMany(UserConnection::class, 'following_id')
+            ->where('status', 'pending');
+    }
+
+    /**
+     * Get all connections (following and followers)
+     */
+    public function connections()
+    {
+        return $this->hasMany(UserConnection::class, 'follower_id')
+            ->orWhere('following_id', $this->id);
+    }
+
+    /**
+     * Check if this user is following another user
+     */
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()->where('following_id', $user->id)->exists();
+    }
+
+    /**
+     * Check if this user is followed by another user
+     */
+    public function isFollowedBy(User $user): bool
+    {
+        return $this->followers()->where('follower_id', $user->id)->exists();
+    }
+
+    /**
+     * Check if there is a pending connection request
+     */
+    public function hasPendingConnectionWith(User $user): bool
+    {
+        return UserConnection::where(function ($query) use ($user) {
+            $query->where('follower_id', $this->id)
+                ->where('following_id', $user->id);
+        })->orWhere(function ($query) use ($user) {
+            $query->where('follower_id', $user->id)
+                ->where('following_id', $this->id);
+        })->where('status', 'pending')->exists();
+    }
+
+    /**
+     * Check if users are connected (mutual connection)
+     */
+    public function isConnectedWith(User $user): bool
+    {
+        return $this->isFollowing($user) && $this->isFollowedBy($user);
+    }
+
+    /**
+     * Get connection status with another user
+     */
+    public function getConnectionStatusWith(User $user): ?string
+    {
+        $connection = UserConnection::where(function ($query) use ($user) {
+            $query->where('follower_id', $this->id)
+                ->where('following_id', $user->id);
+        })->orWhere(function ($query) use ($user) {
+            $query->where('follower_id', $user->id)
+                ->where('following_id', $this->id);
+        })->first();
+
+        return $connection?->status;
+    }
+
+    /**
+     * Send connection request to another user
+     */
+    public function sendConnectionRequest(User $user): UserConnection
+    {
+        // Check if the other user already follows me (mutual connection)
+        $existingConnection = UserConnection::where('follower_id', $user->id)
+            ->where('following_id', $this->id)
+            ->where('status', 'accepted')
+            ->first();
+
+        // If they already follow me, auto-accept the connection (mutual follow)
+        $status = $existingConnection ? 'accepted' : 'pending';
+
+        return UserConnection::create([
+            'follower_id' => $this->id,
+            'following_id' => $user->id,
+            'status' => $status,
+        ]);
+    }
+
+    /**
+     * Accept connection request from another user
+     */
+    public function acceptConnectionRequest(User $user): bool
+    {
+        $connection = UserConnection::where('follower_id', $user->id)
+            ->where('following_id', $this->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if ($connection) {
+            $connection->accept();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Decline connection request from another user
+     */
+    public function declineConnectionRequest(User $user): bool
+    {
+        return UserConnection::where('follower_id', $user->id)
+            ->where('following_id', $this->id)
+            ->where('status', 'pending')
+            ->delete() > 0;
+    }
+
+    /**
+     * Remove connection with another user
+     */
+    public function removeConnection(User $user): bool
+    {
+        return UserConnection::where(function ($query) use ($user) {
+            $query->where('follower_id', $this->id)
+                ->where('following_id', $user->id);
+        })->orWhere(function ($query) use ($user) {
+            $query->where('follower_id', $user->id)
+                ->where('following_id', $this->id);
+        })->delete() > 0;
+    }
+
+    /**
+     * Block a user
+     */
+    public function blockUser(User $user): UserConnection
+    {
+        // Remove existing connection if any
+        $this->removeConnection($user);
+
+        // Create blocked connection
+        return UserConnection::create([
+            'follower_id' => $this->id,
+            'following_id' => $user->id,
+            'status' => 'blocked',
+        ]);
+    }
+
+    /**
+     * Unblock a user
+     */
+    public function unblockUser(User $user): bool
+    {
+        return UserConnection::where('follower_id', $this->id)
+            ->where('following_id', $user->id)
+            ->where('status', 'blocked')
+            ->delete() > 0;
+    }
+
+    /**
+     * Check if user has blocked another user
+     */
+    public function hasBlocked(User $user): bool
+    {
+        return UserConnection::where('follower_id', $this->id)
+            ->where('following_id', $user->id)
+            ->where('status', 'blocked')
+            ->exists();
+    }
+
+    /**
+     * Get followers count
+     */
+    public function getFollowersCount(): int
+    {
+        return $this->followers()->count();
+    }
+
+    /**
+     * Get following count
+     */
+    public function getFollowingCount(): int
+    {
+        return $this->following()->count();
+    }
+
+    /**
+     * Get pending requests count
+     */
+    public function getPendingRequestsCount(): int
+    {
+        return $this->pendingFollowerRequests()->count();
+    }
+
+    /**
+     * Get suggested connections (users with similar interests)
+     */
+    public function getSuggestedConnections(int $limit = 10)
+    {
+        $categoryIds = $this->interested_category_ids ?? [];
+
+        if (empty($categoryIds)) {
+            // If no interests, suggest active users
+            return User::where('id', '!=', $this->id)
+                ->whereDoesntHave('connections', function ($query) {
+                    $query->where('follower_id', $this->id)
+                        ->orWhere('following_id', $this->id);
+                })
+                ->withCount('bookings')
+                ->orderBy('bookings_count', 'desc')
+                ->limit($limit)
+                ->get();
+        }
+
+        // Suggest users with similar interests
+        return User::where('id', '!=', $this->id)
+            ->whereDoesntHave('connections', function ($query) {
+                $query->where('follower_id', $this->id)
+                    ->orWhere('following_id', $this->id);
+            })
+            ->whereJsonContains('interested_category_ids', $categoryIds)
+            ->limit($limit)
+            ->get();
     }
 }

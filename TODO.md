@@ -287,7 +287,22 @@
   - [x] Badge-Komponente für Benachrichtigungen
   - [x] Navigation-Link in Sidebar
   - [x] Badge-Übersicht im Dashboard
-- [ ] Social Features (User können sich connecten)
+- [x] **Social Features (User können sich connecten)**
+  - [x] UserConnection Model und Migration
+  - [x] Connection Relationships im User Model (following/followers)
+  - [x] Connection Request Management
+  - [x] ConnectionController (send, accept, decline, remove, block, unblock)
+  - [x] UserProfileController (öffentliche Profile)
+  - [x] Connection Notifications (ConnectionRequestNotification, ConnectionAcceptedNotification)
+  - [x] Connection Views (index, requests, suggestions, search, blocked)
+  - [x] User Profile Views (show, followers, following)
+  - [x] UserConnectionFactory für Tests
+  - [x] Unit Tests (18 Tests für Connection-Logik)
+  - [x] Feature Tests (ConnectionController: 20 Tests, UserProfileController: 10 Tests)
+  - [x] Integration mit Badge-System
+  - [x] Blocking-Funktion
+  - [x] Connection Suggestions basierend auf Interessen
+  - [x] User Suche
 
 ### 3. Organizer Features
 - [x] Organizer Registration & Login (verwendet is_organizer Flag)
@@ -496,20 +511,66 @@
   - [x] settings() Helper-Funktion
   - [x] Public/Private Settings
   - [x] Settings Routes konfiguriert (5 Routes)
-- [ ] Kategorien Bearbeiten im Admin Panel
-- [ ] Reporting/Analytics
-- [ ] System Settings
-- [ ] Audit Log
-- [ ] Database logs
+- [x] **Reporting/Analytics** ✅ NEU
+  - [x] ReportingController implementiert
+  - [x] Dashboard mit Key Metrics (Users, Events, Bookings, Revenue)
+  - [x] Conversion Funnel Analyse
+  - [x] Zeitraum-Filter (7 Tage, 30 Tage, 90 Tage, Jahr, Gesamt)
+  - [x] User Growth Chart
+  - [x] Revenue Chart
+  - [x] Category Performance
+  - [x] Top 10 Events nach Umsatz
+  - [x] Top 10 Veranstalter nach Umsatz
+  - [x] Detaillierte Reports (Users, Events, Revenue)
+  - [x] CSV Export-Funktionalität
+  - [x] Reporting Views (index, users, events, revenue)
+  - [x] Feature Tests (ReportingControllerTest)
+- [x] **Audit Log System** ✅ NEU
+  - [x] AuditLog Model erstellt
+  - [x] Database Migration (audit_logs Tabelle)
+  - [x] AuditLogController implementiert
+  - [x] Index View mit erweiterten Filtern
+  - [x] Detail View für einzelne Logs
+  - [x] Filter nach Aktion, Modell, Datum, Benutzer
+  - [x] Alte Logs löschen Funktion
+  - [x] CSV Export
+  - [x] Automatisches Logging von User-Aktionen
+  - [x] IP-Adresse und User-Agent Tracking
+  - [x] Changes Summary Funktion
+  - [x] AuditLogFactory für Tests
+  - [x] Feature Tests (AuditLogControllerTest)
+- [x] **Impersonate User** ✅ NEU
+  - [x] ImpersonateController implementiert
+  - [x] Impersonate Funktion mit Session-Management
+  - [x] Leave Impersonation Funktion
+  - [x] Schutz vor Self-Impersonation
+  - [x] Schutz vor Admin-zu-Admin Impersonation
+  - [x] Audit Log Integration
+  - [x] Feature Tests (ImpersonateControllerTest)
 - [ ] Support Ticket System
 
 
 ### 5. Erweiterte Features
-- [ ] Multi-Language Support (i18n)
-- [ ] Datenschutz- und DSGVO-Tools
-  - [ ] Data Export für User
-  - [ ] Data Deletion Requests
-  - [ ] Consent Management
+- [x] **Error Pages (404, 500 etc.)** ✅ NEU
+  - [x] 404 Not Found Page
+  - [x] 403 Forbidden Page
+  - [x] 500 Internal Server Error Page
+  - [x] 503 Service Unavailable Page
+  - [x] Responsive Design
+  - [x] Hilfreiche Links
+- [x] **Datenschutz- und DSGVO-Tools** ✅ NEU
+  - [x] DataPrivacyController implementiert
+  - [x] Datenexport (DSGVO Art. 15) - JSON Format
+  - [x] Alle Dateien herunterladen (ZIP)
+  - [x] Kontolöschung beantragen (DSGVO Art. 17)
+  - [x] Datenschutzeinstellungen
+  - [x] Privacy Fields in User Model
+  - [x] Migration für Privacy Fields
+  - [x] Audit Log Integration
+  - [x] Schutz vor Löschung bei aktiven Events/Buchungen
+  - [x] Data Privacy Views
+  - [x] Feature Tests (DataPrivacyControllerTest)
+  - [x] Networking-Opt-In/Opt-Out
 - [ ] Rabattcodes erstellen und verwalten (Frontend)
 - [x] **Event-Duplikation (Clone Event)**
   - [x] Duplicate-Methode in EventManagementController
@@ -547,7 +608,6 @@
   - [x] Twitter Cards
   - [x] Schema.org Structured Data (JSON-LD)
   - [x] Meta-Tags Component (meta-tags.blade.php)
-- [ ] Event-Favoriten für User (noch Fehlerhaft)
 - [x] Notification System (In-App)
 - [x] **Newsletter-Integration**
   - [x] Migration für newsletter_subscribed erstellt

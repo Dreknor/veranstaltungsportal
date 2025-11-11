@@ -10,7 +10,7 @@
             <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Schnellaktionen</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <a href="{{ route('events.index') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                         <x-icon.search class="w-8 h-8 text-blue-600 mr-3" />
                         <div>
@@ -25,6 +25,21 @@
                             <h3 class="font-semibold text-gray-900">Meine Buchungen</h3>
                             <p class="text-sm text-gray-600">Alle Buchungen ansehen</p>
                         </div>
+                    </a>
+
+                    <a href="{{ route('connections.index') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition relative">
+                        <svg class="w-8 h-8 text-indigo-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Netzwerk</h3>
+                            <p class="text-sm text-gray-600">Mit Pädagogen vernetzen</p>
+                        </div>
+                        @if($user->getPendingRequestsCount() > 0)
+                            <span class="absolute top-2 right-2 px-2 py-1 text-xs font-bold rounded-full bg-green-500 text-white">
+                                {{ $user->getPendingRequestsCount() }}
+                            </span>
+                        @endif
                     </a>
 
                     <a href="{{ route('favorites.index') }}" class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">

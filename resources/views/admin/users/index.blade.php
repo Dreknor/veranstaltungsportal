@@ -138,6 +138,21 @@
                                     </a>
 
                                     @if(auth()->id() !== $user->id)
+                                        <!-- Impersonate User -->
+                                        @if(!$user->hasRole('admin'))
+                                            <form action="{{ route('admin.users.impersonate', $user) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                                                        title="Als {{ $user->name }} anmelden">
+                                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                                    </svg>
+                                                    Verkörpern
+                                                </button>
+                                            </form>
+                                        @endif
+
                                         <!-- Quick Promote/Demote for Organizer -->
                                         @if(!$user->hasRole('organizer') && !$user->hasRole('admin'))
                                             <form action="{{ route('admin.users.promote-organizer', $user) }}" method="POST" class="inline">

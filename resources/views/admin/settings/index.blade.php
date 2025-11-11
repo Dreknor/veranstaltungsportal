@@ -1,9 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
+<x-layouts.app>
+    <!-- Page Header -->
+    <div class="mb-6">
         <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                System-Einstellungen
-            </h2>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">System-Einstellungen</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">Verwalten Sie alle System-Einstellungen</p>
+            </div>
             <form method="POST" action="{{ route('admin.settings.initialize') }}">
                 @csrf
                 <button type="submit" class="rounded-md bg-gray-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-500">
@@ -11,9 +13,9 @@
                 </button>
             </form>
         </div>
-    </x-slot>
+    </div>
 
-    <div class="py-12">
+    <div class="space-y-6">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             @if (session('success'))
                 <div class="mb-4 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
@@ -118,5 +120,5 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-layouts.app>
 

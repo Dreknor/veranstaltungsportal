@@ -67,6 +67,26 @@
 
         <x-layouts.app.header />
 
+        <!-- Impersonation Banner -->
+        @if(session()->has('impersonator'))
+            <div class="bg-yellow-500 text-white py-2 px-4">
+                <div class="container mx-auto flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <span class="font-semibold">Sie verkörpern gerade: {{ auth()->user()->name }}</span>
+                    </div>
+                    <form action="{{ route('impersonate.leave') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="bg-white text-yellow-600 px-4 py-1 rounded font-semibold hover:bg-yellow-50 transition">
+                            Verkörperung beenden
+                        </button>
+                    </form>
+                </div>
+            </div>
+        @endif
+
         <!-- Main Content Area with Sidebar -->
         <div class="flex flex-1 overflow-hidden relative">
 
