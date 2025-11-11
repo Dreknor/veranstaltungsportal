@@ -1,17 +1,18 @@
 <!-- Modern Sidebar with Smooth Animations -->
+<!-- Overlay for mobile (moved outside of the aside so it blurs the page but not the sidebar) -->
+<div x-show="sidebarOpen"
+     @click="toggleSidebar"
+     x-transition:enter="transition-opacity ease-linear duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition-opacity ease-linear duration-300"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm md:hidden z-20 pointer-events-auto"
+     aria-hidden="true"></div>
+
 <aside :class="{ 'translate-x-0': sidebarOpen, '-translate-x-full md:translate-x-0': !sidebarOpen, 'md:w-64': sidebarOpen, 'md:w-20': !sidebarOpen }"
     class="fixed md:static inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out shadow-xl md:shadow-none">
-
-    <!-- Overlay for mobile -->
-    <div x-show="sidebarOpen"
-         @click="toggleSidebar"
-         x-transition:enter="transition-opacity ease-linear duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity ease-linear duration-300"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm md:hidden z-30"></div>
 
     <!-- Sidebar Content -->
     <div class="relative h-full flex flex-col bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900">
