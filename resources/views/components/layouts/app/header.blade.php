@@ -50,53 +50,8 @@
                 </svg>
             </button>
 
-            <!-- Notifications -->
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" class="relative p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    @if(auth()->user()->unreadNotifications->count() > 0)
-                    <span class="absolute top-1 right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold animate-pulse">
-                        {{ auth()->user()->unreadNotifications->count() > 9 ? '9+' : auth()->user()->unreadNotifications->count() }}
-                    </span>
-                    @endif
-                </button>
-
-                <!-- Notifications Dropdown -->
-                <div x-show="open"
-                     x-cloak
-                     @click.away="open = false"
-                     x-transition:enter="transition ease-out duration-200"
-                     x-transition:enter-start="opacity-0 scale-95"
-                     x-transition:enter-end="opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-150"
-                     x-transition:leave-start="opacity-100 scale-100"
-                     x-transition:leave-end="opacity-0 scale-95"
-                     class="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 z-50 border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto">
-                    <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Benachrichtigungen</h3>
-                            <a href="{{ route('notifications.index') }}" class="text-xs text-blue-600 dark:text-blue-400 hover:underline">Alle anzeigen</a>
-                        </div>
-                    </div>
-                    @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
-                    <a href="{{ $notification->data['url'] ?? route('notifications.index') }}"
-                       class="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                        <p class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ $notification->data['title'] ?? 'Benachrichtigung' }}</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ $notification->data['message'] ?? '' }}</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
-                    </a>
-                    @empty
-                    <div class="px-4 py-8 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                        </svg>
-                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Keine neuen Benachrichtigungen</p>
-                    </div>
-                    @endforelse
-                </div>
-            </div>
+            <!-- Notifications (Enhanced In-App Notifications) -->
+            <x-notification-bell />
 
             <!-- Profile Dropdown -->
             <div x-data="{ open: false }" class="relative">

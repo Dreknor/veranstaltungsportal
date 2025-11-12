@@ -267,6 +267,21 @@
                 @endif
                 @endauth
 
+                <!-- Hilfe & Support Section -->
+                <li class="pt-6 pb-2">
+                    <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                        <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Hilfe & Support
+                        </h3>
+                        <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                    </div>
+                </li>
+
+                <x-layouts.sidebar-link href="{{ route('help.index') }}" icon='fas-circle-question'
+                    :active="request()->routeIs('help.*')">
+                    Hilfe & Anleitungen
+                </x-layouts.sidebar-link>
+
                 <!-- Datenschutz Section (für alle Benutzer) -->
                 @auth
                 <li class="pt-6 pb-2">

@@ -4,9 +4,11 @@ namespace App\Providers;
 
 use App\Models\Booking;
 use App\Models\Event;
+use App\Models\SystemLog;
 use App\Observers\BookingObserver;
 use App\Observers\BookingObserverForBadges;
 use App\Observers\EventObserver;
+use App\Observers\SystemLogObserver;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event as EventFacade;
 use SocialiteProviders\Manager\SocialiteWasCalled;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::observe(EventObserver::class);
+        SystemLog::observe(SystemLogObserver::class);
         Booking::observe(BookingObserver::class);
         Booking::observe(BookingObserverForBadges::class);
 

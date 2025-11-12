@@ -46,9 +46,6 @@
                     <a href="{{ route('dashboard') }}" class="text-blue-600 hover:underline">
                         Dashboard
                     </a>
-                    <a href="{{ route('contact') }}" class="text-blue-600 hover:underline">
-                        Kontakt
-                    </a>
                 </div>
             </div>
         </div>

@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\NewOrganizerRegisteredNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -40,6 +42,10 @@ class RegistrationController extends Controller
         // Assign appropriate role based on account_type
         if ($accountType === 'organizer') {
             $user->assignRole('organizer');
+
+            // Notify all admins about the new organizer registration
+            $admins = User::role('admin')->get();
+            Notification::send($admins, new NewOrganizerRegisteredNotification($user));
         } else {
             $user->assignRole('user');
         }

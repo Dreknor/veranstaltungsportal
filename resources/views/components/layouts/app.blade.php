@@ -176,6 +176,17 @@
                         </div>
                     @endif
 
+                    <!-- Optional Page Header -->
+                    @isset($header)
+                        <header class="mb-6">
+                            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg">
+                                <div class="px-4 py-5 sm:px-6">
+                                    {{ $header }}
+                                </div>
+                            </div>
+                        </header>
+                    @endisset
+
                     <!-- Page Content -->
                     <div class="animate-fadeIn">
                         {{ $slot }}

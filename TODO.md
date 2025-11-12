@@ -49,6 +49,20 @@
 - [x] **Export-Funktionalität (CSV)**
 - [x] **Email Templates (Buchungsbestätigung, Stornierung)**
 - [x] **Professionelle E-Mail-Templates mit vollständigem Inhalt**
+- [x] **Hilfe-System (HelpController, Routes, Views)**
+- [x] **User-Hilfe-Artikel (12/12 - 100% vollständig)**
+  - [x] Erste Schritte (22KB)
+  - [x] Veranstaltungen finden (18KB)
+  - [x] Veranstaltungen buchen (6.3KB)
+  - [x] Buchungen verwalten (3.9KB)
+  - [x] Profil & Einstellungen (24KB)
+  - [x] Häufige Probleme (18KB)
+  - [x] Benachrichtigungen (13KB)
+  - [x] Netzwerk & Kontakte (9.1KB)
+  - [x] Badges & Erfolge (18KB)
+  - [x] Favoriten & Merkliste (15KB)
+  - [x] Bewertungen schreiben (16KB)
+  - [x] Datenschutz & Privatsphäre (18KB)
   - [x] Buchungsbestätigung (confirmation.blade.php) - Vollständig überarbeitet
   - [x] Payment Confirmed (payment-confirmed.blade.php) - Neu erstellt
   - [x] Zahlungshinweise bei ausstehender Zahlung
@@ -160,6 +174,28 @@
   - [ ] Views für Featured Event Antragstellung (Organizer)
   - [ ] Views für Zahlungsabwicklung (Organizer)
   - [ ] Benachrichtigungen 3 Tage vor Ablauf
+
+### Hilfe-System
+- [x] **User-Hilfe-Artikel (12/12 - 100% vollständig)** ✅
+- [ ] **Organizer-Hilfe-Artikel (0/9)** 🎯 NÄCHSTE PRIORITÄT
+  - [ ] getting-started.blade.php - Erste Schritte als Organisator
+  - [ ] creating-events.blade.php - Events erstellen & verwalten
+  - [ ] managing-bookings.blade.php - Buchungen & Teilnehmer verwalten
+  - [ ] tickets-pricing.blade.php - Tickets & Preisgestaltung
+  - [ ] analytics-reports.blade.php - Statistiken & Berichte
+  - [ ] communication.blade.php - Kommunikation mit Teilnehmern
+  - [ ] marketing-promotion.blade.php - Marketing & Promotion
+  - [ ] settings-preferences.blade.php - Einstellungen & Präferenzen
+  - [ ] troubleshooting.blade.php - Häufige Probleme & FAQ
+  - [ ] **Siehe:** `docs/HELP_ORGANIZER_ADMIN_TODO.md` für Details
+- [ ] **Admin-Hilfe-Artikel (0/6)**
+  - [ ] getting-started.blade.php - Admin-Dashboard Einführung
+  - [ ] user-management.blade.php - Benutzerverwaltung
+  - [ ] event-moderation.blade.php - Event-Moderation & Freigabe
+  - [ ] system-settings.blade.php - Systemeinstellungen
+  - [ ] logs-monitoring.blade.php - Logs & System-Überwachung
+  - [ ] troubleshooting.blade.php - Admin-Troubleshooting
+  - [ ] **Siehe:** `docs/HELP_ORGANIZER_ADMIN_TODO.md` für Details
 
 ## 🔄 In Arbeit / Fehlend
 
@@ -655,9 +691,26 @@
 
 
 ### 8. Dokumentation
-- [ ] User Manual (Endbenutzer)
-- [ ] Organizer Guide
-- [ ] Admin Guide
+- [x] **User Manual (Endbenutzer) - Hilfesystem** ✅ NEU
+  - [x] HelpController implementiert (4 Methoden)
+  - [x] Help Routes konfiguriert (4 Routes)
+  - [x] Hilfe-Übersichtsseite (index.blade.php)
+  - [x] Suchfunktion mit Ranking
+  - [x] Berechtigungssystem (User/Organizer/Admin)
+  - [x] 12 User-Artikel erstellt:
+    - [x] Erste Schritte (vollständig)
+    - [x] Veranstaltungen finden (vollständig)
+    - [x] Veranstaltungen buchen (vollständig)
+    - [x] Buchungen verwalten (vollständig)
+    - [x] Profil & Einstellungen (vollständig)
+    - [x] Häufige Probleme (12 FAQ, vollständig)
+    - [x] 6 Platzhalter-Artikel (Notifications, Social, Badges, Favorites, Reviews, Privacy)
+  - [x] Sidebar-Integration mit Icon
+  - [x] Responsive Design & Dark Mode
+  - [x] Dokumentation (docs/USER_MANUAL_SYSTEM.md)
+  - [x] System vorbereitet für Organizer- und Admin-Handbücher
+- [ ] Organizer Guide (geplant, System vorbereitet)
+- [ ] Admin Guide (geplant, System vorbereitet)
 
 
 ## 🐛 Bekannte Issues

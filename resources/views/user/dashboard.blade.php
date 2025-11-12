@@ -244,15 +244,14 @@
                     <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
                         <a href="{{ route('events.show', $event) }}">
                             @if($event->featured_image)
-                                <img src="{{ asset('storage/' . $event->featured_image) }}"
-                                     alt="{{ $event->title }}"
-                                     class="w-full h-40 object-cover">
+                                <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
                             @else
-                                <div class="w-full h-40 bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center">
-                                    <i class="fas fa-calendar-alt text-white text-4xl"></i>
+                                <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                                    <x-icon.calendar class="w-16 h-16 text-white opacity-50" />
                                 </div>
                             @endif
                         </a>
+
                         <div class="p-4">
                             <div class="flex items-center mb-2">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
@@ -273,7 +272,7 @@
                                 <i class="far fa-map-marker-alt mr-2"></i>
                                 {{ $event->isOnline() ? 'Online-Veranstaltung' : $event->venue_city }}
                             </div>
-                            <a href="{{ route('events.show', $event) }}" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            <a href="{{ route('events.show', $event->slug) }}" class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                                 Mehr erfahren
                             </a>
                         </div>

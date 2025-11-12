@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "44789d08f812ffc0ba2d0b2e04e7a0d4",
+    "content-hash": "fc465c5563a39f4a647f09edf8d07d43",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -423,6 +423,78 @@
                 }
             ],
             "time": "2025-08-20T19:15:30+00:00"
+        },
+        {
+            "name": "danielme85/laravel-log-to-db",
+            "version": "v4.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/danielme85/laravel-log-to-db.git",
+                "reference": "5ccfde1c3a418290bb60a3573f525d080a08ef6d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/danielme85/laravel-log-to-db/zipball/5ccfde1c3a418290bb60a3573f525d080a08ef6d",
+                "reference": "5ccfde1c3a418290bb60a3573f525d080a08ef6d",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": ">=10.0",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "ext-mongodb": "*",
+                "mockery/mockery": ">=1.5",
+                "mongodb/laravel-mongodb": ">=4",
+                "nunomaduro/collision": ">=7.0",
+                "orchestra/testbench": ">=8.0",
+                "phpunit/phpunit": ">=10.0"
+            },
+            "suggest": {
+                "jenssegers/mongodb": "Adds support for MongoDB in Laravel/Eloquent"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "LogToDB": "danielme85\\LaravelLogToDB\\LogToDB"
+                    },
+                    "providers": [
+                        "danielme85\\LaravelLogToDB\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "danielme85\\LaravelLogToDB\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Daniel Mellum",
+                    "email": "mellum@gmail.com"
+                }
+            ],
+            "description": "Custom Laravel  Log channel handler that can store log events to SQL or MongoDB databases. Uses Laravel native logging functionality.",
+            "keywords": [
+                "database",
+                "db",
+                "laravel",
+                "log",
+                "logging",
+                "mongodb",
+                "mysql",
+                "sql"
+            ],
+            "support": {
+                "issues": "https://github.com/danielme85/laravel-log-to-db/issues",
+                "source": "https://github.com/danielme85/laravel-log-to-db/tree/v4.1.2"
+            },
+            "time": "2025-03-04T17:40:34+00:00"
         },
         {
             "name": "dasprid/enum",

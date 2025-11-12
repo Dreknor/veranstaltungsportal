@@ -21,6 +21,12 @@ Route::get('/account-types', function () {
     return view('account-types');
 })->name('account-types');
 
+// Help Center Routes
+Route::get('/help', [\App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
+Route::get('/help/search', [\App\Http\Controllers\HelpController::class, 'search'])->name('help.search');
+Route::get('/help/{category}', [\App\Http\Controllers\HelpController::class, 'category'])->name('help.category');
+Route::get('/help/{category}/{article}', [\App\Http\Controllers\HelpController::class, 'show'])->name('help.article');
+
 // Event Routes (Public)
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/calendar', [EventController::class, 'calendar'])->name('events.calendar');
@@ -331,10 +337,25 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Audit Logs
     Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('/audit-logs/export', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
+    Route::post('/audit-logs/clear', [\App\Http\Controllers\Admin\AuditLogController::class, 'clear'])->name('audit-logs.clear');
     Route::get('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
     Route::delete('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
-    Route::post('/audit-logs/clear', [\App\Http\Controllers\Admin\AuditLogController::class, 'clear'])->name('audit-logs.clear');
-    Route::get('/audit-logs/export', [\App\Http\Controllers\Admin\AuditLogController::class, 'export'])->name('audit-logs.export');
+
+    // System Logs
+    Route::get('/system-logs', [\App\Http\Controllers\Admin\SystemLogController::class, 'index'])->name('system-logs.index');
+    Route::get('/system-logs/statistics', [\App\Http\Controllers\Admin\SystemLogController::class, 'statistics'])->name('system-logs.statistics');
+    Route::get('/system-logs/export', [\App\Http\Controllers\Admin\SystemLogController::class, 'export'])->name('system-logs.export');
+    Route::post('/system-logs/clear', [\App\Http\Controllers\Admin\SystemLogController::class, 'clear'])->name('system-logs.clear');
+    Route::post('/system-logs/clear-by-level', [\App\Http\Controllers\Admin\SystemLogController::class, 'clearByLevel'])->name('system-logs.clear-by-level');
+    Route::get('/system-logs/{id}', [\App\Http\Controllers\Admin\SystemLogController::class, 'show'])->name('system-logs.show');
+    Route::delete('/system-logs/{id}', [\App\Http\Controllers\Admin\SystemLogController::class, 'destroy'])->name('system-logs.destroy');
+
+    // Log Notification Settings
+    Route::get('/log-notifications', [\App\Http\Controllers\Admin\LogNotificationSettingsController::class, 'index'])->name('log-notifications.index');
+    Route::post('/log-notifications/give', [\App\Http\Controllers\Admin\LogNotificationSettingsController::class, 'givePermission'])->name('log-notifications.give');
+    Route::post('/log-notifications/revoke', [\App\Http\Controllers\Admin\LogNotificationSettingsController::class, 'revokePermission'])->name('log-notifications.revoke');
+    Route::post('/log-notifications/test', [\App\Http\Controllers\Admin\LogNotificationSettingsController::class, 'testNotification'])->name('log-notifications.test');
 
     // Impersonate User
     Route::post('/users/{user}/impersonate', [\App\Http\Controllers\Admin\ImpersonateController::class, 'impersonate'])->name('users.impersonate');
@@ -354,3 +375,16 @@ Route::middleware(['auth'])->prefix('data-privacy')->name('data-privacy.')->grou
 });
 
 require __DIR__.'/auth.php';
+
+// Notifications (für eingeloggte Benutzer)
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread', [\App\Http\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::get('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']); // GET für Direktlinks
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications/read/all', [\App\Http\Controllers\NotificationController::class, 'deleteRead'])->name('notifications.delete-read');
+});
+
+

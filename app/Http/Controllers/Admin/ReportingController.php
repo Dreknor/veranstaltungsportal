@@ -34,10 +34,10 @@ class ReportingController extends Controller
             'new_events' => Event::where('created_at', '>=', $startDate)->count(),
             'total_bookings' => Booking::count(),
             'new_bookings' => Booking::where('created_at', '>=', $startDate)->count(),
-            'total_revenue' => Booking::where('payment_status', 'paid')->sum('total_amount'),
+            'total_revenue' => Booking::where('payment_status', 'paid')->sum('total'),
             'period_revenue' => Booking::where('payment_status', 'paid')
                 ->where('created_at', '>=', $startDate)
-                ->sum('total_amount'),
+                ->sum('total'),
         ];
 
         // User Growth Chart
@@ -108,9 +108,9 @@ class ReportingController extends Controller
             'events_by_type' => Event::select('event_type', DB::raw('count(*) as count'))
                 ->groupBy('event_type')
                 ->get(),
-            'average_capacity' => Event::avg('max_participants'),
-            'published_vs_draft' => Event::select('published', DB::raw('count(*) as count'))
-                ->groupBy('published')
+            'average_capacity' => Event::avg('max_attendees'),
+            'published_vs_draft' => Event::select('is_published', DB::raw('count(*) as count'))
+                ->groupBy('is_published')
                 ->get(),
         ];
 
@@ -124,23 +124,33 @@ class ReportingController extends Controller
 
         $data = [
             'revenue_chart' => $this->getRevenueData($startDate, now()),
-            'revenue_by_category' => EventCategory::withSum(['events.bookings' => function ($query) use ($startDate) {
-                $query->where('payment_status', 'paid')
-                    ->where('created_at', '>=', $startDate);
-            }], 'total_amount')
-                ->orderBy('bookings_sum_total_amount', 'desc')
-                ->get(),
-            'payment_methods' => Booking::select('payment_method', DB::raw('count(*) as count'), DB::raw('sum(total_amount) as total'))
+            'revenue_by_category' => EventCategory::with(['events' => function ($query) use ($startDate) {
+                $query->where('created_at', '>=', $startDate)
+                    ->with(['bookings' => function ($q) use ($startDate) {
+                        $q->where('payment_status', 'paid')
+                            ->where('created_at', '>=', $startDate);
+                    }]);
+            }])
+                ->get()
+                ->map(function ($category) {
+                    $category->bookings_sum_total = $category->events->sum(function ($event) {
+                        return $event->bookings->sum('total');
+                    });
+                    return $category;
+                })
+                ->sortByDesc('bookings_sum_total')
+                ->values(),
+            'payment_methods' => Booking::select('payment_method', DB::raw('count(*) as count'), DB::raw('sum(total) as total'))
                 ->where('created_at', '>=', $startDate)
                 ->where('payment_status', 'paid')
                 ->groupBy('payment_method')
                 ->get(),
-            'payment_status_breakdown' => Booking::select('payment_status', DB::raw('count(*) as count'), DB::raw('sum(total_amount) as total'))
+            'payment_status_breakdown' => Booking::select('payment_status', DB::raw('count(*) as count'), DB::raw('sum(total) as total'))
                 ->where('created_at', '>=', $startDate)
                 ->groupBy('payment_status')
                 ->get(),
             'platform_fees' => FeaturedEventFee::where('created_at', '>=', $startDate)
-                ->sum('amount'),
+                ->sum('fee_amount'),
         ];
 
         return view('admin.reporting.revenue', compact('data', 'period'));
@@ -193,7 +203,7 @@ class ReportingController extends Controller
     {
         return Booking::select(
             DB::raw('DATE(created_at) as date'),
-            DB::raw('sum(total_amount) as total')
+            DB::raw('sum(total) as total')
         )
             ->where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
@@ -207,12 +217,21 @@ class ReportingController extends Controller
         return EventCategory::withCount(['events' => function ($query) use ($startDate, $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }])
-            ->withSum(['events.bookings' => function ($query) use ($startDate, $endDate) {
-                $query->where('payment_status', 'paid')
-                    ->whereBetween('created_at', [$startDate, $endDate]);
-            }], 'total_amount')
+            ->with(['events' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])
+                    ->with(['bookings' => function ($q) use ($startDate, $endDate) {
+                        $q->where('payment_status', 'paid')
+                            ->whereBetween('created_at', [$startDate, $endDate]);
+                    }]);
+            }])
             ->orderBy('events_count', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($category) {
+                $category->bookings_sum_total = $category->events->sum(function ($event) {
+                    return $event->bookings->sum('total');
+                });
+                return $category;
+            });
     }
 
     private function getTopEvents($startDate, $endDate)
@@ -223,8 +242,8 @@ class ReportingController extends Controller
             ->withSum(['bookings' => function ($query) use ($startDate, $endDate) {
                 $query->where('payment_status', 'paid')
                     ->whereBetween('created_at', [$startDate, $endDate]);
-            }], 'total_amount')
-            ->orderBy('bookings_sum_total_amount', 'desc')
+            }], 'total')
+            ->orderBy('bookings_sum_total', 'desc')
             ->limit(10)
             ->get();
     }
@@ -232,16 +251,26 @@ class ReportingController extends Controller
     private function getTopOrganizers($startDate, $endDate)
     {
         return User::where('is_organizer', true)
-            ->withCount(['organizedEvents' => function ($query) use ($startDate, $endDate) {
+            ->withCount(['events' => function ($query) use ($startDate, $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
             }])
-            ->withSum(['organizedEvents.bookings' => function ($query) use ($startDate, $endDate) {
-                $query->where('payment_status', 'paid')
-                    ->whereBetween('created_at', [$startDate, $endDate]);
-            }], 'total_amount')
-            ->orderBy('organized_events_bookings_sum_total_amount', 'desc')
-            ->limit(10)
-            ->get();
+            ->with(['events' => function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate])
+                    ->with(['bookings' => function ($q) use ($startDate, $endDate) {
+                        $q->where('payment_status', 'paid')
+                            ->whereBetween('created_at', [$startDate, $endDate]);
+                    }]);
+            }])
+            ->get()
+            ->map(function ($organizer) {
+                $organizer->events_bookings_sum_total = $organizer->events->sum(function ($event) {
+                    return $event->bookings->sum('total');
+                });
+                return $organizer;
+            })
+            ->sortByDesc('events_bookings_sum_total')
+            ->take(10)
+            ->values();
     }
 
     private function getConversionFunnel($startDate, $endDate)
@@ -300,7 +329,7 @@ class ReportingController extends Controller
                             $user->is_organizer ? 'Veranstalter' : 'Teilnehmer',
                             $user->created_at->format('d.m.Y H:i'),
                             $user->bookings->count(),
-                            $user->bookings->where('payment_status', 'paid')->sum('total_amount'),
+                            $user->bookings->where('payment_status', 'paid')->sum('total'),
                         ]);
                     }
                 });
@@ -319,7 +348,7 @@ class ReportingController extends Controller
                             $event->start_date->format('d.m.Y H:i'),
                             $event->event_type,
                             $event->bookings->count(),
-                            $event->bookings->where('payment_status', 'paid')->sum('total_amount'),
+                            $event->bookings->where('payment_status', 'paid')->sum('total'),
                         ]);
                     }
                 });

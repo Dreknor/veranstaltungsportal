@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\NewOrganizerRegisteredNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 
 class UserManagementController extends Controller
@@ -86,6 +88,9 @@ class UserManagementController extends Controller
             'organization_description' => $validated['organization_description'] ?? null,
         ]);
 
+        // Check if user is becoming an organizer
+        $wasOrganizer = $user->hasRole('organizer');
+
         // Sync roles
         if (isset($validated['roles'])) {
             // Preserve admin role if user is editing themselves
@@ -104,6 +109,15 @@ class UserManagementController extends Controller
                 $user->syncRoles(['admin']);
             } elseif ($user->roles()->count() === 0) {
                 $user->assignRole('user');
+            }
+        }
+
+        // Notify admins if user just became an organizer
+        $isNowOrganizer = $user->hasRole('organizer');
+        if (!$wasOrganizer && $isNowOrganizer) {
+            $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new NewOrganizerRegisteredNotification($user));
             }
         }
 
@@ -159,7 +173,16 @@ class UserManagementController extends Controller
             'role' => 'required|exists:roles,name',
         ]);
 
+        $wasOrganizer = $user->hasRole('organizer');
         $user->assignRole($validated['role']);
+
+        // Notify admins if user just became an organizer
+        if (!$wasOrganizer && $validated['role'] === 'organizer') {
+            $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
+            if ($admins->isNotEmpty()) {
+                Notification::send($admins, new NewOrganizerRegisteredNotification($user));
+            }
+        }
 
         return back()->with('success', 'Rolle erfolgreich zugewiesen.');
     }
@@ -193,6 +216,12 @@ class UserManagementController extends Controller
         }
 
         $user->assignRole('organizer');
+
+        // Notify all other admins about the promotion
+        $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
+        if ($admins->isNotEmpty()) {
+            Notification::send($admins, new NewOrganizerRegisteredNotification($user));
+        }
 
         return back()->with('success', 'Benutzer erfolgreich zum Organisator befördert.');
     }
