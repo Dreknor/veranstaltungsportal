@@ -20,8 +20,8 @@ class BookingInvoiceObserver
     public function created(Booking $booking): void
     {
         // Generate invoice number when booking is created
-        if (!$booking->invoice_number) {
-            $booking->invoice_number = $this->invoiceNumberService->generateBookingInvoiceNumber();
+        if (!$booking->invoice_number && $booking->event && $booking->event->user) {
+            $booking->invoice_number = $this->invoiceNumberService->generateBookingInvoiceNumber($booking->event->user);
             $booking->invoice_date = now();
             $booking->saveQuietly(); // Save without triggering events again
         }
@@ -35,8 +35,10 @@ class BookingInvoiceObserver
         // Generate invoice number when payment status changes to paid (if not already set)
         if ($booking->wasChanged('payment_status') &&
             $booking->payment_status === 'paid' &&
-            !$booking->invoice_number) {
-            $booking->invoice_number = $this->invoiceNumberService->generateBookingInvoiceNumber();
+            !$booking->invoice_number &&
+            $booking->event &&
+            $booking->event->user) {
+            $booking->invoice_number = $this->invoiceNumberService->generateBookingInvoiceNumber($booking->event->user);
             $booking->invoice_date = now();
             $booking->saveQuietly();
         }

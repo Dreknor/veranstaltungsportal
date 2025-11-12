@@ -133,7 +133,7 @@
                                 <strong>Datenschutz:</strong> Nur Benutzer mit öffentlichen Profilen oder aktiviertem Networking erscheinen in der Bestenliste.
                                 Bei privaten Profilen wird der Name anonymisiert angezeigt (z.B. "Max M.").
                                 Sie können Ihre Sichtbarkeitseinstellungen in Ihren
-                                <a href="{{ route('profile.edit') }}" class="text-blue-600 hover:text-blue-800 underline">Profileinstellungen</a> anpassen.
+                                <a href="{{ route('settings.profile.edit') }}" class="text-blue-600 hover:text-blue-800 underline">Profileinstellungen</a> anpassen.
                             </div>
                         </div>
                     </div>

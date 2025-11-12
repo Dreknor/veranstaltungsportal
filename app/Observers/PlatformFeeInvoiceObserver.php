@@ -20,6 +20,7 @@ class PlatformFeeInvoiceObserver
     public function created(PlatformFee $platformFee): void
     {
         // Generate invoice number when platform fee is created
+        // Platform fees use global settings (not organizer-specific)
         if (!$platformFee->invoice_number) {
             $platformFee->invoice_number = $this->invoiceNumberService->generatePlatformFeeInvoiceNumber();
             $platformFee->invoice_date = now();

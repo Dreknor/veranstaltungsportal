@@ -59,6 +59,9 @@ class User extends Authenticatable
         'allow_networking',
         'show_profile_public',
         'allow_data_analytics',
+        'invoice_settings',
+        'invoice_counter_booking',
+        'invoice_counter_booking_year',
     ];
 
     /**
@@ -96,6 +99,7 @@ class User extends Authenticatable
             'allow_networking' => 'boolean',
             'show_profile_public' => 'boolean',
             'allow_data_analytics' => 'boolean',
+            'invoice_settings' => 'array',
         ];
     }
 

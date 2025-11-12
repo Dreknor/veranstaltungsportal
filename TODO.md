@@ -493,6 +493,7 @@
   - [x] Series Edit View (series/edit.blade.php)
   - [x] 8 neue Routes konfiguriert
   - [x] Migration ausgeführt
+  - [ ] Hinterlegung Rechnungsnummern in den Einstellungen der Kontoverbindung mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
   - 
 
 ### 4. Admin Features
@@ -584,7 +585,7 @@
   - [x] Audit Log Integration
   - [x] Feature Tests (ImpersonateControllerTest)
 - [ ] Support Ticket System
-
+- [ ] Hinterlegung Rechnungsnummern in den Einstellungen der Plattform-Rechnungsdaten mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
 
 ### 5. Erweiterte Features
 - [x] **Error Pages (404, 500 etc.)** ✅ NEU

@@ -3,62 +3,85 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceNumberService
 {
     /**
-     * Generate invoice number for booking
+     * Generate invoice number for booking (issued by organizer to participant)
+     * Uses organizer-specific settings
      */
-    public function generateBookingInvoiceNumber(): string
+    public function generateBookingInvoiceNumber(User $organizer): string
     {
-        return $this->generateInvoiceNumber('booking');
-    }
+        // Get organizer-specific settings
+        $settings = $organizer->invoice_settings ?? [];
 
-    /**
-     * Generate invoice number for platform fee
-     */
-    public function generatePlatformFeeInvoiceNumber(): string
-    {
-        return $this->generateInvoiceNumber('platform_fee');
-    }
-
-    /**
-     * Generate invoice number based on type
-     */
-    protected function generateInvoiceNumber(string $type): string
-    {
-        $formatKey = "invoice_number_format_{$type}";
-        $counterKey = "invoice_number_counter_{$type}";
-
-        // Get settings
-        $format = Setting::getValue($formatKey, "RE-{YEAR}-{NUMBER}");
-        $padding = (int) Setting::getValue('invoice_number_padding', 5);
-        $resetYearly = Setting::getValue('invoice_reset_yearly', true);
+        $format = $settings['invoice_number_format_booking'] ?? "RE-{YEAR}-{NUMBER}";
+        $padding = (int) ($settings['invoice_number_padding'] ?? 5);
+        $resetYearly = $settings['invoice_reset_yearly'] ?? true;
 
         // Get current counter with lock to prevent race conditions
-        $counter = DB::transaction(function () use ($counterKey, $resetYearly, $type) {
+        $counter = DB::transaction(function () use ($organizer, $resetYearly) {
+            // Reload user to get fresh data with lock
+            $user = User::lockForUpdate()->find($organizer->id);
+
             $currentYear = now()->format('Y');
-            $lastYear = Setting::getValue("{$counterKey}_year", $currentYear);
+            $lastYear = $user->invoice_counter_booking_year ?? $currentYear;
+            $counter = $user->invoice_counter_booking ?? 1;
 
             // Reset counter if yearly reset is enabled and year changed
             if ($resetYearly && $lastYear !== $currentYear) {
-                Setting::setValue($counterKey, 1);
-                Setting::setValue("{$counterKey}_year", $currentYear);
+                $user->invoice_counter_booking = 2; // Next number after reset
+                $user->invoice_counter_booking_year = $currentYear;
+                $user->save();
                 return 1;
             }
 
             // Increment counter
-            $counter = (int) Setting::getValue($counterKey, 1);
-            Setting::setValue($counterKey, $counter + 1);
+            $currentCounter = $counter;
+            $user->invoice_counter_booking = $counter + 1;
+            $user->save();
+
+            return $currentCounter;
+        });
+
+        // Replace placeholders
+        return $this->replacePlaceholders($format, $counter, $padding);
+    }
+
+    /**
+     * Generate invoice number for platform fee (issued by platform to organizer)
+     * Uses global platform settings
+     */
+    public function generatePlatformFeeInvoiceNumber(): string
+    {
+        // Get global platform settings
+        $format = Setting::getValue('invoice_number_format_platform_fee', 'PF-{YEAR}-{NUMBER}');
+        $padding = (int) Setting::getValue('invoice_number_padding', 5);
+        $resetYearly = Setting::getValue('invoice_reset_yearly', true);
+
+        // Get current counter with lock to prevent race conditions
+        $counter = DB::transaction(function () use ($resetYearly) {
+            $currentYear = now()->format('Y');
+            $lastYear = Setting::getValue('invoice_counter_platform_fee_year', $currentYear);
+
+            // Reset counter if yearly reset is enabled and year changed
+            if ($resetYearly && $lastYear !== $currentYear) {
+                Setting::setValue('invoice_counter_platform_fee', 1);
+                Setting::setValue('invoice_counter_platform_fee_year', $currentYear);
+                return 1;
+            }
+
+            // Increment counter
+            $counter = (int) Setting::getValue('invoice_counter_platform_fee', 1);
+            Setting::setValue('invoice_counter_platform_fee', $counter + 1);
 
             return $counter;
         });
 
         // Replace placeholders
-        $invoiceNumber = $this->replacePlaceholders($format, $counter, $padding);
-
-        return $invoiceNumber;
+        return $this->replacePlaceholders($format, $counter, $padding);
     }
 
     /**

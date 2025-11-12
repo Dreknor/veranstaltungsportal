@@ -279,4 +279,100 @@ class CheckInController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Check in a booking directly (for QR code URLs)
+     * The event is determined from the booking
+     */
+    public function checkInByBooking(Request $request, Booking $booking)
+    {
+        $event = $booking->event;
+
+        // Authorization: User must be the organizer of the event
+        $this->authorize('update', $event);
+
+        if (!$booking->canCheckIn()) {
+            $reason = '';
+            if ($booking->status !== 'confirmed') {
+                $reason = 'Status ist nicht "confirmed" (aktuell: ' . $booking->status . ')';
+            } elseif ($booking->payment_status !== 'paid') {
+                $reason = 'Zahlung ist nicht abgeschlossen (aktuell: ' . $booking->payment_status . ')';
+            } elseif ($booking->checked_in) {
+                $reason = 'Bereits eingecheckt am ' . $booking->checked_in_at->format('d.m.Y H:i');
+            } elseif ($booking->event->start_date->isFuture() && !$booking->event->start_date->isToday()) {
+                $reason = 'Event liegt noch in der Zukunft';
+            }
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Diese Buchung kann nicht eingecheckt werden. ' . $reason,
+                    'booking' => [
+                        'id' => $booking->id,
+                        'booking_number' => $booking->booking_number,
+                        'customer_name' => $booking->customer_name,
+                        'checked_in' => $booking->checked_in,
+                        'checked_in_at' => $booking->checked_in_at,
+                    ],
+                ], 400);
+            }
+
+            return back()->with('error', 'Diese Buchung kann nicht eingecheckt werden. ' . $reason);
+        }
+
+        try {
+            $booking->checkIn(
+                checkedInBy: auth()->user(),
+                method: $request->input('method', 'qr'),
+                notes: $request->input('notes', 'QR-Code Check-in')
+            );
+
+            Log::info('Check-In erfolgreich (via QR)', [
+                'booking_id' => $booking->id,
+                'booking_number' => $booking->booking_number,
+                'event_id' => $event->id,
+                'checked_in_by' => auth()->id(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Erfolgreich eingecheckt!',
+                    'booking' => [
+                        'id' => $booking->id,
+                        'booking_number' => $booking->booking_number,
+                        'customer_name' => $booking->customer_name,
+                        'customer_email' => $booking->customer_email,
+                        'checked_in' => true,
+                        'checked_in_at' => $booking->checked_in_at,
+                        'tickets_count' => $booking->items->sum('quantity'),
+                        'event' => [
+                            'id' => $event->id,
+                            'title' => $event->title,
+                        ],
+                    ],
+                ]);
+            }
+
+            return redirect()
+                ->route('organizer.check-in.index', ['event' => $event])
+                ->with('status', 'Teilnehmer erfolgreich eingecheckt: ' . $booking->customer_name);
+
+        } catch (\Exception $e) {
+            Log::error('Check-In Fehler (via QR)', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Fehler beim Check-In: ' . $e->getMessage(),
+                ], 500);
+            }
+
+            return back()->with('error', 'Fehler beim Check-In: ' . $e->getMessage());
+        }
+    }
 }

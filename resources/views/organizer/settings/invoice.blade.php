@@ -6,18 +6,10 @@
                 <nav class="flex" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
-                            <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
+                            <a href="{{ route('organizer.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
                                 <i class="fas fa-home mr-2"></i>
-                                Admin
+                                Veranstalter
                             </a>
-                        </li>
-                        <li>
-                            <div class="flex items-center">
-                                <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                                <a href="{{ route('admin.monetization.index') }}" class="text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
-                                    Monetarisierung
-                                </a>
-                            </div>
                         </li>
                         <li aria-current="page">
                             <div class="flex items-center">
@@ -31,27 +23,27 @@
 
             <div class="mb-6">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                    <i class="fas fa-file-invoice mr-2"></i>Rechnungsnummern für Plattformgebühren
+                    <i class="fas fa-file-invoice mr-2"></i>Rechnungsnummern für Teilnehmer-Buchungen
                 </h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2">
-                    Konfigurieren Sie das Format und die Nummerierung für Rechnungen, die von der Plattform an Veranstalter gestellt werden.
+                    Konfigurieren Sie das Format und die Nummerierung für Rechnungen, die Sie an Ihre Teilnehmer ausstellen.
                 </p>
                 <p class="text-sm text-yellow-600 dark:text-yellow-400 mt-2">
                     <i class="fas fa-info-circle mr-1"></i>
-                    <strong>Hinweis:</strong> Rechnungen an Teilnehmer werden vom jeweiligen Veranstalter konfiguriert.
+                    <strong>Hinweis:</strong> Rechnungen für Plattformgebühren werden von der Plattform verwaltet.
                 </p>
             </div>
 
-            <!-- Tab Navigation -->
+            <!-- Navigation -->
             <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
                 <nav class="-mb-px flex space-x-8">
-                    <a href="{{ route('admin.monetization.index') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 pb-4 text-sm font-medium">
-                        Gebühren-Einstellungen
+                    <a href="{{ route('organizer.bank-account.index') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 pb-4 text-sm font-medium">
+                        Kontoverbindung
                     </a>
-                    <a href="{{ route('admin.monetization.billing-data') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 pb-4 text-sm font-medium">
-                        Plattform-Rechnungsdaten
+                    <a href="{{ route('organizer.bank-account.billing-data') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 px-1 pb-4 text-sm font-medium">
+                        Rechnungsdaten
                     </a>
-                    <a href="{{ route('admin.settings.invoice.index') }}" class="border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 px-1 pb-4 text-sm font-medium">
+                    <a href="{{ route('organizer.settings.invoice.index') }}" class="border-b-2 border-blue-500 text-blue-600 dark:text-blue-400 px-1 pb-4 text-sm font-medium">
                         <i class="fas fa-file-invoice mr-1"></i>Rechnungsnummern
                     </a>
                 </nav>
@@ -82,7 +74,7 @@
             @endif
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <form action="{{ route('admin.settings.invoice.update') }}" method="POST" class="p-6">
+                <form action="{{ route('organizer.settings.invoice.update') }}" method="POST" class="p-6">
                     @csrf
                     @method('PUT')
 
@@ -102,40 +94,40 @@
                         </div>
                     </div>
 
-                    <!-- Platform Fee Invoice Format -->
+                    <!-- Booking Invoice Format -->
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center border-b pb-2">
-                            <i class="fas fa-file-invoice-dollar mr-2 text-green-600"></i>
-                            Plattformgebühren-Rechnungen
+                            <i class="fas fa-receipt mr-2 text-blue-600"></i>
+                            Rechnungen an Teilnehmer
                         </h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Diese Rechnungen werden von der Plattform an Veranstalter gestellt, wenn ein Event abgeschlossen ist.
+                            Diese Rechnungen stellen Sie an Teilnehmer aus, die sich für Ihre Veranstaltungen anmelden.
                         </p>
 
                         <div class="space-y-4">
                             <div>
-                                <label for="invoice_number_format_platform_fee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label for="invoice_number_format_booking" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Format für Rechnungsnummern
                                 </label>
                                 <input type="text"
-                                       name="invoice_number_format_platform_fee"
-                                       id="invoice_number_format_platform_fee"
-                                       value="{{ old('invoice_number_format_platform_fee', $settings['invoice_number_format_platform_fee']) }}"
+                                       name="invoice_number_format_booking"
+                                       id="invoice_number_format_booking"
+                                       value="{{ old('invoice_number_format_booking', $settings['invoice_number_format_booking']) }}"
                                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                                        required>
                                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                    Beispiel: PF-{YEAR}-{NUMBER} → <span id="preview-platform" class="font-mono font-bold">...</span>
+                                    Beispiel: RE-{YEAR}-{NUMBER} → <span id="preview-booking" class="font-mono font-bold">...</span>
                                 </p>
                             </div>
 
                             <div>
-                                <label for="invoice_number_counter_platform_fee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                <label for="invoice_number_counter_booking" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                     Aktueller Zählerstand
                                 </label>
                                 <input type="number"
-                                       name="invoice_number_counter_platform_fee"
-                                       id="invoice_number_counter_platform_fee"
-                                       value="{{ old('invoice_number_counter_platform_fee', $settings['invoice_number_counter_platform_fee']) }}"
+                                       name="invoice_number_counter_booking"
+                                       id="invoice_number_counter_booking"
+                                       value="{{ old('invoice_number_counter_booking', $settings['invoice_number_counter_booking']) }}"
                                        min="1"
                                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                                        required>
@@ -193,6 +185,20 @@
                         </div>
                     </div>
 
+                    <!-- Info Box -->
+                    <div class="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-lightbulb text-yellow-600 dark:text-yellow-400 text-xl mr-3 mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">Wichtiger Hinweis</h4>
+                                <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                    Diese Einstellungen gelten nur für Ihre Rechnungen. Jeder Veranstalter hat seinen eigenen Rechnungskreis mit individuellen fortlaufenden Nummern.
+                                    Ändern Sie die Zählerstände nur, wenn Sie genau wissen, was Sie tun, da dies zu doppelten Rechnungsnummern führen kann.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Submit Button -->
                     <div class="flex items-center justify-end pt-6 border-t">
                         <button type="submit"
@@ -210,14 +216,14 @@
     <script>
         // Live preview of invoice number format
         function updatePreview() {
-            const formatInput = document.getElementById('invoice_number_format_platform_fee');
+            const formatInput = document.getElementById('invoice_number_format_booking');
             const paddingInput = document.getElementById('invoice_number_padding');
-            const previewSpan = document.getElementById('preview-platform');
+            const previewSpan = document.getElementById('preview-booking');
 
             const format = formatInput.value;
             const padding = parseInt(paddingInput.value) || 5;
 
-            fetch('{{ route('admin.settings.invoice.preview') }}', {
+            fetch('{{ route('organizer.settings.invoice.preview') }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -245,7 +251,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             updatePreview();
 
-            document.getElementById('invoice_number_format_platform_fee').addEventListener('input', updatePreview);
+            document.getElementById('invoice_number_format_booking').addEventListener('input', updatePreview);
             document.getElementById('invoice_number_padding').addEventListener('input', updatePreview);
         });
     </script>

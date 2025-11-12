@@ -157,6 +157,7 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::get('/bookings/{booking}', [Organizer\BookingManagementController::class, 'show'])->name('bookings.show');
     Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
     Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
+    Route::post('/bookings/{booking}/check-in', [Organizer\CheckInController::class, 'checkInByBooking'])->name('bookings.check-in');
 
     // Check-In System
     Route::get('/events/{event}/check-in', [Organizer\CheckInController::class, 'index'])->name('check-in.index');
@@ -200,6 +201,11 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::put('/bank-account', [Organizer\BankAccountController::class, 'update'])->name('bank-account.update');
     Route::get('/bank-account/billing-data', [Organizer\BankAccountController::class, 'billingData'])->name('bank-account.billing-data');
     Route::put('/bank-account/billing-data', [Organizer\BankAccountController::class, 'updateBillingData'])->name('bank-account.billing-data.update');
+
+    // Invoice Number Settings
+    Route::get('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
+    Route::put('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
+    Route::post('/settings/invoice/preview', [Organizer\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
 
     // Invoice Management (Platform-Fee Rechnungen)
     Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
@@ -290,11 +296,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/settings/{setting}', [\App\Http\Controllers\Admin\SettingsController::class, 'destroy'])->name('settings.destroy');
     Route::post('/settings/initialize', [\App\Http\Controllers\Admin\SettingsController::class, 'initializeDefaults'])->name('settings.initialize');
 
-    // Invoice Number Settings
+    // Invoice Number Settings (Platform Fee Invoices)
     Route::get('/settings/invoice', [\App\Http\Controllers\Admin\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
     Route::put('/settings/invoice', [\App\Http\Controllers\Admin\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
     Route::post('/settings/invoice/preview', [\App\Http\Controllers\Admin\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
 
+    // Monetization Settings (Admin Only)
     // Monetization Settings (Admin Only)
     Route::get('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'index'])->name('monetization.index');
     Route::put('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'update'])->name('monetization.update');

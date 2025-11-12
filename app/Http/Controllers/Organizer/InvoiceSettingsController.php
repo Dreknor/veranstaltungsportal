@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Http\Controllers\Organizer;
+
+use App\Http\Controllers\Controller;
+use App\Services\InvoiceNumberService;
+use Illuminate\Http\Request;
+
+class InvoiceSettingsController extends Controller
+{
+    protected InvoiceNumberService $invoiceNumberService;
+
+    public function __construct(InvoiceNumberService $invoiceNumberService)
+    {
+        $this->middleware(['auth', 'organizer']);
+        $this->invoiceNumberService = $invoiceNumberService;
+    }
+
+    /**
+     * Show invoice settings form
+     */
+    public function index()
+    {
+        $user = auth()->user();
+        $settings = $user->invoice_settings ?? [];
+
+        // Default values
+        $defaults = [
+            'invoice_number_format_booking' => 'RE-{YEAR}-{NUMBER}',
+            'invoice_number_padding' => 5,
+            'invoice_reset_yearly' => true,
+        ];
+
+        $settings = array_merge($defaults, $settings);
+        $settings['invoice_number_counter_booking'] = $user->invoice_counter_booking ?? 1;
+
+        $placeholders = $this->invoiceNumberService->getAvailablePlaceholders();
+
+        return view('organizer.settings.invoice', compact('settings', 'placeholders'));
+    }
+
+    /**
+     * Update invoice settings
+     */
+    public function update(Request $request)
+    {
+        $request->validate([
+            'invoice_number_format_booking' => 'required|string|max:100',
+            'invoice_number_counter_booking' => 'required|integer|min:1',
+            'invoice_number_padding' => 'required|integer|min:1|max:10',
+            'invoice_reset_yearly' => 'required|boolean',
+        ]);
+
+        // Validate format string
+        if (!$this->invoiceNumberService->validateFormat($request->invoice_number_format_booking)) {
+            return back()->withErrors([
+                'invoice_number_format_booking' => 'Ungültiges Format für Buchungs-Rechnungsnummern. Es muss {NUMBER} oder {COUNTER} enthalten.'
+            ])->withInput();
+        }
+
+        $user = auth()->user();
+
+        // Save settings
+        $invoiceSettings = [
+            'invoice_number_format_booking' => $request->invoice_number_format_booking,
+            'invoice_number_padding' => $request->invoice_number_padding,
+            'invoice_reset_yearly' => $request->invoice_reset_yearly,
+        ];
+
+        $user->update([
+            'invoice_settings' => $invoiceSettings,
+            'invoice_counter_booking' => $request->invoice_number_counter_booking,
+        ]);
+
+        return back()->with('status', 'Rechnungsnummern-Einstellungen wurden erfolgreich aktualisiert.');
+    }
+
+    /**
+     * Preview invoice number format
+     */
+    public function preview(Request $request)
+    {
+        $format = $request->input('format', 'RE-{YEAR}-{NUMBER}');
+        $padding = $request->input('padding', 5);
+
+        if (!$this->invoiceNumberService->validateFormat($format)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ungültiges Format. Es muss {NUMBER} oder {COUNTER} enthalten.'
+            ], 400);
+        }
+
+        $preview = $this->invoiceNumberService->previewFormat($format, $padding);
+
+        return response()->json([
+            'success' => true,
+            'preview' => $preview
+        ]);
+    }
+}
+

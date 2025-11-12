@@ -107,7 +107,14 @@ class Setting extends Model
      */
     public static function setValue(string $key, $value): void
     {
-        $setting = self::firstOrCreate(['key' => $key]);
+        $setting = self::firstOrCreate(
+            ['key' => $key],
+            [
+                'label' => ucfirst(str_replace('_', ' ', $key)),
+                'type' => is_bool($value) ? 'boolean' : (is_int($value) ? 'integer' : (is_array($value) ? 'json' : 'string')),
+                'group' => 'general',
+            ]
+        );
         $setting->setTypedValue($value);
         $setting->save();
     }
