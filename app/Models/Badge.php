@@ -34,6 +34,7 @@ class Badge extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_badges')
+            ->using(UserBadge::class)
             ->withPivot(['earned_at', 'is_highlighted', 'progress'])
             ->withTimestamps();
     }

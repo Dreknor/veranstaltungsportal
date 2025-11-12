@@ -81,6 +81,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
             'notification_preferences' => 'array',
             'interested_category_ids' => 'array',
             'newsletter_subscribed_at' => 'datetime',
@@ -133,6 +134,53 @@ class User extends Authenticatable
         }
 
         return $this->name;
+    }
+
+    /**
+     * Get display name based on privacy settings
+     * Returns full name for public profiles, anonymized name otherwise
+     */
+    public function displayName(?User $viewer = null): string
+    {
+        // Always show full name to the user themselves
+        if ($viewer && $viewer->id === $this->id) {
+            return $this->fullName();
+        }
+
+        // Show full name for public profiles
+        if ($this->show_profile_public) {
+            return $this->fullName();
+        }
+
+        // Show full name to connected users if networking is allowed
+        if ($viewer && $this->allow_networking && $viewer->isFollowing($this)) {
+            return $this->fullName();
+        }
+
+        // Otherwise, anonymize the name
+        return $this->anonymizedName();
+    }
+
+    /**
+     * Get anonymized name (e.g., "Max M." or "User #123")
+     */
+    public function anonymizedName(): string
+    {
+        if ($this->first_name) {
+            $lastInitial = $this->last_name ? mb_substr($this->last_name, 0, 1) . '.' : '';
+            return trim($this->first_name . ' ' . $lastInitial);
+        }
+
+        // Fallback: Use first part of name or User ID
+        if ($this->name) {
+            $parts = explode(' ', $this->name);
+            if (count($parts) > 1) {
+                return $parts[0] . ' ' . mb_substr($parts[1], 0, 1) . '.';
+            }
+            return $this->name;
+        }
+
+        return 'Benutzer #' . $this->id;
     }
 
     /**
@@ -355,6 +403,7 @@ class User extends Authenticatable
     public function badges()
     {
         return $this->belongsToMany(Badge::class, 'user_badges')
+            ->using(UserBadge::class)
             ->withPivot(['earned_at', 'is_highlighted', 'progress'])
             ->withTimestamps()
             ->orderByPivot('earned_at', 'desc');
@@ -439,7 +488,7 @@ class User extends Authenticatable
     /**
      * Check if user meets badge requirements
      */
-    protected function meetsRequirements(Badge $badge): bool
+    public function meetsRequirements(Badge $badge): bool
     {
         $requirements = $badge->requirements ?? [];
 

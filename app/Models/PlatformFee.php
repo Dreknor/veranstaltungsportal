@@ -11,6 +11,8 @@ class PlatformFee extends Model
     use HasFactory;
 
     protected $fillable = [
+        'invoice_number',
+        'invoice_date',
         'event_id',
         'booking_id',
         'fee_percentage',
@@ -27,6 +29,7 @@ class PlatformFee extends Model
         'fee_amount' => 'decimal:2',
         'minimum_fee' => 'decimal:2',
         'paid_at' => 'datetime',
+        'invoice_date' => 'datetime',
     ];
 
     /**

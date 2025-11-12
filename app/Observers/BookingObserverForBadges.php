@@ -19,6 +19,11 @@ class BookingObserverForBadges
      */
     public function updated(Booking $booking): void
     {
+        // Only check badges if booking has an associated user
+        if (!$booking->user) {
+            return;
+        }
+
         // Check for badges when payment is confirmed
         if ($booking->wasChanged('payment_status') && $booking->payment_status === 'paid') {
             $this->badgeService->checkAndAwardBadges($booking->user);
@@ -43,8 +48,10 @@ class BookingObserverForBadges
      */
     public function restored(Booking $booking): void
     {
-        // Re-check badges on restoration
-        $this->badgeService->checkAndAwardBadges($booking->user);
+        // Re-check badges on restoration (only if user exists)
+        if ($booking->user) {
+            $this->badgeService->checkAndAwardBadges($booking->user);
+        }
     }
 }
 

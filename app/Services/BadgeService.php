@@ -80,6 +80,12 @@ class BadgeService
                     ->from('user_badges')
                     ->whereColumn('user_badges.user_id', 'users.id');
             }, 'badges_count')
+            ->where(function($query) {
+                // Only include users with public profiles OR who allow networking
+                $query->where('show_profile_public', true)
+                      ->orWhere('allow_networking', true);
+            })
+            ->having('total_points', '>', 0) // Only users with at least one badge
             ->orderByDesc('total_points')
             ->limit($limit)
             ->get()

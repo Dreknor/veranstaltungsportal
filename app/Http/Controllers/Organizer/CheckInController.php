@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CheckInController extends Controller
 {
@@ -46,16 +47,52 @@ class CheckInController extends Controller
         }
 
         if (!$booking->canCheckIn()) {
-            return back()->with('error', 'Diese Buchung kann nicht eingecheckt werden.');
+            $reason = '';
+            if ($booking->status !== 'confirmed') {
+                $reason = 'Status ist nicht "confirmed" (aktuell: ' . $booking->status . ')';
+            } elseif ($booking->payment_status !== 'paid') {
+                $reason = 'Zahlung ist nicht abgeschlossen (aktuell: ' . $booking->payment_status . ')';
+            } elseif ($booking->checked_in) {
+                $reason = 'Bereits eingecheckt am ' . $booking->checked_in_at->format('d.m.Y H:i');
+            } elseif ($booking->event->start_date->isFuture() && !$booking->event->start_date->isToday()) {
+                $reason = 'Event liegt noch in der Zukunft';
+            }
+
+            Log::warning('Check-In fehlgeschlagen', [
+                'booking_id' => $booking->id,
+                'booking_number' => $booking->booking_number,
+                'status' => $booking->status,
+                'payment_status' => $booking->payment_status,
+                'checked_in' => $booking->checked_in,
+                'reason' => $reason,
+            ]);
+
+            return back()->with('error', 'Diese Buchung kann nicht eingecheckt werden. ' . $reason);
         }
 
-        $booking->checkIn(
-            checkedInBy: auth()->user(),
-            method: 'manual',
-            notes: $request->input('notes')
-        );
+        try {
+            $booking->checkIn(
+                checkedInBy: auth()->user(),
+                method: 'manual',
+                notes: $request->input('notes')
+            );
 
-        return back()->with('status', 'Teilnehmer erfolgreich eingecheckt.');
+            Log::info('Check-In erfolgreich', [
+                'booking_id' => $booking->id,
+                'booking_number' => $booking->booking_number,
+                'checked_in_by' => auth()->id(),
+            ]);
+
+            return back()->with('status', 'Teilnehmer erfolgreich eingecheckt: ' . $booking->customer_name);
+        } catch (\Exception $e) {
+            Log::error('Check-In Fehler', [
+                'booking_id' => $booking->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->with('error', 'Fehler beim Check-In: ' . $e->getMessage());
+        }
     }
 
     /**

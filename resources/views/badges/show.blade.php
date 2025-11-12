@@ -67,11 +67,14 @@
                             @if($hasEarned)
                                 @php
                                     $userBadge = auth()->user()->badges()->where('badge_id', $badge->id)->first();
+                                    $earnedAt = $userBadge->pivot->earned_at instanceof \Carbon\Carbon
+                                        ? $userBadge->pivot->earned_at
+                                        : \Carbon\Carbon::parse($userBadge->pivot->earned_at);
                                 @endphp
                                 <div class="mt-4 text-sm text-gray-600">
                                     <i class="far fa-clock mr-1"></i>
-                                    Verdient am {{ $userBadge->pivot->earned_at->format('d.m.Y') }}
-                                    ({{ $userBadge->pivot->earned_at->diffForHumans() }})
+                                    Verdient am {{ $earnedAt->format('d.m.Y') }}
+                                    ({{ $earnedAt->diffForHumans() }})
                                 </div>
                             @endif
                         </div>

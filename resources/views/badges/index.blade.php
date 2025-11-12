@@ -140,7 +140,12 @@
                                                 <i class="fas fa-star text-yellow-500"></i> {{ $badge->points }} Punkte
                                             </span>
                                             <span>
-                                                <i class="far fa-clock"></i> {{ $badge->pivot->earned_at->diffForHumans() }}
+                                                <i class="far fa-clock"></i>
+                                                @if($badge->pivot->earned_at instanceof \Carbon\Carbon)
+                                                    {{ $badge->pivot->earned_at->diffForHumans() }}
+                                                @else
+                                                    {{ \Carbon\Carbon::parse($badge->pivot->earned_at)->diffForHumans() }}
+                                                @endif
                                             </span>
                                         </div>
                                     </div>

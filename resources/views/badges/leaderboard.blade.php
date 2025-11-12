@@ -62,15 +62,24 @@
                                 <div class="flex-1 ml-4">
                                     <div class="flex items-center">
                                         <div class="flex-shrink-0">
-                                            <img class="h-12 w-12 rounded-full"
-                                                 src="{{ $entry['user']->profilePhotoUrl() }}"
-                                                 alt="{{ $entry['user']->fullName() }}">
+                                            @if($entry['user']->show_profile_public || ($entry['user']->allow_networking && auth()->check() && auth()->user()->isFollowing($entry['user'])))
+                                                <img class="h-12 w-12 rounded-full"
+                                                     src="{{ $entry['user']->profilePhotoUrl() }}"
+                                                     alt="{{ $entry['user']->displayName(auth()->user()) }}">
+                                            @else
+                                                <div class="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-600"></i>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="ml-4">
                                             <h4 class="text-lg font-semibold text-gray-900">
-                                                {{ $entry['user']->fullName() }}
+                                                {{ $entry['user']->displayName(auth()->user()) }}
                                                 @if($isCurrentUser)
                                                     <span class="ml-2 text-sm text-blue-600">(Sie)</span>
+                                                @endif
+                                                @if(!$entry['user']->show_profile_public)
+                                                    <i class="fas fa-lock text-gray-400 text-sm ml-1" title="Privates Profil"></i>
                                                 @endif
                                             </h4>
                                             <p class="text-sm text-gray-600">
@@ -113,11 +122,20 @@
                         <h4 class="text-sm font-semibold text-blue-900 mb-2">
                             Wie funktioniert die Bestenliste?
                         </h4>
-                        <p class="text-sm text-blue-800">
+                        <p class="text-sm text-blue-800 mb-3">
                             Die Bestenliste basiert auf den Gesamtpunkten, die Sie durch das Verdienen von Abzeichen sammeln.
                             Jedes Abzeichen hat einen bestimmten Punktewert. Je mehr Abzeichen Sie verdienen, desto höher steigen Sie in der Rangliste!
                             Nehmen Sie an Fortbildungen teil, schreiben Sie Bewertungen und engagieren Sie sich, um mehr Abzeichen zu verdienen.
                         </p>
+                        <div class="flex items-start mt-3 pt-3 border-t border-blue-200">
+                            <i class="fas fa-shield-alt text-blue-600 mr-2 mt-1"></i>
+                            <div class="text-sm text-blue-800">
+                                <strong>Datenschutz:</strong> Nur Benutzer mit öffentlichen Profilen oder aktiviertem Networking erscheinen in der Bestenliste.
+                                Bei privaten Profilen wird der Name anonymisiert angezeigt (z.B. "Max M.").
+                                Sie können Ihre Sichtbarkeitseinstellungen in Ihren
+                                <a href="{{ route('profile.edit') }}" class="text-blue-600 hover:text-blue-800 underline">Profileinstellungen</a> anpassen.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

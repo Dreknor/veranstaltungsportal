@@ -61,6 +61,9 @@ class EventFactory extends Factory
 
         $location = $this->faker->randomElement($locations);
 
+        $startDateCarbon = \Carbon\Carbon::instance($startDate);
+        $endDateCarbon = \Carbon\Carbon::instance($endDate);
+
         return [
             'user_id' => User::factory(),
             'event_category_id' => EventCategory::factory(),
@@ -69,7 +72,7 @@ class EventFactory extends Factory
             'description' => $this->faker->paragraphs(3, true),
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'duration' => $startDate->diffInMinutes($endDate),
+            'duration' => $startDateCarbon->diffInMinutes($endDateCarbon),
             'venue_name' => $location['name'],
             'venue_address' => $this->faker->streetAddress(),
             'venue_city' => $location['city'],

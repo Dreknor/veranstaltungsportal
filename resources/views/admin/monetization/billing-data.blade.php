@@ -26,6 +26,9 @@
                     <a href="{{ route('admin.monetization.billing-data') }}" class="border-b-2 border-blue-500 text-blue-600 px-1 pb-4 text-sm font-medium">
                         Plattform-Rechnungsdaten
                     </a>
+                    <a href="{{ route('admin.settings.invoice.index') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-4 text-sm font-medium">
+                        <i class="fas fa-file-invoice mr-1"></i>Rechnungsnummern
+                    </a>
                 </nav>
             </div>
 

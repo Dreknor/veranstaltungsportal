@@ -26,6 +26,9 @@
                     <a href="{{ route('admin.monetization.billing-data') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-4 text-sm font-medium">
                         Plattform-Rechnungsdaten
                     </a>
+                    <a href="{{ route('admin.settings.invoice.index') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-4 text-sm font-medium">
+                        <i class="fas fa-file-invoice mr-1"></i>Rechnungsnummern
+                    </a>
                     @if($featuredStats['total_featured_fees'] > 0 || $settings['featured_event_enabled'])
                     <a href="{{ route('admin.monetization.featured-events') }}" class="border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 px-1 pb-4 text-sm font-medium">
                         Featured Events Übersicht

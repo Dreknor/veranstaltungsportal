@@ -13,6 +13,8 @@ class Booking extends Model
     use HasFactory;
     protected $fillable = [
         'booking_number',
+        'invoice_number',
+        'invoice_date',
         'event_id',
         'user_id',
         'customer_name',
@@ -57,6 +59,7 @@ class Booking extends Model
             'certificate_generated_at' => 'datetime',
             'checked_in' => 'boolean',
             'checked_in_at' => 'datetime',
+            'invoice_date' => 'datetime',
         ];
     }
 
@@ -149,8 +152,15 @@ class Booking extends Model
         }
 
         // Event must not be in the future (allow check-in on event day)
-        if ($this->event->start_date->isFuture() && !$this->event->start_date->isToday()) {
-            return false;
+        // Allow check-in up to 24 hours before the event for testing/early access
+        if ($this->event && $this->event->start_date) {
+            $eventStart = $this->event->start_date;
+            $now = now();
+
+            // Allow check-in if event is today or in the past, or within 24 hours
+            if ($eventStart->isFuture() && !$eventStart->isToday() && $eventStart->diffInHours($now) > 24) {
+                return false;
+            }
         }
 
         return true;

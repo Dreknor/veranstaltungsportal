@@ -22,7 +22,7 @@ class TicketPdfService
     {
         // Eager load relationships
         $booking->load(['event.organizer', 'items.ticketType']);
-        
+
         $qrCodeDataUri = $this->qrCodeService->generateBookingQrCodeDataUri($booking, 200);
 
         $data = [
@@ -127,16 +127,16 @@ class TicketPdfService
     {
         // Eager load relationships
         $booking->load(['event.organizer', 'items.ticketType']);
-        
+
         // Prepare items array
         $items = [];
         $netTotal = 0;
         $taxRate = 19; // Default VAT rate for Germany
-        
+
         foreach ($booking->items as $item) {
             $itemTotal = $item->price * $item->quantity;
             $netTotal += $itemTotal;
-            
+
             $items[] = [
                 'description' => $booking->event->title,
                 'ticket_type' => $item->ticketType->name,
@@ -146,12 +146,12 @@ class TicketPdfService
                 'total' => $itemTotal,
             ];
         }
-        
+
         $discountAmount = $booking->discount ?? 0;
         $netAfterDiscount = $netTotal - $discountAmount;
         $taxAmount = $netAfterDiscount * ($taxRate / 100);
         $totalAmount = $netAfterDiscount + $taxAmount;
-        
+
         $data = [
             'booking' => $booking,
             'event' => $booking->event,
@@ -163,7 +163,7 @@ class TicketPdfService
             'totalAmount' => $totalAmount,
             'notes' => null,
             'invoiceNumber' => $this->generateInvoiceNumber($booking),
-            'invoiceDate' => now()->format('d.m.Y'),
+            'invoiceDate' => $booking->invoice_date ? $booking->invoice_date->format('d.m.Y') : now()->format('d.m.Y'),
         ];
 
         return Pdf::loadView('pdf.invoice', $data)
@@ -191,7 +191,8 @@ class TicketPdfService
      */
     protected function generateInvoiceNumber(Booking $booking): string
     {
-        return 'INV-' . date('Y') . '-' . str_pad($booking->id, 6, '0', STR_PAD_LEFT);
+        // Use invoice number from booking if available, otherwise fallback to legacy format
+        return $booking->invoice_number ?? ('INV-' . date('Y') . '-' . str_pad($booking->id, 6, '0', STR_PAD_LEFT));
     }
 
     /**

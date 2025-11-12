@@ -23,6 +23,39 @@
         </div>
     </div>
 
+    <!-- Flash Messages -->
+    @if(session('status'))
+        <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg" role="alert">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-xl mr-3"></i>
+                <p class="font-medium">{{ session('status') }}</p>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-xl mr-3"></i>
+                <p class="font-medium">{{ session('error') }}</p>
+            </div>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
+            <div class="flex items-center mb-2">
+                <i class="fas fa-exclamation-triangle text-xl mr-3"></i>
+                <p class="font-medium">Fehler aufgetreten:</p>
+            </div>
+            <ul class="list-disc list-inside ml-8">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <!-- Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
@@ -169,15 +202,22 @@
                                             </button>
                                         </form>
                                     @else
-                                        <form action="{{ route('organizer.check-in.store', [$event, $booking]) }}"
-                                              method="POST"
-                                              class="inline">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="text-green-600 hover:text-green-900 dark:text-green-400">
-                                                <i class="fas fa-check mr-1"></i> Einchecken
-                                            </button>
-                                        </form>
+                                        @if($booking->canCheckIn())
+                                            <form action="{{ route('organizer.check-in.store', [$event, $booking]) }}"
+                                                  method="POST"
+                                                  class="inline check-in-form">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="text-green-600 hover:text-green-900 dark:text-green-400 check-in-btn">
+                                                    <i class="fas fa-check mr-1"></i> Einchecken
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-gray-400 dark:text-gray-600 text-sm"
+                                                  title="Status: {{ $booking->status }}, Zahlung: {{ $booking->payment_status }}">
+                                                <i class="fas fa-ban mr-1"></i> Nicht möglich
+                                            </span>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
@@ -227,6 +267,27 @@
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Handle manual check-in forms
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkInForms = document.querySelectorAll('.check-in-form');
+
+            checkInForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const button = this.querySelector('.check-in-btn');
+
+                    // Disable button to prevent double-clicks
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Wird eingecheckt...';
+
+                    // Re-enable after 3 seconds (in case of redirect failure)
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.innerHTML = '<i class="fas fa-check mr-1"></i> Einchecken';
+                    }, 3000);
+                });
             });
         });
 

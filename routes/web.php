@@ -290,6 +290,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('/settings/{setting}', [\App\Http\Controllers\Admin\SettingsController::class, 'destroy'])->name('settings.destroy');
     Route::post('/settings/initialize', [\App\Http\Controllers\Admin\SettingsController::class, 'initializeDefaults'])->name('settings.initialize');
 
+    // Invoice Number Settings
+    Route::get('/settings/invoice', [\App\Http\Controllers\Admin\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
+    Route::put('/settings/invoice', [\App\Http\Controllers\Admin\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
+    Route::post('/settings/invoice/preview', [\App\Http\Controllers\Admin\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
+
     // Monetization Settings (Admin Only)
     Route::get('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'index'])->name('monetization.index');
     Route::put('/monetization', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'update'])->name('monetization.update');
