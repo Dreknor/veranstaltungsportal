@@ -11,14 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Erstelle die Permission
-        Permission::create(['name' => 'receive-critical-log-notifications']);
+        try {
+            Permission::create(['name' => 'receive-critical-log-notifications']);
 
-        // Optional: Gib Admin-Rolle automatisch diese Permission
-        $adminRole = Role::where('name', 'admin')->first();
-        if ($adminRole) {
-            $adminRole->givePermissionTo('receive-critical-log-notifications');
+            // Optional: Gib Admin-Rolle automatisch diese Permission
+            $adminRole = Role::where('name', 'admin')->first();
+            if ($adminRole) {
+                $adminRole->givePermissionTo('receive-critical-log-notifications');
+            }
+        } catch (\Exception $e) {
+            // Log the error message
+            \Log::error('Fehler beim Erstellen der Permission: ' . $e->getMessage());
         }
+        // Erstelle die Permission
+
     }
 
     /**
