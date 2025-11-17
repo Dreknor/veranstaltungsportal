@@ -23,6 +23,10 @@ class AdminMiddleware
             abort(403, 'Unauthorized action.');
         }
 
+        if (!auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         return $next($request);
     }
 }

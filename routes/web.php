@@ -45,7 +45,7 @@ Route::post('/events/{event}/waitlist/join', [\App\Http\Controllers\WaitlistCont
 Route::post('/events/{event}/waitlist/leave', [\App\Http\Controllers\WaitlistController::class, 'leave'])->name('waitlist.leave');
 
 // Event Review Routes
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/events/{event}/reviews', [\App\Http\Controllers\EventReviewController::class, 'store'])->name('events.reviews.store');
     Route::put('/reviews/{review}', [\App\Http\Controllers\EventReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/reviews/{review}', [\App\Http\Controllers\EventReviewController::class, 'destroy'])->name('reviews.destroy');
@@ -110,7 +110,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Organizer Routes
-Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
+Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
     Route::get('/dashboard', [Organizer\DashboardController::class, 'index'])->name('dashboard');
 
     // Profile Management
@@ -232,7 +232,7 @@ Route::middleware(['auth', 'organizer'])->prefix('organizer')->name('organizer.'
     Route::delete('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'cancel'])->name('featured-events.cancel');
 });
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/profile', [Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
     Route::put('settings/profile', [Settings\ProfileController::class, 'update'])->name('settings.profile.update');
     Route::delete('settings/profile/photo', [Settings\ProfileController::class, 'deletePhoto'])->name('settings.profile.photo.delete');
@@ -253,7 +253,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Admin Routes
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // User Management
@@ -374,10 +374,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 });
 
 // Impersonate Leave (available for all authenticated users)
-Route::middleware(['auth'])->post('/impersonate/leave', [\App\Http\Controllers\Admin\ImpersonateController::class, 'leave'])->name('impersonate.leave');
+Route::middleware(['auth', 'verified'])->post('/impersonate/leave', [\App\Http\Controllers\Admin\ImpersonateController::class, 'leave'])->name('impersonate.leave');
 
 // Data Privacy & DSGVO
-Route::middleware(['auth'])->prefix('data-privacy')->name('data-privacy.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('data-privacy')->name('data-privacy.')->group(function () {
     Route::get('/', [\App\Http\Controllers\DataPrivacyController::class, 'index'])->name('index');
     Route::get('/export', [\App\Http\Controllers\DataPrivacyController::class, 'exportData'])->name('export');
     Route::get('/download-files', [\App\Http\Controllers\DataPrivacyController::class, 'downloadFiles'])->name('download-files');
@@ -389,7 +389,7 @@ Route::middleware(['auth'])->prefix('data-privacy')->name('data-privacy.')->grou
 require __DIR__.'/auth.php';
 
 // Notifications (für eingeloggte Benutzer)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/unread', [\App\Http\Controllers\NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');

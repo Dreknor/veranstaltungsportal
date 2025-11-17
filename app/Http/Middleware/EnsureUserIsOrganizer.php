@@ -19,6 +19,10 @@ class EnsureUserIsOrganizer
             abort(403, 'Nur Organisatoren haben Zugriff auf diesen Bereich.');
         }
 
+        if (!$request->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         return $next($request);
     }
 }
