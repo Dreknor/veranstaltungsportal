@@ -42,7 +42,7 @@
                         </button>
                     </form>
                 @else
-                    <form method="POST" action="{{ route('waitlist.join', $event) }}" class="space-y-4">
+                    <form method="POST" action="{{ route('waitlist.join', $event) }}" class="space-y-4" data-recaptcha data-recaptcha-action="waitlist">
                         @csrf
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -96,6 +96,9 @@
                                 </select>
                             </div>
                         @endif
+
+                        <!-- reCAPTCHA -->
+                        <x-recaptcha action="waitlist" />
 
                         <button type="submit" class="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors font-semibold">
                             Zur Warteliste hinzufügen

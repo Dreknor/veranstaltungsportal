@@ -47,7 +47,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('events.verify-access', $event->slug) }}" method="POST">
+                <form action="{{ route('events.verify-access', $event->slug) }}" method="POST" data-recaptcha data-recaptcha-action="access_code">
                     @csrf
                     <div class="mb-6">
                         <label for="access_code" class="block text-sm font-medium text-gray-700 mb-2">
@@ -60,6 +60,9 @@
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                placeholder="Gib deinen Access Code ein">
                     </div>
+
+                    <!-- reCAPTCHA -->
+                    <x-recaptcha action="access_code" />
 
                     <button type="submit"
                             class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition">

@@ -11,7 +11,7 @@
                 <p class="text-lg text-gray-600 mt-2">{{ $event->title }}</p>
             </div>
 
-            <form method="POST" action="{{ route('bookings.store', $event) }}" id="booking-form">
+            <form method="POST" action="{{ route('bookings.store', $event) }}" id="booking-form" data-recaptcha data-recaptcha-action="booking">
                 @csrf
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -206,6 +206,9 @@
                                     <span id="total">0,00 €</span>
                                 </div>
                             </div>
+
+                            <!-- reCAPTCHA -->
+                            <x-recaptcha action="booking" />
 
                             <button type="submit" id="submit-button" {{ $ticketTypes->isEmpty() ? 'disabled' : 'disabled' }}
                                     class="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed">

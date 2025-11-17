@@ -89,6 +89,9 @@
                         placeholder="••••••••" />
                 </div>
 
+                <!-- reCAPTCHA -->
+                <x-recaptcha action="register" />
+
                 <!-- Register Button -->
                 <x-button type="primary" class="w-full">{{ __('Create Account') }}</x-button>
             </form>

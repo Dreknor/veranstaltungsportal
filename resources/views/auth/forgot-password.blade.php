@@ -16,12 +16,15 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('password.email') }}">
+                    <form method="POST" action="{{ route('password.email') }}" data-recaptcha data-recaptcha-action="password_reset">
                         @csrf
                         <!-- Email Input -->
                         <div class="mb-4">
                             <x-forms.input name="email" type="email" label="Email" placeholder="your@email.com" />
                         </div>
+
+                        <!-- reCAPTCHA -->
+                        <x-recaptcha action="password_reset" />
 
                         <!-- Send Reset Link Button -->
                         <x-button type="primary" buttonType="submit" class="w-full">

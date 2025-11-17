@@ -8,7 +8,7 @@
                         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Log in to your account') }}</h1>
                     </div>
 
-                    <form method="POST" action="{{ route('login') }}" class="space-y-3">
+                    <form method="POST" action="{{ route('login') }}" class="space-y-3" data-recaptcha data-recaptcha-action="login">
                         @csrf
                         <!-- Email Input -->
                         <div>
@@ -28,6 +28,9 @@
                                 <x-forms.checkbox label="Remember me" name="remember" />
                             </div>
                         </div>
+
+                        <!-- reCAPTCHA -->
+                        <x-recaptcha action="login" />
 
                         <!-- Login Button -->
                         <x-button type="primary" class="w-full">{{ __('Sign In') }}</x-button>

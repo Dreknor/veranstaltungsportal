@@ -33,7 +33,7 @@ Route::get('/events/calendar', [EventController::class, 'calendar'])->name('even
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/events/{slug}/calendar', [EventController::class, 'exportToCalendar'])->name('events.calendar.export');
 Route::get('/events/{slug}/access', [EventController::class, 'access'])->name('events.access');
-Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])->name('events.verify-access');
+Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])->middleware('recaptcha:access_code')->name('events.verify-access');
 
 // Event Series Routes (Public)
 Route::get('/series/{series}', [\App\Http\Controllers\SeriesController::class, 'show'])->name('series.show');
@@ -53,7 +53,7 @@ Route::middleware(['auth'])->group(function () {
 
 // Booking Routes
 Route::get('/events/{event}/book', [BookingController::class, 'create'])->name('bookings.create');
-Route::post('/events/{event}/book', [BookingController::class, 'store'])->name('bookings.store');
+Route::post('/events/{event}/book', [BookingController::class, 'store'])->middleware('recaptcha:booking')->name('bookings.store');
 Route::get('/bookings/{bookingNumber}', [BookingController::class, 'show'])->name('bookings.show');
 Route::get('/bookings/{bookingNumber}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
 Route::get('/bookings/{bookingNumber}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
