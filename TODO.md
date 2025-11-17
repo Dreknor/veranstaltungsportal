@@ -585,8 +585,8 @@
   - [x] Audit Log Integration
   - [x] Feature Tests (ImpersonateControllerTest)
 - [ ] Support Ticket System
-- [ ] Hinterlegung Rechnungsnummern in den Einstellungen der Plattform-Rechnungsdaten mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
-
+- [x] Hinterlegung Rechnungsnummern in den Einstellungen der Plattform-Rechnungsdaten mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
+- [ ] Trennung des Benutzerkontos von den Organisator-Einstellungen, sodass mehrere Benutzer als ein Organisator auftreten können
 ### 5. Erweiterte Features
 - [x] **Error Pages (404, 500 etc.)** ✅ NEU
   - [x] 404 Not Found Page

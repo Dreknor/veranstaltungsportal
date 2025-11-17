@@ -81,7 +81,7 @@ class BankAccountController extends Controller
             'company_postal_code' => 'required|string|max:10',
             'company_city' => 'required|string|max:100',
             'company_country' => 'required|string|max:100',
-            'tax_id' => 'nullable|string|max:50',
+            'tax_id' => 'required|string|max:50',
             'vat_id' => 'nullable|string|max:50',
             'company_email' => 'required|email|max:255',
             'company_phone' => 'required|string|max:50',
@@ -92,7 +92,7 @@ class BankAccountController extends Controller
         $user->update([
             'organizer_billing_data' => $validated,
             'organization_name' => $validated['company_name'],
-            'tax_id' => $validated['tax_id'] ?? '',
+            'tax_id' => $validated['tax_id'],
         ]);
 
         return redirect()

@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
             EventCategorySeeder::class,
             RolesAndPermissionsSeeder::class,
             BadgeSeeder::class,
-            PlatformFeeSeeder::class,
-            DemoDataSeeder::class,
+            //PlatformFeeSeeder::class,
+            //DemoDataSeeder::class,
         ]);
     }
 }

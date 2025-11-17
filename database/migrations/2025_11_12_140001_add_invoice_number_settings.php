@@ -20,6 +20,8 @@ return new class extends Migration
                 'type' => 'string',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'label' => 'Rechungsnummer-Format für Veranstalter',
+                'description' => 'Format der Rechnungsnummer für Rechnungen an Kunden für Buchungen',
             ],
             [
                 'key' => 'invoice_number_format_platform_fee',
@@ -27,6 +29,9 @@ return new class extends Migration
                 'type' => 'string',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'label' => 'Plattformgebühren Rechnungsnummer',
+                'description' => 'Format der Rechnungsnummer für Rechnungen an Veranstalter für Plattformgebühren',
+
             ],
             [
                 'key' => 'invoice_number_counter_booking',
@@ -34,6 +39,8 @@ return new class extends Migration
                 'type' => 'integer',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'label' => 'Rechnungsnummer Zähler für Buchungen',
+                'description' => 'Startwert des Rechnungsnummernzählers für Rechnungen an Kunden für Buchungen',
             ],
             [
                 'key' => 'invoice_number_counter_platform_fee',
@@ -41,6 +48,8 @@ return new class extends Migration
                 'type' => 'integer',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'label' => 'Rechnungsnummer Zähler für Plattformgebühren',
+                'description' => 'Startwert des Rechnungsnummernzählers für Rechnungen an Veranstalter für Plattformgebühren',
             ],
             [
                 'key' => 'invoice_number_padding',
@@ -48,6 +57,8 @@ return new class extends Migration
                 'type' => 'integer',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'label' => 'Rechnungsnummer Auffüllung',
+                'description' => 'Anzahl der Stellen, auf die die Rechnungsnummer aufgefüllt wird',
             ],
             [
                 'key' => 'invoice_reset_yearly',
@@ -55,6 +66,9 @@ return new class extends Migration
                 'type' => 'boolean',
                 'created_at' => now(),
                 'updated_at' => now(),
+                'label' => 'Jährlicher Rücksetzungsmodus für Rechnungsnummern',
+                'description' => 'Ob die Rechnungsnummern jedes Jahr zurückgesetzt werden sollen',
+
             ],
         ]);
     }

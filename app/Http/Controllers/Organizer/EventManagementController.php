@@ -74,6 +74,31 @@ class EventManagementController extends Controller
             'organizer_website' => 'nullable|url',
         ]);
 
+        // Check if trying to publish without complete organizer data
+        if ($request->boolean('is_published')) {
+            $user = auth()->user();
+
+            if (!$user->canPublishEvents()) {
+                $missingData = $user->getMissingOrganizerData();
+                $errorMessage = 'Um Events zu veröffentlichen, müssen Sie zunächst Ihre ';
+
+                if (in_array('billing_data', $missingData) && in_array('bank_account', $missingData)) {
+                    $errorMessage .= 'Rechnungsdaten und Bankverbindung';
+                } elseif (in_array('billing_data', $missingData)) {
+                    $errorMessage .= 'Rechnungsdaten';
+                } else {
+                    $errorMessage .= 'Bankverbindung';
+                }
+
+                $errorMessage .= ' vervollständigen. Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen versendet werden.';
+
+                return back()->withErrors(['is_published' => $errorMessage])
+                    ->with('error', $errorMessage)
+                    ->with('redirect_to_settings', true)
+                    ->withInput();
+            }
+        }
+
         $validated['user_id'] = auth()->id();
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
 
@@ -170,6 +195,30 @@ class EventManagementController extends Controller
             'organizer_phone' => 'nullable|string',
             'organizer_website' => 'nullable|url',
         ]);
+
+        // Check if trying to publish without complete organizer data
+        if ($request->boolean('is_published') && !$event->is_published) {
+            $user = auth()->user();
+
+            if (!$user->canPublishEvents()) {
+                $missingData = $user->getMissingOrganizerData();
+                $errorMessage = 'Um Events zu veröffentlichen, müssen Sie zunächst Ihre ';
+
+                if (in_array('billing_data', $missingData) && in_array('bank_account', $missingData)) {
+                    $errorMessage .= 'Rechnungsdaten und Bankverbindung';
+                } elseif (in_array('billing_data', $missingData)) {
+                    $errorMessage .= 'Rechnungsdaten';
+                } else {
+                    $errorMessage .= 'Bankverbindung';
+                }
+
+                $errorMessage .= ' vervollständigen. Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen versendet werden.';
+
+                return back()->withErrors(['is_published' => $errorMessage])
+                    ->with('error', $errorMessage)
+                    ->with('redirect_to_settings', true);
+            }
+        }
 
         // Handle Image Upload
         if ($request->hasFile('featured_image')) {

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class RegistrationController extends Controller
 {
@@ -41,7 +42,8 @@ class RegistrationController extends Controller
 
         // Assign appropriate role based on account_type
         if ($accountType === 'organizer') {
-            $user->assignRole('organizer');
+            $role = Role::query()->firstOrCreate(['name' => 'organizer']);
+            $user->assignRole($role);
 
             // Notify all admins about the new organizer registration
             $admins = User::role('admin')->get();

@@ -11,13 +11,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}" 
-                               placeholder="Titel oder Beschreibung..." 
+                        <input type="text" name="search" id="search" value="{{ request('search') }}"
+                               placeholder="Titel oder Beschreibung..."
                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     </div>
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                        <select name="status" id="status" 
+                        <select name="status" id="status"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Alle</option>
                             <option value="published" {{ request('status') === 'published' ? 'selected' : '' }}>Veröffentlicht</option>
@@ -27,7 +27,7 @@
                     </div>
                     <div>
                         <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategorie</label>
-                        <select name="category" id="category" 
+                        <select name="category" id="category"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Alle</option>
                             @foreach($categories as $category)
@@ -80,9 +80,9 @@
                         <tr>
                             <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    @if($event->image)
+                                    @if($event->featured_image)
                                         <div class="flex-shrink-0 h-10 w-10">
-                                            <img class="h-10 w-10 rounded object-cover" src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}">
+                                            <img class="h-10 w-10 rounded object-cover" src="{{ asset('storage/' . $event->featured_image) }}" alt="{{ $event->title }}">
                                         </div>
                                     @else
                                         <div class="flex-shrink-0 h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -132,7 +132,7 @@
                                        class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
                                         Anzeigen
                                     </a>
-                                    
+
                                     <form action="{{ route('admin.events.toggle-publish', $event) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300">
@@ -147,7 +147,7 @@
                                         </button>
                                     </form>
 
-                                    <form action="{{ route('admin.events.destroy', $event) }}" method="POST" 
+                                    <form action="{{ route('admin.events.destroy', $event) }}" method="POST"
                                           class="inline" onsubmit="return confirm('Event wirklich löschen?');">
                                         @csrf
                                         @method('DELETE')

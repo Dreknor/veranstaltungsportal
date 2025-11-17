@@ -283,6 +283,91 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if organizer has complete billing data
+     * Required fields: company_name, address, postal_code, city, country, email, phone, tax_id
+     */
+    public function hasCompleteBillingData(): bool
+    {
+        if (!$this->isOrganizer()) {
+            return true; // Non-organizers don't need billing data
+        }
+
+        $billingData = $this->organizer_billing_data ?? [];
+
+        // Check required fields
+        $requiredFields = [
+            'company_name',
+            'company_address',
+            'company_postal_code',
+            'company_city',
+            'company_country',
+            'company_email',
+            'company_phone',
+            'tax_id'
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (empty($billingData[$field])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if organizer has complete bank account data
+     * Required for receiving payments
+     */
+    public function hasCompleteBankAccount(): bool
+    {
+        if (!$this->isOrganizer()) {
+            return true; // Non-organizers don't need bank account
+        }
+
+        $bankAccount = $this->bank_account ?? [];
+
+        // Check required fields: account_holder, iban
+        return !empty($bankAccount['account_holder']) && !empty($bankAccount['iban']);
+    }
+
+    /**
+     * Check if organizer can publish events
+     * Requires complete billing data and bank account
+     */
+    public function canPublishEvents(): bool
+    {
+        if (!$this->isOrganizer()) {
+            return false;
+        }
+
+        return $this->hasCompleteBillingData() && $this->hasCompleteBankAccount();
+    }
+
+    /**
+     * Get missing organizer data as array
+     * Returns list of missing requirements
+     */
+    public function getMissingOrganizerData(): array
+    {
+        if (!$this->isOrganizer()) {
+            return [];
+        }
+
+        $missing = [];
+
+        if (!$this->hasCompleteBillingData()) {
+            $missing[] = 'billing_data';
+        }
+
+        if (!$this->hasCompleteBankAccount()) {
+            $missing[] = 'bank_account';
+        }
+
+        return $missing;
+    }
+
+    /**
      * Check if user can manage users
      */
     public function canManageUsers(): bool

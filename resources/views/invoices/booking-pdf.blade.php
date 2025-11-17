@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Rechnung - {{ $booking->booking_number }}</title>
+    <title>Rechnung - {{ $booking->invoice_number ?? $booking->booking_number }}</title>
     <style>
         * {
             margin: 0;
@@ -162,12 +162,16 @@
     <div class="invoice-info">
         <table>
             <tr>
-                <td>Buchungsnummer:</td>
-                <td>{{ $booking->booking_number }}</td>
+                <td>Rechnungsnummer:</td>
+                <td>{{ $booking->invoice_number }}</td>
             </tr>
             <tr>
                 <td>Rechnungsdatum:</td>
-                <td>{{ now()->format('d.m.Y') }}</td>
+                <td>{{ optional($booking->invoice_date)->format('d.m.Y') ?? now()->format('d.m.Y') }}</td>
+            </tr>
+            <tr>
+                <td>Buchungsnummer:</td>
+                <td>{{ $booking->booking_number }}</td>
             </tr>
             <tr>
                 <td>Veranstaltung:</td>
@@ -228,7 +232,7 @@
     <div class="notes">
         <strong>Zahlungshinweise:</strong><br>
         Bitte überweisen Sie den Betrag bis zum {{ $event->start_date->subDays(7)->format('d.m.Y') }}.<br>
-        Verwendungszweck: {{ $booking->booking_number }}
+        Verwendungszweck: {{ $booking->invoice_number ?? $booking->booking_number }}
     </div>
     @else
     <div class="notes" style="background: #d1fae5; border-color: #10b981;">
@@ -239,7 +243,7 @@
 
     <div class="footer">
         Vielen Dank für Ihre Buchung!<br>
-        Bei Fragen wenden Sie sich bitte an: {{ $organizer['email'] ?? 'support@example.com' }}
+        Bei Fragen wenden Sie sich bitte an: {{ $organizer['email']  }}
     </div>
 </body>
 </html>

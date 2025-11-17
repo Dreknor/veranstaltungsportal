@@ -62,9 +62,9 @@
                 @foreach($events as $event)
                     <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                         <!-- Event Image -->
-                        @if($event->image)
+                        @if($event->featured_image)
                             <div class="h-48 overflow-hidden">
-                                <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}"
+                                <img src="{{ asset('storage/' . $event->featured_image) }}" alt="{{ $event->title }}"
                                      class="w-full h-full object-cover">
                             </div>
                         @else
