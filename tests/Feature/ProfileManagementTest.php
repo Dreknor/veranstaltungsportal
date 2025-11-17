@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -10,7 +11,7 @@ class ProfileTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function user_can_view_profile_page()
     {
         $user = User::factory()->create();
@@ -20,7 +21,7 @@ class ProfileTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_update_profile_information()
     {
         $user = User::factory()->create();
@@ -42,7 +43,7 @@ class ProfileTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_update_organization_information()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -63,7 +64,7 @@ class ProfileTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_update_billing_information()
     {
         $user = User::factory()->create();
@@ -88,7 +89,7 @@ class ProfileTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_update_notification_preferences()
     {
         $user = User::factory()->create();
@@ -109,7 +110,7 @@ class ProfileTest extends TestCase
         $this->assertTrue($user->notification_preferences['email_booking_confirmation']);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_use_duplicate_email()
     {
         $user1 = User::factory()->create(['email' => 'existing@example.com']);
@@ -125,7 +126,7 @@ class ProfileTest extends TestCase
         $response->assertSessionHasErrors('email');
     }
 
-    /** @test */
+    #[Test]
     public function user_can_delete_account()
     {
         $user = User::factory()->create();
@@ -139,3 +140,5 @@ class ProfileTest extends TestCase
         ]);
     }
 }
+
+

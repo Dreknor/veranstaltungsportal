@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -12,7 +13,7 @@ class AdminPanelTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function admin_can_view_all_events()
     {
         $admin = createAdmin();
@@ -23,7 +24,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_all_bookings()
     {
         $admin = createAdmin();
@@ -34,7 +35,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_all_users()
     {
         $admin = createAdmin();
@@ -45,7 +46,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_approve_event()
     {
         $admin = createAdmin();
@@ -59,7 +60,7 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_reject_event()
     {
         $admin = createAdmin();
@@ -73,7 +74,7 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_delete_any_event()
     {
         $admin = createAdmin();
@@ -85,7 +86,7 @@ class AdminPanelTest extends TestCase
         $this->assertSoftDeleted('events', ['id' => $event->id]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_platform_settings()
     {
         $admin = createAdmin();
@@ -95,7 +96,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_update_platform_settings()
     {
         $admin = createAdmin();
@@ -109,7 +110,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(302);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_manage_event_categories()
     {
         $admin = createAdmin();
@@ -124,7 +125,7 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_revenue_statistics()
     {
         $admin = createAdmin();
@@ -140,7 +141,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_access_admin_panel()
     {
         $user = createUser();
@@ -150,7 +151,7 @@ class AdminPanelTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_ban_user()
     {
         $admin = createAdmin();
@@ -164,7 +165,7 @@ class AdminPanelTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_feature_event()
     {
         $admin = createAdmin();
@@ -180,4 +181,6 @@ class AdminPanelTest extends TestCase
         ]);
     }
 }
+
+
 

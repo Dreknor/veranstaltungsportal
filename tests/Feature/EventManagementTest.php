@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\EventCategory;
@@ -13,7 +14,7 @@ class EventManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function authenticated_organizer_can_view_event_create_page()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -23,7 +24,7 @@ class EventManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_organizer_can_create_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -53,7 +54,7 @@ class EventManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_organizer_can_view_their_events()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -64,7 +65,7 @@ class EventManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_organizer_can_edit_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -75,7 +76,7 @@ class EventManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_organizer_can_update_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -101,7 +102,7 @@ class EventManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_organizer_can_delete_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -112,7 +113,7 @@ class EventManagementTest extends TestCase
         $this->assertSoftDeleted('events', ['id' => $event->id]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_edit_other_organizers_events()
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
@@ -124,7 +125,7 @@ class EventManagementTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function guests_can_view_published_events()
     {
         $event = Event::factory()->create([
@@ -138,7 +139,7 @@ class EventManagementTest extends TestCase
             ->assertSee($event->title);
     }
 
-    /** @test */
+    #[Test]
     public function guests_cannot_view_unpublished_events()
     {
         $event = Event::factory()->create(['is_published' => false]);
@@ -148,7 +149,7 @@ class EventManagementTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function events_list_shows_only_published_events()
     {
         Event::factory()->count(3)->create(['is_published' => true]);
@@ -159,7 +160,7 @@ class EventManagementTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_cancel_event_with_reason()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -179,3 +180,5 @@ class EventManagementTest extends TestCase
         ]);
     }
 }
+
+

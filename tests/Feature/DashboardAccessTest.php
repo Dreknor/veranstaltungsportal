@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -12,7 +13,7 @@ class DashboardAccessTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_access_dashboard()
     {
         $user = User::factory()->create();
@@ -22,7 +23,7 @@ class DashboardAccessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function guests_cannot_access_dashboard()
     {
         $response = $this->get(route('dashboard'));
@@ -30,7 +31,7 @@ class DashboardAccessTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function participant_sees_their_bookings_on_dashboard()
     {
         $user = User::factory()->create(['user_type' => 'participant']);
@@ -41,7 +42,7 @@ class DashboardAccessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_sees_their_events_on_dashboard()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -52,7 +53,7 @@ class DashboardAccessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_access_organizer_dashboard()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -62,7 +63,7 @@ class DashboardAccessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function participant_cannot_access_organizer_dashboard()
     {
         $participant = User::factory()->create(['user_type' => 'participant']);
@@ -72,7 +73,7 @@ class DashboardAccessTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function dashboard_displays_upcoming_events()
     {
         $user = User::factory()->create();
@@ -87,4 +88,6 @@ class DashboardAccessTest extends TestCase
         $response->assertStatus(200);
     }
 }
+
+
 

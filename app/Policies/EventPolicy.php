@@ -21,6 +21,17 @@ class EventPolicy
      */
     public function view(User $user, Event $event): bool
     {
+        // Admin can view all events
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Check if event belongs to user's organization
+        if ($event->organization_id) {
+            return $user->isMemberOf($event->organization);
+        }
+
+        // Fallback to user-based check (for legacy events)
         return $user->id === $event->user_id;
     }
 
@@ -29,7 +40,8 @@ class EventPolicy
      */
     public function create(User $user): bool
     {
-        return true;
+        // User must have an active organization or be organizer
+        return $user->isOrganizer() || $user->activeOrganizations()->count() > 0;
     }
 
     /**
@@ -37,6 +49,19 @@ class EventPolicy
      */
     public function update(User $user, Event $event): bool
     {
+        // Admin can update all events
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Check if event belongs to user's organization
+        if ($event->organization_id) {
+            $organization = $event->organization;
+            $role = $user->getRoleInOrganization($organization);
+            return in_array($role, ['owner', 'admin']);
+        }
+
+        // Fallback to user-based check (for legacy events)
         return $user->id === $event->user_id;
     }
 
@@ -45,6 +70,19 @@ class EventPolicy
      */
     public function delete(User $user, Event $event): bool
     {
+        // Admin can delete all events
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Check if event belongs to user's organization
+        if ($event->organization_id) {
+            $organization = $event->organization;
+            $role = $user->getRoleInOrganization($organization);
+            return in_array($role, ['owner', 'admin']);
+        }
+
+        // Fallback to user-based check (for legacy events)
         return $user->id === $event->user_id;
     }
 
@@ -53,7 +91,7 @@ class EventPolicy
      */
     public function restore(User $user, Event $event): bool
     {
-        return false;
+        return $this->delete($user, $event);
     }
 
     /**
@@ -61,7 +99,34 @@ class EventPolicy
      */
     public function forceDelete(User $user, Event $event): bool
     {
-        return false;
+        return $this->delete($user, $event);
+    }
+
+    /**
+     * Determine if user can manage bookings for this event
+     */
+    public function manageBookings(User $user, Event $event): bool
+    {
+        return $this->update($user, $event);
+    }
+
+    /**
+     * Determine if user can check-in attendees for this event
+     */
+    public function checkInAttendees(User $user, Event $event): bool
+    {
+        // Admin can check-in for all events
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Check if event belongs to user's organization (any role can check-in)
+        if ($event->organization_id) {
+            return $user->isMemberOf($event->organization);
+        }
+
+        // Fallback to user-based check
+        return $user->id === $event->user_id;
     }
 }
 

@@ -10,11 +10,15 @@ use Illuminate\Support\Facades\Log;
 
 class BookingManagementController extends Controller
 {
-
     public function index(Request $request)
     {
-        $query = Booking::whereHas('event', function ($q) {
-            $q->where('user_id', auth()->id());
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $query = Booking::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id);
         })->with(['event', 'items']);
 
         // Filter nach Event
@@ -43,60 +47,44 @@ class BookingManagementController extends Controller
         }
 
         $bookings = $query->latest()->paginate(20);
+        $events = $organization->events()->get();
 
-        $events = Event::where('user_id', auth()->id())->get();
-
-        return view('organizer.bookings.index', compact('bookings', 'events'));
+        return view('organizer.bookings.index', compact('bookings', 'events', 'organization'));
     }
 
     public function show(Booking $booking)
     {
         $this->authorize('view', $booking);
-
         $booking->load(['event', 'items.ticketType', 'user', 'discountCode']);
-
         return view('organizer.bookings.show', compact('booking'));
     }
 
     public function updateStatus(Request $request, Booking $booking)
     {
         $this->authorize('update', $booking);
-
         $request->validate([
             'status' => 'required|in:pending,confirmed,cancelled,completed',
         ]);
-
         $booking->update([
             'status' => $request->status,
             'confirmed_at' => $request->status === 'confirmed' ? now() : $booking->confirmed_at,
             'cancelled_at' => $request->status === 'cancelled' ? now() : $booking->cancelled_at,
         ]);
-
-        // TODO: Send notification email
-
         return back()->with('success', 'Buchungsstatus aktualisiert!');
     }
 
     public function updatePaymentStatus(Request $request, Booking $booking)
     {
         $this->authorize('update', $booking);
-
         $request->validate([
             'payment_status' => 'required|in:pending,paid,refunded,failed',
         ]);
-
         $oldPaymentStatus = $booking->payment_status;
-
-        $booking->update([
-            'payment_status' => $request->payment_status,
-        ]);
-
-        // Wenn Zahlung auf "paid" gesetzt wird, Tickets per E-Mail versenden
+        $booking->update(['payment_status' => $request->payment_status]);
         if ($request->payment_status === 'paid' && $oldPaymentStatus !== 'paid') {
             try {
                 \Illuminate\Support\Facades\Mail::to($booking->customer_email)
                     ->send(new \App\Mail\PaymentConfirmed($booking));
-
                 return back()->with('success', 'Zahlungsstatus aktualisiert und Tickets per E-Mail versendet!');
             } catch (\Exception $e) {
                 Log::error('Fehler beim Senden der Zahlungsbestätigungs-E-Mail: ',[
@@ -106,32 +94,32 @@ class BookingManagementController extends Controller
                 return back()->with('warning', 'Zahlungsstatus aktualisiert, aber E-Mail konnte nicht versendet werden: ' . $e->getMessage());
             }
         }
-
         return back()->with('success', 'Zahlungsstatus aktualisiert!');
     }
 
     public function export(Request $request)
     {
-        $query = Booking::whereHas('event', function ($q) {
-            $q->where('user_id', auth()->id());
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $query = Booking::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id);
         })->with(['event', 'items.ticketType']);
 
         if ($request->has('event_id')) {
             $query->where('event_id', $request->event_id);
         }
-
         if ($request->has('status')) {
             $query->where('status', $request->status);
         }
-
         $bookings = $query->get();
 
-        $format = $request->get('format', 'csv'); // csv oder excel
-
+        $format = $request->get('format', 'csv');
         if ($format === 'excel') {
             return $this->exportExcel($bookings);
         }
-
         return $this->exportCsv($bookings);
     }
 

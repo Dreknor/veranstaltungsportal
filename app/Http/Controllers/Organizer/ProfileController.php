@@ -17,8 +17,9 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
+        $organization = $user->currentOrganization();
 
-        return view('organizer.profile.edit', compact('user'));
+        return view('organizer.profile.edit', compact('user', 'organization'));
     }
 
     public function update(Request $request)
@@ -31,18 +32,7 @@ class ProfileController extends Controller
             'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:20'],
             'bio' => ['nullable', 'string', 'max:1000'],
-            'organization_name' => ['nullable', 'string', 'max:255'],
-            'organization_website' => ['nullable', 'url', 'max:255'],
-            'organization_description' => ['nullable', 'string', 'max:2000'],
-            'profile_photo' => ['nullable', 'image', 'max:2048'], // 2MB max
-            'billing_company' => ['nullable', 'string', 'max:255'],
-            'billing_address' => ['nullable', 'string', 'max:255'],
-            'billing_address_line2' => ['nullable', 'string', 'max:255'],
-            'billing_postal_code' => ['nullable', 'string', 'max:20'],
-            'billing_city' => ['nullable', 'string', 'max:255'],
-            'billing_state' => ['nullable', 'string', 'max:255'],
-            'billing_country' => ['nullable', 'string', 'max:255'],
-            'tax_id' => ['nullable', 'string', 'max:50'],
+            'profile_photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
         // Handle profile photo upload
@@ -59,7 +49,7 @@ class ProfileController extends Controller
         $user->update($validated);
 
         return redirect()->route('organizer.profile.edit')
-            ->with('success', 'Profil erfolgreich aktualisiert.');
+            ->with('success', 'Profil erfolgreich aktualisiert. Organisationsdaten verwalten Sie in den Organisations-Einstellungen.');
     }
 
     public function deletePhoto()
@@ -75,4 +65,3 @@ class ProfileController extends Controller
             ->with('success', 'Profilbild erfolgreich gelöscht.');
     }
 }
-

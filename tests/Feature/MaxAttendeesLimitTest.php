@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\TicketType;
@@ -13,7 +14,7 @@ class MaxAttendeesLimitTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function ticket_type_available_quantity_respects_event_max_attendees()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -41,7 +42,7 @@ class MaxAttendeesLimitTest extends TestCase
         $this->assertEquals(10, $ticketType->availableQuantity());
     }
 
-    /** @test */
+    #[Test]
     public function ticket_type_available_quantity_uses_ticket_limit_when_lower_than_event_limit()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -69,7 +70,7 @@ class MaxAttendeesLimitTest extends TestCase
         $this->assertEquals(15, $ticketType->availableQuantity());
     }
 
-    /** @test */
+    #[Test]
     public function event_max_attendees_blocks_booking_when_reached()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -132,7 +133,7 @@ class MaxAttendeesLimitTest extends TestCase
         $this->assertEquals(0, $ticketType->availableQuantity());
     }
 
-    /** @test */
+    #[Test]
     public function multiple_ticket_types_respect_shared_event_max_attendees()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -207,4 +208,6 @@ class MaxAttendeesLimitTest extends TestCase
         $this->assertEquals(4, $ticketType2->availableQuantity());
     }
 }
+
+
 

@@ -6,13 +6,14 @@ use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class UserNewsletterTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function user_can_subscribe_to_newsletter()
     {
         $user = User::factory()->create([
@@ -26,7 +27,7 @@ class UserNewsletterTest extends TestCase
         $this->assertNotNull($user->newsletter_subscribed_at);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_unsubscribe_from_newsletter()
     {
         $user = User::factory()->create([
@@ -39,7 +40,7 @@ class UserNewsletterTest extends TestCase
         $this->assertFalse($user->newsletter_subscribed);
     }
 
-    /** @test */
+    #[Test]
     public function subscription_sets_current_timestamp()
     {
         $user = User::factory()->create([
@@ -56,7 +57,7 @@ class UserNewsletterTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function user_can_check_if_interested_in_category()
     {
         $category = EventCategory::factory()->create();
@@ -68,7 +69,7 @@ class UserNewsletterTest extends TestCase
         $this->assertFalse($user->isInterestedInCategory(999));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_add_interest_to_category()
     {
         $category = EventCategory::factory()->create();
@@ -82,7 +83,7 @@ class UserNewsletterTest extends TestCase
         $this->assertContains($category->id, $user->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function adding_existing_interest_does_not_duplicate()
     {
         $category = EventCategory::factory()->create();
@@ -95,7 +96,7 @@ class UserNewsletterTest extends TestCase
         $this->assertCount(1, $user->fresh()->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_remove_interest_from_category()
     {
         $category1 = EventCategory::factory()->create();
@@ -111,7 +112,7 @@ class UserNewsletterTest extends TestCase
         $this->assertTrue($user->isInterestedInCategory($category2->id));
     }
 
-    /** @test */
+    #[Test]
     public function removing_non_existent_interest_does_not_error()
     {
         $user = User::factory()->create([
@@ -123,7 +124,7 @@ class UserNewsletterTest extends TestCase
         $this->assertEquals([1, 2, 3], $user->fresh()->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_get_interested_categories_collection()
     {
         $category1 = EventCategory::factory()->create(['name' => 'Category 1']);
@@ -140,7 +141,7 @@ class UserNewsletterTest extends TestCase
         $this->assertTrue($interestedCategories->contains('id', $category2->id));
     }
 
-    /** @test */
+    #[Test]
     public function interested_categories_returns_empty_collection_when_no_interests()
     {
         $user = User::factory()->create([
@@ -152,7 +153,7 @@ class UserNewsletterTest extends TestCase
         $this->assertCount(0, $interestedCategories);
     }
 
-    /** @test */
+    #[Test]
     public function user_gets_recommended_events_based_on_interests()
     {
         $category1 = EventCategory::factory()->create();
@@ -182,7 +183,7 @@ class UserNewsletterTest extends TestCase
         $this->assertEquals($interestedEvent->id, $recommendations->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function user_with_no_interests_gets_popular_events()
     {
         $category = EventCategory::factory()->create();
@@ -212,7 +213,7 @@ class UserNewsletterTest extends TestCase
         $this->assertEquals($popularEvent->id, $recommendations->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function recommended_events_respects_limit()
     {
         $category = EventCategory::factory()->create();
@@ -232,7 +233,7 @@ class UserNewsletterTest extends TestCase
         $this->assertCount(3, $recommendations);
     }
 
-    /** @test */
+    #[Test]
     public function recommended_events_only_includes_future_published_events()
     {
         $category = EventCategory::factory()->create();
@@ -268,7 +269,7 @@ class UserNewsletterTest extends TestCase
         $this->assertEquals($futureEvent->id, $recommendations->first()->id);
     }
 
-    /** @test */
+    #[Test]
     public function recommended_events_are_sorted_by_start_date()
     {
         $category = EventCategory::factory()->create();
@@ -295,4 +296,3 @@ class UserNewsletterTest extends TestCase
         $this->assertEquals($event1->id, $recommendations->last()->id);
     }
 }
-

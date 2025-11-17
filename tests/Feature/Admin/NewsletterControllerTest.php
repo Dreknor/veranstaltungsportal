@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\User;
@@ -32,7 +33,7 @@ class NewsletterControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_access_newsletter_index()
     {
         $response = $this->actingAs($this->admin)
@@ -43,7 +44,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertViewHas(['stats', 'upcomingEvents', 'featuredEvents', 'recentNewsletters']);
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_access_newsletter_index()
     {
         $response = $this->actingAs($this->user)
@@ -52,7 +53,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function guest_cannot_access_newsletter_index()
     {
         $response = $this->get(route('admin.newsletter.index'));
@@ -60,7 +61,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function newsletter_index_displays_correct_statistics()
     {
         // Create additional subscribers
@@ -85,7 +86,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertEquals(2, $stats['guest_subscribers']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_access_newsletter_compose_page()
     {
         $response = $this->actingAs($this->admin)
@@ -96,7 +97,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertViewHas(['type', 'upcomingEvents', 'featuredEvents', 'recommendations', 'sampleUser']);
     }
 
-    /** @test */
+    #[Test]
     public function compose_page_uses_weekly_as_default_type()
     {
         $response = $this->actingAs($this->admin)
@@ -106,7 +107,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertEquals('weekly', $response->viewData('type'));
     }
 
-    /** @test */
+    #[Test]
     public function compose_page_accepts_monthly_type()
     {
         $response = $this->actingAs($this->admin)
@@ -116,7 +117,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertEquals('monthly', $response->viewData('type'));
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_preview_newsletter()
     {
         $category = EventCategory::factory()->create();
@@ -135,7 +136,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertViewHas(['subscriber', 'upcomingEvents', 'featuredEvents', 'recommendations', 'type']);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_send_test_newsletter()
     {
         $response = $this->actingAs($this->admin)
@@ -148,7 +149,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertSessionHas('success', 'Test-Newsletter wurde an alle Admins versendet!');
     }
 
-    /** @test */
+    #[Test]
     public function send_newsletter_requires_valid_type()
     {
         $response = $this->actingAs($this->admin)
@@ -160,7 +161,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertSessionHasErrors('type');
     }
 
-    /** @test */
+    #[Test]
     public function send_newsletter_requires_valid_send_to()
     {
         $response = $this->actingAs($this->admin)
@@ -172,7 +173,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertSessionHasErrors('send_to');
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_subscribers_list()
     {
         // Create subscribers
@@ -189,7 +190,7 @@ class NewsletterControllerTest extends TestCase
         $response->assertViewHas(['subscribers', 'guestSubscribers']);
     }
 
-    /** @test */
+    #[Test]
     public function subscribers_list_paginates_results()
     {
         // Create more than 50 subscribers
@@ -208,7 +209,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertEquals(61, $subscribers->total()); // 60 + 1 from setUp
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_export_subscribers_csv()
     {
         User::factory()->count(3)->create([
@@ -230,7 +231,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertStringContainsString('newsletter_subscribers_', $response->headers->get('Content-Disposition'));
     }
 
-    /** @test */
+    #[Test]
     public function exported_csv_contains_correct_headers()
     {
         $response = $this->actingAs($this->admin)
@@ -245,7 +246,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertStringContainsString('Abonniert seit', $content);
     }
 
-    /** @test */
+    #[Test]
     public function exported_csv_includes_registered_and_guest_subscribers()
     {
         User::factory()->create([
@@ -271,7 +272,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertStringContainsString('Gast', $content);
     }
 
-    /** @test */
+    #[Test]
     public function newsletter_index_shows_upcoming_events()
     {
         $category = EventCategory::factory()->create();
@@ -299,7 +300,7 @@ class NewsletterControllerTest extends TestCase
         $this->assertEquals('Future Event', $upcomingEvents->first()->title);
     }
 
-    /** @test */
+    #[Test]
     public function newsletter_index_shows_featured_events()
     {
         $category = EventCategory::factory()->create();
@@ -329,4 +330,6 @@ class NewsletterControllerTest extends TestCase
         $this->assertEquals('Featured Event', $featuredEvents->first()->title);
     }
 }
+
+
 

@@ -12,7 +12,7 @@ class InvoiceSettingsController extends Controller
 
     public function __construct(InvoiceNumberService $invoiceNumberService)
     {
-        $this->middleware(['auth', 'organizer']);
+        $this->middleware(['auth']);
         $this->invoiceNumberService = $invoiceNumberService;
     }
 
@@ -21,8 +21,12 @@ class InvoiceSettingsController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
-        $settings = $user->invoice_settings ?? [];
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $settings = $organization->invoice_settings ?? [];
 
         // Default values
         $defaults = [
@@ -32,11 +36,11 @@ class InvoiceSettingsController extends Controller
         ];
 
         $settings = array_merge($defaults, $settings);
-        $settings['invoice_number_counter_booking'] = $user->invoice_counter_booking ?? 1;
+        $settings['invoice_number_counter_booking'] = $organization->invoice_counter_booking ?? 1;
 
         $placeholders = $this->invoiceNumberService->getAvailablePlaceholders();
 
-        return view('organizer.settings.invoice', compact('settings', 'placeholders'));
+        return view('organizer.settings.invoice', compact('settings', 'placeholders', 'organization'));
     }
 
     /**
@@ -44,6 +48,11 @@ class InvoiceSettingsController extends Controller
      */
     public function update(Request $request)
     {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         $request->validate([
             'invoice_number_format_booking' => 'required|string|max:100',
             'invoice_number_counter_booking' => 'required|integer|min:1',
@@ -58,8 +67,6 @@ class InvoiceSettingsController extends Controller
             ])->withInput();
         }
 
-        $user = auth()->user();
-
         // Save settings
         $invoiceSettings = [
             'invoice_number_format_booking' => $request->invoice_number_format_booking,
@@ -67,9 +74,10 @@ class InvoiceSettingsController extends Controller
             'invoice_reset_yearly' => $request->invoice_reset_yearly,
         ];
 
-        $user->update([
+        $organization->update([
             'invoice_settings' => $invoiceSettings,
             'invoice_counter_booking' => $request->invoice_number_counter_booking,
+            'invoice_counter_booking_year' => now()->year,
         ]);
 
         return back()->with('status', 'Rechnungsnummern-Einstellungen wurden erfolgreich aktualisiert.');
@@ -98,4 +106,3 @@ class InvoiceSettingsController extends Controller
         ]);
     }
 }
-

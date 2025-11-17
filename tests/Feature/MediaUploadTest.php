@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,7 +14,7 @@ class MediaUploadTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_upload_event_featured_image()
     {
         Storage::fake('public');
@@ -30,7 +31,7 @@ class MediaUploadTest extends TestCase
         Storage::disk('public')->assertExists('events/' . $file->hashName());
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_upload_gallery_images()
     {
         Storage::fake('public');
@@ -53,7 +54,7 @@ class MediaUploadTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function user_can_upload_profile_photo()
     {
         Storage::fake('public');
@@ -68,7 +69,7 @@ class MediaUploadTest extends TestCase
         Storage::disk('public')->assertExists('profile-photos/' . $file->hashName());
     }
 
-    /** @test */
+    #[Test]
     public function only_images_can_be_uploaded()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -83,7 +84,7 @@ class MediaUploadTest extends TestCase
         $response->assertSessionHasErrors('image');
     }
 
-    /** @test */
+    #[Test]
     public function image_size_is_limited()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -98,5 +99,7 @@ class MediaUploadTest extends TestCase
         $response->assertSessionHasErrors('image');
     }
 }
+
+
 
 

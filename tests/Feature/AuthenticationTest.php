@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -11,7 +12,7 @@ class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function login_screen_can_be_rendered()
     {
         $response = $this->get('/login');
@@ -19,7 +20,7 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function users_can_authenticate_with_valid_credentials()
     {
         $user = User::factory()->create([
@@ -36,7 +37,7 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect(route('dashboard'));
     }
 
-    /** @test */
+    #[Test]
     public function users_cannot_authenticate_with_invalid_password()
     {
         $user = User::factory()->create([
@@ -52,7 +53,7 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    /** @test */
+    #[Test]
     public function users_can_logout()
     {
         $user = User::factory()->create();
@@ -63,7 +64,7 @@ class AuthenticationTest extends TestCase
         $response->assertRedirect('/');
     }
 
-    /** @test */
+    #[Test]
     public function registration_screen_can_be_rendered()
     {
         $response = $this->get('/register');
@@ -71,7 +72,7 @@ class AuthenticationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function new_users_can_register()
     {
         $response = $this->post('/register', [
@@ -79,14 +80,14 @@ class AuthenticationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-            'user_type' => 'participant',
+            'account_type' => 'participant',
         ]);
 
         $this->assertAuthenticated();
         $response->assertRedirect(route('dashboard'));
     }
 
-    /** @test */
+    #[Test]
     public function organizers_can_register()
     {
         $response = $this->post('/register', [
@@ -94,7 +95,7 @@ class AuthenticationTest extends TestCase
             'email' => 'organizer@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
-            'user_type' => 'organizer',
+            'account_type' => 'organizer',
             'organization_name' => 'Test Organization',
         ]);
 
@@ -104,4 +105,6 @@ class AuthenticationTest extends TestCase
         $this->assertTrue($user->isOrganizer());
     }
 }
+
+
 

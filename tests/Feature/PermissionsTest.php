@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,7 +14,7 @@ class PermissionsTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function admin_can_access_admin_panel()
     {
         $admin = User::factory()->create();
@@ -25,7 +26,7 @@ class PermissionsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_access_admin_panel()
     {
         $user = User::factory()->create(['user_type' => 'participant']);
@@ -35,7 +36,7 @@ class PermissionsTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_manage_all_events()
     {
         $admin = User::factory()->create();
@@ -49,7 +50,7 @@ class PermissionsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_manage_users()
     {
         $admin = User::factory()->create();
@@ -61,7 +62,7 @@ class PermissionsTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_only_manage_own_events()
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
@@ -77,7 +78,7 @@ class PermissionsTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function participant_cannot_access_organizer_features()
     {
         $participant = User::factory()->create(['user_type' => 'participant']);
@@ -87,7 +88,7 @@ class PermissionsTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function guest_cannot_access_protected_routes()
     {
         $response = $this->get(route('dashboard'));
@@ -95,5 +96,7 @@ class PermissionsTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 }
+
+
 
 

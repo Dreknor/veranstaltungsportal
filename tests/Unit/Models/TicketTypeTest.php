@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\TicketType;
 use App\Models\Event;
 use App\Models\BookingItem;
@@ -12,7 +13,7 @@ class TicketTypeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_an_event()
     {
         $event = Event::factory()->create();
@@ -22,7 +23,7 @@ class TicketTypeTest extends TestCase
         $this->assertEquals($event->id, $ticketType->event->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_booking_items()
     {
         $ticketType = TicketType::factory()->create();
@@ -31,7 +32,7 @@ class TicketTypeTest extends TestCase
         $this->assertCount(3, $ticketType->bookingItems);
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_available_quantity()
     {
         $ticketType = TicketType::factory()->create([
@@ -42,7 +43,7 @@ class TicketTypeTest extends TestCase
         $this->assertEquals(70, $ticketType->availableQuantity());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_unlimited_when_quantity_is_null()
     {
         $ticketType = TicketType::factory()->create(['quantity' => null]);
@@ -50,7 +51,7 @@ class TicketTypeTest extends TestCase
         $this->assertEquals(PHP_INT_MAX, $ticketType->availableQuantity());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_ticket_is_on_sale()
     {
         $ticketType = TicketType::factory()->create([
@@ -62,7 +63,7 @@ class TicketTypeTest extends TestCase
         $this->assertTrue($ticketType->isOnSale());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_on_sale_before_sale_start()
     {
         $ticketType = TicketType::factory()->create([
@@ -74,7 +75,7 @@ class TicketTypeTest extends TestCase
         $this->assertFalse($ticketType->isOnSale());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_on_sale_after_sale_end()
     {
         $ticketType = TicketType::factory()->create([
@@ -86,7 +87,7 @@ class TicketTypeTest extends TestCase
         $this->assertFalse($ticketType->isOnSale());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_on_sale_when_not_available()
     {
         $ticketType = TicketType::factory()->create([
@@ -98,7 +99,7 @@ class TicketTypeTest extends TestCase
         $this->assertFalse($ticketType->isOnSale());
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_available_tickets()
     {
         TicketType::factory()->create([
@@ -122,4 +123,6 @@ class TicketTypeTest extends TestCase
         $this->assertCount(1, TicketType::available()->get());
     }
 }
+
+
 

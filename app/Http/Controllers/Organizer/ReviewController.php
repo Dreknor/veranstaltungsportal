@@ -13,8 +13,13 @@ class ReviewController extends Controller
      */
     public function index(Request $request)
     {
-        $query = EventReview::whereHas('event', function ($q) {
-            $q->where('user_id', auth()->id());
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $query = EventReview::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id);
         })->with(['event', 'user'])
           ->orderBy('created_at', 'desc');
 
@@ -40,25 +45,25 @@ class ReviewController extends Controller
         $reviews = $query->paginate(20);
 
         // Get organizer's events for filter
-        $events = auth()->user()->events()->orderBy('title')->get();
+        $events = $organization->events()->orderBy('title')->get();
 
         // Statistics
         $stats = [
-            'total' => EventReview::whereHas('event', function ($q) {
-                $q->where('user_id', auth()->id());
+            'total' => EventReview::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
             })->count(),
-            'pending' => EventReview::whereHas('event', function ($q) {
-                $q->where('user_id', auth()->id());
+            'pending' => EventReview::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
             })->where('is_approved', false)->count(),
-            'approved' => EventReview::whereHas('event', function ($q) {
-                $q->where('user_id', auth()->id());
+            'approved' => EventReview::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
             })->where('is_approved', true)->count(),
-            'average_rating' => round(EventReview::whereHas('event', function ($q) {
-                $q->where('user_id', auth()->id());
+            'average_rating' => round(EventReview::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
             })->where('is_approved', true)->avg('rating'), 1),
         ];
 
-        return view('organizer.reviews.index', compact('reviews', 'events', 'stats'));
+        return view('organizer.reviews.index', compact('reviews', 'events', 'stats', 'organization'));
     }
 
     /**
@@ -66,12 +71,12 @@ class ReviewController extends Controller
      */
     public function moderate(EventReview $review)
     {
-        // Check if review belongs to organizer's event
-        if ($review->event->user_id !== auth()->id()) {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization || $review->event->organization_id !== $organization->id) {
             abort(403);
         }
 
-        return view('organizer.reviews.moderate', compact('review'));
+        return view('organizer.reviews.moderate', compact('review', 'organization'));
     }
 
     /**
@@ -79,8 +84,8 @@ class ReviewController extends Controller
      */
     public function approve(EventReview $review)
     {
-        // Check if review belongs to organizer's event
-        if ($review->event->user_id !== auth()->id()) {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization || $review->event->organization_id !== $organization->id) {
             abort(403);
         }
 
@@ -97,8 +102,8 @@ class ReviewController extends Controller
      */
     public function reject(EventReview $review)
     {
-        // Check if review belongs to organizer's event
-        if ($review->event->user_id !== auth()->id()) {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization || $review->event->organization_id !== $organization->id) {
             abort(403);
         }
 
@@ -115,8 +120,8 @@ class ReviewController extends Controller
      */
     public function destroy(EventReview $review)
     {
-        // Check if review belongs to organizer's event
-        if ($review->event->user_id !== auth()->id()) {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization || $review->event->organization_id !== $organization->id) {
             abort(403);
         }
 

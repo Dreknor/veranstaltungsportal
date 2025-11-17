@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\Booking;
@@ -12,7 +13,7 @@ class DiscountCodeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_an_event()
     {
         $event = Event::factory()->create();
@@ -22,7 +23,7 @@ class DiscountCodeTest extends TestCase
         $this->assertEquals($event->id, $discountCode->event->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_bookings()
     {
         $discountCode = DiscountCode::factory()->create();
@@ -31,7 +32,7 @@ class DiscountCodeTest extends TestCase
         $this->assertCount(3, $discountCode->bookings);
     }
 
-    /** @test */
+    #[Test]
     public function it_is_valid_when_active_and_within_date_range()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -45,7 +46,7 @@ class DiscountCodeTest extends TestCase
         $this->assertTrue($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_valid_when_inactive()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -57,7 +58,7 @@ class DiscountCodeTest extends TestCase
         $this->assertFalse($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_valid_before_valid_from_date()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -69,7 +70,7 @@ class DiscountCodeTest extends TestCase
         $this->assertFalse($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_valid_after_valid_until_date()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -81,7 +82,7 @@ class DiscountCodeTest extends TestCase
         $this->assertFalse($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function it_is_not_valid_when_usage_limit_reached()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -95,7 +96,7 @@ class DiscountCodeTest extends TestCase
         $this->assertFalse($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_percentage_discount()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -108,7 +109,7 @@ class DiscountCodeTest extends TestCase
         $this->assertEquals(20, $discount);
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_fixed_discount()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -121,7 +122,7 @@ class DiscountCodeTest extends TestCase
         $this->assertEquals(15, $discount);
     }
 
-    /** @test */
+    #[Test]
     public function it_caps_fixed_discount_at_total_amount()
     {
         $discountCode = DiscountCode::factory()->create([
@@ -134,5 +135,7 @@ class DiscountCodeTest extends TestCase
         $this->assertEquals(30, $discount);
     }
 }
+
+
 
 

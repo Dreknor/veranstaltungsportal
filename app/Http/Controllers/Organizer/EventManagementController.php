@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\TicketType;
+use App\Models\User;
 use App\Services\EventCostCalculationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class EventManagementController extends Controller
@@ -15,33 +17,42 @@ class EventManagementController extends Controller
 
     public function index()
     {
-        $events = Event::where('user_id', auth()->id())
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+        $events = $organization->events()
             ->with(['category', 'bookings'])
             ->latest()
             ->paginate(15);
-
-        return view('organizer.events.index', compact('events'));
+        return view('organizer.events.index', compact('events', 'organization'));
     }
 
     public function create()
     {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
         $categories = EventCategory::where('is_active', true)->get();
-
-        // Create empty event for cost estimation
         $event = new Event();
         $event->max_attendees = 50; // Default
         $event->price_from = 0;
         $event->is_featured = false;
-
-        // Calculate initial costs
         $costCalculationService = app(EventCostCalculationService::class);
-        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
-
-        return view('organizer.events.create', compact('categories', 'publishingCosts'));
+        /** @var User $currentUser */
+        $currentUser = User::findOrFail(auth()->id());
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, $currentUser);
+        return view('organizer.events.create', compact('categories', 'publishingCosts', 'organization'));
     }
 
     public function store(Request $request)
     {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'event_category_id' => 'required|exists:event_categories,id',
@@ -74,24 +85,9 @@ class EventManagementController extends Controller
             'organizer_website' => 'nullable|url',
         ]);
 
-        // Check if trying to publish without complete organizer data
         if ($request->boolean('is_published')) {
-            $user = auth()->user();
-
-            if (!$user->canPublishEvents()) {
-                $missingData = $user->getMissingOrganizerData();
-                $errorMessage = 'Um Events zu veröffentlichen, müssen Sie zunächst Ihre ';
-
-                if (in_array('billing_data', $missingData) && in_array('bank_account', $missingData)) {
-                    $errorMessage .= 'Rechnungsdaten und Bankverbindung';
-                } elseif (in_array('billing_data', $missingData)) {
-                    $errorMessage .= 'Rechnungsdaten';
-                } else {
-                    $errorMessage .= 'Bankverbindung';
-                }
-
-                $errorMessage .= ' vervollständigen. Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen versendet werden.';
-
+            if (!$organization->hasCompleteBillingData()) {
+                $errorMessage = 'Um Events zu veröffentlichen, müssen Sie zunächst die Rechnungsdaten und Bankverbindung Ihrer Organisation vervollständigen.';
                 return back()->withErrors(['is_published' => $errorMessage])
                     ->with('error', $errorMessage)
                     ->with('redirect_to_settings', true)
@@ -99,7 +95,7 @@ class EventManagementController extends Controller
             }
         }
 
-        $validated['user_id'] = auth()->id();
+        $validated['organization_id'] = $organization->id;
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
 
         // Handle Image Upload
@@ -129,11 +125,13 @@ class EventManagementController extends Controller
         $startDate = \Carbon\Carbon::parse($request->input('featured_start_date', now()));
 
         $featuredService = app(\App\Services\FeaturedEventService::class);
+        /** @var User $currentUser */
+        $currentUser = User::findOrFail(auth()->id());
 
         try {
             $featuredFee = $featuredService->createFeaturedRequest(
                 $event,
-                auth()->user(),
+                $currentUser,
                 $durationType,
                 $startDate,
                 $durationType === 'custom' ? (int)$customDays : null
@@ -142,7 +140,7 @@ class EventManagementController extends Controller
             // Store fee ID in session for redirect to payment
             session()->put('pending_featured_fee_id', $featuredFee->id);
         } catch (\Exception $e) {
-            \Log::error('Failed to create featured booking: ' . $e->getMessage());
+            Log::error('Failed to create featured booking: ' . $e->getMessage());
         }
     }
 
@@ -155,7 +153,9 @@ class EventManagementController extends Controller
 
         // Calculate publishing costs
         $costCalculationService = app(EventCostCalculationService::class);
-        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+        /** @var User $currentUser */
+        $currentUser = User::findOrFail(auth()->id());
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, $currentUser);
 
         return view('organizer.events.edit', compact('event', 'categories', 'ticketTypes', 'publishingCosts'));
     }
@@ -489,7 +489,9 @@ class EventManagementController extends Controller
 
         // Calculate costs
         $costCalculationService = app(EventCostCalculationService::class);
-        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, auth()->user());
+        /** @var User $currentUser */
+        $currentUser = User::findOrFail(auth()->id());
+        $publishingCosts = $costCalculationService->calculatePublishingCosts($event, $currentUser);
 
         return response()->json([
             'success' => true,

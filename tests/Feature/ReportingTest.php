@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -12,7 +13,7 @@ class ReportingTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_event_statistics()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -23,7 +24,7 @@ class ReportingTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_booking_report()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -39,7 +40,7 @@ class ReportingTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_export_attendee_list()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -55,7 +56,7 @@ class ReportingTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_revenue_report()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -72,7 +73,7 @@ class ReportingTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_platform_statistics()
     {
         $admin = User::factory()->create();
@@ -87,7 +88,7 @@ class ReportingTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_view_other_organizers_reports()
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
@@ -99,5 +100,7 @@ class ReportingTest extends TestCase
         $response->assertStatus(403);
     }
 }
+
+
 
 

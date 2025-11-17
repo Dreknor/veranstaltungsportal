@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -13,7 +14,7 @@ class TicketPdfGenerationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function pdf_ticket_can_be_generated_for_confirmed_booking()
     {
         Storage::fake('local');
@@ -32,7 +33,7 @@ class TicketPdfGenerationTest extends TestCase
         $response->assertHeader('Content-Type', 'application/pdf');
     }
 
-    /** @test */
+    #[Test]
     public function user_can_only_download_their_own_tickets()
     {
         $user1 = User::factory()->create();
@@ -48,7 +49,7 @@ class TicketPdfGenerationTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function pdf_ticket_cannot_be_generated_for_pending_booking()
     {
         $user = User::factory()->create();
@@ -62,7 +63,7 @@ class TicketPdfGenerationTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function pdf_ticket_contains_qr_code()
     {
         $user = User::factory()->create();
@@ -77,7 +78,7 @@ class TicketPdfGenerationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_download_all_tickets_for_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -93,4 +94,6 @@ class TicketPdfGenerationTest extends TestCase
         $response->assertStatus(200);
     }
 }
+
+
 

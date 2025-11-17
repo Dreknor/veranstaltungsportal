@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -13,7 +14,7 @@ class EdgeCasesTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function event_with_zero_max_attendees_allows_unlimited_bookings()
     {
         $event = Event::factory()->create([
@@ -24,7 +25,7 @@ class EdgeCasesTest extends TestCase
         $this->assertTrue($event->hasAvailableTickets());
     }
 
-    /** @test */
+    #[Test]
     public function free_event_with_zero_price_ticket()
     {
         $user = createUser();
@@ -44,7 +45,7 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(0, $booking->total);
     }
 
-    /** @test */
+    #[Test]
     public function event_exactly_at_capacity()
     {
         $event = Event::factory()->create([
@@ -62,7 +63,7 @@ class EdgeCasesTest extends TestCase
         $this->assertFalse($event->fresh()->hasAvailableTickets());
     }
 
-    /** @test */
+    #[Test]
     public function cancelled_booking_frees_up_tickets()
     {
         $event = Event::factory()->create(['max_attendees' => 10]);
@@ -81,7 +82,7 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(10, $event->fresh()->availableTickets());
     }
 
-    /** @test */
+    #[Test]
     public function event_in_past_cannot_be_booked()
     {
         $event = Event::factory()->create([
@@ -92,7 +93,7 @@ class EdgeCasesTest extends TestCase
         $this->assertFalse($event->canBeBooked());
     }
 
-    /** @test */
+    #[Test]
     public function event_starting_in_less_than_one_hour()
     {
         $event = Event::factory()->create([
@@ -104,7 +105,7 @@ class EdgeCasesTest extends TestCase
         $this->assertTrue($event->canBeBooked());
     }
 
-    /** @test */
+    #[Test]
     public function discount_code_with_zero_usage_limit()
     {
         $discountCode = \App\Models\DiscountCode::factory()->create([
@@ -115,7 +116,7 @@ class EdgeCasesTest extends TestCase
         $this->assertTrue($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function discount_code_exactly_at_usage_limit()
     {
         $discountCode = \App\Models\DiscountCode::factory()->create([
@@ -127,7 +128,7 @@ class EdgeCasesTest extends TestCase
         $this->assertFalse($discountCode->isValid());
     }
 
-    /** @test */
+    #[Test]
     public function hundred_percent_discount_makes_booking_free()
     {
         $discountCode = \App\Models\DiscountCode::factory()->create([
@@ -140,7 +141,7 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(100, $discount);
     }
 
-    /** @test */
+    #[Test]
     public function event_with_very_long_title()
     {
         $organizer = createOrganizer();
@@ -154,7 +155,7 @@ class EdgeCasesTest extends TestCase
         $this->assertNotNull($event);
     }
 
-    /** @test */
+    #[Test]
     public function booking_with_multiple_ticket_types()
     {
         $user = createUser();
@@ -182,7 +183,7 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(200, $booking->subtotal); // 2*50 + 1*100
     }
 
-    /** @test */
+    #[Test]
     public function series_with_no_recurrence_count_or_end_date()
     {
         $series = \App\Models\EventSeries::factory()->create([
@@ -194,7 +195,7 @@ class EdgeCasesTest extends TestCase
         $this->assertNull($series->recurrence_end_date);
     }
 
-    /** @test */
+    #[Test]
     public function event_with_same_start_and_end_date()
     {
         $startDate = now()->addWeek();
@@ -207,7 +208,7 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals($event->start_date->format('Y-m-d H:i'), $event->end_date->format('Y-m-d H:i'));
     }
 
-    /** @test */
+    #[Test]
     public function ticket_type_with_unlimited_quantity()
     {
         $ticketType = TicketType::factory()->create([
@@ -218,5 +219,7 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(PHP_INT_MAX, $ticketType->availableQuantity());
     }
 }
+
+
 
 

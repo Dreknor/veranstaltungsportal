@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         Booking::observe(BookingObserverForBadges::class);
         Booking::observe(\App\Observers\BookingInvoiceObserver::class);
         \App\Models\PlatformFee::observe(\App\Observers\PlatformFeeInvoiceObserver::class);
+        \App\Models\Organization::observe(\App\Observers\OrganizationObserver::class);
 
         // Listen for Socialite SSO events
         EventFacade::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {

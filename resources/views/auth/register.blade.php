@@ -95,10 +95,6 @@
                         <x-button type="primary" class="w-full">{{ __('Konto erstellen') }}</x-button>
                     </form>
 
-                <!-- Register Button -->
-                <x-button type="primary" class="w-full">{{ __('Create Account') }}</x-button>
-            </form>
-
                     <!-- SSO Register Separator -->
                     <div class="relative my-6">
                         <div class="absolute inset-0 flex items-center">

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\EventSeries;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class EventSeriesPolicy
 {
@@ -13,7 +12,7 @@ class EventSeriesPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->is_organizer;
+        return true;
     }
 
     /**
@@ -21,7 +20,10 @@ class EventSeriesPolicy
      */
     public function view(User $user, EventSeries $eventSeries): bool
     {
-        return $user->id === $eventSeries->user_id;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        return $eventSeries->organization && $user->isMemberOf($eventSeries->organization);
     }
 
     /**
@@ -29,7 +31,7 @@ class EventSeriesPolicy
      */
     public function create(User $user): bool
     {
-        return $user->is_organizer;
+        return $user->activeOrganizations()->exists() || $user->hasRole('admin');
     }
 
     /**
@@ -37,7 +39,14 @@ class EventSeriesPolicy
      */
     public function update(User $user, EventSeries $eventSeries): bool
     {
-        return $user->id === $eventSeries->user_id;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        if (!$eventSeries->organization) {
+            return false;
+        }
+        $role = $user->getRoleInOrganization($eventSeries->organization);
+        return in_array($role, ['owner', 'admin']);
     }
 
     /**
@@ -45,7 +54,7 @@ class EventSeriesPolicy
      */
     public function delete(User $user, EventSeries $eventSeries): bool
     {
-        return $user->id === $eventSeries->user_id;
+        return $this->update($user, $eventSeries);
     }
 
     /**
@@ -53,7 +62,7 @@ class EventSeriesPolicy
      */
     public function restore(User $user, EventSeries $eventSeries): bool
     {
-        return $user->id === $eventSeries->user_id;
+        return false;
     }
 
     /**
@@ -61,7 +70,6 @@ class EventSeriesPolicy
      */
     public function forceDelete(User $user, EventSeries $eventSeries): bool
     {
-        return $user->id === $eventSeries->user_id;
+        return false;
     }
 }
-

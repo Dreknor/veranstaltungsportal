@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,7 +19,7 @@ class CacheTest extends TestCase
         Cache::flush();
     }
 
-    /** @test */
+    #[Test]
     public function events_are_cached_for_homepage()
     {
         Event::factory()->count(10)->create(['is_published' => true]);
@@ -33,7 +34,7 @@ class CacheTest extends TestCase
         $response2->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function event_cache_is_cleared_when_event_is_updated()
     {
         $organizer = createOrganizer();
@@ -61,7 +62,7 @@ class CacheTest extends TestCase
         $response->assertSee('Updated Title');
     }
 
-    /** @test */
+    #[Test]
     public function featured_events_are_cached()
     {
         Event::factory()->count(5)->create([
@@ -74,7 +75,7 @@ class CacheTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function user_bookings_are_not_cached()
     {
         $user = createUser();
@@ -84,4 +85,6 @@ class CacheTest extends TestCase
         $response->assertStatus(200);
     }
 }
+
+
 

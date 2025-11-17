@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -13,7 +14,7 @@ class PaymentTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function booking_can_be_created_with_pending_payment()
     {
         $user = User::factory()->create();
@@ -43,7 +44,7 @@ class PaymentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function booking_status_changes_after_payment_confirmation()
     {
         $booking = Booking::factory()->create([
@@ -65,7 +66,7 @@ class PaymentTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function free_events_dont_require_payment()
     {
         $user = User::factory()->create();
@@ -94,7 +95,7 @@ class PaymentTest extends TestCase
         $this->assertEquals('confirmed', $booking->status);
     }
 
-    /** @test */
+    #[Test]
     public function refund_can_be_processed_for_cancelled_booking()
     {
         $booking = Booking::factory()->create([
@@ -117,3 +118,5 @@ class PaymentTest extends TestCase
         ]);
     }
 }
+
+

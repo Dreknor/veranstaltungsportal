@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\EventCategory;
@@ -15,7 +16,7 @@ class EventControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_user()
     {
         $user = User::factory()->create();
@@ -25,7 +26,7 @@ class EventControllerTest extends TestCase
         $this->assertEquals($user->id, $event->user->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_category()
     {
         $category = EventCategory::factory()->create();
@@ -35,7 +36,7 @@ class EventControllerTest extends TestCase
         $this->assertEquals($category->id, $event->category->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_belong_to_a_series()
     {
         $series = EventSeries::factory()->create();
@@ -48,7 +49,7 @@ class EventControllerTest extends TestCase
         $this->assertInstanceOf(EventSeries::class, $event->series);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_ticket_types()
     {
         $event = Event::factory()->create();
@@ -57,7 +58,7 @@ class EventControllerTest extends TestCase
         $this->assertCount(3, $event->ticketTypes);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_bookings()
     {
         $event = Event::factory()->create();
@@ -66,7 +67,7 @@ class EventControllerTest extends TestCase
         $this->assertCount(2, $event->bookings);
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_available_tickets_correctly()
     {
         $event = Event::factory()->create(['max_attendees' => 100]);
@@ -87,7 +88,7 @@ class EventControllerTest extends TestCase
         $this->assertEquals(75, $event->availableTickets());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_unlimited_tickets_when_max_attendees_is_null()
     {
         $event = Event::factory()->create(['max_attendees' => null]);
@@ -95,7 +96,7 @@ class EventControllerTest extends TestCase
         $this->assertEquals(PHP_INT_MAX, $event->availableTickets());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_event_has_available_tickets()
     {
         $event = Event::factory()->create(['max_attendees' => 10]);
@@ -113,7 +114,7 @@ class EventControllerTest extends TestCase
         $this->assertFalse($event->hasAvailableTickets());
     }
 
-    /** @test */
+    #[Test]
     public function it_identifies_online_events()
     {
         $event = Event::factory()->create(['event_type' => 'online']);
@@ -125,7 +126,7 @@ class EventControllerTest extends TestCase
         $this->assertFalse($event->requiresVenue());
     }
 
-    /** @test */
+    #[Test]
     public function it_identifies_physical_events()
     {
         $event = Event::factory()->create(['event_type' => 'physical']);
@@ -137,7 +138,7 @@ class EventControllerTest extends TestCase
         $this->assertFalse($event->requiresOnlineInfo());
     }
 
-    /** @test */
+    #[Test]
     public function it_identifies_hybrid_events()
     {
         $event = Event::factory()->create(['event_type' => 'hybrid']);
@@ -149,7 +150,7 @@ class EventControllerTest extends TestCase
         $this->assertTrue($event->requiresOnlineInfo());
     }
 
-    /** @test */
+    #[Test]
     public function it_gets_attendees_count()
     {
         $event = Event::factory()->create();
@@ -167,7 +168,7 @@ class EventControllerTest extends TestCase
         $this->assertEquals(3, $event->getAttendeesCount());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_event_has_attendees()
     {
         $event = Event::factory()->create();
@@ -183,7 +184,7 @@ class EventControllerTest extends TestCase
         $this->assertTrue($event->hasAttendees());
     }
 
-    /** @test */
+    #[Test]
     public function it_can_be_booked_when_conditions_are_met()
     {
         $event = Event::factory()->create([
@@ -196,7 +197,7 @@ class EventControllerTest extends TestCase
         $this->assertTrue($event->canBeBooked());
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_be_booked_when_cancelled()
     {
         $event = Event::factory()->create([
@@ -209,7 +210,7 @@ class EventControllerTest extends TestCase
         $this->assertFalse($event->canBeBooked());
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_be_booked_when_not_published()
     {
         $event = Event::factory()->create([
@@ -222,7 +223,7 @@ class EventControllerTest extends TestCase
         $this->assertFalse($event->canBeBooked());
     }
 
-    /** @test */
+    #[Test]
     public function it_cannot_be_booked_when_in_the_past()
     {
         $event = Event::factory()->create([
@@ -235,7 +236,7 @@ class EventControllerTest extends TestCase
         $this->assertFalse($event->canBeBooked());
     }
 
-    /** @test */
+    #[Test]
     public function it_has_location_attribute()
     {
         $event = Event::factory()->create([
@@ -247,7 +248,7 @@ class EventControllerTest extends TestCase
         $this->assertEquals('Kongresshalle, Musterstraße 123, Berlin', $event->location);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_published_events()
     {
         Event::factory()->count(3)->create(['is_published' => true]);
@@ -256,7 +257,7 @@ class EventControllerTest extends TestCase
         $this->assertCount(3, Event::published()->get());
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_upcoming_events()
     {
         Event::factory()->count(2)->create(['start_date' => now()->addWeek()]);
@@ -265,7 +266,7 @@ class EventControllerTest extends TestCase
         $this->assertCount(2, Event::upcoming()->get());
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_featured_events()
     {
         Event::factory()->count(2)->create(['is_featured' => true]);
@@ -274,4 +275,6 @@ class EventControllerTest extends TestCase
         $this->assertCount(2, Event::featured()->get());
     }
 }
+
+
 

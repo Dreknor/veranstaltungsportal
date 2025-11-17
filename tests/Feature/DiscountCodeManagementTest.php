@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\DiscountCode;
@@ -12,7 +13,7 @@ class DiscountCodeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_create_discount_code()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -39,7 +40,7 @@ class DiscountCodeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_create_fixed_discount_code()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -62,7 +63,7 @@ class DiscountCodeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_update_discount_code()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -85,7 +86,7 @@ class DiscountCodeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_deactivate_discount_code()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -111,7 +112,7 @@ class DiscountCodeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_delete_discount_code()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -126,7 +127,7 @@ class DiscountCodeTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function discount_code_must_be_unique_per_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -150,7 +151,7 @@ class DiscountCodeTest extends TestCase
         $response->assertSessionHasErrors('code');
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_modify_discount_codes_of_other_events()
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
@@ -164,4 +165,6 @@ class DiscountCodeTest extends TestCase
         $response->assertStatus(403);
     }
 }
+
+
 

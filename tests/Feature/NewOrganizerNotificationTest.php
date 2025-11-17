@@ -135,3 +135,4 @@ it('notification contains correct organizer data', function () {
     expect($mail->subject)->toContain('John Doe');
 });
 
+

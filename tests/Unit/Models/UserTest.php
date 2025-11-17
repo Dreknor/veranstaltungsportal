@@ -8,12 +8,13 @@ use App\Models\Booking;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use Spatie\Permission\Models\Role;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_events()
     {
         $user = User::factory()->create();
@@ -22,7 +23,7 @@ class UserTest extends TestCase
         $this->assertCount(3, $user->events);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_bookings()
     {
         $user = User::factory()->create();
@@ -31,7 +32,7 @@ class UserTest extends TestCase
         $this->assertCount(2, $user->bookings);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_initials_from_first_and_last_name()
     {
         $user = User::factory()->create([
@@ -42,7 +43,7 @@ class UserTest extends TestCase
         $this->assertEquals('MM', $user->initials());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_initials_from_name_when_no_first_last_name()
     {
         $user = User::factory()->create([
@@ -54,7 +55,7 @@ class UserTest extends TestCase
         $this->assertEquals('JD', $user->initials());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_full_name()
     {
         $user = User::factory()->create([
@@ -65,7 +66,7 @@ class UserTest extends TestCase
         $this->assertEquals('Max Mustermann', $user->fullName());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_name_when_no_first_last_name()
     {
         $user = User::factory()->create([
@@ -77,7 +78,7 @@ class UserTest extends TestCase
         $this->assertEquals('John Doe', $user->fullName());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_profile_photo_url()
     {
         $user = User::factory()->create(['profile_photo' => 'photos/test.jpg']);
@@ -85,7 +86,7 @@ class UserTest extends TestCase
         $this->assertStringContainsString('photos/test.jpg', $user->profilePhotoUrl());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_gravatar_when_no_profile_photo()
     {
         $user = User::factory()->create([
@@ -96,7 +97,7 @@ class UserTest extends TestCase
         $this->assertStringContainsString('gravatar.com', $user->profilePhotoUrl());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_user_is_organizer()
     {
         $user = User::factory()->create(['user_type' => 'organizer']);
@@ -104,7 +105,7 @@ class UserTest extends TestCase
         $this->assertTrue($user->isOrganizer());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_user_is_participant()
     {
         $user = User::factory()->create(['user_type' => 'participant']);
@@ -112,7 +113,7 @@ class UserTest extends TestCase
         $this->assertTrue($user->isParticipant());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_user_is_admin()
     {
         $user = User::factory()->create();
@@ -122,7 +123,7 @@ class UserTest extends TestCase
         $this->assertTrue($user->isAdmin());
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_user_type_label()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -132,7 +133,7 @@ class UserTest extends TestCase
         $this->assertEquals('Teilnehmer', $participant->userTypeLabel());
     }
 
-    /** @test */
+    #[Test]
     public function it_checks_if_user_can_manage_events()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -142,7 +143,7 @@ class UserTest extends TestCase
         $this->assertFalse($participant->canManageEvents());
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_notification_preferences_to_array()
     {
         $user = User::factory()->create([
@@ -154,4 +155,3 @@ class UserTest extends TestCase
         $this->assertFalse($user->notification_preferences['sms']);
     }
 }
-

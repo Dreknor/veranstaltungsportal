@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\BookingItem;
 use App\Models\Booking;
 use App\Models\TicketType;
@@ -12,7 +13,7 @@ class BookingItemTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_booking()
     {
         $booking = Booking::factory()->create();
@@ -22,7 +23,7 @@ class BookingItemTest extends TestCase
         $this->assertEquals($booking->id, $item->booking->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_ticket_type()
     {
         $ticketType = TicketType::factory()->create();
@@ -32,7 +33,7 @@ class BookingItemTest extends TestCase
         $this->assertEquals($ticketType->id, $item->ticketType->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_subtotal()
     {
         $item = BookingItem::factory()->create([
@@ -43,7 +44,7 @@ class BookingItemTest extends TestCase
         $this->assertEquals(100.00, $item->quantity * $item->price);
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_price_to_decimal()
     {
         $item = BookingItem::factory()->create(['price' => 49.99]);
@@ -51,4 +52,6 @@ class BookingItemTest extends TestCase
         $this->assertEquals('49.99', $item->price);
     }
 }
+
+
 

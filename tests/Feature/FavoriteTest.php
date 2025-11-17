@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +12,7 @@ class FavoriteTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function user_can_favorite_an_event()
     {
         $user = User::factory()->create();
@@ -22,7 +23,7 @@ class FavoriteTest extends TestCase
         $this->assertTrue($user->hasFavorited($event));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_unfavorite_an_event()
     {
         $user = User::factory()->create();
@@ -36,7 +37,7 @@ class FavoriteTest extends TestCase
         $this->assertFalse($user->hasFavorited($event));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_view_their_favorite_events()
     {
         $user = User::factory()->create();
@@ -51,7 +52,7 @@ class FavoriteTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function guest_cannot_favorite_events()
     {
         $event = Event::factory()->create(['is_published' => true]);
@@ -61,7 +62,7 @@ class FavoriteTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function favorite_count_is_tracked()
     {
         $user1 = User::factory()->create();
@@ -74,4 +75,6 @@ class FavoriteTest extends TestCase
         $this->assertEquals(2, $event->favoriteUsers()->count());
     }
 }
+
+
 

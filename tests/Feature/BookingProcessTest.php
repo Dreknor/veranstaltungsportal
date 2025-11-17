@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Booking;
@@ -14,7 +15,7 @@ class BookingProcessTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function guest_can_view_booking_page_for_published_event()
     {
         $event = Event::factory()->create([
@@ -27,7 +28,7 @@ class BookingProcessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_create_booking_for_event()
     {
         $user = User::factory()->create();
@@ -60,7 +61,7 @@ class BookingProcessTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function booking_calculates_total_correctly()
     {
         $user = User::factory()->create();
@@ -89,7 +90,7 @@ class BookingProcessTest extends TestCase
         $this->assertEquals(100, $booking->subtotal);
     }
 
-    /** @test */
+    #[Test]
     public function booking_applies_discount_code()
     {
         $user = User::factory()->create();
@@ -127,7 +128,7 @@ class BookingProcessTest extends TestCase
         $this->assertEquals(80, $booking->total);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_view_their_bookings()
     {
         $user = User::factory()->create();
@@ -138,7 +139,7 @@ class BookingProcessTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_cancel_their_booking()
     {
         $user = User::factory()->create();
@@ -155,7 +156,7 @@ class BookingProcessTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_cancel_other_users_booking()
     {
         $user1 = User::factory()->create();
@@ -170,7 +171,7 @@ class BookingProcessTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function booking_reduces_available_tickets()
     {
         $user = User::factory()->create();
@@ -201,7 +202,7 @@ class BookingProcessTest extends TestCase
         $this->assertEquals(7, $ticketType->availableQuantity());
     }
 
-    /** @test */
+    #[Test]
     public function cannot_book_more_tickets_than_available()
     {
         $user = User::factory()->create();
@@ -229,7 +230,7 @@ class BookingProcessTest extends TestCase
         $response->assertSessionHasErrors();
     }
 
-    /** @test */
+    #[Test]
     public function cannot_book_cancelled_event()
     {
         $user = User::factory()->create();
@@ -253,4 +254,6 @@ class BookingProcessTest extends TestCase
         $response->assertStatus(403);
     }
 }
+
+
 

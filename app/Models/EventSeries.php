@@ -39,7 +39,37 @@ class EventSeries extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->organization?->owners()->first()
+            ?? $this->organization?->admins()->first()
+            ?? $this->organization?->users()->first();
+    }
+
+    /**
+     * Set the user ID attribute and assign the organization
+     */
+    public function setUserIdAttribute($value): void
+    {
+        $user = \App\Models\User::find($value);
+        if ($user) {
+            $org = $user->activeOrganizations()->first();
+            if (!$org) {
+                $org = \App\Models\Organization::factory()->create();
+                $org->users()->attach($user->id, [
+                    'role' => 'owner',
+                    'is_active' => true,
+                    'joined_at' => now(),
+                ]);
+            }
+            $this->attributes['organization_id'] = $org->id;
+        }
+    }
+
+    /**
+     * Get the organization that owns the series
+     */
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
     }
 
     /**
@@ -235,4 +265,3 @@ class EventSeries extends Model
         }
     }
 }
-

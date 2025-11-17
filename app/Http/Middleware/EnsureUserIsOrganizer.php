@@ -15,15 +15,22 @@ class EnsureUserIsOrganizer
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->isOrganizer()) {
+        $user = $request->user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        $hasOrgMembership = method_exists($user, 'activeOrganizations') && $user->activeOrganizations()->exists();
+        $hasOrganizerRole = method_exists($user, 'hasRole') && ($user->hasRole('organizer') || $user->hasRole('admin'));
+
+        if (!($hasOrgMembership || $hasOrganizerRole)) {
             abort(403, 'Nur Organisatoren haben Zugriff auf diesen Bereich.');
         }
 
-        if (!$request->user()->hasVerifiedEmail()) {
+        if (!$user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
 
         return $next($request);
     }
 }
-

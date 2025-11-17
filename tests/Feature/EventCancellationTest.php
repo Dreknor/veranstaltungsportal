@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -12,7 +13,7 @@ class EventCancellationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_cancel_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -33,7 +34,7 @@ class EventCancellationTest extends TestCase
         $this->assertNotNull($event->fresh()->cancelled_at);
     }
 
-    /** @test */
+    #[Test]
     public function cancelling_event_notifies_all_attendees()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -55,7 +56,7 @@ class EventCancellationTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function cancelled_event_cannot_accept_new_bookings()
     {
         $user = User::factory()->create();
@@ -69,7 +70,7 @@ class EventCancellationTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function cancelled_event_shows_cancellation_message()
     {
         $event = Event::factory()->create([
@@ -83,7 +84,7 @@ class EventCancellationTest extends TestCase
         $response->assertSee('Due to weather');
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_provide_refund_for_cancelled_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -103,4 +104,6 @@ class EventCancellationTest extends TestCase
         $response->assertStatus(302);
     }
 }
+
+
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\EventCategory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,7 +13,7 @@ class NewsletterSubscriptionTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_subscribe_to_newsletter()
     {
         $user = User::factory()->create([
@@ -29,7 +30,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertNotNull($user->fresh()->newsletter_subscribed_at);
     }
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_unsubscribe_from_newsletter()
     {
         $user = User::factory()->create([
@@ -46,7 +47,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertFalse($user->fresh()->newsletter_subscribed);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_update_interests()
     {
         $user = User::factory()->create();
@@ -65,7 +66,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertEquals($categoryIds, $user->fresh()->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_clear_interests()
     {
         $user = User::factory()->create([
@@ -83,7 +84,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertEquals([], $user->fresh()->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function interests_must_be_valid_category_ids()
     {
         $user = User::factory()->create();
@@ -96,7 +97,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertSessionHasErrors('category_ids.0');
     }
 
-    /** @test */
+    #[Test]
     public function user_can_view_interests_settings_page()
     {
         $user = User::factory()->create();
@@ -110,7 +111,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertViewHas(['categories', 'recommendedEvents']);
     }
 
-    /** @test */
+    #[Test]
     public function interests_page_shows_only_active_categories()
     {
         $user = User::factory()->create();
@@ -127,7 +128,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertEquals('Active Category', $categories->first()->name);
     }
 
-    /** @test */
+    #[Test]
     public function guest_cannot_access_interests_settings()
     {
         $response = $this->get(route('settings.interests.edit'));
@@ -135,7 +136,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function guest_cannot_subscribe_to_newsletter()
     {
         $response = $this->post(route('newsletter.subscribe'));
@@ -143,7 +144,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    /** @test */
+    #[Test]
     public function newsletter_subscription_creates_record_with_timestamp()
     {
         $user = User::factory()->create([
@@ -161,7 +162,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertTrue($user->newsletter_subscribed_at->isToday());
     }
 
-    /** @test */
+    #[Test]
     public function user_can_check_if_interested_in_category()
     {
         $user = User::factory()->create();
@@ -175,7 +176,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertTrue($user->isInterestedInCategory($category->id));
     }
 
-    /** @test */
+    #[Test]
     public function user_can_add_interest()
     {
         $user = User::factory()->create(['interested_category_ids' => []]);
@@ -186,7 +187,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertTrue($user->isInterestedInCategory($category->id));
     }
 
-    /** @test */
+    #[Test]
     public function adding_interest_twice_does_not_duplicate()
     {
         $user = User::factory()->create(['interested_category_ids' => []]);
@@ -198,7 +199,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertCount(1, $user->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_remove_interest()
     {
         $category = EventCategory::factory()->create();
@@ -212,7 +213,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertEmpty($user->interested_category_ids);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_get_interested_categories()
     {
         $categories = EventCategory::factory()->count(3)->create();
@@ -228,7 +229,7 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertEquals($categoryIds, $interestedCategories->pluck('id')->toArray());
     }
 
-    /** @test */
+    #[Test]
     public function newsletter_unsubscribe_route_works()
     {
         $user = User::factory()->create([
@@ -244,4 +245,6 @@ class NewsletterSubscriptionTest extends TestCase
         $this->assertFalse($user->fresh()->newsletter_subscribed);
     }
 }
+
+
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -13,7 +14,7 @@ class QueueTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function booking_confirmation_email_is_queued()
     {
         Queue::fake();
@@ -39,7 +40,7 @@ class QueueTest extends TestCase
         Queue::assertPushed(\App\Jobs\SendBookingConfirmationEmail::class);
     }
 
-    /** @test */
+    #[Test]
     public function event_reminder_emails_are_queued()
     {
         Queue::fake();
@@ -59,7 +60,7 @@ class QueueTest extends TestCase
         Queue::assertPushed(\App\Jobs\SendEventReminderEmail::class);
     }
 
-    /** @test */
+    #[Test]
     public function cancelled_event_notifications_are_queued()
     {
         Queue::fake();
@@ -79,4 +80,6 @@ class QueueTest extends TestCase
         Queue::assertPushed(\App\Jobs\SendEventCancellationEmail::class);
     }
 }
+
+
 

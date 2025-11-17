@@ -45,3 +45,10 @@ Schedule::command('featured:disable-expired')
     ->dailyAt('00:00')
     ->timezone('Europe/Berlin')
     ->description('Disable expired featured events');
+
+// Queue Worker Mode Configuration (set in .env: QUEUE_WORKER_MODE)
+// - 'cronjob': Queue jobs are processed every minute via cronjob (default, simple setup)
+// - 'supervisor': Queue worker runs continuously as daemon (recommended for production)
+if (env('QUEUE_WORKER_MODE', 'cronjob') === 'cronjob') {
+    Schedule::command('queue:work --stop-when-empty --max-time=50')->everyMinute();
+}

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -13,7 +14,7 @@ class CheckInTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_check_in_page()
     {
         $organizer = createOrganizer();
@@ -24,7 +25,7 @@ class CheckInTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_check_in_attendee_with_qr_code()
     {
         $organizer = createOrganizer();
@@ -46,7 +47,7 @@ class CheckInTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_check_in_attendee_manually()
     {
         $organizer = createOrganizer();
@@ -65,7 +66,7 @@ class CheckInTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_check_in_cancelled_booking()
     {
         $organizer = createOrganizer();
@@ -83,7 +84,7 @@ class CheckInTest extends TestCase
         $response->assertStatus(422);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_check_in_invalid_booking_number()
     {
         $organizer = createOrganizer();
@@ -96,7 +97,7 @@ class CheckInTest extends TestCase
         $response->assertStatus(404);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_check_in_statistics()
     {
         $organizer = createOrganizer();
@@ -119,7 +120,7 @@ class CheckInTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_check_in_for_other_organizers_event()
     {
         $organizer1 = createOrganizer();
@@ -131,7 +132,7 @@ class CheckInTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function booking_can_be_checked_in_only_once()
     {
         $organizer = createOrganizer();
@@ -150,4 +151,6 @@ class CheckInTest extends TestCase
         $response->assertStatus(422);
     }
 }
+
+
 

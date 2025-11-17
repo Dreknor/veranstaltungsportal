@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\EventWaitlist;
@@ -12,7 +13,7 @@ class WaitlistTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function user_can_join_waitlist_for_sold_out_event()
     {
         $user = User::factory()->create();
@@ -39,7 +40,7 @@ class WaitlistTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_join_waitlist_for_available_event()
     {
         $user = User::factory()->create();
@@ -56,7 +57,7 @@ class WaitlistTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_leave_waitlist()
     {
         $user = User::factory()->create();
@@ -76,7 +77,7 @@ class WaitlistTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_waitlist_for_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -89,7 +90,7 @@ class WaitlistTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_join_waitlist_twice()
     {
         $user = User::factory()->create();
@@ -119,3 +120,5 @@ class WaitlistTest extends TestCase
         $response->assertSessionHasErrors();
     }
 }
+
+

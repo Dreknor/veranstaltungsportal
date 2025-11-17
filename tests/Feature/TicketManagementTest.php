@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\TicketType;
@@ -12,7 +13,7 @@ class TicketManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_create_ticket_type_for_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -36,7 +37,7 @@ class TicketManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_update_ticket_type()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -61,7 +62,7 @@ class TicketManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_delete_ticket_type()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -76,7 +77,7 @@ class TicketManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_modify_ticket_types_of_other_events()
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
@@ -90,7 +91,7 @@ class TicketManagementTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function ticket_type_can_have_sale_period()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -114,7 +115,7 @@ class TicketManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function ticket_type_can_have_min_max_per_order()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -139,4 +140,6 @@ class TicketManagementTest extends TestCase
         ]);
     }
 }
+
+
 

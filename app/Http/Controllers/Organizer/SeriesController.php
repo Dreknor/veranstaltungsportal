@@ -16,7 +16,7 @@ class SeriesController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'organizer']);
+        $this->middleware(['auth']);
     }
 
     /**
@@ -24,13 +24,18 @@ class SeriesController extends Controller
      */
     public function index()
     {
-        $series = EventSeries::where('user_id', auth()->id())
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $series = EventSeries::where('organization_id', $organization->id)
             ->with(['category', 'events'])
             ->withCount('events')
             ->latest()
             ->paginate(15);
 
-        return view('organizer.series.index', compact('series'));
+        return view('organizer.series.index', compact('series', 'organization'));
     }
 
     /**
@@ -38,8 +43,12 @@ class SeriesController extends Controller
      */
     public function create()
     {
-        $categories = EventCategory::where('is_active', true)->get();
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
 
+        $categories = EventCategory::where('is_active', true)->get();
         // Create empty event for cost estimation
         $event = new Event();
         $event->max_attendees = 50; // Default
@@ -53,7 +62,7 @@ class SeriesController extends Controller
         // Get platform fee info for display when no specific costs available
         $platformFeeInfo = $costCalculationService->getPlatformFeeInfo(auth()->user());
 
-        return view('organizer.series.create', compact('categories', 'publishingCosts', 'platformFeeInfo'));
+        return view('organizer.series.create', compact('categories', 'publishingCosts', 'platformFeeInfo', 'organization'));
     }
 
     /**
@@ -61,6 +70,11 @@ class SeriesController extends Controller
      */
     public function store(Request $request)
     {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
@@ -91,7 +105,7 @@ class SeriesController extends Controller
 
             // Create series with simplified data
             $series = EventSeries::create([
-                'user_id' => auth()->id(),
+                'organization_id' => $organization->id,
                 'title' => $validated['title'],
                 'description' => $validated['description'] ?? null,
                 'event_category_id' => $validated['event_category_id'],
@@ -119,7 +133,7 @@ class SeriesController extends Controller
             $this->generatePlaceholderEvents($series);
 
             return redirect()->route('organizer.series.show', $series)
-                ->with('success', 'Veranstaltungsreihe mit ' . $validated['recurrence_count'] . ' Terminen erfolgreich erstellt! Sie können die Termine jetzt individuell bearbeiten.');
+                ->with('success', 'Veranstaltungsreihe erstellt!');
         } catch (\Exception $e) {
             \Log::error('Series creation error: ' . $e->getMessage());
             return back()->withInput()->withErrors(['error' => 'Fehler beim Erstellen der Veranstaltungsreihe: ' . $e->getMessage()]);
@@ -202,7 +216,7 @@ class SeriesController extends Controller
         $series->delete();
 
         return redirect()->route('organizer.series.index')
-            ->with('success', 'Veranstaltungsreihe und alle zugehörigen Events erfolgreich gelöscht!');
+            ->with('success', 'Veranstaltungsreihe und alle zugehörigen Events gelöscht!');
     }
 
     /**
@@ -223,7 +237,7 @@ class SeriesController extends Controller
             $endDate = $startDate->copy()->addMinutes($template['duration']);
 
             Event::create([
-                'user_id' => $series->user_id,
+                'organization_id' => $series->organization_id,
                 'series_id' => $series->id,
                 'series_position' => $i,
                 'is_series_part' => true, // WICHTIG: Einzelbuchung nicht möglich
@@ -259,7 +273,7 @@ class SeriesController extends Controller
     {
         $this->authorize('update', $series);
 
-        // Delete events without bookings
+        // Delete events ohne Buchungen
         $series->events()->whereDoesntHave('bookings')->delete();
 
         return redirect()->route('organizer.series.show', $series)
@@ -282,10 +296,10 @@ class SeriesController extends Controller
         $startDateTime = Carbon::parse($validated['event_date'] . ' ' . $validated['start_time']);
         $endDateTime = $startDateTime->copy()->addMinutes($template['duration']);
 
-        $position = $series->events()->max('series_position') + 1;
+        $position = (int) $series->events()->max('series_position') + 1;
 
         Event::create([
-            'user_id' => $series->user_id,
+            'organization_id' => $series->organization_id,
             'series_id' => $series->id,
             'series_position' => $position,
             'event_category_id' => $series->event_category_id,
@@ -299,20 +313,10 @@ class SeriesController extends Controller
             'venue_city' => $template['venue_city'],
             'venue_postal_code' => $template['venue_postal_code'],
             'venue_country' => $template['venue_country'],
-            'venue_latitude' => $template['venue_latitude'] ?? null,
-            'venue_longitude' => $template['venue_longitude'] ?? null,
-            'directions' => $template['directions'] ?? null,
-            'organizer_info' => $template['organizer_info'] ?? null,
-            'organizer_email' => $template['organizer_email'] ?? null,
-            'organizer_phone' => $template['organizer_phone'] ?? null,
-            'organizer_website' => $template['organizer_website'] ?? null,
-            'max_attendees' => $template['max_attendees'] ?? null,
-            'is_published' => $template['is_published'] ?? false,
         ]);
 
-        $series->updateTotalEvents();
-
-        return back()->with('success', 'Event erfolgreich zur Reihe hinzugefügt!');
+        return redirect()->route('organizer.series.show', $series)
+            ->with('success', 'Event zur Reihe hinzugefügt.');
     }
 }
 

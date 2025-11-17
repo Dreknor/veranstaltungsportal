@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\EventSeries;
@@ -12,7 +13,7 @@ class EventSeriesControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function organizer_can_create_event_series()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -35,7 +36,7 @@ class EventSeriesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_view_their_series()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -46,7 +47,7 @@ class EventSeriesControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function series_can_have_multiple_events()
     {
         $series = EventSeries::factory()->create();
@@ -58,7 +59,7 @@ class EventSeriesControllerTest extends TestCase
         $this->assertCount(5, $series->events);
     }
 
-    /** @test */
+    #[Test]
     public function events_in_series_are_ordered_by_position()
     {
         $series = EventSeries::factory()->create();
@@ -80,7 +81,7 @@ class EventSeriesControllerTest extends TestCase
         $this->assertEquals(2, $events->last()->series_position);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_update_series()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -101,7 +102,7 @@ class EventSeriesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_delete_series()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
@@ -114,7 +115,7 @@ class EventSeriesControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_modify_other_organizers_series()
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
@@ -126,5 +127,7 @@ class EventSeriesControllerTest extends TestCase
         $response->assertStatus(403);
     }
 }
+
+
 
 

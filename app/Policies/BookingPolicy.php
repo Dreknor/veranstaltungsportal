@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Booking;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class BookingPolicy
 {
@@ -21,7 +20,17 @@ class BookingPolicy
      */
     public function view(User $user, Booking $booking): bool
     {
-        return $user->id === $booking->event->user_id || $user->id === $booking->user_id;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // Participant can view their own booking
+        if ($booking->user_id && $user->id === $booking->user_id) {
+            return true;
+        }
+
+        // Organization members can view
+        return $booking->event && $booking->event->organization && $user->isMemberOf($booking->event->organization);
     }
 
     /**
@@ -37,7 +46,16 @@ class BookingPolicy
      */
     public function update(User $user, Booking $booking): bool
     {
-        return $user->id === $booking->event->user_id;
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        if (!$booking->event || !$booking->event->organization) {
+            return false;
+        }
+
+        $role = $user->getRoleInOrganization($booking->event->organization);
+        return in_array($role, ['owner', 'admin']);
     }
 
     /**
@@ -45,7 +63,7 @@ class BookingPolicy
      */
     public function delete(User $user, Booking $booking): bool
     {
-        return $user->id === $booking->event->user_id;
+        return $this->update($user, $booking);
     }
 
     /**

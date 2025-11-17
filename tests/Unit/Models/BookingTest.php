@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Booking;
 use App\Models\Event;
 use App\Models\User;
@@ -14,7 +15,7 @@ class BookingTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_generates_booking_number_on_creation()
     {
         $booking = Booking::factory()->create();
@@ -23,7 +24,7 @@ class BookingTest extends TestCase
         $this->assertStringStartsWith('BK-', $booking->booking_number);
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_an_event()
     {
         $event = Event::factory()->create();
@@ -33,7 +34,7 @@ class BookingTest extends TestCase
         $this->assertEquals($event->id, $booking->event->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_user()
     {
         $user = User::factory()->create();
@@ -43,7 +44,7 @@ class BookingTest extends TestCase
         $this->assertEquals($user->id, $booking->user->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_have_a_discount_code()
     {
         $discountCode = DiscountCode::factory()->create();
@@ -52,7 +53,7 @@ class BookingTest extends TestCase
         $this->assertInstanceOf(DiscountCode::class, $booking->discountCode);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_items()
     {
         $booking = Booking::factory()->create();
@@ -61,7 +62,7 @@ class BookingTest extends TestCase
         $this->assertCount(3, $booking->items);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_total_amount_attribute()
     {
         $booking = Booking::factory()->create(['total' => 150.50]);
@@ -69,7 +70,7 @@ class BookingTest extends TestCase
         $this->assertEquals(150.50, $booking->getTotalAmountAttribute());
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_verification_code()
     {
         $booking = Booking::factory()->create(['booking_number' => 'BK-ABC123DEF456']);
@@ -81,7 +82,7 @@ class BookingTest extends TestCase
         $this->assertEquals(strtoupper($verificationCode), $verificationCode);
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_confirmed_bookings()
     {
         Booking::factory()->count(3)->create(['status' => 'confirmed']);
@@ -90,7 +91,7 @@ class BookingTest extends TestCase
         $this->assertCount(3, Booking::confirmed()->get());
     }
 
-    /** @test */
+    #[Test]
     public function it_scopes_pending_bookings()
     {
         Booking::factory()->count(2)->create(['status' => 'pending']);
@@ -99,7 +100,7 @@ class BookingTest extends TestCase
         $this->assertCount(2, Booking::pending()->get());
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_dates_correctly()
     {
         $booking = Booking::factory()->create([
@@ -111,7 +112,7 @@ class BookingTest extends TestCase
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $booking->confirmed_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_decimal_fields_correctly()
     {
         $booking = Booking::factory()->create([
@@ -125,4 +126,6 @@ class BookingTest extends TestCase
         $this->assertEquals('90.25', $booking->total);
     }
 }
+
+
 

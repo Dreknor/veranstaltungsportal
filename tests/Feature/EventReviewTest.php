@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +12,7 @@ class EventReviewTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function authenticated_user_can_leave_review_for_attended_event()
     {
         $user = User::factory()->create();
@@ -42,7 +43,7 @@ class EventReviewTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_review_event_without_booking()
     {
         $user = User::factory()->create();
@@ -58,7 +59,7 @@ class EventReviewTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function reviews_must_have_valid_rating()
     {
         $user = User::factory()->create();
@@ -80,7 +81,7 @@ class EventReviewTest extends TestCase
         $response->assertSessionHasErrors('rating');
     }
 
-    /** @test */
+    #[Test]
     public function event_displays_average_rating()
     {
         $event = Event::factory()->create(['is_published' => true]);
@@ -100,7 +101,7 @@ class EventReviewTest extends TestCase
         $this->assertEquals(4.0, $event->averageRating());
     }
 
-    /** @test */
+    #[Test]
     public function only_approved_reviews_are_visible()
     {
         $event = Event::factory()->create(['is_published' => true]);
@@ -123,3 +124,5 @@ class EventReviewTest extends TestCase
             ->assertDontSee('Unapproved comment');
     }
 }
+
+

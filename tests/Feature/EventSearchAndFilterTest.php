@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +12,7 @@ class EventSearchAndFilterTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function events_can_be_searched_by_title()
     {
         Event::factory()->create([
@@ -29,7 +30,7 @@ class EventSearchAndFilterTest extends TestCase
             ->assertSee('Laravel Conference');
     }
 
-    /** @test */
+    #[Test]
     public function events_can_be_filtered_by_category()
     {
         $category1 = \App\Models\EventCategory::factory()->create(['name' => 'Tech']);
@@ -52,7 +53,7 @@ class EventSearchAndFilterTest extends TestCase
             ->assertSee('Tech Event');
     }
 
-    /** @test */
+    #[Test]
     public function events_can_be_filtered_by_date_range()
     {
         Event::factory()->create([
@@ -75,7 +76,7 @@ class EventSearchAndFilterTest extends TestCase
             ->assertSee('Soon Event');
     }
 
-    /** @test */
+    #[Test]
     public function events_can_be_filtered_by_location()
     {
         Event::factory()->create([
@@ -95,7 +96,7 @@ class EventSearchAndFilterTest extends TestCase
             ->assertSee('Berlin Event');
     }
 
-    /** @test */
+    #[Test]
     public function only_published_events_appear_in_search()
     {
         Event::factory()->create([
@@ -114,7 +115,7 @@ class EventSearchAndFilterTest extends TestCase
             ->assertDontSee('Unpublished Event');
     }
 
-    /** @test */
+    #[Test]
     public function featured_events_are_displayed()
     {
         Event::factory()->count(2)->create([
@@ -131,7 +132,7 @@ class EventSearchAndFilterTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function events_can_be_sorted_by_date()
     {
         $event1 = Event::factory()->create([
@@ -150,7 +151,7 @@ class EventSearchAndFilterTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function events_can_be_filtered_by_event_type()
     {
         Event::factory()->create([
@@ -170,5 +171,7 @@ class EventSearchAndFilterTest extends TestCase
             ->assertSee('Online Event');
     }
 }
+
+
 
 

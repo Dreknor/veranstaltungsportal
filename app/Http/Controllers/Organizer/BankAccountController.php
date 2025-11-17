@@ -13,16 +13,19 @@ class BankAccountController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $organization = Auth::user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
 
-        $bankAccount = $user->bank_account ?? [
+        $bankAccount = $organization->bank_account ?? [
             'account_holder' => '',
             'bank_name' => '',
             'iban' => '',
             'bic' => '',
         ];
 
-        return view('organizer.bank-account.index', compact('bankAccount'));
+        return view('organizer.bank-account.index', compact('bankAccount', 'organization'));
     }
 
     /**
@@ -30,6 +33,11 @@ class BankAccountController extends Controller
      */
     public function update(Request $request)
     {
+        $organization = Auth::user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         $validated = $request->validate([
             'account_holder' => 'required|string|max:255',
             'bank_name' => 'required|string|max:255',
@@ -37,14 +45,11 @@ class BankAccountController extends Controller
             'bic' => 'required|string|max:11',
         ]);
 
-        $user = Auth::user();
-
-        $user->update([
+        $organization->update([
             'bank_account' => $validated
         ]);
 
-        return redirect()
-            ->route('organizer.bank-account.index')
+        return redirect()->route('organizer.bank-account.index')
             ->with('success', 'Kontoverbindung wurde erfolgreich aktualisiert.');
     }
 
@@ -53,21 +58,24 @@ class BankAccountController extends Controller
      */
     public function billingData()
     {
-        $user = Auth::user();
+        $organization = Auth::user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
 
-        $billingData = $user->organizer_billing_data ?? [
-            'company_name' => $user->organization_name ?? '',
+        $billingData = $organization->billing_data ?? [
+            'company_name' => $organization->name ?? '',
             'company_address' => '',
             'company_postal_code' => '',
             'company_city' => '',
             'company_country' => 'Deutschland',
-            'tax_id' => $user->tax_id ?? '',
+            'tax_id' => $organization->tax_id ?? '',
             'vat_id' => '',
-            'company_email' => $user->email,
-            'company_phone' => $user->phone ?? '',
+            'company_email' => $organization->email,
+            'company_phone' => $organization->phone ?? '',
         ];
 
-        return view('organizer.bank-account.billing-data', compact('billingData'));
+        return view('organizer.bank-account.billing-data', compact('billingData', 'organization'));
     }
 
     /**
@@ -75,6 +83,11 @@ class BankAccountController extends Controller
      */
     public function updateBillingData(Request $request)
     {
+        $organization = Auth::user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         $validated = $request->validate([
             'company_name' => 'required|string|max:255',
             'company_address' => 'required|string|max:255',
@@ -87,17 +100,15 @@ class BankAccountController extends Controller
             'company_phone' => 'required|string|max:50',
         ]);
 
-        $user = Auth::user();
-
-        $user->update([
-            'organizer_billing_data' => $validated,
-            'organization_name' => $validated['company_name'],
+        $organization->update([
+            'billing_data' => $validated,
+            'name' => $validated['company_name'],
             'tax_id' => $validated['tax_id'],
+            'email' => $validated['company_email'],
+            'phone' => $validated['company_phone'],
         ]);
 
-        return redirect()
-            ->route('organizer.bank-account.billing-data')
+        return redirect()->route('organizer.bank-account.billing-data')
             ->with('success', 'Rechnungsdaten wurden erfolgreich aktualisiert.');
     }
 }
-

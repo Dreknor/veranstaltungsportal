@@ -23,7 +23,14 @@ class InvoiceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Invoice::where('user_id', auth()->id())
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $query = Invoice::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
+            })
             ->where('type', 'platform_fee')
             ->with('event')
             ->orderBy('invoice_date', 'desc');
@@ -45,20 +52,18 @@ class InvoiceController extends Controller
 
         // Calculate totals
         $totals = [
-            'total' => Invoice::where('user_id', auth()->id())
-                ->where('type', 'platform_fee')
-                ->sum('total_amount'),
-            'paid' => Invoice::where('user_id', auth()->id())
-                ->where('type', 'platform_fee')
-                ->where('status', 'paid')
-                ->sum('total_amount'),
-            'pending' => Invoice::where('user_id', auth()->id())
-                ->where('type', 'platform_fee')
-                ->whereIn('status', ['sent', 'overdue'])
-                ->sum('total_amount'),
+            'total' => Invoice::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
+            })->where('type', 'platform_fee')->sum('total_amount'),
+            'paid' => Invoice::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
+            })->where('type', 'platform_fee')->where('status', 'paid')->sum('total_amount'),
+            'pending' => Invoice::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
+            })->where('type', 'platform_fee')->whereIn('status', ['sent', 'overdue'])->sum('total_amount'),
         ];
 
-        return view('organizer.invoices.index', compact('invoices', 'totals'));
+        return view('organizer.invoices.index', compact('invoices', 'totals', 'organization'));
     }
 
     /**
@@ -66,8 +71,9 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        // Authorization
-        if ($invoice->user_id !== auth()->id()) {
+        // Authorization: invoice must belong to current org
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization || !$invoice->event || $invoice->event->organization_id !== $organization->id) {
             abort(403, 'Unberechtigt');
         }
 
@@ -76,7 +82,7 @@ class InvoiceController extends Controller
         // Get platform fees for this invoice
         $platformFees = PlatformFee::where('event_id', $invoice->event_id)->get();
 
-        return view('organizer.invoices.show', compact('invoice', 'platformFees'));
+        return view('organizer.invoices.show', compact('invoice', 'platformFees', 'organization'));
     }
 
     /**
@@ -84,8 +90,8 @@ class InvoiceController extends Controller
      */
     public function download(Invoice $invoice)
     {
-        // Authorization
-        if ($invoice->user_id !== auth()->id()) {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization || !$invoice->event || $invoice->event->organization_id !== $organization->id) {
             abort(403, 'Unberechtigt');
         }
 
@@ -128,8 +134,13 @@ class InvoiceController extends Controller
      */
     public function platformFees(Request $request)
     {
-        $query = PlatformFee::whereHas('event', function ($q) {
-            $q->where('user_id', auth()->id());
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $query = PlatformFee::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id);
         })->with(['event', 'booking']);
 
         // Filter by event
@@ -148,22 +159,19 @@ class InvoiceController extends Controller
         $platformFees = $query->orderBy('created_at', 'desc')->paginate(20);
 
         // Get user's events for filter dropdown
-        $events = auth()->user()->events()->orderBy('start_date', 'desc')->get();
+        $events = $organization->events()->orderBy('start_date', 'desc')->get();
 
         // Calculate totals
-        $totalFees = PlatformFee::whereHas('event', function ($q) {
-            $q->where('user_id', auth()->id());
+        $totalFees = PlatformFee::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id);
         })->sum('fee_amount');
 
-        $totalBookings = PlatformFee::whereHas('event', function ($q) {
-            $q->where('user_id', auth()->id());
+        $totalBookings = PlatformFee::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id);
         })->sum('booking_amount');
 
         return view('organizer.invoices.platform-fees', compact(
-            'platformFees',
-            'events',
-            'totalFees',
-            'totalBookings'
+            'platformFees', 'events', 'totalFees', 'totalBookings', 'organization'
         ));
     }
 
@@ -172,18 +180,23 @@ class InvoiceController extends Controller
      */
     public function export(Request $request)
     {
-        $format = $request->get('format', 'csv');
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return back()->with('error', 'Keine Organisation ausgewählt.');
+        }
 
-        $invoices = Invoice::where('user_id', auth()->id())
+        $invoices = Invoice::whereHas('event', function ($q) use ($organization) {
+                $q->where('organization_id', $organization->id);
+            })
             ->where('type', 'platform_fee')
             ->with('event')
             ->orderBy('invoice_date', 'desc')
             ->get();
 
+        $format = $request->get('format', 'csv');
         if ($format === 'csv') {
             return $this->exportCsv($invoices);
         }
-
         return back()->with('error', 'Ungültiges Export-Format.');
     }
 
@@ -193,7 +206,6 @@ class InvoiceController extends Controller
     private function exportCsv($invoices)
     {
         $filename = 'rechnungen_' . now()->format('Y-m-d') . '.csv';
-
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
@@ -207,15 +219,7 @@ class InvoiceController extends Controller
 
             // Header
             fputcsv($file, [
-                'Rechnungsnummer',
-                'Datum',
-                'Fälligkeitsdatum',
-                'Event',
-                'Betrag (netto)',
-                'MwSt.',
-                'Gesamt (brutto)',
-                'Status',
-                'Bezahlt am',
+                'Rechnungsnummer', 'Datum', 'Fälligkeitsdatum', 'Event', 'Betrag (netto)', 'MwSt.', 'Gesamt (brutto)', 'Status', 'Bezahlt am',
             ], ';');
 
             // Data

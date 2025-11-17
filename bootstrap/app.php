@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'organizer' => \App\Http\Middleware\EnsureUserIsOrganizer::class,
+            'organization_context' => \App\Http\Middleware\EnsureHasOrganizationContext::class,
             'recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class,
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

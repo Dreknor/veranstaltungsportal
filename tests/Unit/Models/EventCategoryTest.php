@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\EventCategory;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +12,7 @@ class EventCategoryTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_has_many_events()
     {
         $category = EventCategory::factory()->create();
@@ -20,7 +21,7 @@ class EventCategoryTest extends TestCase
         $this->assertCount(5, $category->events);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_slug()
     {
         $category = EventCategory::factory()->create([
@@ -30,7 +31,7 @@ class EventCategoryTest extends TestCase
         $this->assertNotNull($category->slug);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_have_parent_category()
     {
         $parent = EventCategory::factory()->create();
@@ -39,7 +40,7 @@ class EventCategoryTest extends TestCase
         $this->assertEquals($parent->id, $child->parent_id);
     }
 
-    /** @test */
+    #[Test]
     public function it_can_have_child_categories()
     {
         $parent = EventCategory::factory()->create();
@@ -48,7 +49,7 @@ class EventCategoryTest extends TestCase
         $this->assertCount(3, $parent->children);
     }
 
-    /** @test */
+    #[Test]
     public function it_counts_events_correctly()
     {
         $category = EventCategory::factory()->create();
@@ -60,4 +61,6 @@ class EventCategoryTest extends TestCase
         $this->assertEquals(7, $category->events()->count());
     }
 }
+
+
 

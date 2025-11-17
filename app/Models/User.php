@@ -202,7 +202,7 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the events created by this user
+     * Get the events created by this user (legacy - for backward compatibility)
      */
     public function events()
     {
@@ -232,6 +232,110 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasFavorited(Event $event): bool
     {
         return $this->favoriteEvents()->where('event_id', $event->id)->exists();
+    }
+
+    /**
+     * Organizations this user belongs to
+     */
+    public function organizations()
+    {
+        return $this->belongsToMany(Organization::class, 'organization_user')
+            ->withPivot(['role', 'is_active', 'invited_at', 'joined_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Active organizations only
+     */
+    public function activeOrganizations()
+    {
+        return $this->organizations()->wherePivot('is_active', true);
+    }
+
+    /**
+     * Organizations where user is owner
+     */
+    public function ownedOrganizations()
+    {
+        return $this->organizations()->wherePivot('role', 'owner');
+    }
+
+    /**
+     * Get current organization from session
+     */
+    public function currentOrganization(): ?Organization
+    {
+        $organizationId = session('current_organization_id');
+
+        if (!$organizationId) {
+            // Auto-select first active organization
+            $organization = $this->activeOrganizations()->first();
+            if ($organization) {
+                session(['current_organization_id' => $organization->id]);
+                return $organization;
+            }
+            return null;
+        }
+
+        return $this->activeOrganizations()->find($organizationId);
+    }
+
+    /**
+     * Set current organization
+     */
+    public function setCurrentOrganization(Organization $organization): void
+    {
+        if (!$this->isMemberOf($organization)) {
+            throw new \Exception('User is not a member of this organization');
+        }
+
+        session(['current_organization_id' => $organization->id]);
+    }
+
+    /**
+     * Check if user is member of organization
+     */
+    public function isMemberOf(Organization $organization): bool
+    {
+        return $this->activeOrganizations()->where('organizations.id', $organization->id)->exists();
+    }
+
+    /**
+     * Check if user is owner of organization
+     */
+    public function isOwnerOf(Organization $organization): bool
+    {
+        return $this->organizations()
+            ->where('organizations.id', $organization->id)
+            ->wherePivot('role', 'owner')
+            ->wherePivot('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * Check if user can manage organization
+     */
+    public function canManageOrganization(Organization $organization): bool
+    {
+        if ($this->hasRole('admin')) {
+            return true; // Platform admins can manage all
+        }
+
+        $pivot = $this->organizations()
+            ->where('organizations.id', $organization->id)
+            ->first()?->pivot;
+
+        return $pivot && $pivot->is_active && in_array($pivot->role, ['owner', 'admin']);
+    }
+
+    /**
+     * Get user's role in organization
+     */
+    public function getRoleInOrganization(Organization $organization): ?string
+    {
+        return $this->organizations()
+            ->where('organizations.id', $organization->id)
+            ->first()?->pivot?->role;
     }
 
     /**

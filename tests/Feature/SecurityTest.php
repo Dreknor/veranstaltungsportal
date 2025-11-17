@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -13,7 +14,7 @@ class SecurityTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function csrf_token_is_required_for_post_requests()
     {
         $response = $this->post('/login', [
@@ -26,7 +27,7 @@ class SecurityTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /** @test */
+    #[Test]
     public function sql_injection_is_prevented_in_search()
     {
         Event::factory()->create(['title' => 'Normal Event', 'is_published' => true]);
@@ -39,7 +40,7 @@ class SecurityTest extends TestCase
         $this->assertDatabaseHas('events', ['title' => 'Normal Event']);
     }
 
-    /** @test */
+    #[Test]
     public function xss_is_prevented_in_event_title()
     {
         $organizer = createOrganizer();
@@ -57,7 +58,7 @@ class SecurityTest extends TestCase
         $response->assertDontSee('<script>', false);
     }
 
-    /** @test */
+    #[Test]
     public function user_cannot_access_other_users_bookings()
     {
         $user1 = createUser();
@@ -70,7 +71,7 @@ class SecurityTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_cannot_delete_other_organizers_events()
     {
         $organizer1 = createOrganizer();
@@ -83,7 +84,7 @@ class SecurityTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function mass_assignment_is_protected()
     {
         $organizer = createOrganizer();
@@ -102,7 +103,7 @@ class SecurityTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function passwords_are_hashed()
     {
         $password = 'my-secret-password';
@@ -115,7 +116,7 @@ class SecurityTest extends TestCase
         $this->assertTrue(\Hash::check($password, $user->password));
     }
 
-    /** @test */
+    #[Test]
     public function sensitive_data_is_not_exposed_in_api()
     {
         $user = createUser();
@@ -125,7 +126,7 @@ class SecurityTest extends TestCase
         $response->assertJsonMissing(['password', 'remember_token']);
     }
 
-    /** @test */
+    #[Test]
     public function rate_limiting_prevents_brute_force()
     {
         $attempts = 10;
@@ -142,7 +143,7 @@ class SecurityTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /** @test */
+    #[Test]
     public function file_upload_validates_mime_types()
     {
         $organizer = createOrganizer();
@@ -157,7 +158,7 @@ class SecurityTest extends TestCase
         $response->assertSessionHasErrors('image');
     }
 
-    /** @test */
+    #[Test]
     public function session_hijacking_is_prevented()
     {
         $user = createUser();
@@ -170,7 +171,7 @@ class SecurityTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /** @test */
+    #[Test]
     public function booking_number_cannot_be_guessed()
     {
         $booking1 = Booking::factory()->create();
@@ -182,4 +183,6 @@ class SecurityTest extends TestCase
         $this->assertStringStartsWith('BK-', $booking2->booking_number);
     }
 }
+
+
 

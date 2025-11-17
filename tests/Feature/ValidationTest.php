@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -11,7 +12,7 @@ class ValidationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function event_creation_requires_title()
     {
         $organizer = createOrganizer();
@@ -25,7 +26,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('title');
     }
 
-    /** @test */
+    #[Test]
     public function event_creation_requires_valid_event_type()
     {
         $organizer = createOrganizer();
@@ -39,7 +40,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('event_type');
     }
 
-    /** @test */
+    #[Test]
     public function event_start_date_must_be_in_future()
     {
         $organizer = createOrganizer();
@@ -54,7 +55,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('start_date');
     }
 
-    /** @test */
+    #[Test]
     public function event_end_date_must_be_after_start_date()
     {
         $organizer = createOrganizer();
@@ -69,7 +70,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('end_date');
     }
 
-    /** @test */
+    #[Test]
     public function booking_requires_customer_name()
     {
         $user = createUser();
@@ -82,7 +83,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('customer_name');
     }
 
-    /** @test */
+    #[Test]
     public function booking_requires_valid_email()
     {
         $user = createUser();
@@ -96,7 +97,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('customer_email');
     }
 
-    /** @test */
+    #[Test]
     public function ticket_type_price_must_be_numeric()
     {
         $organizer = createOrganizer();
@@ -111,7 +112,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('price');
     }
 
-    /** @test */
+    #[Test]
     public function ticket_type_price_cannot_be_negative()
     {
         $organizer = createOrganizer();
@@ -126,7 +127,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('price');
     }
 
-    /** @test */
+    #[Test]
     public function discount_code_value_must_be_positive()
     {
         $organizer = createOrganizer();
@@ -142,7 +143,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('value');
     }
 
-    /** @test */
+    #[Test]
     public function percentage_discount_cannot_exceed_100()
     {
         $organizer = createOrganizer();
@@ -158,7 +159,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('value');
     }
 
-    /** @test */
+    #[Test]
     public function max_attendees_must_be_positive()
     {
         $organizer = createOrganizer();
@@ -174,7 +175,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('max_attendees');
     }
 
-    /** @test */
+    #[Test]
     public function phone_number_format_is_validated()
     {
         $user = createUser();
@@ -188,7 +189,7 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('phone');
     }
 
-    /** @test */
+    #[Test]
     public function review_rating_must_be_between_1_and_5()
     {
         $user = createUser();
@@ -208,3 +209,5 @@ class ValidationTest extends TestCase
         $response->assertSessionHasErrors('rating');
     }
 }
+
+

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Booking;
 use App\Models\Event;
@@ -15,7 +16,7 @@ class NotificationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function user_receives_notification_when_booking_confirmed()
     {
         Notification::fake();
@@ -35,7 +36,7 @@ class NotificationTest extends TestCase
         Notification::assertSentTo($user, BookingConfirmedNotification::class);
     }
 
-    /** @test */
+    #[Test]
     public function user_receives_notification_when_booking_cancelled()
     {
         Notification::fake();
@@ -53,7 +54,7 @@ class NotificationTest extends TestCase
         Notification::assertSentTo($user, BookingCancelledNotification::class);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_view_notifications()
     {
         $user = User::factory()->create();
@@ -66,7 +67,7 @@ class NotificationTest extends TestCase
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_mark_notification_as_read()
     {
         $user = User::factory()->create();
@@ -81,7 +82,7 @@ class NotificationTest extends TestCase
         $this->assertNotNull($notification->fresh()->read_at);
     }
 
-    /** @test */
+    #[Test]
     public function user_can_mark_all_notifications_as_read()
     {
         $user = User::factory()->create();
@@ -96,4 +97,6 @@ class NotificationTest extends TestCase
         $this->assertEquals(0, $user->unreadNotifications()->count());
     }
 }
+
+
 

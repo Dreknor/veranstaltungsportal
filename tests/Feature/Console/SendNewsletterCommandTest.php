@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Console;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\EventCategory;
 use App\Models\User;
@@ -20,7 +21,7 @@ class SendNewsletterCommandTest extends TestCase
         Mail::fake();
     }
 
-    /** @test */
+    #[Test]
     public function command_sends_newsletter_to_subscribed_users()
     {
         // Create subscribers
@@ -48,7 +49,7 @@ class SendNewsletterCommandTest extends TestCase
         Mail::assertSent(\App\Mail\NewsletterMail::class, 3);
     }
 
-    /** @test */
+    #[Test]
     public function command_does_not_send_to_non_subscribers()
     {
         User::factory()->count(3)->create([
@@ -68,7 +69,7 @@ class SendNewsletterCommandTest extends TestCase
         Mail::assertNotSent(\App\Mail\NewsletterMail::class);
     }
 
-    /** @test */
+    #[Test]
     public function command_accepts_weekly_type()
     {
         $subscriber = User::factory()->create([
@@ -90,7 +91,7 @@ class SendNewsletterCommandTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function command_accepts_monthly_type()
     {
         $subscriber = User::factory()->create([
@@ -112,7 +113,7 @@ class SendNewsletterCommandTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function command_sends_test_newsletter_to_admins_only()
     {
         // Create admin
@@ -138,7 +139,7 @@ class SendNewsletterCommandTest extends TestCase
         Mail::assertSent(\App\Mail\NewsletterMail::class, 1);
     }
 
-    /** @test */
+    #[Test]
     public function command_does_not_send_when_no_upcoming_events()
     {
         $subscriber = User::factory()->create([
@@ -153,7 +154,7 @@ class SendNewsletterCommandTest extends TestCase
         Mail::assertNotSent(\App\Mail\NewsletterMail::class);
     }
 
-    /** @test */
+    #[Test]
     public function command_includes_upcoming_events_in_newsletter()
     {
         $subscriber = User::factory()->create([
@@ -177,7 +178,7 @@ class SendNewsletterCommandTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function command_includes_featured_events_in_newsletter()
     {
         $subscriber = User::factory()->create([
@@ -202,7 +203,7 @@ class SendNewsletterCommandTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function command_includes_personalized_recommendations()
     {
         $category = EventCategory::factory()->create();
@@ -226,7 +227,7 @@ class SendNewsletterCommandTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function command_displays_statistics_after_sending()
     {
         User::factory()->count(5)->create([
@@ -245,7 +246,7 @@ class SendNewsletterCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    /** @test */
+    #[Test]
     public function command_uses_queue_for_sending()
     {
         $this->markTestSkipped('Queue testing requires additional setup');
@@ -254,4 +255,6 @@ class SendNewsletterCommandTest extends TestCase
         // and is properly queued instead of sent immediately
     }
 }
+
+
 

@@ -4,7 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Event;
 use App\Models\EventCategory;
-use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -65,7 +65,7 @@ class EventFactory extends Factory
         $endDateCarbon = \Carbon\Carbon::instance($endDate);
 
         return [
-            'user_id' => User::factory(),
+            'organization_id' => Organization::factory(),
             'event_category_id' => EventCategory::factory(),
             'title' => $title,
             'slug' => Str::slug($title) . '-' . Str::random(6),
@@ -88,6 +88,47 @@ class EventFactory extends Factory
             'is_featured' => false,
             'is_published' => false,
         ];
+    }
+
+    public function configure()
+    {
+        return $this
+            ->afterMaking(function (Event $event, array $attributes) {
+                if (array_key_exists('user_id', $attributes) && empty($attributes['organization_id'])) {
+                    $user = \App\Models\User::find($attributes['user_id']);
+                    if ($user) {
+                        $org = $user->activeOrganizations()->first();
+                        if (!$org) {
+                            $org = \App\Models\Organization::factory()->create();
+                            // attach user as owner
+                            $org->users()->attach($user->id, [
+                                'role' => 'owner',
+                                'is_active' => true,
+                                'joined_at' => now(),
+                            ]);
+                        }
+                        $event->organization_id = $org->id;
+                    }
+                }
+            })
+            ->afterCreating(function (Event $event, array $attributes) {
+                if (!$event->organization_id && array_key_exists('user_id', $attributes)) {
+                    $user = \App\Models\User::find($attributes['user_id']);
+                    if ($user) {
+                        $org = $user->activeOrganizations()->first();
+                        if (!$org) {
+                            $org = \App\Models\Organization::factory()->create();
+                            $org->users()->attach($user->id, [
+                                'role' => 'owner',
+                                'is_active' => true,
+                                'joined_at' => now(),
+                            ]);
+                        }
+                        $event->organization_id = $org->id;
+                        $event->save();
+                    }
+                }
+            });
     }
 
     public function published(): static
@@ -113,4 +154,3 @@ class EventFactory extends Factory
         ]);
     }
 }
-

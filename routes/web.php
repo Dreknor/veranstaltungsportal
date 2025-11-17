@@ -111,127 +111,148 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Organizer Routes
 Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {
-    Route::get('/dashboard', [Organizer\DashboardController::class, 'index'])->name('dashboard');
+    // Organization Management (no org context required)
+    Route::get('/organizations/select', [Organizer\OrganizationController::class, 'select'])->name('organizations.select');
+    Route::post('/organizations/switch/{organization}', [Organizer\OrganizationController::class, 'switch'])->name('organizations.switch');
+    Route::get('/organizations/create', [Organizer\OrganizationController::class, 'create'])->name('organizations.create');
+    Route::post('/organizations', [Organizer\OrganizationController::class, 'store'])->name('organizations.store');
 
-    // Profile Management
-    Route::get('/profile', [Organizer\ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile', [Organizer\ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile/photo', [Organizer\ProfileController::class, 'deletePhoto'])->name('profile.delete-photo');
+    // Routes requiring active organization context
+    Route::middleware(['organization_context'])->group(function () {
+        // Dashboard
+        Route::get('/dashboard', [Organizer\DashboardController::class, 'index'])->name('dashboard');
 
-    // Event Management
-    Route::get('/events', [Organizer\EventManagementController::class, 'index'])->name('events.index');
-    Route::get('/events/create', [Organizer\EventManagementController::class, 'create'])->name('events.create');
-    Route::post('/events', [Organizer\EventManagementController::class, 'store'])->name('events.store');
-    Route::get('/events/{event}/edit', [Organizer\EventManagementController::class, 'edit'])->name('events.edit');
-    Route::put('/events/{event}', [Organizer\EventManagementController::class, 'update'])->name('events.update');
-    Route::delete('/events/{event}', [Organizer\EventManagementController::class, 'destroy'])->name('events.destroy');
-    Route::post('/events/{event}/duplicate', [Organizer\EventManagementController::class, 'duplicate'])->name('events.duplicate');
-    Route::post('/events/{event}/cancel', [Organizer\EventManagementController::class, 'cancel'])->name('events.cancel');
-    Route::get('/events/{event}/attendees/download', [Organizer\EventManagementController::class, 'downloadAttendees'])->name('events.attendees.download');
-    Route::get('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendeesForm'])->name('events.attendees.contact');
-    Route::post('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendees'])->name('events.attendees.contact.send');
-    Route::post('/events/{event}/calculate-costs', [Organizer\EventManagementController::class, 'calculateCosts'])->name('events.calculate-costs');
+        // Organization Settings & Team
+        Route::get('/organization', [Organizer\OrganizationController::class, 'edit'])->name('organization.edit');
+        Route::put('/organization', [Organizer\OrganizationController::class, 'update'])->name('organization.update');
+        Route::delete('/organization/logo', [Organizer\OrganizationController::class, 'deleteLogo'])->name('organization.delete-logo');
+        Route::get('/team', [Organizer\OrganizationController::class, 'team'])->name('team.index');
+        Route::post('/team/invite', [Organizer\OrganizationController::class, 'inviteMember'])->name('team.invite');
+        Route::put('/team/{user}/role', [Organizer\OrganizationController::class, 'updateMemberRole'])->name('team.update-role');
+        Route::delete('/team/{user}', [Organizer\OrganizationController::class, 'removeMember'])->name('team.remove');
+        Route::get('/team/import', [Organizer\OrganizationController::class, 'importForm'])->name('team.import');
+        Route::post('/team/import', [Organizer\OrganizationController::class, 'importMembers'])->name('team.import.process');
+        Route::get('/team/import/template', [Organizer\OrganizationController::class, 'downloadTemplate'])->name('team.import.template');
 
-    // Ticket Type Management
-    Route::get('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'index'])->name('events.ticket-types.index');
-    Route::get('/events/{event}/ticket-types/create', [Organizer\TicketTypeController::class, 'create'])->name('events.ticket-types.create');
-    Route::post('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'store'])->name('events.ticket-types.store');
-    Route::get('/events/{event}/ticket-types/{ticketType}/edit', [Organizer\TicketTypeController::class, 'edit'])->name('events.ticket-types.edit');
-    Route::put('/events/{event}/ticket-types/{ticketType}', [Organizer\TicketTypeController::class, 'update'])->name('events.ticket-types.update');
-    Route::delete('/events/{event}/ticket-types/{ticketType}', [Organizer\TicketTypeController::class, 'destroy'])->name('events.ticket-types.destroy');
-    Route::post('/events/{event}/ticket-types/reorder', [Organizer\TicketTypeController::class, 'reorder'])->name('events.ticket-types.reorder');
+        // Personal Profile Management
+        Route::get('/profile', [Organizer\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [Organizer\ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/profile/photo', [Organizer\ProfileController::class, 'deletePhoto'])->name('profile.delete-photo');
 
-    // Discount Code Management
-    Route::get('/events/{event}/discount-codes', [Organizer\DiscountCodeController::class, 'index'])->name('events.discount-codes.index');
-    Route::get('/events/{event}/discount-codes/create', [Organizer\DiscountCodeController::class, 'create'])->name('events.discount-codes.create');
-    Route::post('/events/{event}/discount-codes', [Organizer\DiscountCodeController::class, 'store'])->name('events.discount-codes.store');
-    Route::get('/events/{event}/discount-codes/{discountCode}/edit', [Organizer\DiscountCodeController::class, 'edit'])->name('events.discount-codes.edit');
-    Route::put('/events/{event}/discount-codes/{discountCode}', [Organizer\DiscountCodeController::class, 'update'])->name('events.discount-codes.update');
-    Route::delete('/events/{event}/discount-codes/{discountCode}', [Organizer\DiscountCodeController::class, 'destroy'])->name('events.discount-codes.destroy');
-    Route::patch('/events/{event}/discount-codes/{discountCode}/toggle', [Organizer\DiscountCodeController::class, 'toggle'])->name('events.discount-codes.toggle');
-    Route::post('/events/{event}/discount-codes/generate', [Organizer\DiscountCodeController::class, 'generate'])->name('events.discount-codes.generate');
+        // Event Management
+        Route::get('/events', [Organizer\EventManagementController::class, 'index'])->name('events.index');
+        Route::get('/events/create', [Organizer\EventManagementController::class, 'create'])->name('events.create');
+        Route::post('/events', [Organizer\EventManagementController::class, 'store'])->name('events.store');
+        Route::get('/events/{event}/edit', [Organizer\EventManagementController::class, 'edit'])->name('events.edit');
+        Route::put('/events/{event}', [Organizer\EventManagementController::class, 'update'])->name('events.update');
+        Route::delete('/events/{event}', [Organizer\EventManagementController::class, 'destroy'])->name('events.destroy');
+        Route::post('/events/{event}/duplicate', [Organizer\EventManagementController::class, 'duplicate'])->name('events.duplicate');
+        Route::post('/events/{event}/cancel', [Organizer\EventManagementController::class, 'cancel'])->name('events.cancel');
+        Route::get('/events/{event}/attendees/download', [Organizer\EventManagementController::class, 'downloadAttendees'])->name('events.attendees.download');
+        Route::get('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendeesForm'])->name('events.attendees.contact');
+        Route::post('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendees'])->name('events.attendees.contact.send');
+        Route::post('/events/{event}/calculate-costs', [Organizer\EventManagementController::class, 'calculateCosts'])->name('events.calculate-costs');
 
-    // Booking Management
-    Route::get('/bookings', [Organizer\BookingManagementController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/export', [Organizer\BookingManagementController::class, 'export'])->name('bookings.export');
-    Route::get('/bookings/{booking}', [Organizer\BookingManagementController::class, 'show'])->name('bookings.show');
-    Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
-    Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
-    Route::post('/bookings/{booking}/check-in', [Organizer\CheckInController::class, 'checkInByBooking'])->name('bookings.check-in');
+        // Ticket Types
+        Route::get('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'index'])->name('events.ticket-types.index');
+        Route::get('/events/{event}/ticket-types/create', [Organizer\TicketTypeController::class, 'create'])->name('events.ticket-types.create');
+        Route::post('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'store'])->name('events.ticket-types.store');
+        Route::get('/events/{event}/ticket-types/{ticketType}/edit', [Organizer\TicketTypeController::class, 'edit'])->name('events.ticket-types.edit');
+        Route::put('/events/{event}/ticket-types/{ticketType}', [Organizer\TicketTypeController::class, 'update'])->name('events.ticket-types.update');
+        Route::delete('/events/{event}/ticket-types/{ticketType}', [Organizer\TicketTypeController::class, 'destroy'])->name('events.ticket-types.destroy');
+        Route::post('/events/{event}/ticket-types/reorder', [Organizer\TicketTypeController::class, 'reorder'])->name('events.ticket-types.reorder');
 
-    // Check-In System
-    Route::get('/events/{event}/check-in', [Organizer\CheckInController::class, 'index'])->name('check-in.index');
-    Route::post('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.store');
-    Route::delete('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'undoCheckIn'])->name('check-in.undo');
-    Route::post('/events/{event}/check-in/scan', [Organizer\CheckInController::class, 'scanQr'])->name('check-in.scan');
-    Route::post('/events/{event}/check-in/bulk', [Organizer\CheckInController::class, 'bulkCheckIn'])->name('check-in.bulk');
-    Route::get('/events/{event}/check-in/export', [Organizer\CheckInController::class, 'exportCheckInList'])->name('check-in.export');
+        // Discount Codes
+        Route::get('/events/{event}/discount-codes', [Organizer\DiscountCodeController::class, 'index'])->name('events.discount-codes.index');
+        Route::get('/events/{event}/discount-codes/create', [Organizer\DiscountCodeController::class, 'create'])->name('events.discount-codes.create');
+        Route::post('/events/{event}/discount-codes', [Organizer\DiscountCodeController::class, 'store'])->name('events.discount-codes.store');
+        Route::get('/events/{event}/discount-codes/{discountCode}/edit', [Organizer\DiscountCodeController::class, 'edit'])->name('events.discount-codes.edit');
+        Route::put('/events/{event}/discount-codes/{discountCode}', [Organizer\DiscountCodeController::class, 'update'])->name('events.discount-codes.update');
+        Route::delete('/events/{event}/discount-codes/{discountCode}', [Organizer\DiscountCodeController::class, 'destroy'])->name('events.discount-codes.destroy');
+        Route::patch('/events/{event}/discount-codes/{discountCode}/toggle', [Organizer\DiscountCodeController::class, 'toggle'])->name('events.discount-codes.toggle');
+        Route::post('/events/{event}/discount-codes/generate', [Organizer\DiscountCodeController::class, 'generate'])->name('events.discount-codes.generate');
 
+        // Bookings
+        Route::get('/bookings', [Organizer\BookingManagementController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/export', [Organizer\BookingManagementController::class, 'export'])->name('bookings.export');
+        Route::get('/bookings/{booking}', [Organizer\BookingManagementController::class, 'show'])->name('bookings.show');
+        Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
+        Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
+        Route::post('/bookings/{booking}/check-in', [Organizer\CheckInController::class, 'checkInByBooking'])->name('bookings.check-in');
 
-    // Statistics & Analytics
-    Route::get('/statistics', [Organizer\StatisticsController::class, 'index'])->name('statistics.index');
-    Route::get('/statistics/event/{event}', [Organizer\StatisticsController::class, 'eventStatistics'])->name('statistics.event');
+        // Check-In
+        Route::get('/events/{event}/check-in', [Organizer\CheckInController::class, 'index'])->name('check-in.index');
+        Route::post('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.store');
+        Route::delete('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'undoCheckIn'])->name('check-in.undo');
+        Route::post('/events/{event}/check-in/scan', [Organizer\CheckInController::class, 'scanQr'])->name('check-in.scan');
+        Route::post('/events/{event}/check-in/bulk', [Organizer\CheckInController::class, 'bulkCheckIn'])->name('check-in.bulk');
+        Route::get('/events/{event}/check-in/export', [Organizer\CheckInController::class, 'exportCheckInList'])->name('check-in.export');
 
-    // Waitlist Management
-    Route::get('/events/{event}/waitlist', [\App\Http\Controllers\WaitlistController::class, 'index'])->name('events.waitlist.index');
-    Route::post('/events/{event}/waitlist/notify', [\App\Http\Controllers\WaitlistController::class, 'notifyNext'])->name('events.waitlist.notify');
-    Route::delete('/events/{event}/waitlist/{waitlist}', [\App\Http\Controllers\WaitlistController::class, 'remove'])->name('events.waitlist.remove');
+        // Statistics
+        Route::get('/statistics', [Organizer\StatisticsController::class, 'index'])->name('statistics.index');
+        Route::get('/statistics/event/{event}', [Organizer\StatisticsController::class, 'eventStatistics'])->name('statistics.event');
 
-    // Certificate Management
-    Route::get('/events/{event}/certificates', [Organizer\CertificateController::class, 'index'])->name('events.certificates.index');
-    Route::post('/events/{event}/certificates/{booking}/generate', [Organizer\CertificateController::class, 'generate'])->name('events.certificates.generate');
-    Route::post('/events/{event}/certificates/bulk', [Organizer\CertificateController::class, 'generateBulk'])->name('events.certificates.bulk');
-    Route::get('/events/{event}/certificates/{booking}/download', [Organizer\CertificateController::class, 'download'])->name('events.certificates.download');
-    Route::post('/events/{event}/certificates/{booking}/email', [Organizer\CertificateController::class, 'sendEmail'])->name('events.certificates.email');
-    Route::delete('/events/{event}/certificates/{booking}', [Organizer\CertificateController::class, 'destroy'])->name('events.certificates.destroy');
+        // Waitlist
+        Route::get('/events/{event}/waitlist', [\App\Http\Controllers\WaitlistController::class, 'index'])->name('events.waitlist.index');
+        Route::post('/events/{event}/waitlist/notify', [\App\Http\Controllers\WaitlistController::class, 'notifyNext'])->name('events.waitlist.notify');
+        Route::delete('/events/{event}/waitlist/{waitlist}', [\App\Http\Controllers\WaitlistController::class, 'remove'])->name('events.waitlist.remove');
 
-    // Event Series Management
-    Route::get('/series', [Organizer\SeriesController::class, 'index'])->name('series.index');
-    Route::get('/series/create', [Organizer\SeriesController::class, 'create'])->name('series.create');
-    Route::post('/series', [Organizer\SeriesController::class, 'store'])->name('series.store');
-    Route::get('/series/{series}', [Organizer\SeriesController::class, 'show'])->name('series.show');
-    Route::get('/series/{series}/edit', [Organizer\SeriesController::class, 'edit'])->name('series.edit');
-    Route::put('/series/{series}', [Organizer\SeriesController::class, 'update'])->name('series.update');
-    Route::delete('/series/{series}', [Organizer\SeriesController::class, 'destroy'])->name('series.destroy');
-    Route::post('/series/{series}/regenerate', [Organizer\SeriesController::class, 'regenerate'])->name('series.regenerate');
-    Route::post('/series/{series}/add-event', [Organizer\SeriesController::class, 'addEvent'])->name('series.add-event');
+        // Certificates
+        Route::get('/events/{event}/certificates', [Organizer\CertificateController::class, 'index'])->name('events.certificates.index');
+        Route::post('/events/{event}/certificates/{booking}/generate', [Organizer\CertificateController::class, 'generate'])->name('events.certificates.generate');
+        Route::post('/events/{event}/certificates/bulk', [Organizer\CertificateController::class, 'generateBulk'])->name('events.certificates.bulk');
+        Route::get('/events/{event}/certificates/{booking}/download', [Organizer\CertificateController::class, 'download'])->name('events.certificates.download');
+        Route::post('/events/{event}/certificates/{booking}/email', [Organizer\CertificateController::class, 'sendEmail'])->name('events.certificates.email');
+        Route::delete('/events/{event}/certificates/{booking}', [Organizer\CertificateController::class, 'destroy'])->name('events.certificates.destroy');
 
-    // Bank Account & Billing Data
-    Route::get('/bank-account', [Organizer\BankAccountController::class, 'index'])->name('bank-account.index');
-    Route::put('/bank-account', [Organizer\BankAccountController::class, 'update'])->name('bank-account.update');
-    Route::get('/bank-account/billing-data', [Organizer\BankAccountController::class, 'billingData'])->name('bank-account.billing-data');
-    Route::put('/bank-account/billing-data', [Organizer\BankAccountController::class, 'updateBillingData'])->name('bank-account.billing-data.update');
+        // Event Series
+        Route::get('/series', [Organizer\SeriesController::class, 'index'])->name('series.index');
+        Route::get('/series/create', [Organizer\SeriesController::class, 'create'])->name('series.create');
+        Route::post('/series', [Organizer\SeriesController::class, 'store'])->name('series.store');
+        Route::get('/series/{series}', [Organizer\SeriesController::class, 'show'])->name('series.show');
+        Route::get('/series/{series}/edit', [Organizer\SeriesController::class, 'edit'])->name('series.edit');
+        Route::put('/series/{series}', [Organizer\SeriesController::class, 'update'])->name('series.update');
+        Route::delete('/series/{series}', [Organizer\SeriesController::class, 'destroy'])->name('series.destroy');
+        Route::post('/series/{series}/regenerate', [Organizer\SeriesController::class, 'regenerate'])->name('series.regenerate');
+        Route::post('/series/{series}/add-event', [Organizer\SeriesController::class, 'addEvent'])->name('series.add-event');
 
-    // Invoice Number Settings
-    Route::get('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
-    Route::put('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
-    Route::post('/settings/invoice/preview', [Organizer\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
+        // Bank & Billing
+        Route::get('/bank-account', [Organizer\BankAccountController::class, 'index'])->name('bank-account.index');
+        Route::put('/bank-account', [Organizer\BankAccountController::class, 'update'])->name('bank-account.update');
+        Route::get('/bank-account/billing-data', [Organizer\BankAccountController::class, 'billingData'])->name('bank-account.billing-data');
+        Route::put('/bank-account/billing-data', [Organizer\BankAccountController::class, 'updateBillingData'])->name('bank-account.billing-data.update');
 
-    // Invoice Management (Platform-Fee Rechnungen)
-    Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/{invoice}', [Organizer\InvoiceController::class, 'show'])->name('invoices.show');
-    Route::get('/invoices/{invoice}/download', [Organizer\InvoiceController::class, 'download'])->name('invoices.download');
-    Route::get('/invoices/export', [Organizer\InvoiceController::class, 'export'])->name('invoices.export');
-    Route::get('/platform-fees', [Organizer\InvoiceController::class, 'platformFees'])->name('invoices.platform-fees');
+        // Invoice Settings & Invoices
+        Route::get('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
+        Route::put('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
+        Route::post('/settings/invoice/preview', [Organizer\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
+        Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/{invoice}', [Organizer\InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/download', [Organizer\InvoiceController::class, 'download'])->name('invoices.download');
+        Route::get('/invoices/export', [Organizer\InvoiceController::class, 'export'])->name('invoices.export');
+        Route::get('/platform-fees', [Organizer\InvoiceController::class, 'platformFees'])->name('invoices.platform-fees');
 
-    // Review Management
-    Route::get('/reviews', [Organizer\ReviewController::class, 'index'])->name('reviews.index');
-    Route::get('/reviews/{review}/moderate', [Organizer\ReviewController::class, 'moderate'])->name('reviews.moderate');
-    Route::patch('/reviews/{review}/approve', [Organizer\ReviewController::class, 'approve'])->name('reviews.approve');
-    Route::patch('/reviews/{review}/reject', [Organizer\ReviewController::class, 'reject'])->name('reviews.reject');
-    Route::delete('/reviews/{review}', [Organizer\ReviewController::class, 'destroy'])->name('reviews.destroy');
+        // Reviews
+        Route::get('/reviews', [Organizer\ReviewController::class, 'index'])->name('reviews.index');
+        Route::get('/reviews/{review}/moderate', [Organizer\ReviewController::class, 'moderate'])->name('reviews.moderate');
+        Route::patch('/reviews/{review}/approve', [Organizer\ReviewController::class, 'approve'])->name('reviews.approve');
+        Route::patch('/reviews/{review}/reject', [Organizer\ReviewController::class, 'reject'])->name('reviews.reject');
+        Route::delete('/reviews/{review}', [Organizer\ReviewController::class, 'destroy'])->name('reviews.destroy');
 
-    // Featured Events Management
-    Route::get('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'create'])->name('featured-events.create');
-    Route::post('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'store'])->name('featured-events.store');
-    Route::get('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'payment'])->name('featured-events.payment');
-    Route::post('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'processPayment'])->name('featured-events.process-payment');
-    Route::get('/featured-events/history', [\App\Http\Controllers\FeaturedEventController::class, 'history'])->name('featured-events.history');
-    Route::get('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'extend'])->name('featured-events.extend');
-    Route::post('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'processExtension'])->name('featured-events.process-extension');
-    Route::delete('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'cancel'])->name('featured-events.cancel');
+        // Featured Events
+        Route::get('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'create'])->name('featured-events.create');
+        Route::post('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'store'])->name('featured-events.store');
+        Route::get('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'payment'])->name('featured-events.payment');
+        Route::post('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'processPayment'])->name('featured-events.process-payment');
+        Route::get('/featured-events/history', [\App\Http\Controllers\FeaturedEventController::class, 'history'])->name('featured-events.history');
+        Route::get('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'extend'])->name('featured-events.extend');
+        Route::post('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'processExtension'])->name('featured-events.process-extension');
+        Route::delete('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'cancel'])->name('featured-events.cancel');
+        // End of organizer routes requiring organization_context
+    });
 });
 
+// Settings
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/profile', [Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
     Route::put('settings/profile', [Settings\ProfileController::class, 'update'])->name('settings.profile.update');
@@ -398,5 +419,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications/read/all', [\App\Http\Controllers\NotificationController::class, 'deleteRead'])->name('notifications.delete-read');
 });
-
 

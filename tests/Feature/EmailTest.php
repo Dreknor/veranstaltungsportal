@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\User;
 use App\Models\Event;
 use App\Models\Booking;
@@ -16,7 +17,7 @@ class EmailTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function booking_confirmation_email_is_sent()
     {
         Mail::fake();
@@ -36,7 +37,7 @@ class EmailTest extends TestCase
         });
     }
 
-    /** @test */
+    #[Test]
     public function booking_cancellation_email_is_sent()
     {
         Mail::fake();
@@ -51,7 +52,7 @@ class EmailTest extends TestCase
         Mail::assertSent(BookingCancellation::class);
     }
 
-    /** @test */
+    #[Test]
     public function event_cancellation_email_is_sent_to_attendees()
     {
         Mail::fake();
@@ -75,7 +76,7 @@ class EmailTest extends TestCase
         Mail::assertSent(EventCancelledMail::class, 2);
     }
 
-    /** @test */
+    #[Test]
     public function booking_confirmation_email_contains_booking_details()
     {
         $booking = Booking::factory()->create([
@@ -87,4 +88,6 @@ class EmailTest extends TestCase
         $this->assertEquals($booking->customer_email, $booking->customer_email);
     }
 }
+
+
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\EventSeries;
 use App\Models\User;
 use App\Models\EventCategory;
@@ -13,7 +14,7 @@ class EventSeriesTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_user()
     {
         $user = User::factory()->create();
@@ -23,7 +24,7 @@ class EventSeriesTest extends TestCase
         $this->assertEquals($user->id, $series->user->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_belongs_to_a_category()
     {
         $category = EventCategory::factory()->create();
@@ -33,7 +34,7 @@ class EventSeriesTest extends TestCase
         $this->assertEquals($category->id, $series->category->id);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_events()
     {
         $series = EventSeries::factory()->create();
@@ -45,7 +46,7 @@ class EventSeriesTest extends TestCase
         $this->assertCount(5, $series->events);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_active_events()
     {
         $series = EventSeries::factory()->create();
@@ -65,7 +66,7 @@ class EventSeriesTest extends TestCase
         $this->assertCount(3, $series->activeEvents);
     }
 
-    /** @test */
+    #[Test]
     public function it_returns_upcoming_events()
     {
         $series = EventSeries::factory()->create();
@@ -85,7 +86,7 @@ class EventSeriesTest extends TestCase
         $this->assertCount(2, $series->upcomingEvents);
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_recurrence_days_to_array()
     {
         $series = EventSeries::factory()->create([
@@ -96,7 +97,7 @@ class EventSeriesTest extends TestCase
         $this->assertEquals([1, 3, 5], $series->recurrence_days);
     }
 
-    /** @test */
+    #[Test]
     public function it_casts_template_data_to_array()
     {
         $series = EventSeries::factory()->create([
@@ -107,3 +108,5 @@ class EventSeriesTest extends TestCase
         $this->assertEquals('Main Hall', $series->template_data['venue']);
     }
 }
+
+
