@@ -11,12 +11,12 @@
                         @csrf
                         <!-- Full Name Input -->
                         <div>
-                            <x-forms.input label="Vollständiger Name" name="name" type="text" placeholder="{{ __('Vollständiger Name') }}" autofocus />
+                            <x-forms.input label="Vollständiger Name" name="name" type="text" placeholder="{{ __('Vollständiger Name') }}" autofocus autocomplete="name" />
                         </div>
 
                         <!-- Email Input -->
                         <div>
-                            <x-forms.input label="E-Mail" name="email" type="email" placeholder="ihre@email.de" />
+                            <x-forms.input label="E-Mail" name="email" type="email" placeholder="ihre@email.de" autocomplete="email" />
                         </div>
 
                         <!-- Account Type Selection -->
@@ -63,7 +63,7 @@
                         <div x-show="userType === 'organizer'" x-transition class="space-y-3">
                             <div>
                                 <x-forms.input label="Organisation / Firma" name="organization_name" type="text"
-                                             placeholder="{{ __('Name Ihrer Organisation') }}" />
+                                             placeholder="{{ __('Name Ihrer Organisation') }}" autocomplete="organization" x-bind:required="userType === 'organizer'" />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -71,7 +71,7 @@
                                 </label>
                                 <textarea name="organization_description" rows="3"
                                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
-                                        placeholder="{{ __('Kurze Beschreibung Ihrer Organisation') }}">{{ old('organization_description') }}</textarea>
+                                        placeholder="{{ __('Kurze Beschreibung Ihrer Organisation') }}" autocomplete="off">{{ old('organization_description') }}</textarea>
                                 @error('organization_description')
                                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                                 @enderror
@@ -80,13 +80,13 @@
 
                         <!-- Password Input -->
                         <div>
-                            <x-forms.input label="Passwort" name="password" type="password" placeholder="••••••••" />
+                            <x-forms.input label="Passwort" name="password" type="password" placeholder="••••••••" autocomplete="new-password" />
                         </div>
 
                         <!-- Confirm Password Input -->
                         <div>
                             <x-forms.input label="Passwort bestätigen" name="password_confirmation" type="password"
-                                placeholder="••••••••" />
+                                placeholder="••••••••" autocomplete="new-password" />
                         </div>
                         <!-- reCAPTCHA -->
                         <x-recaptcha action="register" />

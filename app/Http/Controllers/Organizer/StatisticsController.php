@@ -50,15 +50,16 @@ class StatisticsController extends Controller
 
         $totalRevenue = Booking::whereHas('event', function($q) use ($orgId) {
             $q->where('organization_id', $orgId);
-        })->where('status', '!=', 'cancelled')->sum('total_amount');
+
+        })->where('status', '!=', 'cancelled')->sum('total');
 
         $confirmedRevenue = Booking::whereHas('event', function($q) use ($orgId) {
             $q->where('organization_id', $orgId);
-        })->where('status', 'confirmed')->sum('total_amount');
+        })->where('status', 'confirmed')->sum('total');
 
         $pendingRevenue = Booking::whereHas('event', function($q) use ($orgId) {
             $q->where('organization_id', $orgId);
-        })->where('status', 'pending')->sum('total_amount');
+        })->where('status', 'pending')->sum('total');
 
         $ticketsSold = DB::table('booking_items')
             ->join('bookings', 'booking_items.booking_id', '=', 'bookings.id')
@@ -75,7 +76,7 @@ class StatisticsController extends Controller
         ->select(
             DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
             DB::raw('COUNT(*) as count'),
-            DB::raw('SUM(total_amount) as revenue')
+            DB::raw('SUM(total) as revenue')
         )
         ->groupBy('month')
         ->orderBy('month')
@@ -84,11 +85,11 @@ class StatisticsController extends Controller
         $topEventsByRevenue = Event::where('organization_id', $orgId)
             ->withSum(['bookings' => function($q) {
                 $q->where('status', '!=', 'cancelled');
-            }], 'total_amount')
+            }], 'total')
             ->withCount(['bookings' => function($q) {
                 $q->where('status', '!=', 'cancelled');
             }])
-            ->orderBy('bookings_sum_total_amount', 'desc')
+            ->orderBy('bookings_sum_total', 'desc')
             ->limit(10)
             ->get();
 
@@ -146,9 +147,9 @@ class StatisticsController extends Controller
         $pendingBookings = $event->bookings()->where('status', 'pending')->count();
         $cancelledBookings = $event->bookings()->where('status', 'cancelled')->count();
 
-        $totalRevenue = $event->bookings()->where('status', '!=', 'cancelled')->sum('total_amount');
-        $confirmedRevenue = $event->bookings()->where('status', 'confirmed')->sum('total_amount');
-        $pendingRevenue = $event->bookings()->where('status', 'pending')->sum('total_amount');
+        $totalRevenue = $event->bookings()->where('status', '!=', 'cancelled')->sum('total');
+        $confirmedRevenue = $event->bookings()->where('status', 'confirmed')->sum('total');
+        $pendingRevenue = $event->bookings()->where('status', 'pending')->sum('total');
 
         $ticketsSold = DB::table('booking_items')
             ->join('bookings', 'booking_items.booking_id', '=', 'bookings.id')

@@ -67,6 +67,13 @@
 
         <x-layouts.app.header />
 
+        {{-- Organizer Navigation Bar (nur auf Organizer-Routen) --}}
+        @auth
+            @if (request()->routeIs('organizer.*'))
+                @include('components.organizer-navigation')
+            @endif
+        @endauth
+
         <!-- Impersonation Banner -->
         @if(session()->has('impersonator'))
             <div class="bg-yellow-500 text-white py-2 px-4">

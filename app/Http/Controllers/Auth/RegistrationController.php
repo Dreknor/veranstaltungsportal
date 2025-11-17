@@ -36,6 +36,11 @@ class RegistrationController extends Controller
                 'max:255',
                 function ($attribute, $value, $fail) use ($request) {
                     if ($request->input('account_type') === 'organizer' && $value) {
+                        // Verhindere, dass eine E-Mail als Organisationsname verwendet wird
+                        if (filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                            $fail('Bitte geben Sie einen Organisationsnamen an, nicht eine E-Mail-Adresse.');
+                            return;
+                        }
                         $slug = \Illuminate\Support\Str::slug($value);
                         if (\App\Models\Organization::where('slug', $slug)->exists()) {
                             $fail('Eine Organisation mit diesem Namen existiert bereits. Bitte wählen Sie einen anderen Namen.');
@@ -47,8 +52,17 @@ class RegistrationController extends Controller
         ]);
 
         $accountType = $validated['account_type'];
-        $organizationName = $validated['organization_name'] ?? null;
-        $organizationDescription = $validated['organization_description'] ?? null;
+
+        // Robuste Ermittlung des Organisationsnamens direkt aus der Anfrage (getrimmt)
+        $organizationName = null;
+        if ($accountType === 'organizer') {
+            $rawOrgName = (string) $request->input('organization_name', '');
+            $organizationName = trim(preg_replace('/\s+/', ' ', $rawOrgName));
+            if ($organizationName === '') {
+                $organizationName = null;
+            }
+        }
+        $organizationDescription = $request->input('organization_description');
 
         // Remove organization and account_type fields from user data
         unset($validated['account_type'], $validated['organization_name'], $validated['organization_description']);
@@ -62,11 +76,13 @@ class RegistrationController extends Controller
             $role = Role::query()->firstOrCreate(['name' => 'organizer']);
             $user->assignRole($role);
 
-            // Create organization for the organizer
+            // Create organization for the organizer (nur wenn Name vorhanden)
             if ($organizationName) {
                 $organization = \App\Models\Organization::create([
                     'name' => $organizationName,
                     'description' => $organizationDescription,
+                    'email' => $user->email,
+                    'is_active' => true,
                 ]);
 
                 // Attach user as owner of the organization
@@ -75,6 +91,13 @@ class RegistrationController extends Controller
                     'is_active' => true,
                     'joined_at' => now(),
                 ]);
+
+                // Setze aktuelle Organisation im Session-Kontext
+                try {
+                    $user->setCurrentOrganization($organization);
+                } catch (\Throwable $e) {
+                    // Ignoriere Fehler hier, Middleware fängt fehlenden Kontext ab
+                }
             }
 
             // Notify all admins about the new organizer registration
