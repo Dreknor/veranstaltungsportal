@@ -150,6 +150,14 @@
                         <strong>{{ $booking->booking_number }}</strong>
                     </td>
                 </tr>
+                <tr>
+                    <td style="padding: 8px 0; color: #666;">
+                        <strong>🧾 Rechnungsnr.:</strong>
+                    </td>
+                    <td style="padding: 8px 0;">
+                        <strong>{{ $booking->invoice_number ?? 'wird erstellt' }}</strong>
+                    </td>
+                </tr>
             </table>
         </div>
 
@@ -229,7 +237,7 @@
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📎 Anlagen</h3>
             <ul style="margin: 0; padding-left: 20px;">
                 <li style="margin-bottom: 8px;">
-                    <strong>Rechnung</strong> - Rechnung_{{ $booking->booking_number }}.pdf
+                    <strong>Rechnung</strong> - Rechnung_{{ $booking->invoice_number ?? $booking->booking_number }}.pdf
                 </li>
                 @if($booking->payment_status === 'paid' && !$booking->event->isOnline())
                 <li style="margin-bottom: 8px;">

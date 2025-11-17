@@ -37,6 +37,53 @@
                 </div>
             @endif
 
+            @if(!auth()->user()->canPublishEvents())
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-yellow-900">Veröffentlichung nicht möglich</p>
+                            <p class="text-sm text-yellow-700 mt-1">
+                                Um Events zu veröffentlichen, müssen Sie zunächst Ihre
+                                @if(!auth()->user()->hasCompleteBillingData() && !auth()->user()->hasCompleteBankAccount())
+                                    Rechnungsdaten und Bankverbindung
+                                @elseif(!auth()->user()->hasCompleteBillingData())
+                                    Rechnungsdaten
+                                @else
+                                    Bankverbindung
+                                @endif
+                                vervollständigen.
+                            </p>
+                            <p class="text-sm text-yellow-600 mt-2">
+                                Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen an Teilnehmer versendet werden.
+                            </p>
+                            <div class="flex gap-2 mt-3">
+                                @if(!auth()->user()->hasCompleteBillingData())
+                                    <a href="{{ route('organizer.bank-account.billing-data') }}"
+                                       class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm font-medium">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Rechnungsdaten vervollständigen
+                                    </a>
+                                @endif
+                                @if(!auth()->user()->hasCompleteBankAccount())
+                                    <a href="{{ route('organizer.bank-account.index') }}"
+                                       class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm font-medium">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                                        </svg>
+                                        Bankverbindung vervollständigen
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Teilnehmer-Management -->
             @if($event->hasAttendees())
                 <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -423,8 +470,14 @@
                         <div class="flex items-center">
                             <input type="checkbox" id="is_published" name="is_published" value="1"
                                    {{ old('is_published', $event->is_published) ? 'checked' : '' }}
-                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <label for="is_published" class="ml-2 text-sm text-gray-700">Event veröffentlichen</label>
+                                   {{ !auth()->user()->canPublishEvents() && !$event->is_published ? 'disabled' : '' }}
+                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 {{ !auth()->user()->canPublishEvents() && !$event->is_published ? 'opacity-50 cursor-not-allowed' : '' }}">
+                            <label for="is_published" class="ml-2 text-sm text-gray-700 {{ !auth()->user()->canPublishEvents() && !$event->is_published ? 'opacity-50' : '' }}">
+                                Event veröffentlichen
+                                @if(!auth()->user()->canPublishEvents() && !$event->is_published)
+                                    <span class="text-yellow-600 text-xs">(Rechnungsdaten erforderlich)</span>
+                                @endif
+                            </label>
                         </div>
 
                         <div class="flex items-center">

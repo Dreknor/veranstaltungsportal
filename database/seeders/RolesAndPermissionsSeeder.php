@@ -19,12 +19,6 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // Create permissions
         $permissions = [
-            // User Management
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
-
             // Event Management
             'view events',
             'create events',
