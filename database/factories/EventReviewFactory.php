@@ -16,8 +16,10 @@ class EventReviewFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'user_id' => User::factory(),
+            'booking_id' => null,
             'rating' => $this->faker->numberBetween(1, 5),
             'comment' => $this->faker->optional(0.7)->paragraph(),
+            'is_approved' => false,
         ];
     }
 
@@ -34,6 +36,13 @@ class EventReviewFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'rating' => $this->faker->numberBetween(1, 2),
             'comment' => $this->faker->paragraph(),
+        ]);
+    }
+
+    public function approved(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_approved' => true,
         ]);
     }
 }

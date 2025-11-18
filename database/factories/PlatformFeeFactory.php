@@ -19,7 +19,10 @@ class PlatformFeeFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'booking_id' => Booking::factory(),
+            'invoice_number' => null,
+            'invoice_date' => null,
             'fee_percentage' => 5.00,
+            'booking_amount' => $this->faker->randomFloat(2, 100, 1000),
             'fee_amount' => $this->faker->randomFloat(2, 1, 50),
             'status' => 'pending',
             'paid_at' => null,
