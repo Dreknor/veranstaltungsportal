@@ -33,12 +33,15 @@ class BookingConfirmation extends Mailable
         // Sicherstellen, dass eine veranstalterspezifische Rechnungsnummer existiert (einmalig je Buchung)
         if (empty($this->booking->invoice_number)) {
             $invoiceNumberService = app(InvoiceNumberService::class);
-            $organizer = $this->booking->event->user; // Veranstalter
-            $newInvoiceNumber = $invoiceNumberService->generateBookingInvoiceNumber($organizer);
-            $this->booking->forceFill([
-                'invoice_number' => $newInvoiceNumber,
-                'invoice_date' => now(),
-            ])->save();
+            $organizer = $this->booking->event->getUser(); // Veranstalter (über Organisation)
+
+            if ($organizer) {
+                $newInvoiceNumber = $invoiceNumberService->generateBookingInvoiceNumber($organizer);
+                $this->booking->forceFill([
+                    'invoice_number' => $newInvoiceNumber,
+                    'invoice_date' => now(),
+                ])->save();
+            }
         }
 
         $invoiceNumber = $this->booking->invoice_number;

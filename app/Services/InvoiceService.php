@@ -180,6 +180,27 @@ class InvoiceService
      */
     private function getOrganizerBillingData($user)
     {
+        // Get organization from user
+        $organization = $user->currentOrganization();
+
+        if ($organization) {
+            $billingData = $organization->billing_data ?? [];
+
+            return [
+                'company_name' => $billingData['company_name'] ?? $organization->name,
+                'address' => $billingData['company_address'] ?? '',
+                'postal_code' => $billingData['company_postal_code'] ?? '',
+                'city' => $billingData['company_city'] ?? '',
+                'country' => $billingData['company_country'] ?? 'Deutschland',
+                'tax_id' => $organization->tax_id ?? $billingData['tax_id'] ?? '',
+                'vat_id' => $billingData['vat_id'] ?? '',
+                'email' => $organization->email ?? $billingData['company_email'] ?? $user->email,
+                'phone' => $organization->phone ?? $billingData['company_phone'] ?? '',
+                'bank_account' => $organization->bank_account ?? [],
+            ];
+        }
+
+        // Fallback to legacy user billing data
         $billingData = $user->organizer_billing_data ?? [];
 
         return [
@@ -192,6 +213,7 @@ class InvoiceService
             'vat_id' => $billingData['vat_id'] ?? '',
             'email' => $billingData['company_email'] ?? $user->email,
             'phone' => $billingData['company_phone'] ?? $user->phone ?? '',
+            'bank_account' => $user->bank_account ?? [],
         ];
     }
 
@@ -200,6 +222,21 @@ class InvoiceService
      */
     private function formatOrganizerAddress($user)
     {
+        // Get organization from user
+        $organization = $user->currentOrganization();
+
+        if ($organization) {
+            $billingData = $organization->billing_data ?? [];
+
+            $address = $billingData['company_address'] ?? '';
+            $postal = $billingData['company_postal_code'] ?? '';
+            $city = $billingData['company_city'] ?? '';
+            $country = $billingData['company_country'] ?? '';
+
+            return trim("{$address}\n{$postal} {$city}\n{$country}");
+        }
+
+        // Fallback to legacy user billing data
         $billingData = $user->organizer_billing_data ?? [];
 
         $address = $billingData['company_address'] ?? '';

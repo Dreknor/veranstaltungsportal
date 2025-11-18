@@ -319,7 +319,7 @@ class BookingController extends Controller
     public function show($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event.user', 'items.ticketType'])
+            ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff - erlaube wenn:
@@ -446,7 +446,7 @@ class BookingController extends Controller
     public function downloadInvoice($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event.user', 'items.ticketType'])
+            ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
@@ -471,7 +471,7 @@ class BookingController extends Controller
     public function downloadTicket($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event.user', 'items.ticketType'])
+            ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
@@ -496,7 +496,7 @@ class BookingController extends Controller
     public function downloadCertificate($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event.user', 'items.ticketType'])
+            ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
         // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
@@ -522,7 +522,7 @@ class BookingController extends Controller
     public function downloadIcal($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)
-            ->with(['event.user'])
+            ->with(['event.organization'])
             ->firstOrFail();
 
         // Prüfe Zugriff (nur für Buchungsinhaber)

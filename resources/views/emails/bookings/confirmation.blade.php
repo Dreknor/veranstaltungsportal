@@ -202,6 +202,33 @@
             @endif
         </div>
 
+        <!-- Organizer Information -->
+        @php
+            $organization = $booking->event->organization;
+            $bankAccount = $organization->bank_account ?? [];
+            $billingData = $organization->billing_data ?? [];
+        @endphp
+
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6c757d;">
+            <h3 style="color: #495057; margin: 0 0 10px 0; font-size: 16px;">🏢 Veranstalter</h3>
+            <p style="margin: 0; color: #333; line-height: 1.6;">
+                <strong>{{ $organization->name }}</strong><br>
+                @if(!empty($billingData['company_address']))
+                    {{ $billingData['company_address'] }}<br>
+                    {{ $billingData['company_postal_code'] }} {{ $billingData['company_city'] }}<br>
+                @endif
+                @if(!empty($billingData['company_email']))
+                    E-Mail: {{ $billingData['company_email'] }}<br>
+                @endif
+                @if(!empty($billingData['company_phone']))
+                    Telefon: {{ $billingData['company_phone'] }}<br>
+                @endif
+                @if(!empty($organization->tax_id))
+                    Steuernummer: {{ $organization->tax_id }}<br>
+                @endif
+            </p>
+        </div>
+
         @if($booking->payment_status !== 'paid')
         <!-- Payment Instructions -->
         <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
@@ -214,12 +241,24 @@
                 <table style="width: 100%;">
                     <tr>
                         <td style="padding: 5px 0; color: #666; width: 140px;">Empfänger:</td>
-                        <td style="padding: 5px 0;"><strong>{{ settings('site_name', 'Bildungsportal') }}</strong></td>
+                        <td style="padding: 5px 0;"><strong>{{ $bankAccount['account_holder'] ?? $organization->name }}</strong></td>
                     </tr>
+                    @if(!empty($bankAccount['bank_name']))
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">Bank:</td>
+                        <td style="padding: 5px 0;"><strong>{{ $bankAccount['bank_name'] }}</strong></td>
+                    </tr>
+                    @endif
                     <tr>
                         <td style="padding: 5px 0; color: #666;">IBAN:</td>
-                        <td style="padding: 5px 0;"><strong>DE89 3704 0044 0532 0130 00</strong></td>
+                        <td style="padding: 5px 0;"><strong>{{ $bankAccount['iban'] ?? 'Wird noch bekannt gegeben' }}</strong></td>
                     </tr>
+                    @if(!empty($bankAccount['bic']))
+                    <tr>
+                        <td style="padding: 5px 0; color: #666;">BIC:</td>
+                        <td style="padding: 5px 0;"><strong>{{ $bankAccount['bic'] }}</strong></td>
+                    </tr>
+                    @endif
                     <tr>
                         <td style="padding: 5px 0; color: #666;">Verwendungszweck:</td>
                         <td style="padding: 5px 0;"><strong>{{ $booking->booking_number }}</strong></td>
@@ -283,11 +322,19 @@
         <!-- Contact Info -->
         <div style="text-align: center; padding: 20px 0; border-top: 2px solid #eee; margin-top: 30px;">
             <p style="margin: 0 0 10px 0; color: #666;">
-                Bei Fragen erreichen Sie uns unter:
+                Bei Fragen zur Veranstaltung erreichen Sie den Veranstalter unter:
             </p>
             <p style="margin: 0; font-size: 14px;">
-                <strong>{{ settings('contact_email', 'info@bildungsportal.de') }}</strong>
+                <strong>{{ $billingData['company_email'] ?? $organization->email }}</strong>
+                @if(!empty($billingData['company_phone']))
+                    <br>Tel: {{ $billingData['company_phone'] }}
+                @endif
             </p>
+            @if(!empty(settings('contact_email')))
+            <p style="margin: 15px 0 0 0; color: #999; font-size: 12px;">
+                Allgemeine Fragen an die Plattform: {{ settings('contact_email') }}
+            </p>
+            @endif
         </div>
 
         <!-- Footer -->

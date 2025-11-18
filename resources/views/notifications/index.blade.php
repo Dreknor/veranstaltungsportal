@@ -50,6 +50,17 @@
             @else
                 <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($notifications as $notification)
+                        @php
+                            $data = $notification->data;
+                            $title = $data['title'] ?? 'Benachrichtigung';
+                            $message = $data['message'] ?? 'Keine Details verfügbar';
+                            $url = $data['url'] ?? null;
+
+                            // Bestimme Badge-Farbe basierend auf Notification-Typ
+                            $isCritical = $notification->type === 'App\Notifications\CriticalLogNotification';
+                            $badgeClass = $isCritical ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+                        @endphp
+
                         <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $notification->read_at ? 'opacity-75' : 'bg-blue-50 dark:bg-blue-900/20' }}">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
@@ -58,9 +69,9 @@
                                             <span class="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                                         @endif
 
-                                        @if($notification->type === 'App\Notifications\CriticalLogNotification')
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 mr-2">
-                                                {{ $notification->data['level'] ?? 'ERROR' }}
+                                        @if($isCritical && isset($data['level']))
+                                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $badgeClass }} mr-2">
+                                                {{ $data['level'] }}
                                             </span>
                                         @endif
 
@@ -70,26 +81,28 @@
                                     </div>
 
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">
-                                        @if(isset($notification->data['count']) && $notification->data['count'] > 1)
-                                            {{ $notification->data['count'] }} kritische System-Fehler erkannt
-                                        @else
-                                            Kritischer System-Fehler: {{ $notification->data['level'] ?? 'ERROR' }}
-                                        @endif
+                                        {{ $title }}
                                     </p>
 
                                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                                        {{ $notification->data['message'] ?? 'Keine Details verfügbar' }}
+                                        {{ $message }}
                                     </p>
 
-                                    @if(isset($notification->data['channel']))
+                                    @if($isCritical && isset($data['channel']))
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            Channel: {{ $notification->data['channel'] }}
+                                            Channel: {{ $data['channel'] }}
+                                        </p>
+                                    @endif
+
+                                    @if(isset($data['booking_number']))
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            Buchungsnummer: {{ $data['booking_number'] }}
                                         </p>
                                     @endif
                                 </div>
 
                                 <div class="flex items-center space-x-2 ml-4">
-                                    @if(isset($notification->data['url']))
+                                    @if($url)
                                         <a href="{{ route('notifications.mark-read', $notification->id) }}" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-sm font-medium">
                                             Details
                                         </a>

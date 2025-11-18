@@ -11,37 +11,47 @@ class InvoiceNumberService
     /**
      * Generate invoice number for booking (issued by organizer to participant)
      * Uses organizer-specific settings
+     *
+     * @param User $organizer The organizer user (will use their current organization)
+     * @return string Generated invoice number
      */
     public function generateBookingInvoiceNumber(User $organizer): string
     {
-        // Get organizer-specific settings
-        $settings = $organizer->invoice_settings ?? [];
+        // Get the organizer's current organization
+        $organization = $organizer->currentOrganization();
+
+        if (!$organization) {
+            throw new \Exception('Organizer must have an active organization to generate invoice numbers.');
+        }
+
+        // Get organization-specific invoice settings
+        $settings = $organization->invoice_settings ?? [];
 
         $format = $settings['invoice_number_format_booking'] ?? "RE-{YEAR}-{NUMBER}";
         $padding = (int) ($settings['invoice_number_padding'] ?? 5);
         $resetYearly = $settings['invoice_reset_yearly'] ?? true;
 
         // Get current counter with lock to prevent race conditions
-        $counter = DB::transaction(function () use ($organizer, $resetYearly) {
-            // Reload user to get fresh data with lock
-            $user = User::lockForUpdate()->find($organizer->id);
+        $counter = DB::transaction(function () use ($organization, $resetYearly) {
+            // Reload organization to get fresh data with lock
+            $org = \App\Models\Organization::lockForUpdate()->find($organization->id);
 
             $currentYear = now()->format('Y');
-            $lastYear = $user->invoice_counter_booking_year ?? $currentYear;
-            $counter = $user->invoice_counter_booking ?? 1;
+            $lastYear = $org->invoice_counter_booking_year ?? $currentYear;
+            $counter = $org->invoice_counter_booking ?? 1;
 
             // Reset counter if yearly reset is enabled and year changed
             if ($resetYearly && $lastYear !== $currentYear) {
-                $user->invoice_counter_booking = 2; // Next number after reset
-                $user->invoice_counter_booking_year = $currentYear;
-                $user->save();
+                $org->invoice_counter_booking = 2; // Next number after reset
+                $org->invoice_counter_booking_year = $currentYear;
+                $org->save();
                 return 1;
             }
 
             // Increment counter
             $currentCounter = $counter;
-            $user->invoice_counter_booking = $counter + 1;
-            $user->save();
+            $org->invoice_counter_booking = $counter + 1;
+            $org->save();
 
             return $currentCounter;
         });

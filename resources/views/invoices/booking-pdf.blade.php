@@ -232,6 +232,22 @@
     <div class="notes">
         <strong>Zahlungshinweise:</strong><br>
         Bitte überweisen Sie den Betrag bis zum {{ $event->start_date->subDays(7)->format('d.m.Y') }}.<br>
+        <br>
+        <strong>Bankverbindung:</strong><br>
+        @if(!empty($organizer['bank_account']))
+            @php $bankAccount = $organizer['bank_account']; @endphp
+            Kontoinhaber: {{ $bankAccount['account_holder'] ?? $organizer['company_name'] }}<br>
+            @if(!empty($bankAccount['bank_name']))
+                Bank: {{ $bankAccount['bank_name'] }}<br>
+            @endif
+            IBAN: {{ $bankAccount['iban'] ?? 'Wird noch bekannt gegeben' }}<br>
+            @if(!empty($bankAccount['bic']))
+                BIC: {{ $bankAccount['bic'] }}<br>
+            @endif
+        @else
+            Bankverbindung: Wird noch bekannt gegeben<br>
+        @endif
+        <br>
         Verwendungszweck: {{ $booking->invoice_number ?? $booking->booking_number }}
     </div>
     @else

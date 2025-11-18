@@ -336,7 +336,7 @@ class ReportingController extends Controller
             } elseif ($type === 'events') {
                 fputcsv($file, ['ID', 'Titel', 'Kategorie', 'Veranstalter', 'Datum', 'Typ', 'Buchungen', 'Umsatz']);
 
-                Event::with(['category', 'organizer', 'bookings' => function ($query) use ($startDate, $endDate) {
+                Event::with(['category', 'organization', 'bookings' => function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('created_at', [$startDate, $endDate]);
                 }])->chunk(100, function ($events) use ($file) {
                     foreach ($events as $event) {
@@ -344,7 +344,7 @@ class ReportingController extends Controller
                             $event->id,
                             $event->title,
                             $event->category->name ?? '',
-                            $event->organizer->name ?? '',
+                            $event->organization->name ?? '',
                             $event->start_date->format('d.m.Y H:i'),
                             $event->event_type,
                             $event->bookings->count(),

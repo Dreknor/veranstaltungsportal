@@ -13,7 +13,7 @@ class EventController extends Controller
     {
         // Einzelne Events (keine Serie-Teile)
         $eventsQuery = Event::query()
-            ->with(['category', 'user'])
+            ->with(['category', 'organization'])
             ->published()
             ->where(function($q) {
                 $q->where('is_series_part', false)
@@ -22,7 +22,7 @@ class EventController extends Controller
 
         // Aktive Veranstaltungsreihen
         $seriesQuery = EventSeries::query()
-            ->with(['category', 'user', 'events'])
+            ->with(['category', 'organization', 'events'])
             ->where('is_active', true);
 
         // Filter nach Kategorie
@@ -142,7 +142,7 @@ class EventController extends Controller
     public function show($slug)
     {
         $event = Event::where('slug', $slug)
-            ->with(['category', 'user', 'series', 'ticketTypes', 'reviews.user'])
+            ->with(['category', 'organization', 'series', 'ticketTypes', 'reviews.user'])
             ->firstOrFail();
 
         // Increment view count

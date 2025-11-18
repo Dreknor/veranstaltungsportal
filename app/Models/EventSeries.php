@@ -35,13 +35,26 @@ class EventSeries extends Model
     ];
 
     /**
-     * Get the user that owns the series
+     * Get the user that owns the series (for legacy compatibility)
      */
-    public function user()
+    public function getUser(): ?\App\Models\User
     {
         return $this->organization?->owners()->first()
             ?? $this->organization?->admins()->first()
             ?? $this->organization?->users()->first();
+    }
+
+    /**
+     * Accessor for user attribute (for backward compatibility)
+     */
+    public function getUserAttribute(): ?\App\Models\User
+    {
+        // Check if 'user' is already in attributes (to avoid recursion)
+        if (array_key_exists('user', $this->attributes)) {
+            return $this->attributes['user'];
+        }
+
+        return $this->getUser();
     }
 
     /**

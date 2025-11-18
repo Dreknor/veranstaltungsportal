@@ -416,13 +416,29 @@ class Event extends Model implements HasMedia
         return $query->orderBy('views', 'desc');
     }
 
-    // Legacy compatibility: allow tests referencing user() to work by deriving from organization members
-    public function user(): ?\App\Models\User
+    /**
+     * Get the user associated with this event (for legacy compatibility)
+     * Returns first owner/admin of organization
+     */
+    public function getUser(): ?\App\Models\User
     {
         // Prefer first owner/admin of organization for compatibility
         return $this->organization?->owners()->first()
             ?? $this->organization?->admins()->first()
             ?? $this->organization?->users()->first();
+    }
+
+    /**
+     * Accessor for user attribute (for backward compatibility)
+     */
+    public function getUserAttribute(): ?\App\Models\User
+    {
+        // Check if 'user' is already in attributes (to avoid recursion)
+        if (array_key_exists('user', $this->attributes)) {
+            return $this->attributes['user'];
+        }
+
+        return $this->getUser();
     }
 
     // Allow setting user_id in factories/tests to map to organization_id

@@ -202,11 +202,18 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Get the events created by this user (legacy - for backward compatibility)
+     * Get the events created by this user (through organizations)
+     * Returns events from all organizations the user belongs to
      */
     public function events()
     {
-        return $this->hasMany(Event::class);
+        // Return a query builder, not a relation
+        // This allows it to work with count(), get(), etc.
+        return Event::query()
+            ->whereHas('organization.users', function ($query) {
+                $query->where('users.id', $this->id)
+                      ->where('organization_user.is_active', true);
+            });
     }
 
     /**
