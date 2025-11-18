@@ -1,21 +1,16 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Rabattcode erstellen für "{{ $event->title }}"
-        </h2>
-    </x-slot>
+<x-layouts.app title="Rabattcode erstellen">
+<div class="container mx-auto px-4 py-8 max-w-3xl">
+    <div class="mb-8">
+        <a href="{{ route('organizer.events.discount-codes.index', $event) }}"
+           class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center gap-2 mb-4">
+            ← Zurück zur Übersicht
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Rabattcode erstellen</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">{{ $event->title }}</p>
+    </div>
 
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="mb-6">
-                <a href="{{ route('organizer.events.discount-codes.index', $event) }}" class="text-blue-600 hover:text-blue-800">
-                    ← Zurück zur Übersicht
-                </a>
-            </div>
-
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <form action="{{ route('organizer.events.discount-codes.store', $event) }}" method="POST">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <form action="{{ route('organizer.events.discount-codes.store', $event) }}" method="POST">
                         @csrf
 
                         <div class="mb-6">
@@ -108,9 +103,6 @@
                             </button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
     </div>
 
     @push('scripts')
@@ -138,5 +130,6 @@
         }
     </script>
     @endpush
-</x-app-layout>
+</div>
+</x-layouts.app>
 

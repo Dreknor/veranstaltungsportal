@@ -39,8 +39,6 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:50'],
             'bio' => ['nullable', 'string', 'max:1000'],
             'profile_photo' => ['nullable', 'image', 'max:2048'], // 2MB Max
-            'organization_name' => ['nullable', 'string', 'max:255'],
-            'organization_description' => ['nullable', 'string', 'max:1000'],
         ]);
 
         // Handle profile photo upload

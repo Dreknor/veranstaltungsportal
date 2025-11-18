@@ -1,12 +1,11 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-            Statistiken & Analytics
-        </h2>
-    </x-slot>
+<x-layouts.app title="Statistiken & Analytics">
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Statistiken & Analytics</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Übersicht über Ihre Veranstaltungen und Buchungen</p>
+    </div>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+    <div class="space-y-6">
 
             <!-- Date Range Filter -->
             <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
@@ -213,5 +212,6 @@
 
         </div>
     </div>
-</x-app-layout>
+</div>
+</x-layouts.app>
 

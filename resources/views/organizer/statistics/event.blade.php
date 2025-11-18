@@ -1,17 +1,17 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Statistiken: {{ $event->title }}
-            </h2>
-            <a href="{{ route('organizer.statistics.index') }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                ← Zurück zur Übersicht
-            </a>
+<x-layouts.app title="Statistiken: {{ $event->title }}">
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Statistiken: {{ $event->title }}</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Detaillierte Auswertung für diese Veranstaltung</p>
         </div>
-    </x-slot>
+        <a href="{{ route('organizer.statistics.index') }}"
+           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+            ← Zurück zur Übersicht
+        </a>
+    </div>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+    <div class="space-y-6">
 
             <!-- Overview Stats Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -164,5 +164,6 @@
 
         </div>
     </div>
-</x-app-layout>
+
+</x-layouts.app>
 

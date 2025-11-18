@@ -118,7 +118,7 @@ class StatisticsController extends Controller
         $paymentStats = Booking::whereHas('event', function($q) use ($orgId) {
             $q->where('organization_id', $orgId);
         })
-        ->select('payment_status', DB::raw('COUNT(*) as count'), DB::raw('SUM(total_amount) as total'))
+        ->select('payment_status', DB::raw('COUNT(*) as count'), DB::raw('SUM(total) as total'))
         ->groupBy('payment_status')
         ->get();
 

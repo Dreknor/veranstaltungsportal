@@ -219,6 +219,37 @@ class Organization extends Model
     }
 
     /**
+     * Check if organization has complete bank account data
+     */
+    public function hasCompleteBankAccount(): bool
+    {
+        $bankAccount = $this->bank_account ?? [];
+
+        $requiredFields = [
+            'account_holder',
+            'bank_name',
+            'iban',
+            'bic',
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (empty($bankAccount[$field])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if organization can publish events (has complete billing and bank data)
+     */
+    public function canPublishEvents(): bool
+    {
+        return $this->hasCompleteBillingData() && $this->hasCompleteBankAccount();
+    }
+
+    /**
      * Get logo URL
      */
     public function logoUrl(): ?string

@@ -125,32 +125,6 @@
                                 </p>
                             </div>
 
-                            <!-- Organization Fields (only for organizers) -->
-                            @if($user->isOrganizer())
-                                <div class="mb-4">
-                                    <x-forms.input label="Organisation / Firma" name="organization_name" type="text"
-                                        value="{{ old('organization_name', $user->organization_name) }}" />
-                                </div>
-
-                                <div class="mb-4">
-                                    <label for="organization_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        {{ __('Organisationsbeschreibung') }}
-                                    </label>
-                                    <textarea name="organization_description"
-                                              id="organization_description"
-                                              rows="3"
-                                              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
-                                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                                                     dark:bg-gray-700 dark:text-gray-100"
-                                              maxlength="1000">{{ old('organization_description', $user->organization_description) }}</textarea>
-                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                        {{ __('Informationen über Ihre Organisation für Teilnehmer') }}
-                                    </p>
-                                    @error('organization_description')
-                                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            @endif
 
                             <div class="mb-4">
                                 <x-forms.input label="Phone" name="phone" type="tel"

@@ -1,19 +1,34 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-            Organizer-Profil bearbeiten
-        </h2>
-    </x-slot>
+<x-layouts.app title="Organizer-Profil bearbeiten">
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Organizer-Profil bearbeiten</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Ihre persönlichen Profil-Informationen</p>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            @if (session('success'))
-                <div class="mb-4 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
-                    <div class="flex">
-                        <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                            </svg>
+        <!-- Info Box -->
+        <div class="mt-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-700 dark:text-blue-300">
+                        <strong>Hinweis:</strong> Organisationsdaten, Rechnungsinformationen und Bankverbindung verwalten Sie in den
+                        <a href="{{ route('organizer.organization.edit') }}" class="underline hover:text-blue-900 dark:hover:text-blue-200">Organisations-Einstellungen</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (session('success'))
+        <div class="mb-6 rounded-lg bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
                         </div>
                         <div class="ml-3">
                             <p class="text-sm font-medium text-green-800 dark:text-green-200">
@@ -113,125 +128,6 @@
                             </div>
                         </div>
 
-                        <!-- Organization Information -->
-                        <div class="border-b border-gray-200 pb-6 dark:border-gray-700">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Organisationsinformationen</h3>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Informationen über Ihre Organisation oder Institution</p>
-
-                            <div class="mt-4 space-y-4">
-                                <!-- Organization Name -->
-                                <div>
-                                    <label for="organization_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Organisationsname</label>
-                                    <input type="text" name="organization_name" id="organization_name" value="{{ old('organization_name', $user->organization_name) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                    @error('organization_name')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- Organization Website -->
-                                <div>
-                                    <label for="organization_website" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label>
-                                    <input type="url" name="organization_website" id="organization_website" value="{{ old('organization_website', $user->organization_website) }}" placeholder="https://www.beispiel.de" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                    @error('organization_website')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- Organization Description -->
-                                <div>
-                                    <label for="organization_description" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Beschreibung der Organisation</label>
-                                    <textarea name="organization_description" id="organization_description" rows="4" maxlength="2000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">{{ old('organization_description', $user->organization_description) }}</textarea>
-                                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Maximal 2000 Zeichen</p>
-                                    @error('organization_description')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Billing Address -->
-                        <div class="border-b border-gray-200 pb-6 dark:border-gray-700">
-                            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Rechnungsadresse</h3>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Ihre Rechnungsadresse für Abrechnungen und Steuerzwecke</p>
-
-                            <div class="mt-4 space-y-4">
-                                <!-- Company Name -->
-                                <div>
-                                    <label for="billing_company" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Firma/Institution</label>
-                                    <input type="text" name="billing_company" id="billing_company" value="{{ old('billing_company', $user->billing_company) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                    @error('billing_company')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- Address -->
-                                <div>
-                                    <label for="billing_address" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Straße & Hausnummer</label>
-                                    <input type="text" name="billing_address" id="billing_address" value="{{ old('billing_address', $user->billing_address) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                    @error('billing_address')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- Address Line 2 -->
-                                <div>
-                                    <label for="billing_address_line2" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Adresszusatz (optional)</label>
-                                    <input type="text" name="billing_address_line2" id="billing_address_line2" value="{{ old('billing_address_line2', $user->billing_address_line2) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                    @error('billing_address_line2')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- Postal Code -->
-                                    <div>
-                                        <label for="billing_postal_code" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Postleitzahl</label>
-                                        <input type="text" name="billing_postal_code" id="billing_postal_code" value="{{ old('billing_postal_code', $user->billing_postal_code) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                        @error('billing_postal_code')
-                                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- City -->
-                                    <div>
-                                        <label for="billing_city" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Stadt</label>
-                                        <input type="text" name="billing_city" id="billing_city" value="{{ old('billing_city', $user->billing_city) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                        @error('billing_city')
-                                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <!-- State -->
-                                    <div>
-                                        <label for="billing_state" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bundesland</label>
-                                        <input type="text" name="billing_state" id="billing_state" value="{{ old('billing_state', $user->billing_state) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                        @error('billing_state')
-                                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Country -->
-                                    <div>
-                                        <label for="billing_country" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Land</label>
-                                        <input type="text" name="billing_country" id="billing_country" value="{{ old('billing_country', $user->billing_country ?? 'Deutschland') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                        @error('billing_country')
-                                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-
-                                <!-- Tax ID -->
-                                <div>
-                                    <label for="tax_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Steuernummer / USt-IdNr.</label>
-                                    <input type="text" name="tax_id" id="tax_id" value="{{ old('tax_id', $user->tax_id) }}" placeholder="z.B. DE123456789" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                                    @error('tax_id')
-                                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Submit Button -->
                         <div class="flex justify-end">
@@ -243,6 +139,5 @@
                 </div>
             </div>
         </div>
-    </div>
-</x-app-layout>
+</x-layouts.app>
 

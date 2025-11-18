@@ -396,6 +396,13 @@ class User extends Authenticatable implements MustVerifyEmail
             return true; // Non-organizers don't need billing data
         }
 
+        // For organizers with organization system, check current organization
+        $organization = $this->currentOrganization();
+        if ($organization) {
+            return $organization->hasCompleteBillingData();
+        }
+
+        // Fallback to legacy user billing data (for backward compatibility)
         $billingData = $this->organizer_billing_data ?? [];
 
         // Check required fields
@@ -429,6 +436,13 @@ class User extends Authenticatable implements MustVerifyEmail
             return true; // Non-organizers don't need bank account
         }
 
+        // For organizers with organization system, check current organization
+        $organization = $this->currentOrganization();
+        if ($organization) {
+            return $organization->hasCompleteBankAccount();
+        }
+
+        // Fallback to legacy user bank account (for backward compatibility)
         $bankAccount = $this->bank_account ?? [];
 
         // Check required fields: account_holder, iban
@@ -445,6 +459,13 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
 
+        // For organizers with organization system, check current organization
+        $organization = $this->currentOrganization();
+        if ($organization) {
+            return $organization->canPublishEvents();
+        }
+
+        // Fallback to legacy check (for backward compatibility)
         return $this->hasCompleteBillingData() && $this->hasCompleteBankAccount();
     }
 
