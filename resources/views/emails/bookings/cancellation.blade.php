@@ -153,7 +153,7 @@
             <h3>Ihre Tickets:</h3>
             @foreach($booking->items as $item)
                 <div class="price-row">
-                    <span>{{ $item->ticketType->name }}</span>
+                    <span>{{ $item->ticketType?->name ?? 'Ticket' }}</span>
                     <span>{{ number_format($item->price, 2, ',', '.') }} €</span>
                 </div>
             @endforeach

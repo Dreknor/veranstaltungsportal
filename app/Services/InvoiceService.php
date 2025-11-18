@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\PlatformFee;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class InvoiceService
@@ -19,6 +20,12 @@ class InvoiceService
     {
         // Check if event has ended
         if (!$event->end_date || !$event->end_date->isPast()) {
+            return null;
+        }
+
+        // Check if event has a user/organization
+        if (!$event->user) {
+            Log::warning("Cannot generate platform fee invoice for event {$event->id}: No user/organization found");
             return null;
         }
 
@@ -59,7 +66,7 @@ class InvoiceService
             'type' => 'platform_fee',
             'recipient_name' => $event->user->organization_name ?? $event->user->name,
             'recipient_email' => $event->user->email,
-            'recipient_address' => $this->formatOrganizerAddress($event->user),
+            'recipient_address' => $this->formatOrganizerAddress($event->user, $event),
             'amount' => $totalFees,
             'tax_rate' => 19.0, // German VAT
             'tax_amount' => $totalFees * 0.19,
@@ -70,7 +77,7 @@ class InvoiceService
             'status' => 'sent',
             'billing_data' => [
                 'platform' => $this->getPlatformBillingData(),
-                'organizer' => $this->getOrganizerBillingData($event->user),
+                'organizer' => $this->getOrganizerBillingData($event->user, $event),
                 'items' => $invoiceItems,
                 'breakdown' => [
                     'booking_fees' => $totalBookingFees,
@@ -119,14 +126,14 @@ class InvoiceService
             'due_date' => $booking->event->start_date ? $booking->event->start_date->copy()->subDays(7) : now()->addDays(7),
             'status' => 'sent',
             'billing_data' => [
-                'organizer' => $this->getOrganizerBillingData($booking->event->user),
+                'organizer' => $this->getOrganizerBillingData($booking->event->user, $booking->event),
                 'participant' => [
                     'name' => $booking->customer_name,
                     'email' => $booking->customer_email,
                     'address' => $this->formatBookingAddress($booking),
                 ],
                 'items' => $this->getBookingItems($booking),
-                'bank_account' => $booking->event->user->bank_account ?? [],
+                'bank_account' => $booking->event->user?->bank_account ?? [],
             ],
         ]);
 
@@ -178,8 +185,40 @@ class InvoiceService
     /**
      * Get organizer billing data
      */
-    private function getOrganizerBillingData($user)
+    private function getOrganizerBillingData($user, $event = null)
     {
+        // If no user provided, try to get data from event
+        if (!$user) {
+            if ($event) {
+                return [
+                    'company_name' => $event->getOrganizerName(),
+                    'address' => '',
+                    'postal_code' => '',
+                    'city' => '',
+                    'country' => 'Deutschland',
+                    'tax_id' => '',
+                    'vat_id' => '',
+                    'email' => $event->getOrganizerEmail() ?? '',
+                    'phone' => $event->getOrganizerPhone() ?? '',
+                    'bank_account' => [],
+                ];
+            }
+
+            // Ultimate fallback
+            return [
+                'company_name' => 'Unbekannt',
+                'address' => '',
+                'postal_code' => '',
+                'city' => '',
+                'country' => 'Deutschland',
+                'tax_id' => '',
+                'vat_id' => '',
+                'email' => '',
+                'phone' => '',
+                'bank_account' => [],
+            ];
+        }
+
         // Get organization from user
         $organization = $user->currentOrganization();
 
@@ -220,8 +259,13 @@ class InvoiceService
     /**
      * Format organizer address
      */
-    private function formatOrganizerAddress($user)
+    private function formatOrganizerAddress($user, $event = null)
     {
+        // If no user provided, return empty address
+        if (!$user) {
+            return '';
+        }
+
         // Get organization from user
         $organization = $user->currentOrganization();
 
@@ -432,7 +476,7 @@ class InvoiceService
             'booking' => $booking,
             'event' => $booking->event,
             'items' => $this->getBookingItems($booking),
-            'organizer' => $this->getOrganizerBillingData($booking->event->user),
+            'organizer' => $this->getOrganizerBillingData($booking->event->user, $booking->event),
             'customer' => [
                 'name' => $booking->customer_name,
                 'email' => $booking->customer_email,

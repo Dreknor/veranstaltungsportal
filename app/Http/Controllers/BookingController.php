@@ -262,6 +262,13 @@ class BookingController extends Controller
                     $data['ticket_type']->increment('quantity_sold', $data['quantity']);
                 }
 
+                // Lade Beziehungen für E-Mail-Versand
+                $booking->load([
+                    'items.ticketType',
+                    'event.organization.users',
+                    'event.category'
+                ]);
+
                 // Sende entsprechende E-Mail
                 if ($isFree) {
                     // Bei kostenlosen Tickets: Direkt Tickets versenden

@@ -12,7 +12,7 @@ class EventManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = Event::with(['organization', 'category']);
+        $query = Event::with(['organization.users', 'category']);
 
         if ($request->filled('search')) {
             $search = $request->search;

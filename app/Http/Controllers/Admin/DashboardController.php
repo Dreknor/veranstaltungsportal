@@ -26,7 +26,7 @@ class DashboardController extends Controller
         ];
 
         $recentUsers = User::latest()->limit(10)->get();
-        $recentEvents = Event::with('organization', 'category')->latest()->limit(10)->get();
+        $recentEvents = Event::with(['organization.users', 'category'])->latest()->limit(10)->get();
         $recentBookings = Booking::with(['event', 'user'])->latest()->limit(10)->get();
 
         return view('admin.dashboard', compact('stats', 'recentUsers', 'recentEvents', 'recentBookings'));

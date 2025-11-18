@@ -235,7 +235,7 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{{ $event->title }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">von {{ $event->user->name }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">von {{ $event->getOrganizerName() }}</p>
                                 </div>
                                 <div class="text-right ml-4">
                                     @if($event->is_published)

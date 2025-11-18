@@ -37,7 +37,7 @@
                     <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">{{ $event->title }}</h1>
                     <div class="flex items-center text-white text-lg">
                         <x-icon.user class="w-5 h-5 mr-2" />
-                        Veranstalter: {{ $event->user->name }}
+                        Veranstalter: {{ $event->getOrganizerName() }}
                     </div>
                 </div>
             </div>

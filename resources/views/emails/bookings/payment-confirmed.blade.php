@@ -98,7 +98,7 @@
             <table style="width: 100%; border-collapse: collapse;">
                 @foreach($booking->items as $item)
                 <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 0;">{{ $item->ticketType->name }}</td>
+                    <td style="padding: 10px 0;">{{ $item->ticketType?->name ?? 'Ticket' }}</td>
                     <td style="padding: 10px 0; text-align: center;"><strong>{{ $item->quantity }}x</strong></td>
                 </tr>
                 @endforeach

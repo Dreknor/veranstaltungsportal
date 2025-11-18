@@ -94,8 +94,8 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-gray-100">{{ $event->user->name }}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $event->user->email }}</div>
+                                <div class="text-sm text-gray-900 dark:text-gray-100">{{ $event->getOrganizerName() }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $event->getOrganizerEmail() ?? 'N/A' }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">

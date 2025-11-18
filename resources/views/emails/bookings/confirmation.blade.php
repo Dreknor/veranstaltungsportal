@@ -168,7 +168,7 @@
             <table style="width: 100%; border-collapse: collapse;">
                 @foreach($booking->items as $item)
                 <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 0;">{{ $item->ticketType->name }}</td>
+                    <td style="padding: 10px 0;">{{ $item->ticketType?->name ?? 'Ticket' }}</td>
                     <td style="padding: 10px 0; text-align: center;">{{ $item->quantity }}x</td>
                     <td style="padding: 10px 0; text-align: right;">{{ number_format($item->price, 2, ',', '.') }} €</td>
                 </tr>
@@ -205,26 +205,30 @@
         <!-- Organizer Information -->
         @php
             $organization = $booking->event->organization;
-            $bankAccount = $organization->bank_account ?? [];
-            $billingData = $organization->billing_data ?? [];
+            $bankAccount = $organization?->bank_account ?? [];
+            $billingData = $organization?->billing_data ?? [];
+            $organizerName = $organization?->name ?? $booking->event->getOrganizerName();
+            $organizerEmail = $organization?->email ?? $booking->event->getOrganizerEmail();
+            $organizerPhone = $organization?->phone ?? $booking->event->getOrganizerPhone();
+            $organizerTaxId = $organization?->tax_id ?? null;
         @endphp
 
         <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6c757d;">
             <h3 style="color: #495057; margin: 0 0 10px 0; font-size: 16px;">🏢 Veranstalter</h3>
             <p style="margin: 0; color: #333; line-height: 1.6;">
-                <strong>{{ $organization->name }}</strong><br>
+                <strong>{{ $organizerName }}</strong><br>
                 @if(!empty($billingData['company_address']))
                     {{ $billingData['company_address'] }}<br>
                     {{ $billingData['company_postal_code'] }} {{ $billingData['company_city'] }}<br>
                 @endif
-                @if(!empty($billingData['company_email']))
-                    E-Mail: {{ $billingData['company_email'] }}<br>
+                @if(!empty($billingData['company_email']) || $organizerEmail)
+                    E-Mail: {{ $billingData['company_email'] ?? $organizerEmail }}<br>
                 @endif
-                @if(!empty($billingData['company_phone']))
-                    Telefon: {{ $billingData['company_phone'] }}<br>
+                @if(!empty($billingData['company_phone']) || $organizerPhone)
+                    Telefon: {{ $billingData['company_phone'] ?? $organizerPhone }}<br>
                 @endif
-                @if(!empty($organization->tax_id))
-                    Steuernummer: {{ $organization->tax_id }}<br>
+                @if($organizerTaxId)
+                    Steuernummer: {{ $organizerTaxId }}<br>
                 @endif
             </p>
         </div>
@@ -241,7 +245,7 @@
                 <table style="width: 100%;">
                     <tr>
                         <td style="padding: 5px 0; color: #666; width: 140px;">Empfänger:</td>
-                        <td style="padding: 5px 0;"><strong>{{ $bankAccount['account_holder'] ?? $organization->name }}</strong></td>
+                        <td style="padding: 5px 0;"><strong>{{ $bankAccount['account_holder'] ?? $organizerName }}</strong></td>
                     </tr>
                     @if(!empty($bankAccount['bank_name']))
                     <tr>
@@ -325,9 +329,9 @@
                 Bei Fragen zur Veranstaltung erreichen Sie den Veranstalter unter:
             </p>
             <p style="margin: 0; font-size: 14px;">
-                <strong>{{ $billingData['company_email'] ?? $organization->email }}</strong>
-                @if(!empty($billingData['company_phone']))
-                    <br>Tel: {{ $billingData['company_phone'] }}
+                <strong>{{ $billingData['company_email'] ?? $organizerEmail }}</strong>
+                @if(!empty($billingData['company_phone']) || $organizerPhone)
+                    <br>Tel: {{ $billingData['company_phone'] ?? $organizerPhone }}
                 @endif
             </p>
             @if(!empty(settings('contact_email')))
