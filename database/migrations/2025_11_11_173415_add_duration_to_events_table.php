@@ -18,7 +18,16 @@ return new class extends Migration
         });
 
         // Update existing events with calculated duration
-        DB::statement('UPDATE events SET duration = TIMESTAMPDIFF(MINUTE, start_date, end_date)');
+        // Use database-agnostic approach for calculating duration
+        $driver = DB::connection()->getDriverName();
+
+        if ($driver === 'mysql') {
+            DB::statement('UPDATE events SET duration = TIMESTAMPDIFF(MINUTE, start_date, end_date)');
+        } elseif ($driver === 'sqlite') {
+            DB::statement("UPDATE events SET duration = CAST((julianday(end_date) - julianday(start_date)) * 24 * 60 AS INTEGER)");
+        } elseif ($driver === 'pgsql') {
+            DB::statement("UPDATE events SET duration = EXTRACT(EPOCH FROM (end_date - start_date)) / 60");
+        }
     }
 
     /**

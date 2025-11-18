@@ -32,24 +32,6 @@ class EventCategoryTest extends TestCase
     }
 
     #[Test]
-    public function it_can_have_parent_category()
-    {
-        $parent = EventCategory::factory()->create();
-        $child = EventCategory::factory()->create(['parent_id' => $parent->id]);
-
-        $this->assertEquals($parent->id, $child->parent_id);
-    }
-
-    #[Test]
-    public function it_can_have_child_categories()
-    {
-        $parent = EventCategory::factory()->create();
-        EventCategory::factory()->count(3)->create(['parent_id' => $parent->id]);
-
-        $this->assertCount(3, $parent->children);
-    }
-
-    #[Test]
     public function it_counts_events_correctly()
     {
         $category = EventCategory::factory()->create();

@@ -32,9 +32,9 @@ class EventSeriesFactory extends Factory
     public function configure()
     {
         return $this
-            ->afterMaking(function (EventSeries $series, array $attributes) {
-                if (array_key_exists('user_id', $attributes) && empty($attributes['organization_id'])) {
-                    $user = \App\Models\User::find($attributes['user_id']);
+            ->afterMaking(function (EventSeries $series) {
+                if ($series->user_id && !$series->organization_id) {
+                    $user = \App\Models\User::find($series->user_id);
                     if ($user) {
                         $org = $user->activeOrganizations()->first();
                         if (!$org) {
@@ -49,9 +49,9 @@ class EventSeriesFactory extends Factory
                     }
                 }
             })
-            ->afterCreating(function (EventSeries $series, array $attributes) {
-                if (!$series->organization_id && array_key_exists('user_id', $attributes)) {
-                    $user = \App\Models\User::find($attributes['user_id']);
+            ->afterCreating(function (EventSeries $series) {
+                if (!$series->organization_id && $series->user_id) {
+                    $user = \App\Models\User::find($series->user_id);
                     if ($user) {
                         $org = $user->activeOrganizations()->first();
                         if (!$org) {

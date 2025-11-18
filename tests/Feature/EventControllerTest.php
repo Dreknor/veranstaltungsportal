@@ -71,19 +71,20 @@ class EventControllerTest extends TestCase
     public function it_calculates_available_tickets_correctly()
     {
         $event = Event::factory()->create(['max_attendees' => 100]);
+        $ticketType = \App\Models\TicketType::factory()->create(['event_id' => $event->id]);
 
         // Create confirmed bookings with items
         $booking1 = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed'
         ]);
-        $booking1->items()->create(['quantity' => 10, 'price' => 50]);
+        $booking1->items()->create(['quantity' => 10, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $booking2 = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed'
         ]);
-        $booking2->items()->create(['quantity' => 15, 'price' => 50]);
+        $booking2->items()->create(['quantity' => 15, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $this->assertEquals(75, $event->availableTickets());
     }
@@ -100,6 +101,7 @@ class EventControllerTest extends TestCase
     public function it_checks_if_event_has_available_tickets()
     {
         $event = Event::factory()->create(['max_attendees' => 10]);
+        $ticketType = \App\Models\TicketType::factory()->create(['event_id' => $event->id]);
 
         $this->assertTrue($event->hasAvailableTickets());
 
@@ -108,7 +110,7 @@ class EventControllerTest extends TestCase
             'event_id' => $event->id,
             'status' => 'confirmed'
         ]);
-        $booking->items()->create(['quantity' => 10, 'price' => 50]);
+        $booking->items()->create(['quantity' => 10, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $event->refresh();
         $this->assertFalse($event->hasAvailableTickets());

@@ -17,6 +17,7 @@ class EventWaitlistFactory extends Factory
             'event_id' => Event::factory(),
             'user_id' => User::factory(),
             'email' => fake()->safeEmail(),
+            'name' => fake()->name(),
             'quantity' => fake()->numberBetween(1, 5),
             'notified_at' => null,
         ];

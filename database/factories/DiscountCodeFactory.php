@@ -21,9 +21,9 @@ class DiscountCodeFactory extends Factory
         return [
             'event_id' => $this->faker->optional(0.5)->randomElement([null, Event::factory()]),
             'code' => strtoupper(Str::random(8)),
-            'discount_type' => $type,
-            'discount_value' => $value,
-            'max_uses' => $this->faker->optional(0.6)->numberBetween(10, 100),
+            'type' => $type,
+            'value' => $value,
+            'usage_limit' => $this->faker->optional(0.6)->numberBetween(10, 100),
             'usage_count' => 0,
             'valid_from' => $this->faker->optional(0.5)->dateTimeBetween('-1 month', 'now'),
             'valid_until' => $this->faker->optional(0.7)->dateTimeBetween('now', '+3 months'),

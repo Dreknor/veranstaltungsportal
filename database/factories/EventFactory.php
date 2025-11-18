@@ -102,9 +102,9 @@ class EventFactory extends Factory
     public function configure()
     {
         return $this
-            ->afterMaking(function (Event $event, array $attributes) {
-                if (array_key_exists('user_id', $attributes) && empty($attributes['organization_id'])) {
-                    $user = \App\Models\User::find($attributes['user_id']);
+            ->afterMaking(function (Event $event) {
+                if ($event->user_id && !$event->organization_id) {
+                    $user = \App\Models\User::find($event->user_id);
                     if ($user) {
                         $org = $user->activeOrganizations()->first();
                         if (!$org) {
@@ -120,9 +120,9 @@ class EventFactory extends Factory
                     }
                 }
             })
-            ->afterCreating(function (Event $event, array $attributes) {
-                if (!$event->organization_id && array_key_exists('user_id', $attributes)) {
-                    $user = \App\Models\User::find($attributes['user_id']);
+            ->afterCreating(function (Event $event) {
+                if (!$event->organization_id && $event->user_id) {
+                    $user = \App\Models\User::find($event->user_id);
                     if ($user) {
                         $org = $user->activeOrganizations()->first();
                         if (!$org) {

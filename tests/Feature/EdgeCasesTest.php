@@ -53,11 +53,13 @@ class EdgeCasesTest extends TestCase
             'is_published' => true,
         ]);
 
+        $ticketType = \App\Models\TicketType::factory()->create(['event_id' => $event->id]);
+
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
         ]);
-        $booking->items()->create(['quantity' => 10, 'price' => 50]);
+        $booking->items()->create(['quantity' => 10, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $this->assertEquals(0, $event->fresh()->availableTickets());
         $this->assertFalse($event->fresh()->hasAvailableTickets());
@@ -67,12 +69,13 @@ class EdgeCasesTest extends TestCase
     public function cancelled_booking_frees_up_tickets()
     {
         $event = Event::factory()->create(['max_attendees' => 10]);
+        $ticketType = \App\Models\TicketType::factory()->create(['event_id' => $event->id]);
 
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
         ]);
-        $booking->items()->create(['quantity' => 5, 'price' => 50]);
+        $booking->items()->create(['quantity' => 5, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $this->assertEquals(5, $event->fresh()->availableTickets());
 

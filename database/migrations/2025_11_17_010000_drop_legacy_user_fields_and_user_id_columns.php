@@ -32,6 +32,13 @@ return new class extends Migration
 
         Schema::table('event_series', function (Blueprint $table) {
             if (Schema::hasColumn('event_series', 'user_id')) {
+                // Drop indexes first (SQLite compatibility)
+                try {
+                    $table->dropIndex(['user_id', 'is_active']);
+                } catch (\Exception $e) {
+                    // Index might not exist
+                }
+
                 $table->dropForeign(['user_id']);
                 $table->dropColumn('user_id');
             }

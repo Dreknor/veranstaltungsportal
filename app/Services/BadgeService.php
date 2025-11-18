@@ -85,7 +85,7 @@ class BadgeService
                 $query->where('show_profile_public', true)
                       ->orWhere('allow_networking', true);
             })
-            ->having('total_points', '>', 0) // Only users with at least one badge
+            ->whereRaw('(select COALESCE(SUM(badges.points), 0) from user_badges inner join badges on user_badges.badge_id = badges.id where user_badges.user_id = users.id) > 0') // Only users with at least one badge
             ->orderByDesc('total_points')
             ->limit($limit)
             ->get()

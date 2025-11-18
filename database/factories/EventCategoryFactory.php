@@ -23,10 +23,11 @@ class EventCategoryFactory extends Factory
         ];
 
         $name = $this->faker->randomElement($categories);
+        $slug = Str::slug($name) . '-' . $this->faker->unique()->numberBetween(1000, 9999);
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => $slug,
             'description' => $this->faker->optional()->sentence(),
             'icon' => $this->faker->randomElement(['academic-cap', 'book-open', 'users', 'heart', 'sparkles', 'shield-check']),
             'color' => $this->faker->randomElement(['#2563eb', '#059669', '#7c3aed', '#dc2626', '#0891b2', '#ea580c']),

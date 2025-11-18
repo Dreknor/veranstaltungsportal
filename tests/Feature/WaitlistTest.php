@@ -22,12 +22,14 @@ class WaitlistTest extends TestCase
             'max_attendees' => 10,
         ]);
 
+        $ticketType = \App\Models\TicketType::factory()->create(['event_id' => $event->id]);
+
         // Fill all available tickets
         $booking = \App\Models\Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
         ]);
-        $booking->items()->create(['quantity' => 10, 'price' => 50]);
+        $booking->items()->create(['quantity' => 10, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
             'email' => $user->email,
@@ -67,6 +69,7 @@ class WaitlistTest extends TestCase
             'event_id' => $event->id,
             'user_id' => $user->id,
             'email' => $user->email,
+            'name' => $user->name,
             'quantity' => 1,
         ]);
 
@@ -95,19 +98,21 @@ class WaitlistTest extends TestCase
     {
         $user = User::factory()->create();
         $event = Event::factory()->create(['max_attendees' => 1]);
+        $ticketType = \App\Models\TicketType::factory()->create(['event_id' => $event->id]);
 
         // Fill event
         $booking = \App\Models\Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
         ]);
-        $booking->items()->create(['quantity' => 1, 'price' => 50]);
+        $booking->items()->create(['quantity' => 1, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         // Join waitlist first time
         EventWaitlist::create([
             'event_id' => $event->id,
             'user_id' => $user->id,
             'email' => $user->email,
+            'name' => $user->name,
             'quantity' => 1,
         ]);
 
