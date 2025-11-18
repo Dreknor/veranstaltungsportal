@@ -73,3 +73,36 @@ function createAdmin(array $attributes = []): \App\Models\User
     $admin->assignRole($role);
     return $admin;
 }
+
+/**
+ * Create an organizer user with organization
+ */
+function createOrganizerWithOrganization(array $userAttributes = [], array $orgAttributes = []): \App\Models\User
+{
+    // Ensure organizer role exists
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'organizer']);
+
+    $user = \App\Models\User::factory()->create($userAttributes);
+    $user->assignRole('organizer');
+
+    // Create organization for the user
+    $organization = \App\Models\Organization::factory()->create($orgAttributes);
+    $organization->users()->attach($user->id, [
+        'role' => 'owner',
+        'is_active' => true,
+        'joined_at' => now(),
+    ]);
+
+    return $user;
+}
+
+/**
+ * Setup default roles for testing
+ */
+function setupRoles(): void
+{
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin']);
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'organizer']);
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'user']);
+}
+

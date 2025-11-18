@@ -103,8 +103,10 @@ class EventFactory extends Factory
     {
         return $this
             ->afterMaking(function (Event $event) {
-                if ($event->user_id && !$event->organization_id) {
-                    $user = \App\Models\User::find($event->user_id);
+                // If user_id is set (from ->for($user, 'user')), create/use organization
+                if (isset($event->getAttributes()['user_id']) && !$event->organization_id) {
+                    $userId = $event->getAttributes()['user_id'];
+                    $user = \App\Models\User::find($userId);
                     if ($user) {
                         $org = $user->activeOrganizations()->first();
                         if (!$org) {
@@ -118,24 +120,14 @@ class EventFactory extends Factory
                         }
                         $event->organization_id = $org->id;
                     }
+                    // Remove user_id from attributes as it's not a column
+                    unset($event->getAttributes()['user_id']);
                 }
             })
             ->afterCreating(function (Event $event) {
-                if (!$event->organization_id && $event->user_id) {
-                    $user = \App\Models\User::find($event->user_id);
-                    if ($user) {
-                        $org = $user->activeOrganizations()->first();
-                        if (!$org) {
-                            $org = \App\Models\Organization::factory()->create();
-                            $org->users()->attach($user->id, [
-                                'role' => 'owner',
-                                'is_active' => true,
-                                'joined_at' => now(),
-                            ]);
-                        }
-                        $event->organization_id = $org->id;
-                        $event->save();
-                    }
+                // Ensure organization_id is saved if it was set during making
+                if ($event->organization_id) {
+                    $event->save();
                 }
             });
     }

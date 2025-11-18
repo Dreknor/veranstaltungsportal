@@ -153,6 +153,11 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::post('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendees'])->name('events.attendees.contact.send');
         Route::post('/events/{event}/calculate-costs', [Organizer\EventManagementController::class, 'calculateCosts'])->name('events.calculate-costs');
 
+        // Media Upload Routes
+        Route::post('/events/{event}/upload-image', [Organizer\EventManagementController::class, 'uploadImage'])->name('events.upload-image');
+        Route::post('/events/{event}/upload-gallery', [Organizer\EventManagementController::class, 'uploadGalleryImage'])->name('events.upload-gallery');
+        Route::post('/profile/upload-photo', [Organizer\ProfileController::class, 'uploadPhoto'])->name('profile.upload-photo');
+
         // Ticket Types
         Route::get('/events/{event}/ticket-types', [Organizer\TicketTypeController::class, 'index'])->name('events.ticket-types.index');
         Route::get('/events/{event}/ticket-types/create', [Organizer\TicketTypeController::class, 'create'])->name('events.ticket-types.create');

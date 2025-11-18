@@ -84,6 +84,26 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Pseudo-relation for backwards compatibility with tests
+     * Returns the first owner of the organization
+     */
+    public function user()
+    {
+        if ($this->organization) {
+            return $this->organization->users()->wherePivot('role', 'owner')->first();
+        }
+        return null;
+    }
+
+    /**
+     * Alias for organization (for backwards compatibility)
+     */
+    public function organizer(): BelongsTo
+    {
+        return $this->organization();
+    }
+
+    /**
      * Get the organization or null
      */
     public function getOrganizerEntity()

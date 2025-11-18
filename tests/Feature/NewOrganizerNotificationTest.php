@@ -30,7 +30,6 @@ it('sends notification to admins when a new organizer registers', function () {
         'password' => 'password123',
         'password_confirmation' => 'password123',
         'account_type' => 'organizer',
-        'organization_name' => 'Test Organization',
     ]);
 
     // Get the newly created organizer
@@ -106,9 +105,18 @@ it('notification contains correct organizer data', function () {
         'first_name' => 'John',
         'last_name' => 'Doe',
         'email' => 'john@example.com',
-        'organization_name' => 'Doe Events',
     ]);
     $organizer->assignRole('organizer');
+
+    // Create organization for the organizer
+    $organization = \App\Models\Organization::factory()->create([
+        'name' => 'Doe Events',
+    ]);
+    $organization->users()->attach($organizer->id, [
+        'role' => 'owner',
+        'is_active' => true,
+        'joined_at' => now(),
+    ]);
 
     $notification = new NewOrganizerRegisteredNotification($organizer);
 
@@ -120,14 +128,12 @@ it('notification contains correct organizer data', function () {
         'organizer_id',
         'organizer_name',
         'organizer_email',
-        'organization_name',
         'registered_at',
         'url',
     ]);
     expect($array['organizer_id'])->toBe($organizer->id);
     expect($array['organizer_name'])->toBe('John Doe');
     expect($array['organizer_email'])->toBe('john@example.com');
-    expect($array['organization_name'])->toBe('Doe Events');
 
     // Test toMail
     $mail = $notification->toMail($admin);
