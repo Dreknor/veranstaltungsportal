@@ -1,0 +1,77 @@
+name: Laravel CI & Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+    
+    # Konfiguriere einen MySQL-Dienst-Container für die Tests
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: testing_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - name: ⬇️ Repository auschecken
+      uses: actions/checkout@v4
+
+    - name: ⚙️ PHP einrichten
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2' # Passe die Version an deine Laravel-Anforderungen an
+        extensions: exif, pcntl, pdo_mysql # Notwendige PHP-Erweiterungen
+        cache: 'composer'
+
+    - name: 📦 Composer-Abhängigkeiten installieren
+      run: composer install --prefer-dist --no-interaction --no-progress
+
+    - name: 🔐 .env-Datei erstellen und App Key generieren
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+
+    - name: 📄 Datenbank-Verbindung konfigurieren
+      run: |
+        sed -i 's/DB_CONNECTION=sqlite/DB_CONNECTION=mysql/' .env
+        sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+        sed -i 's/DB_PORT=3306/DB_PORT=3306/' .env
+        sed -i 's/DB_DATABASE=laravel/DB_DATABASE=testing_db/' .env # Muss zum Dienst-Namen passen
+        sed -i 's/DB_USERNAME=root/DB_USERNAME=root/' .env
+        sed -i 's/DB_PASSWORD=/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/' .env
+
+    - name: 🛠️ Datenbank migrieren und füllen
+      run: |
+        php artisan migrate --env=testing --force
+        # Optional: Wenn du Seeders für Tests brauchst
+        # php artisan db:seed --env=testing --force 
+
+    # --- Vite/Node.js Schritte für Frontend-Asset-Tests (falls nötig) ---
+    - name: ⚙️ Node.js einrichten
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm' 
+
+    - name: 📦 Frontend-Abhängigkeiten installieren
+      run: npm ci
+
+    - name: 🏗️ Frontend-Assets bauen (Vite)
+      # Wichtig für Tests, die auf die gebauten Assets (z.B. CSS/JS) zugreifen
+      run: npm run build
+
+    # --- Test-Schritte ---
+    - name: 🧪 PHPUnit-Tests ausführen
+      # Verwende Laravel's integriertes Testkommando
+      run: php artisan test
+      # Alternativ: run: vendor/bin/phpunit
