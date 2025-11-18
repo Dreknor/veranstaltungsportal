@@ -67,6 +67,7 @@ class EventFactory extends Factory
         return [
             'organization_id' => Organization::factory(),
             'event_category_id' => EventCategory::factory(),
+            'event_type' => 'physical',
             'title' => $title,
             'slug' => Str::slug($title) . '-' . Str::random(6),
             'description' => $this->faker->paragraphs(3, true),
@@ -80,6 +81,8 @@ class EventFactory extends Factory
             'venue_country' => 'Deutschland',
             'venue_latitude' => $this->faker->latitude(50, 52),
             'venue_longitude' => $this->faker->longitude(12, 14),
+            'online_url' => null,
+            'online_access_code' => null,
             'organizer_info' => $this->faker->optional(0.6)->sentence(),
             'organizer_email' => $this->faker->optional(0.7)->email(),
             'organizer_phone' => $this->faker->optional(0.5)->phoneNumber(),
@@ -87,6 +90,12 @@ class EventFactory extends Factory
             'max_attendees' => $this->faker->numberBetween(15, 40),
             'is_featured' => false,
             'is_published' => false,
+            'is_private' => false,
+            'is_cancelled' => false,
+            'cancelled_at' => null,
+            'cancellation_reason' => null,
+            'registration_required' => true,
+            'views' => 0,
         ];
     }
 
