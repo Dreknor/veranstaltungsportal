@@ -42,8 +42,7 @@ class UserManagementController extends Controller
             }
         }
 
-        $users = $query->withCount(['events', 'bookings'])
-                       ->latest()
+        $users = $query->latest()
                        ->paginate(20);
 
         $roles = Role::all();

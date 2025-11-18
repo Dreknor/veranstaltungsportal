@@ -17,6 +17,8 @@ class TicketPdfGenerationTest extends TestCase
     #[Test]
     public function pdf_ticket_can_be_generated_for_confirmed_booking()
     {
+
+
         Storage::fake('local');
 
         $user = User::factory()->create();

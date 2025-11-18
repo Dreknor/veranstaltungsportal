@@ -8,7 +8,7 @@ use App\Services\TicketPdfService;
 
 test('can generate QR code for booking', function () {
     $booking = Booking::factory()
-        ->for(Event::factory()->for(User::factory(), 'organizer'))
+        ->for(Event::factory())
         ->create();
 
     $qrCodeService = app(QrCodeService::class);
@@ -20,7 +20,7 @@ test('can generate QR code for booking', function () {
 
 test('can verify QR code data', function () {
     $user = User::factory()->create();
-    $event = Event::factory()->create(['organizer_id' => $user->id]);
+    $event = Event::factory()->create();
     $booking = Booking::factory()->create(['event_id' => $event->id]);
 
     $qrCodeService = app(QrCodeService::class);
@@ -55,7 +55,7 @@ test('qr code verification fails with invalid data', function () {
 
 test('can generate PDF ticket for booking', function () {
     $user = User::factory()->create();
-    $event = Event::factory()->create(['organizer_id' => $user->id]);
+    $event = Event::factory()->create();
     $booking = Booking::factory()->create(['event_id' => $event->id]);
 
     $pdfService = app(TicketPdfService::class);
@@ -66,7 +66,7 @@ test('can generate PDF ticket for booking', function () {
 
 test('can download ticket PDF', function () {
     $user = User::factory()->create();
-    $event = Event::factory()->create(['organizer_id' => $user->id]);
+    $event = Event::factory()->create();
     $booking = Booking::factory()->create([
         'event_id' => $event->id,
         'user_id' => $user->id,
@@ -81,7 +81,7 @@ test('can download ticket PDF', function () {
 
 test('can download invoice PDF', function () {
     $user = User::factory()->create();
-    $event = Event::factory()->create(['organizer_id' => $user->id]);
+    $event = Event::factory()->create();
     $booking = Booking::factory()->create([
         'event_id' => $event->id,
         'user_id' => $user->id,
@@ -98,7 +98,7 @@ test('cannot download ticket without proper access', function () {
     $organizer = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $event = Event::factory()->create(['organizer_id' => $organizer->id]);
+    $event = Event::factory()->create();
     $booking = Booking::factory()->create([
         'event_id' => $event->id,
         'user_id' => $organizer->id,
@@ -112,7 +112,7 @@ test('cannot download ticket without proper access', function () {
 
 test('can generate invoice PDF', function () {
     $user = User::factory()->create();
-    $event = Event::factory()->create(['organizer_id' => $user->id]);
+    $event = Event::factory()->create();
     $booking = Booking::factory()->create(['event_id' => $event->id]);
 
     $pdfService = app(TicketPdfService::class);

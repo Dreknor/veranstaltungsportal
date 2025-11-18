@@ -69,7 +69,6 @@ class EventFactory extends Factory
             'event_category_id' => EventCategory::factory(),
             'event_type' => 'physical',
             'title' => $title,
-            'slug' => Str::slug($title) . '-' . Str::random(6),
             'description' => $this->faker->paragraphs(3, true),
             'start_date' => $startDate,
             'end_date' => $endDate,

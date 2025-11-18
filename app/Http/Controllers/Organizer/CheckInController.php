@@ -144,14 +144,14 @@ class CheckInController extends Controller
                     'checked_in' => true,
                     'checked_in_at' => $booking->checked_in_at,
                 ],
-            ], 400);
+            ], 422);
         }
 
         if (!$booking->canCheckIn()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Diese Buchung kann nicht eingecheckt werden. Status: ' . $booking->status . ', Zahlung: ' . $booking->payment_status,
-            ], 400);
+            ], 422);
         }
 
         $booking->checkIn(
@@ -374,5 +374,32 @@ class CheckInController extends Controller
 
             return back()->with('error', 'Fehler beim Check-In: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Get check-in statistics for an event
+     */
+    public function stats(Event $event)
+    {
+        $this->authorize('update', $event);
+
+        $stats = [
+            'total' => $event->bookings()
+                ->where('payment_status', 'paid')
+                ->where('status', 'confirmed')
+                ->count(),
+            'checked_in' => $event->bookings()
+                ->where('payment_status', 'paid')
+                ->where('status', 'confirmed')
+                ->where('checked_in', true)
+                ->count(),
+            'pending' => $event->bookings()
+                ->where('payment_status', 'paid')
+                ->where('status', 'confirmed')
+                ->where('checked_in', false)
+                ->count(),
+        ];
+
+        return response()->json($stats);
     }
 }

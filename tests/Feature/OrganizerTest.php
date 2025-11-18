@@ -5,12 +5,13 @@ use App\Models\EventCategory;
 use App\Models\User;
 
 beforeEach(function () {
-    $this->user = User::factory()->create();
+    $this->user = createOrganizerWithOrganization();
+    $this->organization = $this->user->organizations()->first();
     $this->actingAs($this->user);
 });
 
 test('organizer can view their dashboard', function () {
-    Event::factory()->for($this->user, 'user')->count(3)->create();
+    Event::factory()->state(['organization_id' => $this->organization->id])->count(3)->create();
 
     $response = $this->get(route('organizer.dashboard'));
 
@@ -45,7 +46,7 @@ test('organizer can create an event', function () {
 });
 
 test('organizer can update their event', function () {
-    $event = Event::factory()->for($this->user, 'user')->create([
+    $event = Event::factory()->state(['organization_id' => $this->organization->id])->create([
         'title' => 'Old Title',
     ]);
 
@@ -79,7 +80,7 @@ test('organizer cannot update another users event', function () {
 });
 
 test('organizer can delete their event', function () {
-    $event = Event::factory()->for($this->user, 'user')->create();
+    $event = Event::factory()->state(['organization_id' => $this->organization->id])->create();
 
     $response = $this->delete(route('organizer.events.destroy', $event));
 
@@ -88,7 +89,7 @@ test('organizer can delete their event', function () {
 });
 
 test('organizer can view bookings for their events', function () {
-    $event = Event::factory()->for($this->user, 'user')->create();
+    $event = Event::factory()->state(['organization_id' => $this->organization->id])->create();
     \App\Models\Booking::factory()->for($event)->count(5)->create();
 
     $response = $this->get(route('organizer.bookings.index'));

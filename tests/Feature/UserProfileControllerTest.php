@@ -12,6 +12,7 @@ beforeEach(function () {
         'first_name' => 'Jane',
         'last_name' => 'Smith',
         'bio' => 'Passionate educator',
+        'show_profile_public' => true, // Make profile public for tests
     ]);
 });
 

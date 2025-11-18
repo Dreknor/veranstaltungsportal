@@ -26,7 +26,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Sie haben den Newsletter erfolgreich abonniert!');
 
-        $this->assertTrue($user->fresh()->newsletter_subscribed);
+        $this->assertEquals(1, $user->fresh()->newsletter_subscribed);
         $this->assertNotNull($user->fresh()->newsletter_subscribed_at);
     }
 
@@ -44,7 +44,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Sie haben den Newsletter erfolgreich abbestellt.');
 
-        $this->assertFalse($user->fresh()->newsletter_subscribed);
+        $this->assertEquals(0, $user->fresh()->newsletter_subscribed);
     }
 
     #[Test]
@@ -157,7 +157,7 @@ class NewsletterSubscriptionTest extends TestCase
 
         $user = $user->fresh();
 
-        $this->assertTrue($user->newsletter_subscribed);
+        $this->assertEquals(1, $user->newsletter_subscribed);
         $this->assertNotNull($user->newsletter_subscribed_at);
         $this->assertTrue($user->newsletter_subscribed_at->isToday());
     }
@@ -242,7 +242,7 @@ class NewsletterSubscriptionTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Sie haben den Newsletter abbestellt.');
 
-        $this->assertFalse($user->fresh()->newsletter_subscribed);
+        $this->assertEquals(0, $user->fresh()->newsletter_subscribed);
     }
 }
 

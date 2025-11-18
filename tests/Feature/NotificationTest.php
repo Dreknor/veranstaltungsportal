@@ -77,7 +77,7 @@ class NotificationTest extends TestCase
         $notification = $user->notifications->first();
 
         $response = $this->actingAs($user)
-            ->post(route('notifications.read', $notification->id));
+            ->post(route('notifications.mark-read', $notification->id));
 
         $this->assertNotNull($notification->fresh()->read_at);
     }
@@ -92,7 +92,7 @@ class NotificationTest extends TestCase
         $user->notify(new BookingConfirmedNotification($booking1));
         $user->notify(new BookingConfirmedNotification($booking2));
 
-        $response = $this->actingAs($user)->post(route('notifications.read-all'));
+        $response = $this->actingAs($user)->post(route('notifications.mark-all-read'));
 
         $this->assertEquals(0, $user->unreadNotifications()->count());
     }

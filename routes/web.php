@@ -187,11 +187,14 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
 
         // Check-In
         Route::get('/events/{event}/check-in', [Organizer\CheckInController::class, 'index'])->name('check-in.index');
-        Route::post('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.store');
-        Route::delete('/events/{event}/check-in/{booking}', [Organizer\CheckInController::class, 'undoCheckIn'])->name('check-in.undo');
+        Route::post('/events/{event}/check-in', [Organizer\CheckInController::class, 'scanQr'])->name('check-in.process');
         Route::post('/events/{event}/check-in/scan', [Organizer\CheckInController::class, 'scanQr'])->name('check-in.scan');
+        Route::post('/events/{event}/check-in/manual', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.manual');
+        Route::get('/events/{event}/check-in/stats', [Organizer\CheckInController::class, 'stats'])->name('check-in.stats');
         Route::post('/events/{event}/check-in/bulk', [Organizer\CheckInController::class, 'bulkCheckIn'])->name('check-in.bulk');
         Route::get('/events/{event}/check-in/export', [Organizer\CheckInController::class, 'exportCheckInList'])->name('check-in.export');
+        Route::post('/events/{event}/check-in/{booking}/store', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.store');
+        Route::delete('/events/{event}/check-in/{booking}/undo', [Organizer\CheckInController::class, 'undoCheckIn'])->name('check-in.undo');
 
         // Statistics
         Route::get('/statistics', [Organizer\StatisticsController::class, 'index'])->name('statistics.index');

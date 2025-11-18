@@ -112,7 +112,7 @@ class BadgeService
             $progress[$key] = [
                 'current' => $currentValue,
                 'required' => $targetValue,
-                'percentage' => min(100, round(($currentValue / $targetValue) * 100)),
+                'percentage' => min(100.0, round(($currentValue / $targetValue) * 100, 1)),
                 'completed' => $currentValue >= $targetValue,
             ];
         }

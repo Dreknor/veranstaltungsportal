@@ -20,7 +20,7 @@ class CheckInTest extends TestCase
         $organizer = createOrganizer();
         $event = Event::factory()->create(['user_id' => $organizer->id]);
 
-        $response = $this->actingAs($organizer)->get(route('organizer.events.check-in', $event));
+        $response = $this->actingAs($organizer)->get(route('organizer.check-in.index', $event));
 
         $response->assertStatus(200);
     }
@@ -33,10 +33,11 @@ class CheckInTest extends TestCase
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
+            'payment_status' => 'paid',
             'booking_number' => 'BK-TEST123',
         ]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.check-in.process', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.check-in.process', $event), [
             'booking_number' => 'BK-TEST123',
         ]);
 
@@ -57,7 +58,7 @@ class CheckInTest extends TestCase
             'status' => 'confirmed',
         ]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.check-in.manual', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.check-in.manual', $event), [
             'booking_id' => $booking->id,
         ]);
 
@@ -77,7 +78,7 @@ class CheckInTest extends TestCase
             'booking_number' => 'BK-CANCELLED',
         ]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.check-in.process', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.check-in.process', $event), [
             'booking_number' => 'BK-CANCELLED',
         ]);
 
@@ -90,7 +91,7 @@ class CheckInTest extends TestCase
         $organizer = createOrganizer();
         $event = Event::factory()->create(['user_id' => $organizer->id]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.check-in.process', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.check-in.process', $event), [
             'booking_number' => 'BK-INVALID',
         ]);
 
@@ -115,7 +116,7 @@ class CheckInTest extends TestCase
             'checked_in_at' => null,
         ]);
 
-        $response = $this->actingAs($organizer)->get(route('organizer.events.check-in.stats', $event));
+        $response = $this->actingAs($organizer)->get(route('organizer.check-in.stats', $event));
 
         $response->assertStatus(200);
     }
@@ -127,7 +128,7 @@ class CheckInTest extends TestCase
         $organizer2 = createOrganizer();
         $event = Event::factory()->create(['user_id' => $organizer2->id]);
 
-        $response = $this->actingAs($organizer1)->get(route('organizer.events.check-in', $event));
+        $response = $this->actingAs($organizer1)->get(route('organizer.check-in.index', $event));
 
         $response->assertStatus(403);
     }
@@ -140,7 +141,9 @@ class CheckInTest extends TestCase
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
+            'payment_status' => 'paid',
             'booking_number' => 'BK-ONCE',
+            'checked_in' => true,
             'checked_in_at' => now(),
         ]);
 

@@ -31,7 +31,7 @@ class WaitlistTest extends TestCase
         ]);
         $booking->items()->create(['quantity' => 10, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
-        $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
+        $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
             'email' => $user->email,
             'quantity' => 1,
         ]);
@@ -51,7 +51,7 @@ class WaitlistTest extends TestCase
             'max_attendees' => 100,
         ]);
 
-        $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
+        $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
             'email' => $user->email,
             'quantity' => 1,
         ]);
@@ -73,7 +73,7 @@ class WaitlistTest extends TestCase
             'quantity' => 1,
         ]);
 
-        $response = $this->actingAs($user)->delete(route('events.waitlist.leave', [$event, $waitlist]));
+        $response = $this->actingAs($user)->post(route('waitlist.leave', $event));
 
         $this->assertDatabaseMissing('event_waitlists', [
             'id' => $waitlist->id,
@@ -88,7 +88,7 @@ class WaitlistTest extends TestCase
 
         EventWaitlist::factory()->count(5)->create(['event_id' => $event->id]);
 
-        $response = $this->actingAs($organizer)->get(route('organizer.events.waitlist', $event));
+        $response = $this->actingAs($organizer)->get(route('organizer.events.waitlist.index', $event));
 
         $response->assertStatus(200);
     }
@@ -117,7 +117,7 @@ class WaitlistTest extends TestCase
         ]);
 
         // Try to join again
-        $response = $this->actingAs($user)->post(route('events.waitlist.join', $event), [
+        $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
             'email' => $user->email,
             'quantity' => 1,
         ]);

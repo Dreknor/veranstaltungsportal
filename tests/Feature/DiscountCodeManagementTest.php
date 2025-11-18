@@ -30,7 +30,7 @@ class DiscountCodeTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->post(route('organizer.events.discounts.store', $event), $discountData);
+            ->post(route('organizer.events.discount-codes.store', $event), $discountData);
 
         $this->assertDatabaseHas('discount_codes', [
             'event_id' => $event->id,
@@ -54,7 +54,7 @@ class DiscountCodeTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->post(route('organizer.events.discounts.store', $event), $discountData);
+            ->post(route('organizer.events.discount-codes.store', $event), $discountData);
 
         $this->assertDatabaseHas('discount_codes', [
             'event_id' => $event->id,
@@ -78,7 +78,7 @@ class DiscountCodeTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->put(route('organizer.events.discounts.update', [$event, $discountCode]), $updateData);
+            ->put(route('organizer.events.discount-codes.update', [$event, $discountCode]), $updateData);
 
         $this->assertDatabaseHas('discount_codes', [
             'id' => $discountCode->id,
@@ -104,7 +104,7 @@ class DiscountCodeTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->put(route('organizer.events.discounts.update', [$event, $discountCode]), $updateData);
+            ->put(route('organizer.events.discount-codes.update', [$event, $discountCode]), $updateData);
 
         $this->assertDatabaseHas('discount_codes', [
             'id' => $discountCode->id,
@@ -120,7 +120,7 @@ class DiscountCodeTest extends TestCase
         $discountCode = DiscountCode::factory()->create(['event_id' => $event->id]);
 
         $response = $this->actingAs($organizer)
-            ->delete(route('organizer.events.discounts.destroy', [$event, $discountCode]));
+            ->delete(route('organizer.events.discount-codes.destroy', [$event, $discountCode]));
 
         $this->assertDatabaseMissing('discount_codes', [
             'id' => $discountCode->id,
@@ -146,7 +146,7 @@ class DiscountCodeTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->post(route('organizer.events.discounts.store', $event), $discountData);
+            ->post(route('organizer.events.discount-codes.store', $event), $discountData);
 
         $response->assertSessionHasErrors('code');
     }
@@ -160,7 +160,7 @@ class DiscountCodeTest extends TestCase
         $discountCode = DiscountCode::factory()->create(['event_id' => $event->id]);
 
         $response = $this->actingAs($organizer1)
-            ->delete(route('organizer.events.discounts.destroy', [$event, $discountCode]));
+            ->delete(route('organizer.events.discount-codes.destroy', [$event, $discountCode]));
 
         $response->assertStatus(403);
     }

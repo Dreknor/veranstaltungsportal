@@ -14,6 +14,11 @@ class EventObserver
      */
     public function creating(Event $event): void
     {
+        // Generate slug if not already set
+        if (empty($event->slug) && !empty($event->title)) {
+            $event->slug = \Illuminate\Support\Str::slug($event->title) . '-' . \Illuminate\Support\Str::random(6);
+        }
+
         // Calculate duration before creating
         if ($event->start_date && $event->end_date && !$event->duration) {
             $event->calculateDuration();

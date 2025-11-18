@@ -15,7 +15,7 @@ class ValidationTest extends TestCase
     #[Test]
     public function event_creation_requires_title()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
 
         $response = $this->actingAs($organizer)->post(route('organizer.events.store'), [
             'description' => 'Test description',
@@ -29,7 +29,7 @@ class ValidationTest extends TestCase
     #[Test]
     public function event_creation_requires_valid_event_type()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
 
         $response = $this->actingAs($organizer)->post(route('organizer.events.store'), [
             'title' => 'Test Event',
@@ -43,7 +43,7 @@ class ValidationTest extends TestCase
     #[Test]
     public function event_start_date_must_be_in_future()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
 
         $response = $this->actingAs($organizer)->post(route('organizer.events.store'), [
             'title' => 'Test Event',
@@ -58,7 +58,7 @@ class ValidationTest extends TestCase
     #[Test]
     public function event_end_date_must_be_after_start_date()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
 
         $response = $this->actingAs($organizer)->post(route('organizer.events.store'), [
             'title' => 'Test Event',
@@ -100,10 +100,10 @@ class ValidationTest extends TestCase
     #[Test]
     public function ticket_type_price_must_be_numeric()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
         $event = Event::factory()->create(['user_id' => $organizer->id]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.tickets.store', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.events.ticket-types.store', $event), [
             'name' => 'VIP Ticket',
             'price' => 'not-a-number',
             'is_available' => true,
@@ -115,10 +115,10 @@ class ValidationTest extends TestCase
     #[Test]
     public function ticket_type_price_cannot_be_negative()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
         $event = Event::factory()->create(['user_id' => $organizer->id]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.tickets.store', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.events.ticket-types.store', $event), [
             'name' => 'VIP Ticket',
             'price' => -10,
             'is_available' => true,
@@ -130,10 +130,10 @@ class ValidationTest extends TestCase
     #[Test]
     public function discount_code_value_must_be_positive()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
         $event = Event::factory()->create(['user_id' => $organizer->id]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.discounts.store', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.events.discount-codes.store', $event), [
             'code' => 'INVALID',
             'type' => 'percentage',
             'value' => -20,
@@ -146,10 +146,10 @@ class ValidationTest extends TestCase
     #[Test]
     public function percentage_discount_cannot_exceed_100()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
         $event = Event::factory()->create(['user_id' => $organizer->id]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.discounts.store', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.events.discount-codes.store', $event), [
             'code' => 'OVER100',
             'type' => 'percentage',
             'value' => 150,
@@ -162,7 +162,7 @@ class ValidationTest extends TestCase
     #[Test]
     public function max_attendees_must_be_positive()
     {
-        $organizer = createOrganizer();
+        $organizer = createOrganizerWithOrganization();
 
         $response = $this->actingAs($organizer)->post(route('organizer.events.store'), [
             'title' => 'Test Event',

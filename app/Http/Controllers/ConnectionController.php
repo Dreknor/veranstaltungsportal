@@ -21,11 +21,9 @@ class ConnectionController extends Controller
         $user = $request->user();
 
         $following = $user->following()
-            ->withCount(['events', 'bookings'])
             ->paginate(12, ['*'], 'following');
 
         $followers = $user->followers()
-            ->withCount(['events', 'bookings'])
             ->paginate(12, ['*'], 'followers');
 
         $stats = [
@@ -86,7 +84,6 @@ class ConnectionController extends Controller
                         ->orWhere('email', 'like', "%{$query}%");
                 });
             })
-            ->withCount(['events', 'bookings', 'followers'])
             ->paginate(12);
 
         return view('connections.search', compact('users', 'query'));

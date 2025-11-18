@@ -134,7 +134,6 @@ class UserProfileController extends Controller
     public function followers(Request $request, User $user): View
     {
         $followers = $user->followers()
-            ->withCount(['events', 'bookings'])
             ->paginate(12);
 
         return view('users.followers', compact('user', 'followers'));
@@ -146,7 +145,6 @@ class UserProfileController extends Controller
     public function following(Request $request, User $user): View
     {
         $following = $user->following()
-            ->withCount(['events', 'bookings'])
             ->paginate(12);
 
         return view('users.following', compact('user', 'following'));

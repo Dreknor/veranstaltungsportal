@@ -136,7 +136,7 @@ test('badge service calculates badge progress', function () {
     expect($progress)->toHaveKey('events_attended')
         ->and($progress['events_attended']['current'])->toBe(2)
         ->and($progress['events_attended']['required'])->toBe(5)
-        ->and($progress['events_attended']['percentage'])->toBe(40)
+        ->and($progress['events_attended']['percentage'])->toBe(40.0)
         ->and($progress['events_attended']['completed'])->toBeFalse();
 });
 
