@@ -13,7 +13,7 @@
         "barryvdh/laravel-dompdf": "^3.1",
         "blade-ui-kit/blade-icons": "^1.8",
         "danielme85/laravel-log-to-db": "^4.1",
-        "laravel/framework": "^12.0",
+        "laravel/framework": "*",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",
         "owen-it/laravel-auditing": "^14.0",
@@ -84,7 +84,7 @@
     },
     "config": {
         "optimize-autoloader": true,
-        "preferred-install": "dist",
+        "preferred-install": "source",
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
