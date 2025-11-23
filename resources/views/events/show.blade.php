@@ -64,9 +64,11 @@
                                             <br><strong>Grund:</strong> {{ $event->cancellation_reason }}
                                         @endif
                                     </p>
-                                    <p class="text-sm text-red-700 mt-2">
-                                        Abgesagt am: {{ $event->cancelled_at->format('d.m.Y H:i') }} Uhr
-                                    </p>
+                                    @if($event->cancelled_at)
+                                        <p class="text-sm text-red-700 mt-2">
+                                            Abgesagt am: {{ $event->cancelled_at->format('d.m.Y H:i') }} Uhr
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
                         </div>

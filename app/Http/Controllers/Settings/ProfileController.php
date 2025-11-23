@@ -36,9 +36,11 @@ class ProfileController extends Controller
                 'max:255',
                 Rule::unique(User::class)->ignore($user->id),
             ],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['nullable', 'string', 'max:50', 'regex:/^[0-9\s\-\+\(\)]+$/'],
             'bio' => ['nullable', 'string', 'max:1000'],
-            'profile_photo' => ['nullable', 'image', 'max:2048'], // 2MB Max
+            'profile_photo' => ['nullable', 'image', 'max:2048'],
+            'notification_preferences' => ['nullable', 'array'],
+            'notification_preferences.*' => ['boolean'],
         ]);
 
         // Handle profile photo upload

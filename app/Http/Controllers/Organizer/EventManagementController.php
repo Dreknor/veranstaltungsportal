@@ -58,7 +58,7 @@ class EventManagementController extends Controller
             'event_category_id' => 'required|exists:event_categories,id',
             'event_type' => 'required|in:physical,online,hybrid',
             'description' => 'required|string',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|after:now',
             'end_date' => 'required|date|after:start_date',
             'venue_name' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
             'venue_address' => 'required_if:event_type,physical,hybrid|nullable|string',
@@ -361,9 +361,9 @@ class EventManagementController extends Controller
         $attendees = $event->getAttendees();
 
         foreach ($attendees as $booking) {
-            // Send dedicated email
+            // Send dedicated email as queued job
             \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                ->send(new \App\Mail\EventCancelledMail($event, $booking));
+                ->queue(new \App\Mail\EventCancelledMail($event, $booking));
 
             // Also send notification for in-app notifications
             if ($booking->user) {

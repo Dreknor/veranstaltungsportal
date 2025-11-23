@@ -102,12 +102,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/connections/{user}/remove', [\App\Http\Controllers\ConnectionController::class, 'remove'])->name('connections.remove');
     Route::post('/connections/{user}/block', [\App\Http\Controllers\ConnectionController::class, 'block'])->name('connections.block');
     Route::delete('/connections/{user}/unblock', [\App\Http\Controllers\ConnectionController::class, 'unblock'])->name('connections.unblock');
-
-    // User Profiles
-    Route::get('/users/{user}', [\App\Http\Controllers\UserProfileController::class, 'show'])->name('users.show');
-    Route::get('/users/{user}/followers', [\App\Http\Controllers\UserProfileController::class, 'followers'])->name('users.followers');
-    Route::get('/users/{user}/following', [\App\Http\Controllers\UserProfileController::class, 'following'])->name('users.following');
 });
+
+// User Profiles (public, no auth required for viewing)
+Route::get('/users/{user}', [\App\Http\Controllers\UserProfileController::class, 'show'])->name('users.show');
+Route::get('/users/{user}/followers', [\App\Http\Controllers\UserProfileController::class, 'followers'])->name('users.followers');
+Route::get('/users/{user}/following', [\App\Http\Controllers\UserProfileController::class, 'following'])->name('users.following');
 
 // Organizer Routes
 Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name('organizer.')->group(function () {

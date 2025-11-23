@@ -21,8 +21,12 @@ class ReportingControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['is_admin' => true]);
-        $this->organizer = User::factory()->create(['is_organizer' => true]);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole('admin');
+
+        $this->organizer = User::factory()->create();
+        $this->organizer->assignRole('organizer');
+
         $this->user = User::factory()->create();
     }
 
@@ -51,15 +55,14 @@ class ReportingControllerTest extends TestCase
     {
         // Create test data
         User::factory()->count(5)->create();
-        $category = EventCategory::factory()->create();
+        $result = $this->createOrganizerWithOrganization($this->organizer);
         $event = Event::factory()->create([
-            'organizer_id' => $this->organizer->id,
-            'category_id' => $category->id,
+            'organization_id' => $result['organization']->id,
         ]);
         Booking::factory()->count(3)->create([
             'event_id' => $event->id,
             'payment_status' => 'paid',
-            'total_amount' => 100,
+            'total' => 100,
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.reporting.index'));
@@ -121,10 +124,9 @@ class ReportingControllerTest extends TestCase
 
     public function test_conversion_funnel_calculation(): void
     {
-        $category = EventCategory::factory()->create();
+        $result = $this->createOrganizerWithOrganization($this->organizer);
         $event = Event::factory()->create([
-            'organizer_id' => $this->organizer->id,
-            'category_id' => $category->id,
+            'organization_id' => $result['organization']->id,
         ]);
         Booking::factory()->count(2)->create([
             'event_id' => $event->id,

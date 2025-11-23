@@ -48,9 +48,10 @@ class UserNewsletterTest extends TestCase
             'newsletter_subscribed_at' => null,
         ]);
 
-        $beforeSubscribe = now();
+        $beforeSubscribe = now()->subSecond();
         $user->subscribeToNewsletter();
-        $afterSubscribe = now();
+        $user->refresh(); // Refresh to get updated attributes
+        $afterSubscribe = now()->addSecond();
 
         $this->assertTrue(
             $user->newsletter_subscribed_at->between($beforeSubscribe, $afterSubscribe)

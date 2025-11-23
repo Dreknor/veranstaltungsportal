@@ -37,7 +37,16 @@ class DiscountCodeController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:discount_codes,code',
             'type' => 'required|in:percentage,fixed',
-            'value' => 'required|numeric|min:0',
+            'value' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->type === 'percentage' && $value > 100) {
+                        $fail('Der Rabatt in Prozent darf nicht größer als 100 sein.');
+                    }
+                },
+            ],
             'max_uses' => 'nullable|integer|min:1',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date|after:valid_from',
@@ -77,7 +86,16 @@ class DiscountCodeController extends Controller
         $validated = $request->validate([
             'code' => 'required|string|max:50|unique:discount_codes,code,' . $discountCode->id,
             'type' => 'required|in:percentage,fixed',
-            'value' => 'required|numeric|min:0',
+            'value' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    if ($request->type === 'percentage' && $value > 100) {
+                        $fail('Der Rabatt in Prozent darf nicht größer als 100 sein.');
+                    }
+                },
+            ],
             'max_uses' => 'nullable|integer|min:1',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date|after:valid_from',

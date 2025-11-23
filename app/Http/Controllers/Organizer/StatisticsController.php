@@ -68,13 +68,18 @@ class StatisticsController extends Controller
             ->where('bookings.status', '!=', 'cancelled')
             ->sum('booking_items.quantity');
 
+        $driver = \DB::connection()->getDriverName();
+        $dateFormat = $driver === 'sqlite'
+            ? "strftime('%Y-%m', created_at)"
+            : "DATE_FORMAT(created_at, '%Y-%m')";
+
         $monthlyBookings = Booking::whereHas('event', function($q) use ($orgId) {
             $q->where('organization_id', $orgId);
         })
         ->whereBetween('created_at', [$startDate, $endDate])
         ->where('status', '!=', 'cancelled')
         ->select(
-            DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+            DB::raw("{$dateFormat} as month"),
             DB::raw('COUNT(*) as count'),
             DB::raw('SUM(total) as revenue')
         )

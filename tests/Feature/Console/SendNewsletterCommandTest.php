@@ -18,6 +18,9 @@ class SendNewsletterCommandTest extends TestCase
     {
         parent::setUp();
 
+        // Use sync queue connection for tests
+        config(['queue.default' => 'sync']);
+
         Mail::fake();
     }
 
@@ -44,9 +47,10 @@ class SendNewsletterCommandTest extends TestCase
         ]);
 
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
+            ->expectsOutputToContain('📧 Preparing')
             ->assertSuccessful();
 
-        Mail::assertSent(\App\Mail\NewsletterMail::class, 3);
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, 3);
     }
 
     #[Test]
@@ -66,7 +70,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
             ->assertSuccessful();
 
-        Mail::assertNotSent(\App\Mail\NewsletterMail::class);
+        Mail::assertNotQueued(\App\Mail\NewsletterMail::class);
     }
 
     #[Test]
@@ -86,7 +90,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
             ->assertSuccessful();
 
-        Mail::assertSent(\App\Mail\NewsletterMail::class, function ($mail) {
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, function ($mail) {
             return $mail->type === 'weekly';
         });
     }
@@ -108,7 +112,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'monthly'])
             ->assertSuccessful();
 
-        Mail::assertSent(\App\Mail\NewsletterMail::class, function ($mail) {
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, function ($mail) {
             return $mail->type === 'monthly';
         });
     }
@@ -136,7 +140,7 @@ class SendNewsletterCommandTest extends TestCase
             ->assertSuccessful();
 
         // Only admins should receive test newsletter
-        Mail::assertSent(\App\Mail\NewsletterMail::class, 1);
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, 1);
     }
 
     #[Test]
@@ -151,7 +155,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
             ->assertSuccessful();
 
-        Mail::assertNotSent(\App\Mail\NewsletterMail::class);
+        Mail::assertNotQueued(\App\Mail\NewsletterMail::class);
     }
 
     #[Test]
@@ -173,7 +177,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
             ->assertSuccessful();
 
-        Mail::assertSent(\App\Mail\NewsletterMail::class, function ($mail) use ($upcomingEvent) {
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, function ($mail) use ($upcomingEvent) {
             return $mail->upcomingEvents->contains('id', $upcomingEvent->id);
         });
     }
@@ -198,7 +202,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
             ->assertSuccessful();
 
-        Mail::assertSent(\App\Mail\NewsletterMail::class, function ($mail) use ($featuredEvent) {
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, function ($mail) use ($featuredEvent) {
             return $mail->featuredEvents->contains('id', $featuredEvent->id);
         });
     }
@@ -222,7 +226,7 @@ class SendNewsletterCommandTest extends TestCase
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
             ->assertSuccessful();
 
-        Mail::assertSent(\App\Mail\NewsletterMail::class, function ($mail) use ($recommendedEvent) {
+        Mail::assertQueued(\App\Mail\NewsletterMail::class, function ($mail) use ($recommendedEvent) {
             return $mail->recommendations->contains('id', $recommendedEvent->id);
         });
     }
@@ -246,14 +250,6 @@ class SendNewsletterCommandTest extends TestCase
             ->assertSuccessful();
     }
 
-    #[Test]
-    public function command_uses_queue_for_sending()
-    {
-        $this->markTestSkipped('Queue testing requires additional setup');
-
-        // This test would verify that NewsletterMail implements ShouldQueue
-        // and is properly queued instead of sent immediately
-    }
 }
 
 

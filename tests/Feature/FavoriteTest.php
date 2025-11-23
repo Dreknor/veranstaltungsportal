@@ -15,10 +15,11 @@ class FavoriteTest extends TestCase
     #[Test]
     public function user_can_favorite_an_event()
     {
+
         $user = User::factory()->create();
         $event = Event::factory()->create(['is_published' => true]);
 
-        $response = $this->actingAs($user)->post(route('events.favorite', $event));
+        $response = $this->actingAs($user)->post(route('favorites.toggle', $event));
 
         $this->assertTrue($user->hasFavorited($event));
     }
@@ -26,13 +27,14 @@ class FavoriteTest extends TestCase
     #[Test]
     public function user_can_unfavorite_an_event()
     {
+
         $user = User::factory()->create();
         $event = Event::factory()->create(['is_published' => true]);
 
         // Favorite first
         $user->favoriteEvents()->attach($event);
 
-        $response = $this->actingAs($user)->delete(route('events.unfavorite', $event));
+        $response = $this->actingAs($user)->post(route('favorites.toggle', $event));
 
         $this->assertFalse($user->hasFavorited($event));
     }
@@ -40,6 +42,7 @@ class FavoriteTest extends TestCase
     #[Test]
     public function user_can_view_their_favorite_events()
     {
+
         $user = User::factory()->create();
         $events = Event::factory()->count(3)->create(['is_published' => true]);
 
@@ -55,9 +58,10 @@ class FavoriteTest extends TestCase
     #[Test]
     public function guest_cannot_favorite_events()
     {
+
         $event = Event::factory()->create(['is_published' => true]);
 
-        $response = $this->post(route('events.favorite', $event));
+        $response = $this->post(route('favorites.toggle', $event));
 
         $response->assertRedirect(route('login'));
     }
@@ -65,6 +69,7 @@ class FavoriteTest extends TestCase
     #[Test]
     public function favorite_count_is_tracked()
     {
+
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
         $event = Event::factory()->create(['is_published' => true]);
@@ -72,8 +77,8 @@ class FavoriteTest extends TestCase
         $user1->favoriteEvents()->attach($event);
         $user2->favoriteEvents()->attach($event);
 
-        // Verwende die Datenbank direkt, da favoriteUsers() Relation möglicherweise nicht existiert
-        $favoriteCount = \DB::table('user_favorite_events')
+        // Verwende die korrekte Tabellenname
+        $favoriteCount = \DB::table('event_user_favorites')
             ->where('event_id', $event->id)
             ->count();
 

@@ -32,11 +32,12 @@ class WaitlistTest extends TestCase
         $booking->items()->create(['quantity' => 10, 'price' => 50, 'ticket_type_id' => $ticketType->id]);
 
         $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
+            'name' => $user->name,
             'email' => $user->email,
             'quantity' => 1,
         ]);
 
-        $this->assertDatabaseHas('event_waitlists', [
+        $this->assertDatabaseHas('event_waitlist', [
             'event_id' => $event->id,
             'user_id' => $user->id,
         ]);
@@ -52,11 +53,13 @@ class WaitlistTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
+            'name' => $user->name,
             'email' => $user->email,
             'quantity' => 1,
         ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(302); // Should redirect back with error
+        $response->assertSessionHasErrors();
     }
 
     #[Test]
@@ -75,7 +78,7 @@ class WaitlistTest extends TestCase
 
         $response = $this->actingAs($user)->post(route('waitlist.leave', $event));
 
-        $this->assertDatabaseMissing('event_waitlists', [
+        $this->assertDatabaseMissing('event_waitlist', [
             'id' => $waitlist->id,
         ]);
     }
@@ -83,8 +86,10 @@ class WaitlistTest extends TestCase
     #[Test]
     public function organizer_can_view_waitlist_for_their_event()
     {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $organizer = User::factory()->create();
+        $organizer->assignRole('organizer');
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $event = Event::factory()->create(['organization_id' => $result['organization']->id]);
 
         EventWaitlist::factory()->count(5)->create(['event_id' => $event->id]);
 
@@ -118,6 +123,7 @@ class WaitlistTest extends TestCase
 
         // Try to join again
         $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
+            'name' => $user->name,
             'email' => $user->email,
             'quantity' => 1,
         ]);

@@ -15,13 +15,28 @@ class WaitlistController extends Controller
      */
     public function join(Request $request, Event $event)
     {
+        // Check if event is sold out
+        if (!$event->isSoldOut()) {
+            return back()->withErrors(['event' => 'Für diese Veranstaltung sind noch Tickets verfügbar.'])->withInput();
+        }
+
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:50',
             'quantity' => 'required|integer|min:1|max:10',
             'ticket_type_id' => 'nullable|exists:ticket_types,id',
         ]);
+
+        // Use user's name if logged in and name not provided
+        if (!isset($validated['name']) && auth()->check()) {
+            $validated['name'] = auth()->user()->name;
+        }
+
+        // Ensure name is set
+        if (empty($validated['name'])) {
+            return back()->withErrors(['name' => 'Name ist erforderlich.'])->withInput();
+        }
 
         // Check if already on waitlist
         $existingEntry = EventWaitlist::where('event_id', $event->id)
@@ -30,7 +45,7 @@ class WaitlistController extends Controller
             ->first();
 
         if ($existingEntry) {
-            return back()->with('error', 'Sie stehen bereits auf der Warteliste für diese Veranstaltung.');
+            return back()->withErrors(['email' => 'Sie stehen bereits auf der Warteliste für diese Veranstaltung.'])->withInput();
         }
 
         $validated['event_id'] = $event->id;

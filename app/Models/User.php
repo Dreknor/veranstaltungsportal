@@ -30,9 +30,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'google_id',
         'github_id',
         'sso_provider',
-        'organization_name',
-        'organization_website',
-        'organization_description',
         'profile_photo',
         'phone',
         'bio',
@@ -44,24 +41,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'interested_category_ids',
         'newsletter_subscribed',
         'newsletter_subscribed_at',
-        'payout_settings',
-        'bank_account',
-        'organizer_billing_data',
-        'custom_platform_fee',
-        'billing_company',
-        'billing_address',
-        'billing_address_line2',
-        'billing_postal_code',
-        'billing_city',
-        'billing_state',
-        'billing_country',
-        'tax_id',
         'allow_networking',
         'show_profile_public',
         'allow_data_analytics',
-        'invoice_settings',
-        'invoice_counter_booking',
-        'invoice_counter_booking_year',
     ];
 
     /**
@@ -829,7 +811,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function connections()
     {
         return $this->hasMany(UserConnection::class, 'follower_id')
-            ->orWhere('following_id', $this->id);
+            ->where(function ($query) {
+                $query->where('follower_id', $this->id)
+                    ->orWhere('following_id', $this->id);
+            });
     }
 
     /**
@@ -1019,13 +1004,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $categoryIds = $this->interested_category_ids ?? [];
 
+        // Get IDs of users already connected
+        $connectedUserIds = UserConnection::where(function ($query) {
+            $query->where('follower_id', $this->id)
+                ->orWhere('following_id', $this->id);
+        })->get()->flatMap(function ($connection) {
+            return [$connection->follower_id, $connection->following_id];
+        })->unique()->filter(function ($id) {
+            return $id !== $this->id;
+        })->values()->toArray();
+
         if (empty($categoryIds)) {
             // If no interests, suggest active users
             return User::where('id', '!=', $this->id)
-                ->whereDoesntHave('connections', function ($query) {
-                    $query->where('follower_id', $this->id)
-                        ->orWhere('following_id', $this->id);
-                })
+                ->whereNotIn('id', $connectedUserIds)
                 ->withCount('bookings')
                 ->orderBy('bookings_count', 'desc')
                 ->limit($limit)
@@ -1033,13 +1025,21 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Suggest users with similar interests
-        return User::where('id', '!=', $this->id)
-            ->whereDoesntHave('connections', function ($query) {
-                $query->where('follower_id', $this->id)
-                    ->orWhere('following_id', $this->id);
-            })
-            ->whereJsonContains('interested_category_ids', $categoryIds)
-            ->limit($limit)
+        // For SQLite compatibility, we need to use a different approach
+        $users = User::where('id', '!=', $this->id)
+            ->whereNotIn('id', $connectedUserIds)
             ->get();
+
+        // Filter in PHP for SQLite compatibility
+        $filteredUsers = $users->filter(function ($user) use ($categoryIds) {
+            $userCategories = $user->interested_category_ids ?? [];
+            if (empty($userCategories)) {
+                return false;
+            }
+            // Check if there's any overlap
+            return count(array_intersect($categoryIds, $userCategories)) > 0;
+        })->take($limit);
+
+        return $filteredUsers;
     }
 }

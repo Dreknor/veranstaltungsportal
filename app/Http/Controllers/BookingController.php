@@ -378,6 +378,11 @@ class BookingController extends Controller
     {
         $booking = Booking::where('booking_number', $bookingNumber)->firstOrFail();
 
+        // Check if user is authorized to cancel this booking
+        if ($booking->user_id && $booking->user_id !== auth()->id()) {
+            abort(403, 'Sie sind nicht berechtigt, diese Buchung zu stornieren.');
+        }
+
         // Prüfe ob Stornierung möglich ist (z.B. 24h vor Event)
         if ($booking->event->start_date->subHours(24)->isPast()) {
             return back()->with('error', 'Stornierung nicht mehr möglich.');
@@ -494,6 +499,12 @@ class BookingController extends Controller
 
         if (!$hasAccess) {
             abort(403, 'Kein Zugriff auf dieses Ticket');
+        }
+
+        // Prüfe, ob Ticket heruntergeladen werden darf
+        // Nur für bestätigte Buchungen ODER wenn die Buchung kostenlos ist (Gesamtpreis = 0)
+        if ($booking->status !== 'confirmed' && $booking->total > 0) {
+            abort(403, 'Tickets können nur für bestätigte und bezahlte Buchungen heruntergeladen werden.');
         }
 
         $pdfService = app(TicketPdfService::class);

@@ -110,6 +110,37 @@ class QrCodeService
     }
 
     /**
+     * Generate QR code for a booking (alias for backward compatibility)
+     *
+     * @param Booking $booking
+     * @return string
+     */
+    public function generateForBooking(Booking $booking): string
+    {
+        return $this->generateBookingQrCode($booking, 'svg', 300);
+    }
+
+    /**
+     * Verify QR code and return booking (alias for backward compatibility)
+     *
+     * @param string $qrData
+     * @return Booking|null
+     */
+    public function verifyQrCode(string $qrData): ?Booking
+    {
+        $data = $this->verifyQrCodeData($qrData);
+
+        if (!$data) {
+            return null;
+        }
+
+        // Try to find booking by booking_number and verification_code
+        return Booking::where('booking_number', $data['booking_number'] ?? null)
+            ->where('verification_code', $data['verification_code'] ?? null)
+            ->first();
+    }
+
+    /**
      * Generate QR code for check-in
      *
      * @param Booking $booking

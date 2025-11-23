@@ -4,8 +4,11 @@ namespace App\Observers;
 
 use App\Models\Booking;
 use App\Models\EventWaitlist;
+use App\Notifications\BookingStatusChangedNotification;
+use App\Notifications\PaymentStatusChangedNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class BookingObserver
 {
@@ -22,10 +25,26 @@ class BookingObserver
             'original_status' => $booking->getOriginal('status')
         ]);
 
-        // Check if booking was cancelled
-        if ($booking->wasChanged('status') && $booking->status === 'cancelled') {
-            Log::info('Booking cancelled, notifying waitlist');
-            $this->notifyWaitlistOnCancellation($booking);
+        // Send notification when booking status changes
+        if ($booking->wasChanged('status')) {
+            $oldStatus = $booking->getOriginal('status');
+            $newStatus = $booking->status;
+
+            $this->sendBookingStatusNotification($booking, $oldStatus, $newStatus);
+
+            // Also check if booking was cancelled for waitlist notification
+            if ($newStatus === 'cancelled') {
+                Log::info('Booking cancelled, notifying waitlist');
+                $this->notifyWaitlistOnCancellation($booking);
+            }
+        }
+
+        // Send notification when payment status changes
+        if ($booking->wasChanged('payment_status')) {
+            $oldPaymentStatus = $booking->getOriginal('payment_status');
+            $newPaymentStatus = $booking->payment_status;
+
+            $this->sendPaymentStatusNotification($booking, $oldPaymentStatus, $newPaymentStatus);
         }
     }
 
@@ -37,6 +56,40 @@ class BookingObserver
         // Only notify if booking was confirmed/completed
         if (in_array($booking->status, ['confirmed', 'completed'])) {
             $this->notifyWaitlistOnCancellation($booking);
+        }
+    }
+
+    /**
+     * Send booking status change notification
+     */
+    protected function sendBookingStatusNotification(Booking $booking, string $oldStatus, string $newStatus)
+    {
+        $notification = new BookingStatusChangedNotification($booking, $oldStatus, $newStatus);
+
+        // If booking has a user, notify them
+        if ($booking->user) {
+            $booking->user->notify($notification);
+        } else {
+            // For guest bookings, send via on-demand notification
+            Notification::route('mail', $booking->customer_email)
+                ->notify($notification);
+        }
+    }
+
+    /**
+     * Send payment status change notification
+     */
+    protected function sendPaymentStatusNotification(Booking $booking, string $oldPaymentStatus, string $newPaymentStatus)
+    {
+        $notification = new PaymentStatusChangedNotification($booking, $oldPaymentStatus, $newPaymentStatus);
+
+        // If booking has a user, notify them
+        if ($booking->user) {
+            $booking->user->notify($notification);
+        } else {
+            // For guest bookings, send via on-demand notification
+            Notification::route('mail', $booking->customer_email)
+                ->notify($notification);
         }
     }
 

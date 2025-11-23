@@ -19,7 +19,7 @@ class QueueTest extends TestCase
     {
         Queue::fake();
 
-        $user = createUser();
+        $user = User::factory()->create();
         $event = Event::factory()->create([
             'is_published' => true,
             'start_date' => now()->addWeek(),
@@ -32,8 +32,16 @@ class QueueTest extends TestCase
         $response = $this->actingAs($user)->post(route('bookings.store', $event), [
             'customer_name' => $user->name,
             'customer_email' => $user->email,
+            'customer_phone' => '1234567890',
+            'billing_address' => '123 Main St',
+            'billing_postal_code' => '12345',
+            'billing_city' => 'Test City',
+            'billing_country' => 'Deutschland',
             'tickets' => [
-                $ticketType->id => 1,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 1,
+                ],
             ],
         ]);
 
@@ -65,13 +73,18 @@ class QueueTest extends TestCase
     {
         Queue::fake();
 
-        $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $organizer = User::factory()->create();
+        $organizer->assignRole('organizer');
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $event = Event::factory()->create(['organization_id' => $result['organization']->id]);
 
         Booking::factory()->count(3)->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
         ]);
+
+        // Set current organization
+        session(['current_organization_id' => $result['organization']->id]);
 
         $this->actingAs($organizer)->post(route('organizer.events.cancel', $event), [
             'cancellation_reason' => 'Unexpected circumstances',

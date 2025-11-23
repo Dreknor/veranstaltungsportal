@@ -58,7 +58,7 @@ test('profile shows pending status for pending connections', function () {
     $this->actingAs($this->user)
         ->get(route('users.show', $this->profileUser))
         ->assertOk()
-        ->assertSee('Ausstehend');
+        ->assertSee('Anfrage gesendet');
 });
 
 test('profile shows user statistics', function () {
@@ -155,6 +155,8 @@ test('profile shows contact info only to connected users', function () {
     $this->profileUser->update([
         'email' => 'jane@example.com',
         'phone' => '123-456-7890',
+        'show_email_to_connections' => true,
+        'show_phone_to_connections' => true,
     ]);
 
     // Not connected - should not see contact info
@@ -179,15 +181,18 @@ test('profile shows contact info only to connected users', function () {
 });
 
 test('organizer profile shows organized events', function () {
-    $organizer = User::factory()->create();
+    $organizer = User::factory()->create([
+        'show_profile_public' => true,
+    ]);
     $organizer->assignRole('organizer');
+    $organization = test()->createOrganization($organizer);
 
     $event = Event::factory()->create([
-        'user_id' => $organizer->id,
+        'organization_id' => $organization->id,
         'start_date' => now()->subDays(5),
     ]);
 
-    $this->actingAs($this->user)
+    test()->actingAs(test()->user)
         ->get(route('users.show', $organizer))
         ->assertOk()
         ->assertSee('Organisierte Veranstaltungen')

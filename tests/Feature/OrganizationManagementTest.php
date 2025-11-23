@@ -18,14 +18,14 @@ class OrganizationManagementTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('organizer');
 
-        $response = $this->actingAs($user)->post('/organizer/organizations', [
+        $response = $this->actingAs($user)->post(route('organizer.organizations.store'), [
             'name' => 'Test Organization',
             'description' => 'Test Description',
             'email' => 'test@example.com',
             'website' => 'https://example.com',
         ]);
 
-        $response->assertRedirect('/organizer/dashboard');
+        $response->assertRedirect();
         $this->assertDatabaseHas('organizations', [
             'name' => 'Test Organization',
             'email' => 'test@example.com',
@@ -47,9 +47,9 @@ class OrganizationManagementTest extends TestCase
         $org1->users()->attach($user->id, ['role' => 'owner', 'is_active' => true, 'joined_at' => now()]);
         $org2->users()->attach($user->id, ['role' => 'admin', 'is_active' => true, 'joined_at' => now()]);
 
-        $response = $this->actingAs($user)->post("/organizer/organizations/switch/{$org2->id}");
+        $response = $this->actingAs($user)->post(route('organizer.organizations.switch', $org2));
 
-        $response->assertRedirect('/organizer/dashboard');
+        $response->assertRedirect();
         $this->assertEquals($org2->id, session('current_organization_id'));
     }
 
@@ -62,12 +62,13 @@ class OrganizationManagementTest extends TestCase
 
         $organization = Organization::factory()->create();
         $organization->users()->attach($owner->id, ['role' => 'owner', 'is_active' => true, 'joined_at' => now()]);
-        $owner->setCurrentOrganization($organization);
 
-        $response = $this->actingAs($owner)->post('/organizer/team/invite', [
-            'email' => $member->email,
-            'role' => 'member',
-        ]);
+        $response = $this->actingAs($owner)
+            ->withSession(['current_organization_id' => $organization->id])
+            ->post(route('organizer.team.invite'), [
+                'email' => $member->email,
+                'role' => 'member',
+            ]);
 
         $response->assertRedirect();
         $this->assertTrue($organization->hasMember($member));
@@ -83,11 +84,12 @@ class OrganizationManagementTest extends TestCase
         $organization = Organization::factory()->create();
         $organization->users()->attach($owner->id, ['role' => 'owner', 'is_active' => true, 'joined_at' => now()]);
         $organization->users()->attach($member->id, ['role' => 'member', 'is_active' => true, 'joined_at' => now()]);
-        $owner->setCurrentOrganization($organization);
 
-        $response = $this->actingAs($owner)->put("/organizer/team/{$member->id}/role", [
-            'role' => 'admin',
-        ]);
+        $response = $this->actingAs($owner)
+            ->withSession(['current_organization_id' => $organization->id])
+            ->put(route('organizer.team.update-role', $member), [
+                'role' => 'admin',
+            ]);
 
         $response->assertRedirect();
         $this->assertEquals('admin', $organization->getUserRole($member));
@@ -101,11 +103,12 @@ class OrganizationManagementTest extends TestCase
 
         $organization = Organization::factory()->create();
         $organization->users()->attach($member->id, ['role' => 'member', 'is_active' => true, 'joined_at' => now()]);
-        $member->setCurrentOrganization($organization);
 
-        $response = $this->actingAs($member)->put('/organizer/organization', [
-            'name' => 'New Name',
-        ]);
+        $response = $this->actingAs($member)
+            ->withSession(['current_organization_id' => $organization->id])
+            ->put(route('organizer.organization.update'), [
+                'name' => 'New Name',
+            ]);
 
         $response->assertForbidden();
     }
@@ -118,9 +121,10 @@ class OrganizationManagementTest extends TestCase
 
         $organization = Organization::factory()->create();
         $organization->users()->attach($owner->id, ['role' => 'owner', 'is_active' => true, 'joined_at' => now()]);
-        $owner->setCurrentOrganization($organization);
 
-        $response = $this->actingAs($owner)->delete("/organizer/team/{$owner->id}");
+        $response = $this->actingAs($owner)
+            ->withSession(['current_organization_id' => $organization->id])
+            ->delete(route('organizer.team.remove', $owner));
 
         $response->assertRedirect();
         $response->assertSessionHas('error');
@@ -133,9 +137,9 @@ class OrganizationManagementTest extends TestCase
         $user = User::factory()->create();
         $user->assignRole('organizer');
 
-        $response = $this->actingAs($user)->get('/organizer/dashboard');
+        $response = $this->actingAs($user)->get(route('organizer.dashboard'));
 
-        $response->assertRedirect('/organizer/organizations/create');
+        $response->assertRedirect(route('organizer.organizations.create'));
     }
 }
 

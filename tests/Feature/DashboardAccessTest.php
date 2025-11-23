@@ -56,7 +56,7 @@ class DashboardAccessTest extends TestCase
     #[Test]
     public function organizer_can_access_organizer_dashboard()
     {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $organizer = createOrganizer();
 
         $response = $this->actingAs($organizer)->get(route('organizer.dashboard'));
 

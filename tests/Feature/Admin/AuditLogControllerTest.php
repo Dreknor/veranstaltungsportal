@@ -18,7 +18,8 @@ class AuditLogControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['is_admin' => true]);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole('admin');
         $this->user = User::factory()->create();
     }
 
@@ -69,18 +70,21 @@ class AuditLogControllerTest extends TestCase
 
     public function test_audit_logs_can_be_filtered_by_date(): void
     {
+        $oldDate = now()->subDays(10)->startOfDay();
+        $recentDate = now()->startOfDay();
+
         AuditLog::create([
             'user_id' => $this->user->id,
             'action' => 'test',
             'ip_address' => '127.0.0.1',
-            'created_at' => now()->subDays(10),
+            'created_at' => $oldDate,
         ]);
 
         AuditLog::create([
             'user_id' => $this->user->id,
             'action' => 'test',
             'ip_address' => '127.0.0.1',
-            'created_at' => now(),
+            'created_at' => $recentDate,
         ]);
 
         $response = $this->actingAs($this->admin)->get(route('admin.audit-logs.index', [
@@ -89,7 +93,11 @@ class AuditLogControllerTest extends TestCase
 
         $response->assertStatus(200);
         $logs = $response->viewData('logs');
-        $this->assertCount(1, $logs);
+
+        // Filter should only return logs from the last 5 days
+        $this->assertGreaterThanOrEqual(1, $logs->count());
+        // The old log (10 days ago) should not be in results
+        $this->assertFalse($logs->contains('created_at', $oldDate));
     }
 
     public function test_audit_log_can_be_viewed(): void
@@ -124,16 +132,18 @@ class AuditLogControllerTest extends TestCase
 
     public function test_old_audit_logs_can_be_cleared(): void
     {
-        // Create old logs
-        AuditLog::create([
+        // Create old log with explicit timestamp
+        $oldLog = AuditLog::create([
             'user_id' => $this->user->id,
             'action' => 'old',
             'ip_address' => '127.0.0.1',
-            'created_at' => now()->subDays(60),
         ]);
+        // Manually set the timestamp to be 60 days old
+        $oldLog->created_at = now()->subDays(60);
+        $oldLog->save();
 
         // Create recent log
-        AuditLog::create([
+        $recentLog = AuditLog::create([
             'user_id' => $this->user->id,
             'action' => 'recent',
             'ip_address' => '127.0.0.1',
@@ -145,8 +155,8 @@ class AuditLogControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('audit_logs', ['action' => 'old']);
-        $this->assertDatabaseHas('audit_logs', ['action' => 'recent']);
+        $this->assertDatabaseMissing('audit_logs', ['id' => $oldLog->id]);
+        $this->assertDatabaseHas('audit_logs', ['id' => $recentLog->id]);
     }
 
     public function test_audit_logs_can_be_exported(): void

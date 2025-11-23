@@ -18,7 +18,7 @@ class PermissionsTest extends TestCase
     public function admin_can_access_admin_panel()
     {
         $admin = User::factory()->create();
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $admin->assignRole($adminRole);
 
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
@@ -29,7 +29,8 @@ class PermissionsTest extends TestCase
     #[Test]
     public function non_admin_cannot_access_admin_panel()
     {
-        $user = User::factory()->create(['user_type' => 'participant']);
+        $user = User::factory()->create();
+        $user->assignRole('user');
 
         $response = $this->actingAs($user)->get(route('admin.dashboard'));
 
@@ -40,7 +41,7 @@ class PermissionsTest extends TestCase
     public function admin_can_manage_all_events()
     {
         $admin = User::factory()->create();
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $admin->assignRole($adminRole);
 
         $event = Event::factory()->create();
@@ -54,7 +55,7 @@ class PermissionsTest extends TestCase
     public function admin_can_manage_users()
     {
         $admin = User::factory()->create();
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $admin->assignRole($adminRole);
 
         $response = $this->actingAs($admin)->get(route('admin.users.index'));
@@ -65,11 +66,19 @@ class PermissionsTest extends TestCase
     #[Test]
     public function organizer_can_only_manage_own_events()
     {
-        $organizer1 = User::factory()->create(['user_type' => 'organizer']);
-        $organizer2 = User::factory()->create(['user_type' => 'organizer']);
+        $organizer1 = User::factory()->create();
+        $organizer1->assignRole('organizer');
+        $result1 = $this->createOrganizerWithOrganization($organizer1);
 
-        $event1 = Event::factory()->create(['user_id' => $organizer1->id]);
-        $event2 = Event::factory()->create(['user_id' => $organizer2->id]);
+        $organizer2 = User::factory()->create();
+        $organizer2->assignRole('organizer');
+        $result2 = $this->createOrganizerWithOrganization($organizer2);
+
+        $event1 = Event::factory()->create(['organization_id' => $result1['organization']->id]);
+        $event2 = Event::factory()->create(['organization_id' => $result2['organization']->id]);
+
+        // Set current organization for organizer1
+        session(['current_organization_id' => $result1['organization']->id]);
 
         $response = $this->actingAs($organizer1)->get(route('organizer.events.edit', $event1));
         $response->assertStatus(200);
@@ -81,7 +90,8 @@ class PermissionsTest extends TestCase
     #[Test]
     public function participant_cannot_access_organizer_features()
     {
-        $participant = User::factory()->create(['user_type' => 'participant']);
+        $participant = User::factory()->create();
+        $participant->assignRole('user');
 
         $response = $this->actingAs($participant)->get(route('organizer.events.index'));
 

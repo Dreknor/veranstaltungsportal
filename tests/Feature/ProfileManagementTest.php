@@ -16,7 +16,7 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('profile.edit'));
+        $response = $this->actingAs($user)->get(route('settings.profile.edit'));
 
         $response->assertStatus(200);
     }
@@ -34,58 +34,12 @@ class ProfileTest extends TestCase
             'phone' => '123456789',
         ];
 
-        $response = $this->actingAs($user)->patch(route('profile.update'), $updateData);
+        $response = $this->actingAs($user)->put(route('settings.profile.update'), $updateData);
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'name' => 'Updated Name',
             'email' => 'updated@example.com',
-        ]);
-    }
-
-    #[Test]
-    public function organizer_can_update_organization_information()
-    {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
-
-        $updateData = [
-            'name' => $organizer->name,
-            'email' => $organizer->email,
-            'organization_name' => 'New Organization',
-            'organization_website' => 'https://neworg.com',
-            'organization_description' => 'A new organization description',
-        ];
-
-        $response = $this->actingAs($organizer)->patch(route('profile.update'), $updateData);
-
-        $this->assertDatabaseHas('users', [
-            'id' => $organizer->id,
-            'organization_name' => 'New Organization',
-        ]);
-    }
-
-    #[Test]
-    public function user_can_update_billing_information()
-    {
-        $user = User::factory()->create();
-
-        $billingData = [
-            'name' => $user->name,
-            'email' => $user->email,
-            'billing_company' => 'Test Company',
-            'billing_address' => '123 Test St',
-            'billing_postal_code' => '12345',
-            'billing_city' => 'Berlin',
-            'billing_country' => 'Germany',
-            'tax_id' => 'DE123456789',
-        ];
-
-        $response = $this->actingAs($user)->patch(route('profile.update'), $billingData);
-
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'billing_company' => 'Test Company',
-            'tax_id' => 'DE123456789',
         ]);
     }
 
@@ -104,7 +58,7 @@ class ProfileTest extends TestCase
             ],
         ];
 
-        $response = $this->actingAs($user)->patch(route('profile.update'), $updateData);
+        $response = $this->actingAs($user)->put(route('settings.profile.update'), $updateData);
 
         $user->refresh();
         $this->assertTrue($user->notification_preferences['email_booking_confirmation']);
@@ -121,7 +75,7 @@ class ProfileTest extends TestCase
             'email' => 'existing@example.com',
         ];
 
-        $response = $this->actingAs($user2)->patch(route('profile.update'), $updateData);
+        $response = $this->actingAs($user2)->put(route('settings.profile.update'), $updateData);
 
         $response->assertSessionHasErrors('email');
     }
@@ -131,7 +85,7 @@ class ProfileTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->delete(route('profile.destroy'), [
+        $response = $this->actingAs($user)->delete(route('settings.profile.destroy'), [
             'password' => 'password',
         ]);
 

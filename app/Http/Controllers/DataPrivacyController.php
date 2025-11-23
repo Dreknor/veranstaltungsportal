@@ -36,14 +36,13 @@ class DataPrivacyController extends Controller
                 'last_name' => $user->last_name,
                 'phone' => $user->phone,
                 'bio' => $user->bio,
-                'is_organizer' => $user->is_organizer,
+                'user_type' => $user->user_type,
                 'created_at' => $user->created_at,
                 'updated_at' => $user->updated_at,
             ],
             'bookings' => $user->bookings()->with(['event', 'items'])->get()->toArray(),
-            'organized_events' => $user->organizedEvents()->with(['ticketTypes', 'discountCodes'])->get()->toArray(),
-            'reviews' => $user->reviews()->with('event')->get()->toArray(),
-            'favorites' => $user->favorites()->get()->toArray(),
+            'organized_events' => $user->events()->get()->toArray(),
+            'favorites' => $user->favoriteEvents()->get()->toArray(),
             'badges' => $user->badges()->get()->toArray(),
             'connections' => [
                 'following' => $user->following()->get()->toArray(),
@@ -81,8 +80,7 @@ class DataPrivacyController extends Controller
 
         $user = auth()->user();
 
-        // Check if user has upcoming events as organizer
-        $upcomingEvents = $user->organizedEvents()
+        $upcomingEvents = $user->events()
             ->where('start_date', '>', now())
             ->count();
 
@@ -105,14 +103,31 @@ class DataPrivacyController extends Controller
             );
         }
 
-        // Log the deletion request
-        AuditLog::log(
-            'account_deletion_requested',
-            $user,
-            null,
-            null,
-            "Benutzer hat Kontolöschung beantragt. Grund: " . ($request->reason ?? 'Nicht angegeben')
-        );
+        $userId = (int) $user->id;
+
+        if (!$userId) {
+            throw new \Exception("User ID is null or zero when trying to log account deletion");
+        }
+
+        // Log the deletion request BEFORE delete and logout
+        $auditLog = AuditLog::create([
+            'user_id' => $userId,
+            'action' => 'account_deletion_requested',
+            'auditable_type' => get_class($user),
+            'auditable_id' => $user->id,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'description' => "Benutzer hat Kontolöschung beantragt. Grund: " . ($request->reason ?? 'Nicht angegeben'),
+        ]);
+
+        // Double check the audit log was saved with correct user_id
+        if ($auditLog->user_id !== $userId) {
+            \Log::error("Audit log user_id mismatch", [
+                'expected' => $userId,
+                'actual' => $auditLog->user_id,
+                'audit_log_id' => $auditLog->id
+            ]);
+        }
 
         // Mark account for deletion (soft delete)
         $user->delete();
@@ -142,15 +157,18 @@ class DataPrivacyController extends Controller
             mkdir(storage_path('app/temp'), 0755, true);
         }
 
-        $zip = new ZipArchive;
+        $zip = new \ZipArchive;
 
-        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === TRUE) {
+        if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
+            $hasFiles = false;
+
             // Add profile photo if exists
             if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
                 $zip->addFile(
                     Storage::disk('public')->path($user->profile_photo),
                     'profile_photo/' . basename($user->profile_photo)
                 );
+                $hasFiles = true;
             }
 
             // Add booking certificates
@@ -160,7 +178,13 @@ class DataPrivacyController extends Controller
                         Storage::path($booking->certificate_path),
                         'certificates/' . basename($booking->certificate_path)
                     );
+                    $hasFiles = true;
                 }
+            }
+
+            // Add a readme if no files were added
+            if (!$hasFiles) {
+                $zip->addFromString('README.txt', 'Keine persönlichen Dateien gefunden.');
             }
 
             $zip->close();
@@ -181,21 +205,53 @@ class DataPrivacyController extends Controller
     }
 
     /**
-     * Redirect to privacy settings (now consolidated)
+     * Show privacy settings
      */
     public function settings()
     {
-        return redirect()->route('settings.privacy.edit')
-            ->with('info', 'Datenschutzeinstellungen werden jetzt zentral in den Profil-Einstellungen verwaltet.');
+        $user = auth()->user();
+        return view('data-privacy.settings', compact('user'));
     }
 
     /**
-     * Redirect to privacy settings update (now consolidated)
+     * Update privacy settings
      */
     public function updateSettings(Request $request)
     {
-        return redirect()->route('settings.privacy.edit')
-            ->with('info', 'Bitte nutzen Sie die zentrale Datenschutz-Einstellungsseite.');
+        $request->validate([
+            'allow_networking' => 'boolean',
+            'show_profile_public' => 'boolean',
+            'allow_data_analytics' => 'boolean',
+        ]);
+
+        $user = auth()->user();
+
+        $oldValues = [
+            'allow_networking' => $user->allow_networking ?? false,
+            'show_profile_public' => $user->show_profile_public ?? false,
+            'allow_data_analytics' => $user->allow_data_analytics ?? false,
+        ];
+
+        $user->update([
+            'allow_networking' => $request->boolean('allow_networking'),
+            'show_profile_public' => $request->boolean('show_profile_public'),
+            'allow_data_analytics' => $request->boolean('allow_data_analytics'),
+        ]);
+
+        // Log the update
+        AuditLog::log(
+            'privacy_settings_updated',
+            $user,
+            $oldValues,
+            [
+                'allow_networking' => $user->allow_networking,
+                'show_profile_public' => $user->show_profile_public,
+                'allow_data_analytics' => $user->allow_data_analytics,
+            ],
+            "Benutzer hat Datenschutzeinstellungen aktualisiert"
+        );
+
+        return back()->with('success', 'Datenschutzeinstellungen wurden erfolgreich aktualisiert.');
     }
 }
 

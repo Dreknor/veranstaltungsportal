@@ -28,7 +28,7 @@ class TicketManagementTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->post(route('organizer.events.tickets.store', $event), $ticketData);
+            ->post(route('organizer.events.ticket-types.store', $event), $ticketData);
 
         $this->assertDatabaseHas('ticket_types', [
             'event_id' => $event->id,
@@ -53,7 +53,7 @@ class TicketManagementTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->put(route('organizer.events.tickets.update', [$event, $ticketType]), $updateData);
+            ->put(route('organizer.events.ticket-types.update', [$event, $ticketType]), $updateData);
 
         $this->assertDatabaseHas('ticket_types', [
             'id' => $ticketType->id,
@@ -70,7 +70,7 @@ class TicketManagementTest extends TestCase
         $ticketType = TicketType::factory()->create(['event_id' => $event->id]);
 
         $response = $this->actingAs($organizer)
-            ->delete(route('organizer.events.tickets.destroy', [$event, $ticketType]));
+            ->delete(route('organizer.events.ticket-types.destroy', [$event, $ticketType]));
 
         $this->assertDatabaseMissing('ticket_types', [
             'id' => $ticketType->id,
@@ -86,7 +86,7 @@ class TicketManagementTest extends TestCase
         $ticketType = TicketType::factory()->create(['event_id' => $event->id]);
 
         $response = $this->actingAs($organizer1)
-            ->delete(route('organizer.events.tickets.destroy', [$event, $ticketType]));
+            ->delete(route('organizer.events.ticket-types.destroy', [$event, $ticketType]));
 
         $response->assertStatus(403);
     }
@@ -107,7 +107,7 @@ class TicketManagementTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->post(route('organizer.events.tickets.store', $event), $ticketData);
+            ->post(route('organizer.events.ticket-types.store', $event), $ticketData);
 
         $this->assertDatabaseHas('ticket_types', [
             'event_id' => $event->id,
@@ -131,7 +131,7 @@ class TicketManagementTest extends TestCase
         ];
 
         $response = $this->actingAs($organizer)
-            ->post(route('organizer.events.tickets.store', $event), $ticketData);
+            ->post(route('organizer.events.ticket-types.store', $event), $ticketData);
 
         $this->assertDatabaseHas('ticket_types', [
             'event_id' => $event->id,

@@ -18,7 +18,7 @@ class FavoriteController extends Controller
 
         // Get favorite event IDs from user's favorites JSON field or separate table
         $favoriteEvents = $user->favoriteEvents()
-            ->with(['category', 'user'])
+            ->with(['category', 'organization'])
             ->where('is_published', true)
             ->orderBy('start_date', 'asc')
             ->paginate(12);

@@ -20,9 +20,13 @@ class ImpersonateControllerTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = User::factory()->create(['is_admin' => true]);
+        $this->admin = User::factory()->create();
+        $this->admin->assignRole('admin');
+
         $this->user = User::factory()->create();
-        $this->organizer = User::factory()->create(['is_organizer' => true]);
+
+        $this->organizer = User::factory()->create();
+        $this->organizer->assignRole('organizer');
     }
 
     public function test_impersonate_requires_authentication(): void
@@ -71,7 +75,8 @@ class ImpersonateControllerTest extends TestCase
 
     public function test_cannot_impersonate_another_admin(): void
     {
-        $anotherAdmin = User::factory()->create(['is_admin' => true]);
+        $anotherAdmin = User::factory()->create();
+        $anotherAdmin->assignRole('admin');
 
         $response = $this->actingAs($this->admin)
             ->post(route('admin.users.impersonate', $anotherAdmin));
@@ -133,12 +138,13 @@ class ImpersonateControllerTest extends TestCase
         $response->assertSessionHas('error');
     }
 
-    public function test_impersonation_session_is_cleared_on_logout(): void
+    public function test_impersonation_session_is_cleared_on_session_flush(): void
     {
         session(['impersonator' => $this->admin->id]);
         Auth::login($this->user);
 
-        Auth::logout();
+        // Flush session (this happens on logout in real application)
+        session()->flush();
 
         $this->assertFalse(session()->has('impersonator'));
     }

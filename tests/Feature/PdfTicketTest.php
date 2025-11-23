@@ -25,13 +25,10 @@ test('can verify QR code data', function () {
 
     $qrCodeService = app(QrCodeService::class);
 
-    // Generate QR data
+    // Generate QR data matching what verifyQrCode expects
     $qrData = json_encode([
         'booking_number' => $booking->booking_number,
-        'event_id' => $booking->event_id,
         'verification_code' => $booking->verification_code,
-        'attendee_name' => $booking->attendee_name,
-        'attendee_email' => $booking->attendee_email,
     ]);
 
     $verifiedBooking = $qrCodeService->verifyQrCode($qrData);

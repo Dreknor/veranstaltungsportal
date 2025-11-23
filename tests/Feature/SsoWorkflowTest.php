@@ -7,10 +7,10 @@ use Spatie\Permission\Models\Role;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    // Create necessary roles
-    Role::create(['name' => 'user']);
-    Role::create(['name' => 'organizer']);
-    Role::create(['name' => 'admin']);
+    // Create necessary roles - use firstOrCreate to avoid duplicates
+    Role::firstOrCreate(['name' => 'user']);
+    Role::firstOrCreate(['name' => 'organizer']);
+    Role::firstOrCreate(['name' => 'admin']);
 });
 
 test('sso user is created with participant role by default', function () {

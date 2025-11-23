@@ -57,7 +57,13 @@ class EmailTest extends TestCase
     {
         Mail::fake();
 
-        $event = Event::factory()->create(['is_cancelled' => true]);
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $event = Event::factory()->create([
+            'organization_id' => $result['organization']->id,
+            'is_cancelled' => false,
+        ]);
+
         $booking1 = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
@@ -69,11 +75,12 @@ class EmailTest extends TestCase
             'customer_email' => 'attendee2@example.com',
         ]);
 
-        foreach ($event->bookings as $booking) {
-            Mail::to($booking->customer_email)->send(new EventCancelledMail($event, $booking));
-        }
+        // Cancel the event via controller to trigger emails
+        $this->actingAs($organizer)->post(route('organizer.events.cancel', $event), [
+            'cancellation_reason' => 'Weather conditions',
+        ]);
 
-        Mail::assertSent(EventCancelledMail::class, 2);
+        Mail::assertQueued(EventCancelledMail::class, 2);
     }
 
     #[Test]

@@ -35,7 +35,9 @@ class TicketTypeTest extends TestCase
     #[Test]
     public function it_calculates_available_quantity()
     {
+        $event = Event::factory()->create(['max_attendees' => null]);
         $ticketType = TicketType::factory()->create([
+            'event_id' => $event->id,
             'quantity' => 100,
             'quantity_sold' => 30,
         ]);
@@ -46,7 +48,11 @@ class TicketTypeTest extends TestCase
     #[Test]
     public function it_returns_unlimited_when_quantity_is_null()
     {
-        $ticketType = TicketType::factory()->create(['quantity' => null]);
+        $event = Event::factory()->create(['max_attendees' => null]);
+        $ticketType = TicketType::factory()->create([
+            'event_id' => $event->id,
+            'quantity' => null,
+        ]);
 
         $this->assertEquals(PHP_INT_MAX, $ticketType->availableQuantity());
     }

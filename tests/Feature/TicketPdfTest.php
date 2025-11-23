@@ -11,12 +11,11 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     $this->user = User::factory()->create();
-    $this->event = Event::factory()->create([
-        'user_id' => $this->user->id,
-    ]);
+    $this->event = Event::factory()->create(['is_published' => true]);
     $this->booking = Booking::factory()->create([
         'event_id' => $this->event->id,
         'user_id' => $this->user->id,
+        'status' => 'confirmed',
     ]);
 
     // Lade die Event-Beziehung, damit booking_number garantiert existiert
@@ -38,7 +37,8 @@ test('can generate qr code as data uri', function () {
     $dataUri = $qrCodeService->generateBookingQrCodeDataUri($this->booking);
 
     expect($dataUri)->toBeString();
-    expect($dataUri)->toStartWith('data:image/png;base64,');
+    // QR Code Service generiert SVG data URI statt PNG
+    expect($dataUri)->toStartWith('data:image/svg+xml;base64,');
 });
 
 test('can verify qr code data', function () {

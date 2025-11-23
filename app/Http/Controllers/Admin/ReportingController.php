@@ -250,21 +250,25 @@ class ReportingController extends Controller
 
     private function getTopOrganizers($startDate, $endDate)
     {
-        return User::where('is_organizer', true)
-            ->withCount(['events' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }])
-            ->with(['events' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate])
-                    ->with(['bookings' => function ($q) use ($startDate, $endDate) {
-                        $q->where('payment_status', 'paid')
-                            ->whereBetween('created_at', [$startDate, $endDate]);
-                    }]);
+        return User::role('organizer')
+            ->with(['organizations' => function ($query) use ($startDate, $endDate) {
+                $query->with(['events' => function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('created_at', [$startDate, $endDate])
+                        ->with(['bookings' => function ($b) use ($startDate, $endDate) {
+                            $b->where('payment_status', 'paid')
+                                ->whereBetween('created_at', [$startDate, $endDate]);
+                        }]);
+                }]);
             }])
             ->get()
             ->map(function ($organizer) {
-                $organizer->events_bookings_sum_total = $organizer->events->sum(function ($event) {
-                    return $event->bookings->sum('total');
+                $organizer->events_bookings_sum_total = $organizer->organizations->sum(function ($organization) {
+                    return $organization->events->sum(function ($event) {
+                        return $event->bookings->sum('total');
+                    });
+                });
+                $organizer->events_count = $organizer->organizations->sum(function ($organization) {
+                    return $organization->events->count();
                 });
                 return $organizer;
             })

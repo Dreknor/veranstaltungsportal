@@ -30,23 +30,5 @@ class DiscountCodeFactory extends Factory
             'is_active' => true,
         ];
     }
-
-    public function expired(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'valid_until' => $this->faker->dateTimeBetween('-1 month', '-1 day'),
-        ]);
-    }
-
-    public function maxedOut(): static
-    {
-        return $this->state(function (array $attributes) {
-            $maxUses = $attributes['max_uses'] ?? 100;
-            return [
-                'max_uses' => $maxUses,
-                'usage_count' => $maxUses,
-            ];
-        });
-    }
 }
 

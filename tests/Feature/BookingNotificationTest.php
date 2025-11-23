@@ -23,6 +23,7 @@ beforeEach(function () {
 });
 
 test('notification is sent when booking status changes', function () {
+
     $this->booking->status = 'confirmed';
     $this->booking->save();
 

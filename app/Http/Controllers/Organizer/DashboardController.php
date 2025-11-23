@@ -48,10 +48,15 @@ class DashboardController extends Controller
         ];
 
         // Revenue Trend (last 12 months)
+        $driver = \DB::connection()->getDriverName();
+        $dateFormat = $driver === 'sqlite'
+            ? "strftime('%Y-%m', created_at)"
+            : "DATE_FORMAT(created_at, '%Y-%m')";
+
         $revenueTrend = $organization->bookings()
             ->where('created_at', '>=', now()->subMonths(12))
             ->whereIn('payment_status', ['paid'])
-            ->selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, SUM(total) as revenue')
+            ->selectRaw("{$dateFormat} as month, SUM(total) as revenue")
             ->groupBy('month')
             ->orderBy('month')
             ->get();

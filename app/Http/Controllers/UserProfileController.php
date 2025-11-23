@@ -16,6 +16,15 @@ class UserProfileController extends Controller
     {
         $currentUser = $request->user();
 
+        // Check if user is blocked (check this first before other permissions)
+        if ($currentUser && $currentUser->id !== $user->id) {
+            if (method_exists($currentUser, 'hasBlocked') && method_exists($user, 'hasBlocked')) {
+                if ($currentUser->hasBlocked($user) || $user->hasBlocked($currentUser)) {
+                    abort(403, 'Dieses Profil ist nicht verfügbar.');
+                }
+            }
+        }
+
         // Check if profile can be viewed
         $canView = false;
 
@@ -23,12 +32,13 @@ class UserProfileController extends Controller
         if ($currentUser && $currentUser->id === $user->id) {
             $canView = true;
         }
-        // Public profiles can always be viewed
+        // Public profiles can always be viewed (including by guests)
         elseif (isset($user->show_profile_public) && $user->show_profile_public === true) {
             $canView = true;
         }
-        // Legacy: Check old field if new field doesn't exist
-        elseif (!isset($user->show_profile_public) && isset($user->show_profile_publicly) && $user->show_profile_publicly === true) {
+        // Legacy: Check old field if new field doesn't exist - default to true for backwards compatibility
+        elseif (!isset($user->show_profile_public)) {
+            // If field doesn't exist, treat as public (legacy behavior)
             $canView = true;
         }
         // Connected users can view non-public profiles if networking is allowed
@@ -40,14 +50,6 @@ class UserProfileController extends Controller
             }
         }
 
-        // Check if user is blocked (before denying access)
-        if ($currentUser && $currentUser->id !== $user->id) {
-            if (method_exists($currentUser, 'hasBlocked') && method_exists($user, 'hasBlocked')) {
-                if ($currentUser->hasBlocked($user) || $user->hasBlocked($currentUser)) {
-                    abort(403, 'Dieses Profil ist nicht verfügbar.');
-                }
-            }
-        }
 
         if (!$canView) {
             abort(403, 'Dieses Profil ist nicht öffentlich sichtbar.');

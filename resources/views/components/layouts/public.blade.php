@@ -6,6 +6,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name') }}</title>
     <meta name="description" content="{{ $description ?? 'Veranstaltungsportal für Fort- und Weiterbildungen' }}">
+    @stack('meta')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         function applyTheme() {

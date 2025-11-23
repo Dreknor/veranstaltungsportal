@@ -30,10 +30,17 @@ class PaymentTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'customer_phone' => '1234567890',
+            'billing_address' => '123 Main St',
+            'billing_postal_code' => '12345',
+            'billing_city' => 'Test City',
+            'billing_country' => 'Deutschland',
             'tickets' => [
-                $ticketType->id => 2,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 2,
+                ],
             ],
-            'payment_method' => 'stripe',
         ];
 
         $response = $this->actingAs($user)->post(route('bookings.store', $event), $bookingData);
@@ -82,8 +89,16 @@ class PaymentTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'customer_phone' => '1234567890',
+            'billing_address' => '123 Main St',
+            'billing_postal_code' => '12345',
+            'billing_city' => 'Test City',
+            'billing_country' => 'Deutschland',
             'tickets' => [
-                $ticketType->id => 1,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 1,
+                ],
             ],
         ];
 

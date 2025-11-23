@@ -59,7 +59,7 @@ class SendNewsletterCommand extends Command
 
         // Get subscribers
         if ($isTest) {
-            $subscribers = User::where('is_admin', true)->get();
+            $subscribers = User::role('admin')->get();
             $this->info('Sending test newsletter to admins...');
         } else {
             $subscribers = User::where('newsletter_subscribed', true)->get();

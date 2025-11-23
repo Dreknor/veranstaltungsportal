@@ -56,7 +56,7 @@ class EventController extends Controller
         }
 
         if ($request->filled('date_to')) {
-            $eventsQuery->where('end_date', '<=', $request->date_to);
+            $eventsQuery->where('start_date', '<=', $request->date_to);
         }
 
         // Events und Serien abrufen
@@ -160,8 +160,11 @@ class EventController extends Controller
         }
 
         // Prüfe ob Event veröffentlicht ist
-        if (!$event->is_published && $event->user_id !== auth()->id()) {
-            abort(404);
+        if (!$event->is_published) {
+            // Allow owners of the organization to view unpublished events
+            if (!auth()->check() || !$event->organization->users()->where('user_id', auth()->id())->wherePivot('role', 'owner')->exists()) {
+                abort(404);
+            }
         }
 
         $relatedEvents = Event::published()

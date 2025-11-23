@@ -17,6 +17,10 @@ test('user can create a booking', function () {
         'customer_name' => 'John Doe',
         'customer_email' => 'john@example.com',
         'customer_phone' => '1234567890',
+        'billing_address' => 'Test Street 123',
+        'billing_postal_code' => '12345',
+        'billing_city' => 'Berlin',
+        'billing_country' => 'Germany',
         'tickets' => [
             [
                 'ticket_type_id' => $ticketType->id,
@@ -30,7 +34,7 @@ test('user can create a booking', function () {
 
     $booking = Booking::first();
     expect($booking->customer_name)->toBe('John Doe');
-    expect($booking->total)->toBe(100.0);
+    expect($booking->total)->toBe('100.00');
     expect($booking->items)->toHaveCount(2);
 });
 
@@ -43,14 +47,18 @@ test('booking applies discount code correctly', function () {
 
     $discountCode = DiscountCode::factory()->create([
         'code' => 'SAVE20',
-        'discount_type' => 'percentage',
-        'discount_value' => 20,
+        'type' => 'percentage',
+        'value' => 20,
         'event_id' => null,
     ]);
 
     $response = $this->post(route('bookings.store', $event), [
         'customer_name' => 'Jane Doe',
         'customer_email' => 'jane@example.com',
+        'billing_address' => 'Test Street 456',
+        'billing_postal_code' => '54321',
+        'billing_city' => 'Munich',
+        'billing_country' => 'Germany',
         'tickets' => [
             [
                 'ticket_type_id' => $ticketType->id,
@@ -63,9 +71,9 @@ test('booking applies discount code correctly', function () {
     $response->assertRedirect();
 
     $booking = Booking::first();
-    expect($booking->subtotal)->toBe(100.0);
-    expect($booking->discount)->toBe(20.0);
-    expect($booking->total)->toBe(80.0);
+    expect($booking->subtotal)->toBe('100.00');
+    expect($booking->discount)->toBe('20.00');
+    expect($booking->total)->toBe('80.00');
 });
 
 test('booking cannot exceed ticket quantity', function () {
@@ -77,6 +85,10 @@ test('booking cannot exceed ticket quantity', function () {
     $response = $this->post(route('bookings.store', $event), [
         'customer_name' => 'John Doe',
         'customer_email' => 'john@example.com',
+        'billing_address' => 'Test Street 789',
+        'billing_postal_code' => '11111',
+        'billing_city' => 'Hamburg',
+        'billing_country' => 'Germany',
         'tickets' => [
             [
                 'ticket_type_id' => $ticketType->id,
@@ -98,11 +110,13 @@ test('booking can be viewed with booking number', function () {
 });
 
 test('booking can be cancelled within allowed timeframe', function () {
+    $user = User::factory()->create();
+
     $event = Event::factory()->create([
         'start_date' => now()->addDays(3),
     ]);
 
-    $booking = Booking::factory()->for($event)->create([
+    $booking = Booking::factory()->for($event)->for($user)->create([
         'status' => 'confirmed',
     ]);
 
@@ -116,7 +130,7 @@ test('booking can be cancelled within allowed timeframe', function () {
         'quantity' => 1,
     ]);
 
-    $response = $this->post(route('bookings.cancel', $booking->booking_number));
+    $response = $this->actingAs($user)->post(route('bookings.cancel', $booking->booking_number));
 
     $booking->refresh();
     expect($booking->status)->toBe('cancelled');

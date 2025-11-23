@@ -17,8 +17,9 @@ class EventCancellationTest extends TestCase
     public function organizer_can_cancel_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $result = $this->createOrganizerWithOrganization($organizer);
         $event = Event::factory()->create([
-            'user_id' => $organizer->id,
+            'organization_id' => $result['organization']->id,
             'is_cancelled' => false,
         ]);
 
@@ -38,7 +39,8 @@ class EventCancellationTest extends TestCase
     public function cancelling_event_notifies_all_attendees()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $event = Event::factory()->create(['organization_id' => $result['organization']->id]);
 
         // Create multiple bookings
         $bookings = Booking::factory()->count(3)->create([
@@ -67,7 +69,8 @@ class EventCancellationTest extends TestCase
 
         $response = $this->actingAs($user)->get(route('bookings.create', $event));
 
-        $response->assertStatus(403);
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
     }
 
     #[Test]
@@ -76,11 +79,13 @@ class EventCancellationTest extends TestCase
         $event = Event::factory()->create([
             'is_published' => true,
             'is_cancelled' => true,
+            'cancelled_at' => now(),
             'cancellation_reason' => 'Due to weather',
         ]);
 
         $response = $this->get(route('events.show', $event));
 
+        $response->assertStatus(200);
         $response->assertSee('Due to weather');
     }
 
@@ -104,6 +109,4 @@ class EventCancellationTest extends TestCase
         $response->assertStatus(302);
     }
 }
-
-
 

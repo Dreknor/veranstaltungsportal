@@ -18,6 +18,7 @@ class EventManagementTest extends TestCase
     public function authenticated_organizer_can_view_event_create_page()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $this->createOrganizerWithOrganization($organizer);
 
         $response = $this->actingAs($organizer)->get(route('organizer.events.create'));
 
@@ -28,6 +29,7 @@ class EventManagementTest extends TestCase
     public function authenticated_organizer_can_create_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $result = $this->createOrganizerWithOrganization($organizer);
         $category = EventCategory::factory()->create();
 
         $eventData = [
@@ -43,14 +45,23 @@ class EventManagementTest extends TestCase
             'venue_postal_code' => '10115',
             'venue_country' => 'Germany',
             'max_attendees' => 100,
-            'is_published' => true,
+            'is_published' => false,
+            'is_featured' => false,
+            'is_private' => false,
         ];
 
         $response = $this->actingAs($organizer)->post(route('organizer.events.store'), $eventData);
 
+        // Debug: Check response
+        if ($response->status() !== 302) {
+            $this->fail('Expected 302 redirect, got ' . $response->status() . '. Response: ' . $response->getContent());
+        }
+
+        $response->assertSessionHasNoErrors();
+
         $this->assertDatabaseHas('events', [
             'title' => 'Test Event',
-            'user_id' => $organizer->id,
+            'organization_id' => $result['organization']->id,
         ]);
     }
 
@@ -80,7 +91,8 @@ class EventManagementTest extends TestCase
     public function authenticated_organizer_can_update_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $event = Event::factory()->create(['organization_id' => $result['organization']->id]);
 
         $updateData = [
             'title' => 'Updated Event Title',
@@ -90,8 +102,13 @@ class EventManagementTest extends TestCase
             'start_date' => $event->start_date->format('Y-m-d H:i:s'),
             'end_date' => $event->end_date->format('Y-m-d H:i:s'),
             'venue_name' => $event->venue_name,
+            'venue_address' => $event->venue_address ?? 'Test Address',
             'venue_city' => $event->venue_city,
-            'is_published' => $event->is_published,
+            'venue_postal_code' => $event->venue_postal_code ?? '10115',
+            'venue_country' => $event->venue_country ?? 'Germany',
+            'is_published' => false,
+            'is_featured' => false,
+            'is_private' => false,
         ];
 
         $response = $this->actingAs($organizer)->put(route('organizer.events.update', $event), $updateData);
@@ -106,7 +123,8 @@ class EventManagementTest extends TestCase
     public function authenticated_organizer_can_delete_their_event()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $event = Event::factory()->create(['organization_id' => $result['organization']->id]);
 
         $response = $this->actingAs($organizer)->delete(route('organizer.events.destroy', $event));
 
@@ -118,7 +136,8 @@ class EventManagementTest extends TestCase
     {
         $organizer1 = User::factory()->create(['user_type' => 'organizer']);
         $organizer2 = User::factory()->create(['user_type' => 'organizer']);
-        $event = Event::factory()->create(['user_id' => $organizer2->id]);
+        $result2 = $this->createOrganizerWithOrganization($organizer2);
+        $event = Event::factory()->create(['organization_id' => $result2['organization']->id]);
 
         $response = $this->actingAs($organizer1)->get(route('organizer.events.edit', $event));
 
@@ -164,8 +183,9 @@ class EventManagementTest extends TestCase
     public function organizer_can_cancel_event_with_reason()
     {
         $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $result = $this->createOrganizerWithOrganization($organizer);
         $event = Event::factory()->create([
-            'user_id' => $organizer->id,
+            'organization_id' => $result['organization']->id,
             'is_cancelled' => false,
         ]);
 

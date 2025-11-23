@@ -47,8 +47,15 @@ class BookingProcessTest extends TestCase
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
             'customer_phone' => '123456789',
+            'billing_address' => 'Test Street 123',
+            'billing_postal_code' => '12345',
+            'billing_city' => 'Berlin',
+            'billing_country' => 'Germany',
             'tickets' => [
-                $ticketType->id => 2,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 2,
+                ],
             ],
         ];
 
@@ -77,8 +84,15 @@ class BookingProcessTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'billing_address' => 'Test Street 123',
+            'billing_postal_code' => '12345',
+            'billing_city' => 'Berlin',
+            'billing_country' => 'Germany',
             'tickets' => [
-                $ticketType->id => 2,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 2,
+                ],
             ],
         ];
 
@@ -113,8 +127,15 @@ class BookingProcessTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'billing_address' => 'Test Street 456',
+            'billing_postal_code' => '54321',
+            'billing_city' => 'Munich',
+            'billing_country' => 'Germany',
             'tickets' => [
-                $ticketType->id => 1,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 1,
+                ],
             ],
             'discount_code' => 'SAVE20',
         ];
@@ -148,7 +169,7 @@ class BookingProcessTest extends TestCase
             'status' => 'confirmed',
         ]);
 
-        $response = $this->actingAs($user)->post(route('bookings.cancel', $booking));
+        $response = $this->actingAs($user)->post(route('bookings.cancel', $booking->booking_number));
 
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,
@@ -166,7 +187,7 @@ class BookingProcessTest extends TestCase
             'status' => 'confirmed',
         ]);
 
-        $response = $this->actingAs($user1)->post(route('bookings.cancel', $booking));
+        $response = $this->actingAs($user1)->post(route('bookings.cancel', $booking->booking_number));
 
         $response->assertStatus(403);
     }
@@ -190,8 +211,15 @@ class BookingProcessTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'billing_address' => 'Test Street 789',
+            'billing_postal_code' => '11111',
+            'billing_city' => 'Hamburg',
+            'billing_country' => 'Germany',
             'tickets' => [
-                $ticketType->id => 3,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 3,
+                ],
             ],
         ];
 
@@ -220,14 +248,22 @@ class BookingProcessTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'billing_address' => 'Test Street 999',
+            'billing_postal_code' => '99999',
+            'billing_city' => 'Frankfurt',
+            'billing_country' => 'Germany',
             'tickets' => [
-                $ticketType->id => 10,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 10,
+                ],
             ],
         ];
 
         $response = $this->actingAs($user)->post(route('bookings.store', $event), $bookingData);
 
-        $response->assertSessionHasErrors();
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
     }
 
     #[Test]
@@ -244,14 +280,22 @@ class BookingProcessTest extends TestCase
         $bookingData = [
             'customer_name' => 'John Doe',
             'customer_email' => 'john@example.com',
+            'billing_address' => 'Test Street 101',
+            'billing_postal_code' => '10101',
+            'billing_city' => 'Dresden',
+            'billing_country' => 'Germany',
             'tickets' => [
-                $ticketType->id => 1,
+                [
+                    'ticket_type_id' => $ticketType->id,
+                    'quantity' => 1,
+                ],
             ],
         ];
 
         $response = $this->actingAs($user)->post(route('bookings.store', $event), $bookingData);
 
-        $response->assertStatus(403);
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
     }
 }
 

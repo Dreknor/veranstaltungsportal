@@ -18,7 +18,8 @@ class CheckInTest extends TestCase
     public function organizer_can_view_check_in_page()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
 
         $response = $this->actingAs($organizer)->get(route('organizer.check-in.index', $event));
 
@@ -29,7 +30,8 @@ class CheckInTest extends TestCase
     public function organizer_can_check_in_attendee_with_qr_code()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
@@ -52,7 +54,8 @@ class CheckInTest extends TestCase
     public function organizer_can_check_in_attendee_manually()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
@@ -71,7 +74,8 @@ class CheckInTest extends TestCase
     public function cannot_check_in_cancelled_booking()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'cancelled',
@@ -89,7 +93,8 @@ class CheckInTest extends TestCase
     public function cannot_check_in_invalid_booking_number()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
 
         $response = $this->actingAs($organizer)->post(route('organizer.check-in.process', $event), [
             'booking_number' => 'BK-INVALID',
@@ -102,7 +107,8 @@ class CheckInTest extends TestCase
     public function organizer_can_view_check_in_statistics()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
 
         Booking::factory()->count(5)->create([
             'event_id' => $event->id,
@@ -126,9 +132,17 @@ class CheckInTest extends TestCase
     {
         $organizer1 = createOrganizer();
         $organizer2 = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer2->id]);
 
-        $response = $this->actingAs($organizer1)->get(route('organizer.check-in.index', $event));
+        // Create event for organizer2's organization
+        $org2 = $organizer2->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org2->id]);
+
+        // Set organizer1's organization in session explicitly
+        $org1 = $organizer1->activeOrganizations()->first();
+
+        $response = $this->actingAs($organizer1)
+            ->withSession(['current_organization_id' => $org1->id])
+            ->get(route('organizer.check-in.index', $event));
 
         $response->assertStatus(403);
     }
@@ -137,7 +151,8 @@ class CheckInTest extends TestCase
     public function booking_can_be_checked_in_only_once()
     {
         $organizer = createOrganizer();
-        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $org = $organizer->activeOrganizations()->first();
+        $event = Event::factory()->create(['organization_id' => $org->id]);
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'status' => 'confirmed',
@@ -147,7 +162,7 @@ class CheckInTest extends TestCase
             'checked_in_at' => now(),
         ]);
 
-        $response = $this->actingAs($organizer)->post(route('organizer.events.check-in.process', $event), [
+        $response = $this->actingAs($organizer)->post(route('organizer.check-in.process', $event), [
             'booking_number' => 'BK-ONCE',
         ]);
 

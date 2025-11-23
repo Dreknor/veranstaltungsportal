@@ -16,33 +16,50 @@ class EventSeriesControllerTest extends TestCase
     #[Test]
     public function organizer_can_create_event_series()
     {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $organizer = User::factory()->create();
+        $organizer->assignRole('organizer');
+        $result = $this->createOrganizerWithOrganization($organizer);
+        $organization = $result['organization'];
         $category = \App\Models\EventCategory::factory()->create();
 
         $seriesData = [
             'title' => 'Weekly Workshop Series',
             'description' => 'A series of weekly workshops',
             'event_category_id' => $category->id,
-            'recurrence_type' => 'weekly',
-            'recurrence_interval' => 1,
             'recurrence_count' => 10,
+            'start_time' => '10:00',
+            'duration' => 120,
+            'venue_name' => 'Test Venue',
+            'venue_address' => '123 Main St',
+            'venue_city' => 'Test City',
+            'venue_postal_code' => '12345',
+            'venue_country' => 'Deutschland',
+            'max_attendees' => 50,
+            'is_published' => true,
         ];
 
-        $response = $this->actingAs($organizer)->post(route('organizer.series.store'), $seriesData);
+        $response = $this->actingAs($organizer)
+            ->withSession(['current_organization_id' => $organization->id])
+            ->post(route('organizer.series.store'), $seriesData);
 
         $this->assertDatabaseHas('event_series', [
             'title' => 'Weekly Workshop Series',
-            'user_id' => $organizer->id,
+            'organization_id' => $organization->id,
         ]);
     }
 
     #[Test]
     public function organizer_can_view_their_series()
     {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
-        EventSeries::factory()->count(3)->create(['user_id' => $organizer->id]);
+        $organizer = User::factory()->create();
+        $organizer->assignRole('organizer');
+        $result = $this->createOrganizerWithOrganization($organizer);
 
-        $response = $this->actingAs($organizer)->get(route('organizer.series.index'));
+        EventSeries::factory()->count(3)->create(['organization_id' => $result['organization']->id]);
+
+        $response = $this->actingAs($organizer)
+            ->withSession(['current_organization_id' => $result['organization']->id])
+            ->get(route('organizer.series.index'));
 
         $response->assertStatus(200);
     }
@@ -84,8 +101,11 @@ class EventSeriesControllerTest extends TestCase
     #[Test]
     public function organizer_can_update_series()
     {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
-        $series = EventSeries::factory()->create(['user_id' => $organizer->id]);
+        $organizer = User::factory()->create();
+        $organizer->assignRole('organizer');
+        $result = $this->createOrganizerWithOrganization($organizer);
+
+        $series = EventSeries::factory()->create(['organization_id' => $result['organization']->id]);
 
         $updateData = [
             'title' => 'Updated Series Title',
@@ -94,7 +114,9 @@ class EventSeriesControllerTest extends TestCase
             'recurrence_type' => $series->recurrence_type,
         ];
 
-        $response = $this->actingAs($organizer)->put(route('organizer.series.update', $series), $updateData);
+        $response = $this->actingAs($organizer)
+            ->withSession(['current_organization_id' => $result['organization']->id])
+            ->put(route('organizer.series.update', $series), $updateData);
 
         $this->assertDatabaseHas('event_series', [
             'id' => $series->id,
@@ -105,10 +127,15 @@ class EventSeriesControllerTest extends TestCase
     #[Test]
     public function organizer_can_delete_series()
     {
-        $organizer = User::factory()->create(['user_type' => 'organizer']);
-        $series = EventSeries::factory()->create(['user_id' => $organizer->id]);
+        $organizer = User::factory()->create();
+        $organizer->assignRole('organizer');
+        $result = $this->createOrganizerWithOrganization($organizer);
 
-        $response = $this->actingAs($organizer)->delete(route('organizer.series.destroy', $series));
+        $series = EventSeries::factory()->create(['organization_id' => $result['organization']->id]);
+
+        $response = $this->actingAs($organizer)
+            ->withSession(['current_organization_id' => $result['organization']->id])
+            ->delete(route('organizer.series.destroy', $series));
 
         $this->assertDatabaseMissing('event_series', [
             'id' => $series->id,
@@ -118,11 +145,19 @@ class EventSeriesControllerTest extends TestCase
     #[Test]
     public function organizer_cannot_modify_other_organizers_series()
     {
-        $organizer1 = User::factory()->create(['user_type' => 'organizer']);
-        $organizer2 = User::factory()->create(['user_type' => 'organizer']);
-        $series = EventSeries::factory()->create(['user_id' => $organizer2->id]);
+        $organizer1 = User::factory()->create();
+        $organizer1->assignRole('organizer');
+        $result1 = $this->createOrganizerWithOrganization($organizer1);
 
-        $response = $this->actingAs($organizer1)->get(route('organizer.series.edit', $series));
+        $organizer2 = User::factory()->create();
+        $organizer2->assignRole('organizer');
+        $result2 = $this->createOrganizerWithOrganization($organizer2);
+
+        $series = EventSeries::factory()->create(['organization_id' => $result2['organization']->id]);
+
+        $response = $this->actingAs($organizer1)
+            ->withSession(['current_organization_id' => $result1['organization']->id])
+            ->get(route('organizer.series.edit', $series));
 
         $response->assertStatus(403);
     }

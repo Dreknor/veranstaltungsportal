@@ -58,7 +58,7 @@ class EventSearchAndFilterTest extends TestCase
     {
         Event::factory()->create([
             'is_published' => true,
-            'start_date' => now()->addDays(5),
+            'start_date' => now()->addDays(3),
             'title' => 'Soon Event',
         ]);
         Event::factory()->create([
@@ -69,7 +69,7 @@ class EventSearchAndFilterTest extends TestCase
 
         $response = $this->get(route('events.index', [
             'date_from' => now()->format('Y-m-d'),
-            'date_to' => now()->addWeek()->format('Y-m-d'),
+            'date_to' => now()->addDays(10)->format('Y-m-d'),
         ]));
 
         $response->assertStatus(200)

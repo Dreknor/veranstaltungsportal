@@ -14,6 +14,14 @@ class Event extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia;
 
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected $fillable = [
         'organization_id',
         'series_id',
@@ -234,6 +242,14 @@ class Event extends Model implements HasMedia
 
         // Otherwise check general availability based on max_attendees
         return $this->availableTickets() > 0;
+    }
+
+    /**
+     * Check if event is sold out
+     */
+    public function isSoldOut(): bool
+    {
+        return !$this->hasAvailableTickets();
     }
 
     public function averageRating(): float

@@ -63,7 +63,24 @@ function createBooking(array $attributes = []): \App\Models\Booking
 
 function createOrganizer(array $attributes = []): \App\Models\User
 {
-    return \App\Models\User::factory()->create(array_merge(['user_type' => 'organizer'], $attributes));
+    // Ensure organizer role exists
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'organizer']);
+
+    $user = \App\Models\User::factory()->create(array_merge(['user_type' => 'organizer'], $attributes));
+    $user->assignRole('organizer');
+
+    // Create an organization for the organizer
+    $organization = \App\Models\Organization::factory()->create();
+    $organization->users()->attach($user->id, [
+        'role' => 'owner',
+        'is_active' => true,
+        'joined_at' => now(),
+    ]);
+
+    // Refresh the user to load the relationship
+    $user->refresh();
+
+    return $user;
 }
 
 function createAdmin(array $attributes = []): \App\Models\User
@@ -77,7 +94,7 @@ function createAdmin(array $attributes = []): \App\Models\User
 /**
  * Create an organizer user with organization
  */
-function createOrganizerWithOrganization(array $userAttributes = [], array $orgAttributes = []): \App\Models\User
+function createOrganizerWithOrganization(array $userAttributes = [], array $orgAttributes = []): array
 {
     // Ensure organizer role exists
     \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'organizer']);
@@ -93,7 +110,7 @@ function createOrganizerWithOrganization(array $userAttributes = [], array $orgA
         'joined_at' => now(),
     ]);
 
-    return $user;
+    return ['user' => $user, 'organization' => $organization];
 }
 
 /**
