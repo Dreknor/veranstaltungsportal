@@ -6,7 +6,7 @@ use App\Models\User;
 
 beforeEach(function () {
     $result = createOrganizerWithOrganization();
-    $this->user = $result['user'];
+    $this->user = $result['organizer'];
     $this->organization = $result['organization'];
     session(['current_organization_id' => $this->organization->id]);
     $this->actingAs($this->user);
@@ -74,7 +74,7 @@ test('organizer can update their event', function () {
 
 test('organizer cannot update another users event', function () {
     $result2 = createOrganizerWithOrganization();
-    $otherUser = $result2['user'];
+    $otherUser = $result2['organizer'];
     $otherOrg = $result2['organization'];
 
     $event = Event::factory()->for($otherOrg)->create();

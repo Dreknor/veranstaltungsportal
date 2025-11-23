@@ -75,14 +75,19 @@ class QrCodeService
      */
     protected function getBookingQrData(Booking $booking): string
     {
+        // Load items if not already loaded
+        if (!$booking->relationLoaded('items')) {
+            $booking->load('items');
+        }
+
         return json_encode([
             'booking_id' => $booking->id,
             'reference' => $booking->booking_number,
             'event_id' => $booking->event_id,
-            'event_name' => $booking->event->title,
+            'event_name' => $booking->event->title ?? 'Event',
             'attendee_name' => $booking->customer_name,
             'attendee_email' => $booking->customer_email,
-            'total_tickets' => $booking->items->sum('quantity'),
+            'total_tickets' => $booking->items->sum('quantity') ?: 1,
             'verification_url' => route('bookings.verify', ['bookingNumber' => $booking->booking_number]),
             'check_in_url' => route('organizer.bookings.check-in', ['booking' => $booking->id]),
         ]);
@@ -99,7 +104,8 @@ class QrCodeService
         try {
             $data = json_decode($qrData, true);
 
-            if (!isset($data['booking_id'], $data['reference'])) {
+            // Require at least one identifier (booking_id, reference, or booking_number)
+            if (!isset($data['booking_id']) && !isset($data['reference']) && !isset($data['booking_number'])) {
                 return null;
             }
 
@@ -134,10 +140,20 @@ class QrCodeService
             return null;
         }
 
-        // Try to find booking by booking_number and verification_code
-        return Booking::where('booking_number', $data['booking_number'] ?? null)
-            ->where('verification_code', $data['verification_code'] ?? null)
-            ->first();
+        // Support both old format (booking_number/verification_code) and new format (booking_id/reference)
+        if (isset($data['booking_id'])) {
+            return Booking::find($data['booking_id']);
+        }
+
+        if (isset($data['reference'])) {
+            return Booking::where('booking_number', $data['reference'])->first();
+        }
+
+        if (isset($data['booking_number'])) {
+            return Booking::where('booking_number', $data['booking_number'])->first();
+        }
+
+        return null;
     }
 
     /**

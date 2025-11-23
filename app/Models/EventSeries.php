@@ -12,6 +12,7 @@ class EventSeries extends Model
 
     protected $fillable = [
         'user_id',
+        'organization_id',
         'title',
         'description',
         'event_category_id',

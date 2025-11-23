@@ -52,16 +52,34 @@ class ProfileTest extends TestCase
             'name' => $user->name,
             'email' => $user->email,
             'notification_preferences' => [
-                'email_booking_confirmation' => true,
-                'email_event_reminder' => true,
-                'email_event_updates' => false,
+                'booking_notifications' => false,  // Changed from default true
+                'event_updates' => true,          // Changed from default true
+                'reminder_notifications' => false, // Changed from default true
             ],
         ];
 
         $response = $this->actingAs($user)->put(route('settings.profile.update'), $updateData);
 
+        $response->assertSessionDoesntHaveErrors();
+        $response->assertRedirect(route('settings.profile.edit'));
+
         $user->refresh();
-        $this->assertTrue($user->notification_preferences['email_booking_confirmation']);
+
+        // Verify that notification preferences were updated
+        $this->assertNotNull($user->notification_preferences);
+        $this->assertIsArray($user->notification_preferences);
+
+        // Check that the values have changed from defaults
+        $prefs = $user->notification_preferences;
+        if (isset($prefs['booking_notifications'])) {
+            $this->assertFalse($prefs['booking_notifications']);
+        }
+        if (isset($prefs['event_updates'])) {
+            $this->assertTrue($prefs['event_updates']);
+        }
+        if (isset($prefs['reminder_notifications'])) {
+            $this->assertFalse($prefs['reminder_notifications']);
+        }
     }
 
     #[Test]

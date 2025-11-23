@@ -88,22 +88,35 @@ test('event show page displays event details', function () {
 
     $response->assertStatus(200);
     $response->assertSee($event->title);
-    // Description might be HTML-escaped or truncated, just check title
 });
 
 test('unpublished event is not accessible to public', function () {
-    test()->markTestSkipped('Authorization for unpublished events may not be fully implemented');
-
-    $organizer = \App\Models\User::factory()->create();
+    $result = createOrganizerWithOrganization();
     $event = Event::factory()
-        ->state(['is_published' => false, 'user_id' => $organizer->id])
+        ->for($result['organization'])
+        ->state(['is_published' => false])
         ->create();
 
-    // Test as guest (not logged in)
     $response = $this->get(route('events.show', $event->slug));
 
-    // Should redirect to login or show 403/404
-    expect($response->status())->toBeIn([302, 403, 404]);
+    // Should show 404 for unpublished events
+    $response->assertStatus(404);
+});
+
+test('unpublished event is accessible to organization owner', function () {
+    $result = createOrganizerWithOrganization();
+    $event = Event::factory()
+        ->for($result['organization'])
+        ->state(['is_published' => false])
+        ->create();
+
+    // Test as organization owner
+    $response = $this->actingAs($result['organizer'])
+        ->get(route('events.show', $event->slug));
+
+    // Should be accessible
+    $response->assertStatus(200);
+    $response->assertSee($event->title);
 });
 
 test('private event requires access code', function () {

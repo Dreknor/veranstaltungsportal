@@ -110,7 +110,7 @@ function createOrganizerWithOrganization(array $userAttributes = [], array $orgA
         'joined_at' => now(),
     ]);
 
-    return ['user' => $user, 'organization' => $organization];
+    return ['organizer' => $user, 'organization' => $organization];
 }
 
 /**

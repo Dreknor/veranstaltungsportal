@@ -7,7 +7,7 @@ use App\Models\Organization;
 
 test('debug event creation', function () {
     $result = createOrganizerWithOrganization();
-    $user = $result['user'];
+    $user = $result['organizer'];
     $organization = $result['organization'];
     session(['current_organization_id' => $organization->id]);
     $this->actingAs($user);

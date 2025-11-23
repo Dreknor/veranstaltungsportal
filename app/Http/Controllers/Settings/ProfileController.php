@@ -54,7 +54,27 @@ class ProfileController extends Controller
             $validated['profile_photo'] = $path;
         }
 
+        // Handle notification preferences separately
+        $notificationPreferences = null;
+        if (isset($validated['notification_preferences'])) {
+            $currentPreferences = $user->notification_preferences ?? [];
+            $newPreferences = array_map(function($value) {
+                return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+            }, $validated['notification_preferences']);
+
+            // Merge new preferences with existing ones
+            $notificationPreferences = array_merge($currentPreferences, $newPreferences);
+
+            // Remove from validated data to handle separately
+            unset($validated['notification_preferences']);
+        }
+
         $user->fill($validated);
+
+        // Set notification preferences after fill using setAttribute to force dirty tracking
+        if ($notificationPreferences !== null) {
+            $user->setAttribute('notification_preferences', $notificationPreferences);
+        }
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

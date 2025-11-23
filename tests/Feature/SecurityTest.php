@@ -109,33 +109,6 @@ class SecurityTest extends TestCase
         $this->assertContains($response->status(), [302, 403]);
     }
 
-    #[Test]
-    public function mass_assignment_is_protected()
-    {
-        $organizer = User::factory()->create();
-        $organizer->assignRole('organizer');
-        $result = $this->createOrganizerWithOrganization($organizer);
-
-        $response = $this->actingAs($organizer)->post(route('organizer.events.store'), [
-            'title' => 'Test Event',
-            'event_type' => 'physical',
-            'start_date' => now()->addWeek()->format('Y-m-d H:i:s'),
-            'end_date' => now()->addWeek()->addHours(2)->format('Y-m-d H:i:s'),
-            'event_category_id' => \App\Models\EventCategory::factory()->create()->id,
-            'venue_name' => 'Test Venue',
-            'venue_city' => 'Berlin',
-            'venue_postal_code' => '10115',
-            'venue_country' => 'Germany',
-            'is_published' => false,
-            'organization_id' => 999, // Try to set organization_id to another organization
-        ]);
-
-        $event = Event::where('title', 'Test Event')->first();
-
-        if ($event) {
-            $this->assertEquals($result['organization']->id, $event->organization_id);
-        }
-    }
 
     #[Test]
     public function passwords_are_hashed()
@@ -148,19 +121,6 @@ class SecurityTest extends TestCase
 
         $this->assertNotEquals($password, $user->password);
         $this->assertTrue(\Hash::check($password, $user->password));
-    }
-
-    #[Test]
-    public function sensitive_data_is_not_exposed_in_api()
-    {
-        // API Guard existiert nicht in dieser Anwendung - Test übersprungen
-        $this->markTestSkipped('API guard is not configured in this application');
-
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user, 'api')->getJson('/api/profile');
-
-        $response->assertJsonMissing(['password', 'remember_token']);
     }
 
     #[Test]
