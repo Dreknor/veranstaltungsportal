@@ -219,8 +219,14 @@ class OrganizationController extends Controller
     /**
      * Update team member role
      */
-    public function updateMemberRole(Request $request, Organization $organization, $userId)
+    public function updateMemberRole(Request $request, $userId)
     {
+        $organization = auth()->user()->currentOrganization();
+
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         $this->authorize('update', $organization);
 
         $validated = $request->validate([
@@ -250,8 +256,14 @@ class OrganizationController extends Controller
     /**
      * Remove team member
      */
-    public function removeMember(Organization $organization, $userId)
+    public function removeMember($userId)
     {
+        $organization = auth()->user()->currentOrganization();
+
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
         $this->authorize('update', $organization);
 
         // Prevent removing the last owner
