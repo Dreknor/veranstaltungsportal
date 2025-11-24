@@ -64,9 +64,19 @@ class UserTest extends TestCase
     #[Test]
     public function it_returns_profile_photo_url()
     {
-        $user = User::factory()->create(['profile_photo' => 'photos/test.jpg']);
+        $user = User::factory()->create(['profile_photo' => 'profile-photos/test.jpg']);
+        $expected = route('profile-photo.show', ['user' => $user->id]);
+        $this->assertEquals($expected, $user->profilePhotoUrl());
+        $this->assertStringContainsString('/profile-photo/' . $user->id, $user->profilePhotoUrl());
+    }
 
-        $this->assertStringContainsString('photos/test.jpg', $user->profilePhotoUrl());
+    #[Test]
+    public function it_returns_gravatar_when_no_profile_photo()
+    {
+        $user = User::factory()->create(['profile_photo' => null]);
+        $url = $user->profilePhotoUrl();
+        $this->assertStringContainsString('gravatar.com/avatar/', $url);
+        $this->assertStringContainsString('?d=mp&s=200', $url);
     }
 
 
@@ -139,4 +149,3 @@ class UserTest extends TestCase
         $this->assertIsArray($user->notification_preferences);
     }
 }
-

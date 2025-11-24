@@ -608,6 +608,19 @@
   - [x] Data Privacy Views
   - [x] Feature Tests (DataPrivacyControllerTest)
   - [x] Networking-Opt-In/Opt-Out
+- [x] **Geschützte Profilbilder** ✅ NEU (24.11.2025)
+  - [x] Profilbilder werden im private Storage gespeichert (storage/app/private)
+  - [x] ProfilePhotoController für authentifizierten Zugriff
+  - [x] Zugriffsrechte implementiert (nur für eingeloggte User)
+  - [x] User kann eigenes Bild sehen
+  - [x] Öffentliche Profile: Bild für alle sichtbar
+  - [x] Networking-Profile: Bild für verbundene User sichtbar
+  - [x] ProfileController aktualisiert (Settings & Organizer)
+  - [x] User Model profilePhotoUrl() nutzt geschützte Route
+  - [x] Migration Command für bestehende Profilbilder (profile:migrate-to-private)
+  - [x] Event-Bilder & Organisationslogos bleiben öffentlich (storage/app/public)
+  - [x] Cache-Control Header für Performance
+  - [x] 403 Error bei unberechtigtem Zugriff behoben
 - [ ] Rabattcodes erstellen und verwalten (Frontend)
 - [x] **Event-Duplikation (Clone Event)**
   - [x] Duplicate-Methode in EventManagementController

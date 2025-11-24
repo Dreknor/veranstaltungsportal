@@ -80,9 +80,12 @@
                                 @endif
 
                                 <div class="flex space-x-2">
-                                    <a href="{{ route('users.show', $user) }}" class="flex-1 text-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                        Profil
-                                    </a>
+                                    @php($viewer = auth()->user())
+                                    @if($user->canBeViewedBy($viewer))
+                                        <a href="{{ route('users.show', $user) }}" class="flex-1 text-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                                            Profil
+                                        </a>
+                                    @endif
                                     <form action="{{ route('connections.send', $user) }}" method="POST" class="flex-1">
                                         @csrf
                                         <button type="submit" class="w-full px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
@@ -98,4 +101,3 @@
         </div>
     </div>
 </x-layouts.app>
-

@@ -163,9 +163,9 @@ class DataPrivacyController extends Controller
             $hasFiles = false;
 
             // Add profile photo if exists
-            if ($user->profile_photo && Storage::disk('public')->exists($user->profile_photo)) {
+            if ($user->profile_photo && Storage::disk('local')->exists($user->profile_photo)) {
                 $zip->addFile(
-                    Storage::disk('public')->path($user->profile_photo),
+                    Storage::disk('local')->path($user->profile_photo),
                     'profile_photo/' . basename($user->profile_photo)
                 );
                 $hasFiles = true;

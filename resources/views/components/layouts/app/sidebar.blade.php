@@ -198,6 +198,16 @@
                         :active="request()->routeIs('organizer.bank-account.*')">
                         Kontoverbindung
                     </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('organizer.organization.edit') }}" icon='fas-building'
+                        :active="request()->routeIs('organizer.organization.*')">
+                        Veranstalter-Profil
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('organizer.team.index') }}" icon='fas-users-gear'
+                        :active="request()->routeIs('organizer.team.*')">
+                        Team-Verwaltung
+                    </x-layouts.sidebar-link>
                 @endif
                 @endauth
 

@@ -405,6 +405,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 // Impersonate Leave (available for all authenticated users)
 Route::middleware(['auth', 'verified'])->post('/impersonate/leave', [\App\Http\Controllers\Admin\ImpersonateController::class, 'leave'])->name('impersonate.leave');
 
+// Protected Profile Photos Route (requires authentication)
+Route::get('/profile-photo/{user}', [\App\Http\Controllers\ProfilePhotoController::class, 'show'])
+    ->middleware('auth')
+    ->name('profile-photo.show');
+
 // Data Privacy & DSGVO
 Route::middleware(['auth', 'verified'])->prefix('data-privacy')->name('data-privacy.')->group(function () {
     Route::get('/', [\App\Http\Controllers\DataPrivacyController::class, 'index'])->name('index');
@@ -414,6 +419,7 @@ Route::middleware(['auth', 'verified'])->prefix('data-privacy')->name('data-priv
     Route::get('/settings', [\App\Http\Controllers\DataPrivacyController::class, 'settings'])->name('settings');
     Route::put('/settings', [\App\Http\Controllers\DataPrivacyController::class, 'updateSettings'])->name('settings.update');
 });
+
 
 require __DIR__.'/auth.php';
 
