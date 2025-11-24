@@ -82,12 +82,26 @@ class SecurityTest extends TestCase
 
         $booking = Booking::factory()->create(['user_id' => $user2->id]);
 
-        // Es gibt keine bookings.show Route - Test übersprungen
-        $this->markTestSkipped('bookings.show route does not exist');
+        // Nutzer 1 versucht auf Buchung von Nutzer 2 zuzugreifen
+        $response = $this->actingAs($user1)->get(route('bookings.show', $booking->booking_number));
 
-        $response = $this->actingAs($user1)->get(route('bookings.show', $booking));
+        // Der Controller leitet bei fehlendem Zugriff zur Verifizierungsseite um (302), kein 403
+        $response->assertStatus(302);
+        $response->assertRedirect(route('bookings.verify', $booking->booking_number));
+    }
 
-        $response->assertStatus(403);
+    #[Test]
+    public function user_can_access_own_booking()
+    {
+        $user = User::factory()->create();
+        $booking = Booking::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->get(route('bookings.show', $booking->booking_number));
+
+        $response->assertStatus(200);
+        $response->assertViewIs('bookings.show');
+        // Buchungsnummer sollte irgendwo im HTML erscheinen
+        $response->assertSee($booking->booking_number, false);
     }
 
     #[Test]
@@ -141,26 +155,6 @@ class SecurityTest extends TestCase
     }
 
     #[Test]
-    public function file_upload_validates_mime_types()
-    {
-        // Upload-Image Route existiert nicht - Featured Image wird direkt beim Event-Create hochgeladen
-        $this->markTestSkipped('Image upload is handled during event creation, not as separate route');
-
-        $organizer = User::factory()->create();
-        $organizer->assignRole('organizer');
-        $result = $this->createOrganizerWithOrganization($organizer);
-        $event = Event::factory()->create(['organization_id' => $result['organization']->id]);
-
-        $file = \Illuminate\Http\UploadedFile::fake()->create('malicious.exe', 100);
-
-        $response = $this->actingAs($organizer)->post(route('organizer.events.upload-image', $event), [
-            'image' => $file,
-        ]);
-
-        $response->assertSessionHasErrors('image');
-    }
-
-    #[Test]
     public function session_hijacking_is_prevented()
     {
         $user = User::factory()->create();
@@ -184,7 +178,21 @@ class SecurityTest extends TestCase
         $this->assertStringStartsWith('BK-', $booking1->booking_number);
         $this->assertStringStartsWith('BK-', $booking2->booking_number);
     }
+
+    #[Test]
+    public function user_booking_page_uses_authenticated_layout_when_logged_in()
+    {
+        $user = User::factory()->create();
+        $booking = Booking::factory()->create(['user_id' => $user->id]);
+
+        $response = $this->actingAs($user)->get(route('bookings.show', $booking->booking_number));
+
+        $response->assertStatus(200);
+        // Prüfe auf typische Sidebar-Elemente aus dem App-Layout
+        $response->assertSee('Meine Buchungen', false);
+        $response->assertSee('Favoriten', false);
+        $response->assertSee('Benachrichtigungen', false);
+        // Sicherstellen, dass das Public-Navi-Element "Registrieren" nicht angezeigt wird
+        $response->assertDontSee('Registrieren', false);
+    }
 }
-
-
-
