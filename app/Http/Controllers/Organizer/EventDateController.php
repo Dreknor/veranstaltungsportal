@@ -17,7 +17,8 @@ class EventDateController extends Controller
         $this->authorize('update', $event);
 
         if (!$event->has_multiple_dates) {
-            return back()->with('error', 'Dieses Event hat keine mehreren Termine aktiviert.');
+            return redirect()->back()
+                ->with('error', 'Dieses Event hat keine mehreren Termine aktiviert.');
         }
 
         $validated = $request->validate([
@@ -37,7 +38,9 @@ class EventDateController extends Controller
 
         EventDate::create($validated);
 
-        return back()->with('success', 'Termin erfolgreich hinzugefügt!');
+        // Explizit zur Edit-Seite leiten, damit kein GET auf /organizer/events/{event}/dates versucht wird
+        return redirect()->back()
+            ->with('success', 'Termin erfolgreich hinzugefügt!');
     }
 
     /**
@@ -68,7 +71,8 @@ class EventDateController extends Controller
 
         $eventDate->update($validated);
 
-        return back()->with('success', 'Termin erfolgreich aktualisiert!');
+        return redirect()->back()
+            ->with('success', 'Termin erfolgreich aktualisiert!');
     }
 
     /**
@@ -84,12 +88,14 @@ class EventDateController extends Controller
 
         // Prevent deletion if it's the last date
         if ($event->dates()->count() <= 1) {
-            return back()->with('error', 'Sie können den letzten Termin nicht löschen. Deaktivieren Sie stattdessen "Mehrere Termine".');
+            return redirect()->route('organizer.events.edit', $event)
+                ->with('error', 'Sie können den letzten Termin nicht löschen. Deaktivieren Sie stattdessen "Mehrere Termine".');
         }
 
         $eventDate->delete();
 
-        return back()->with('success', 'Termin erfolgreich gelöscht!');
+        return redirect()->route('organizer.events.edit', $event->slug)
+            ->with('success', 'Termin erfolgreich gelöscht!');
     }
 
     /**
@@ -114,7 +120,8 @@ class EventDateController extends Controller
 
         // TODO: Notify participants about the cancellation
 
-        return back()->with('success', 'Termin erfolgreich abgesagt!');
+        return redirect()->route('organizer.events.edit', $event)
+            ->with('success', 'Termin erfolgreich abgesagt!');
     }
 
     /**
@@ -133,7 +140,8 @@ class EventDateController extends Controller
             'cancellation_reason' => null,
         ]);
 
-        return back()->with('success', 'Termin erfolgreich reaktiviert!');
+        return redirect()->route('organizer.events.edit', $event->slug)
+            ->with('success', 'Termin erfolgreich reaktiviert!');
     }
 }
 

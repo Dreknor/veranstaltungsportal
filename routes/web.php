@@ -150,6 +150,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::post('/events/{event}/calculate-costs', [Organizer\EventManagementController::class, 'calculateCosts'])->name('events.calculate-costs');
 
         // Event Dates (for events with multiple dates)
+        Route::post('/events/{event}/multiple-dates/toggle', [Organizer\EventMultipleDatesController::class, 'toggle'])->name('events.multiple-dates.toggle');
         Route::post('/events/{event}/dates', [Organizer\EventDateController::class, 'store'])->name('events.dates.store');
         Route::put('/events/{event}/dates/{eventDate}', [Organizer\EventDateController::class, 'update'])->name('events.dates.update');
         Route::delete('/events/{event}/dates/{eventDate}', [Organizer\EventDateController::class, 'destroy'])->name('events.dates.destroy');

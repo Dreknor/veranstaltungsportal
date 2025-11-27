@@ -78,6 +78,7 @@ class EventManagementController extends Controller
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             'is_private' => 'boolean',
+            'has_multiple_dates' => 'boolean',
             'access_code' => 'nullable|string|required_if:is_private,1',
             'organizer_info' => 'nullable|string',
             'organizer_email' => 'nullable|email',
@@ -97,7 +98,6 @@ class EventManagementController extends Controller
 
         $validated['organization_id'] = $organization->id;
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
-        $validated['has_multiple_dates'] = (bool)$request->input('has_multiple_dates', false);
 
         // Handle Image Upload
         if ($request->hasFile('featured_image')) {
@@ -107,13 +107,36 @@ class EventManagementController extends Controller
 
         $event = Event::create($validated);
 
+        // Create first EventDate if has_multiple_dates is enabled
+        if ($request->boolean('has_multiple_dates')) {
+            \App\Models\EventDate::create([
+                'event_id' => $event->id,
+                'start_date' => $event->start_date,
+                'end_date' => $event->end_date,
+                'venue_name' => $event->venue_name,
+                'venue_address' => $event->venue_address,
+                'venue_city' => $event->venue_city,
+                'venue_postal_code' => $event->venue_postal_code,
+                'venue_country' => $event->venue_country,
+                'venue_latitude' => $event->venue_latitude,
+                'venue_longitude' => $event->venue_longitude,
+                'notes' => 'Erster Termin (aus Hauptevent übernommen)',
+            ]);
+        }
+
         // Create featured event booking if requested
         if ($request->boolean('is_featured') && $request->filled('featured_duration_type')) {
             $this->createFeaturedBooking($event, $request);
         }
 
+        $successMessage = 'Event erfolgreich erstellt!';
+        if ($request->boolean('has_multiple_dates')) {
+            $successMessage .= ' Der erste Termin wurde automatisch angelegt.';
+        }
+
         return redirect()->route('organizer.events.edit', $event)
-            ->with('success', 'Event erfolgreich erstellt!');
+            ->with('success', $successMessage)
+            ->with('scroll_to_dates', $request->boolean('has_multiple_dates'));
     }
 
     /**
@@ -149,6 +172,9 @@ class EventManagementController extends Controller
     {
         $this->authorize('update', $event);
 
+        // Load dates relation for multiple dates feature
+        $event->load('dates');
+
         $categories = EventCategory::where('is_active', true)->get();
         $ticketTypes = $event->ticketTypes;
 
@@ -172,7 +198,6 @@ class EventManagementController extends Controller
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
-            'has_multiple_dates' => 'boolean',
             'venue_name' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
             'venue_address' => 'required_if:event_type,physical,hybrid|nullable|string',
             'venue_city' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
@@ -198,6 +223,8 @@ class EventManagementController extends Controller
             'organizer_website' => 'nullable|url',
         ]);
 
+        unset($validated['has_multiple_dates']);
+
         // Check if trying to publish without complete organizer data
         if ($request->boolean('is_published') && !$event->is_published) {
             $user = auth()->user();
@@ -222,8 +249,6 @@ class EventManagementController extends Controller
             }
         }
 
-        // Ensure boolean fields are properly set
-        $validated['has_multiple_dates'] = (bool)$request->input('has_multiple_dates', false);
 
         // Handle Image Upload
         if ($request->hasFile('featured_image')) {

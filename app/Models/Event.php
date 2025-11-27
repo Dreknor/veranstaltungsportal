@@ -35,6 +35,7 @@ class Event extends Model implements HasMedia
         'start_date',
         'end_date',
         'duration',
+        'has_multiple_dates',
         'venue_name',
         'venue_address',
         'venue_city',

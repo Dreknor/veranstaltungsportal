@@ -79,7 +79,7 @@
                                     </svg>
                                 </button>
                             @else
-                                <form method="POST" action="{{ route('organizer.events.dates.reactivate', [$event, $date]) }}" class="inline">
+                                <form method="POST" action="{{ route('organizer.events.dates.reactivate', [$event->id, $date]) }}" class="inline">
                                     @csrf
                                     <button type="submit"
                                             class="p-2 text-green-600 hover:bg-green-100 rounded transition"
@@ -92,7 +92,7 @@
                             @endif
 
                             @if($event->dates()->count() > 1)
-                                <form method="POST" action="{{ route('organizer.events.dates.destroy', [$event, $date]) }}" class="inline">
+                                <form method="POST" action="{{ route('organizer.events.dates.destroy', [$event->id, $date]) }}" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -125,7 +125,7 @@
                 </button>
             </div>
 
-            <form method="POST" action="{{ route('organizer.events.dates.store', $event) }}" class="space-y-4">
+            <form id="add-date-form" method="POST" action="{{ route('organizer.events.dates.store', $event->slug) }}" class="space-y-4">
                 @csrf
 
                 <div class="grid grid-cols-2 gap-4">
@@ -146,27 +146,31 @@
 
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Venue Name</label>
-                            <input type="text" name="venue_name"
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Veranstaltungsort</label>
+                            <input type="text" name="venue_name" placeholder="{{ $event->venue_name }}"
                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_name ?? 'Nicht angegeben' }}</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                            <input type="text" name="venue_address"
+                            <input type="text" name="venue_address" placeholder="{{ $event->venue_address }}"
                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_address ?? 'Nicht angegeben' }}</p>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
-                                <input type="text" name="venue_city"
+                                <input type="text" name="venue_city" placeholder="{{ $event->venue_city }}"
                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_city ?? 'Nicht angegeben' }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
-                                <input type="text" name="venue_postal_code"
+                                <input type="text" name="venue_postal_code" placeholder="{{ $event->venue_postal_code }}"
                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_postal_code ?? 'Nicht angegeben' }}</p>
                             </div>
                         </div>
                     </div>
@@ -240,11 +244,144 @@
     </div>
 </div>
 
+{{-- Edit Date Modal --}}
+<div id="edit-date-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Termin bearbeiten</h3>
+                <button type="button" onclick="closeEditDateModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="edit-date-form" method="POST" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Startdatum *</label>
+                        <input type="datetime-local" id="edit_start_date" name="start_date" required
+                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Enddatum *</label>
+                        <input type="datetime-local" id="edit_end_date" name="end_date" required
+                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <p class="text-sm text-gray-600 mb-3">Abweichender Veranstaltungsort (optional)</p>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Veranstaltungsort</label>
+                            <input type="text" id="edit_venue_name" name="venue_name" placeholder="{{ $event->venue_name }}"
+                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                            <input type="text" id="edit_venue_address" name="venue_address" placeholder="{{ $event->venue_address }}"
+                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
+                                <input type="text" id="edit_venue_city" name="venue_city" placeholder="{{ $event->venue_city }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
+                                <input type="text" id="edit_venue_postal_code" name="venue_postal_code" placeholder="{{ $event->venue_postal_code }}"
+                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Hinweise zu diesem Termin</label>
+                    <textarea id="edit_notes" name="notes" rows="3"
+                              class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              placeholder="z.B. 'Dieser Termin findet online statt'"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <button type="button"
+                            onclick="closeEditDateModal()"
+                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
+                        Abbrechen
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Änderungen speichern
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 function cancelDate(dateId) {
     const form = document.getElementById('cancel-date-form');
-    form.action = '{{ route('organizer.events.dates.cancel', [$event, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
+    form.action = '{{ route('organizer.events.dates.cancel', [$event->id, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
     document.getElementById('cancel-date-modal').classList.remove('hidden');
+}
+
+function editDate(dateId) {
+    // Lade die Termin-Daten - Sicher mit Try-Catch
+    try {
+        const datesData = {!! json_encode($event->dates->keyBy('id')) !!};
+        const date = datesData[dateId];
+
+        if (!date) {
+            console.error('Termin nicht gefunden:', dateId);
+            alert('Termin konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
+            return;
+        }
+
+        // Fülle das Formular mit den aktuellen Daten
+        document.getElementById('edit_start_date').value = formatDateTimeForInput(date.start_date);
+        document.getElementById('edit_end_date').value = formatDateTimeForInput(date.end_date);
+        document.getElementById('edit_venue_name').value = date.venue_name || '';
+        document.getElementById('edit_venue_address').value = date.venue_address || '';
+        document.getElementById('edit_venue_city').value = date.venue_city || '';
+        document.getElementById('edit_venue_postal_code').value = date.venue_postal_code || '';
+        document.getElementById('edit_notes').value = date.notes || '';
+
+        // Setze die Form-Action
+        const form = document.getElementById('edit-date-form');
+        form.action = '{{ route('organizer.events.dates.update', [$event->id, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
+
+        // Zeige das Modal
+        document.getElementById('edit-date-modal').classList.remove('hidden');
+    } catch (error) {
+        console.error('Fehler beim Laden der Termin-Daten:', error);
+        alert('Fehler beim Laden der Termin-Daten. Bitte laden Sie die Seite neu.');
+    }
+}
+
+function closeEditDateModal() {
+    document.getElementById('edit-date-modal').classList.add('hidden');
+}
+
+function formatDateTimeForInput(dateString) {
+    // Konvertiere das Datum in das datetime-local Format (YYYY-MM-DDTHH:MM)
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 </script>
 @endif

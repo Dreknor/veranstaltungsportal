@@ -169,8 +169,10 @@
                     </div>
 
                     <div class="mt-4">
-                        <label class="flex items-start">
-                            <input type="checkbox" name="has_multiple_dates" value="1" {{ old('has_multiple_dates') ? 'checked' : '' }}
+                        <!-- Hidden field ensures false value is sent when checkbox is unchecked -->
+                        <input type="hidden" name="has_multiple_dates" value="0">
+                        <label class="flex items-start cursor-pointer">
+                            <input type="checkbox" id="has_multiple_dates" name="has_multiple_dates" value="1" {{ old('has_multiple_dates') ? 'checked' : '' }}
                                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 mt-1">
                             <span class="ml-2">
                                 <span class="block text-sm font-medium text-gray-700">Event hat mehrere Termine</span>
@@ -180,8 +182,34 @@
                                 </span>
                             </span>
                         </label>
-                        <div class="mt-2 text-xs text-blue-600 italic">
-                            Hinweis: Nach dem Erstellen des Events können Sie weitere Termine hinzufügen.
+
+                        <!-- Info Box für Multiple Dates -->
+                        <div id="multiple-dates-info" class="mt-3 p-4 bg-blue-50 border-l-4 border-blue-500 rounded" style="display: {{ old('has_multiple_dates') ? 'block' : 'none' }}">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-blue-900">Mehrere Termine aktiviert ✓</p>
+                                    <p class="text-xs text-blue-700 mt-1">
+                                        Das oben angegebene Start- und Enddatum wird als <strong>erster Termin</strong> gespeichert.
+                                        Nach dem Erstellen des Events können Sie auf der Bearbeitungsseite weitere Termine hinzufügen.
+                                    </p>
+                                    <ul class="mt-2 text-xs text-blue-700 space-y-1 list-disc list-inside">
+                                        <li>Alle Termine werden gemeinsam gebucht</li>
+                                        <li>Die Kapazität gilt für die gesamte Serie</li>
+                                        <li>Sie können jeden Termin einzeln absagen</li>
+                                    </ul>
+                                    <div class="mt-3 flex items-center gap-2 text-xs bg-white rounded p-2 border border-blue-200">
+                                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                        <span class="text-blue-800">
+                                            <strong>So geht's weiter:</strong> Klicken Sie unten auf "Event erstellen". Auf der nächsten Seite können Sie dann weitere Termine hinzufügen.
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -411,6 +439,21 @@
         document.getElementById('is_private').addEventListener('change', function() {
             document.getElementById('access_code_field').style.display = this.checked ? 'block' : 'none';
         });
+
+        // Toggle Multiple Dates Info Box
+        const multipleDatesCheckbox = document.getElementById('has_multiple_dates');
+        const multipleDatesInfo = document.getElementById('multiple-dates-info');
+
+        if (multipleDatesCheckbox && multipleDatesInfo) {
+            multipleDatesCheckbox.addEventListener('change', function() {
+                multipleDatesInfo.style.display = this.checked ? 'block' : 'none';
+
+                // Visuelle Rückmeldung
+                if (this.checked) {
+                    multipleDatesInfo.classList.add('animate-fadeIn');
+                }
+            });
+        }
 
         // Toggle Venue/Online sections based on event type
         const eventTypeSelect = document.getElementById('event_type');
