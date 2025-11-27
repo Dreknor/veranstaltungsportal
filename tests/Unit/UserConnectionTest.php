@@ -239,20 +239,31 @@ test('user can get connection status with another user', function () {
 test('user can get suggested connections', function () {
     $user = User::factory()->create([
         'interested_category_ids' => [1, 2, 3],
+        'allow_networking' => true,
     ]);
 
-    // Create users with similar interests
+    // Create users with similar interests (and networking allowed)
     $similarUsers = User::factory()->count(5)->create([
         'interested_category_ids' => [1, 2, 4],
+        'allow_networking' => true,
     ]);
 
-    // Create user without similar interests
+    // Create user without similar interests (networking allowed, should not appear)
     User::factory()->create([
         'interested_category_ids' => [5, 6, 7],
+        'allow_networking' => true,
+    ]);
+
+    // Create user with similar interests but networking disabled (should not appear)
+    User::factory()->create([
+        'interested_category_ids' => [2, 8],
+        'allow_networking' => false,
     ]);
 
     $suggestions = $user->getSuggestedConnections(10);
 
+    // Nur Nutzer mit Overlap und allow_networking=true
+    expect($suggestions->every(fn($u) => $u->allow_networking))->toBeTrue();
     expect($suggestions->count())->toBeGreaterThan(0);
     expect($suggestions->count())->toBeLessThanOrEqual(10);
 });

@@ -9,6 +9,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Event;
+use App\Models\Booking;
+use App\Models\EventCategory;
+use App\Models\Badge;
+use App\Models\UserBadge;
+use App\Models\EventReview;
+use App\Models\Organization;
+use App\Models\UserConnection;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -175,7 +183,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function profilePhotoUrl(): string
     {
         if ($this->profile_photo) {
-            return asset('storage/' . $this->profile_photo);
+            return route('profile-photo.show', ['user' => $this->id]);
         }
 
         // Generate a gravatar URL as fallback
@@ -999,12 +1007,18 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get suggested connections (users with similar interests)
+     *
+     * Einschränkungen:
+     * - schließt den aktuellen Nutzer aus
+     * - schließt bereits bestehende Verbindungen (pending/accepted/blocked) aus
+     * - zeigt nur Nutzer an, die Vernetzung erlauben (allow_networking = true)
+     * - bei fehlenden Interessen: fallback auf aktivste Nutzer nach Buchungen (ebenfalls nur mit allow_networking)
      */
     public function getSuggestedConnections(int $limit = 10)
     {
         $categoryIds = $this->interested_category_ids ?? [];
 
-        // Get IDs of users already connected
+        // Ursprüngliche Ermittlung der verbundenen IDs (alle Status) beibehalten
         $connectedUserIds = UserConnection::where(function ($query) {
             $query->where('follower_id', $this->id)
                 ->orWhere('following_id', $this->id);
@@ -1015,8 +1029,8 @@ class User extends Authenticatable implements MustVerifyEmail
         })->values()->toArray();
 
         if (empty($categoryIds)) {
-            // If no interests, suggest active users
             return User::where('id', '!=', $this->id)
+                ->where('allow_networking', true)
                 ->whereNotIn('id', $connectedUserIds)
                 ->withCount('bookings')
                 ->orderBy('bookings_count', 'desc')
@@ -1024,22 +1038,62 @@ class User extends Authenticatable implements MustVerifyEmail
                 ->get();
         }
 
-        // Suggest users with similar interests
-        // For SQLite compatibility, we need to use a different approach
         $users = User::where('id', '!=', $this->id)
+            ->where('allow_networking', true)
             ->whereNotIn('id', $connectedUserIds)
             ->get();
 
-        // Filter in PHP for SQLite compatibility
         $filteredUsers = $users->filter(function ($user) use ($categoryIds) {
             $userCategories = $user->interested_category_ids ?? [];
             if (empty($userCategories)) {
                 return false;
             }
-            // Check if there's any overlap
             return count(array_intersect($categoryIds, $userCategories)) > 0;
         })->take($limit);
 
         return $filteredUsers;
+    }
+
+    /**
+     * Prüft ob dieses Profil vom gegebenen Betrachter eingesehen werden darf.
+     * Bedingungen:
+     * - Eigenes Profil immer sichtbar
+     * - Öffentliches Profil (show_profile_public) sichtbar
+     * - Wenn nicht öffentlich: sichtbar für Follower falls Vernetzung erlaubt
+     * - Blockierte Beziehungen verhindern Sichtbarkeit
+     */
+    public function canBeViewedBy(?User $viewer): bool
+    {
+        // Eigenes Profil
+        if ($viewer && $viewer->id === $this->id) {
+            return true;
+        }
+
+        // Blockierung prüfen (falls Methoden existieren)
+        if ($viewer && method_exists($viewer, 'hasBlocked') && method_exists($this, 'hasBlocked')) {
+            if ($viewer->hasBlocked($this) || $this->hasBlocked($viewer)) {
+                return false;
+            }
+        }
+
+        // Öffentliches Profil
+        if (isset($this->show_profile_public) && $this->show_profile_public === true) {
+            return true;
+        }
+
+        // Legacy Fallback wenn Feld nicht gesetzt (behandle als öffentlich)
+        if (!isset($this->show_profile_public)) {
+            return true;
+        }
+
+        // Vernetzungs-Check für Follower
+        if ($viewer && $viewer->isFollowing($this)) {
+            $allowNetworking = isset($this->allow_networking) ? $this->allow_networking : true;
+            if ($allowNetworking) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

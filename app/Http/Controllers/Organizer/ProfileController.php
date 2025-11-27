@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -16,6 +17,7 @@ class ProfileController extends Controller
 
     public function edit()
     {
+        /** @var User $user */
         $user = auth()->user();
         $organization = $user->currentOrganization();
 
@@ -24,6 +26,7 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
+        /** @var User $user */
         $user = auth()->user();
 
         $validated = $request->validate([
@@ -39,10 +42,10 @@ class ProfileController extends Controller
         if ($request->hasFile('profile_photo')) {
             // Delete old photo if exists
             if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
+                Storage::disk('local')->delete($user->profile_photo);
             }
 
-            $path = $request->file('profile_photo')->store('profile-photos', 'public');
+            $path = $request->file('profile_photo')->store('profile-photos', 'local');
             $validated['profile_photo'] = $path;
         }
 
@@ -54,10 +57,11 @@ class ProfileController extends Controller
 
     public function deletePhoto()
     {
+        /** @var User $user */
         $user = auth()->user();
 
         if ($user->profile_photo) {
-            Storage::disk('public')->delete($user->profile_photo);
+            Storage::disk('local')->delete($user->profile_photo);
             $user->update(['profile_photo' => null]);
         }
 

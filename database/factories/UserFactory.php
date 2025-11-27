@@ -40,4 +40,24 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    /**
+     * Öffentliche Profil-Anzeige aktivieren.
+     */
+    public function publicProfile(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'show_profile_public' => true,
+        ]);
+    }
+
+    /**
+     * Networking erlauben.
+     */
+    public function networkingEnabled(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'allow_networking' => true,
+        ]);
+    }
 }
