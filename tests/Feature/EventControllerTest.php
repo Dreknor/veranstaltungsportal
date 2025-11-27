@@ -6,7 +6,6 @@ use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\EventCategory;
-use App\Models\EventSeries;
 use App\Models\TicketType;
 use App\Models\Booking;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,18 +35,6 @@ class EventControllerTest extends TestCase
         $this->assertEquals($category->id, $event->category->id);
     }
 
-    #[Test]
-    public function it_can_belong_to_a_series()
-    {
-        $series = EventSeries::factory()->create();
-        $event = Event::factory()->create([
-            'series_id' => $series->id,
-            'is_series_part' => true,
-        ]);
-
-        $this->assertTrue($event->isPartOfSeries());
-        $this->assertInstanceOf(EventSeries::class, $event->series);
-    }
 
     #[Test]
     public function it_has_many_ticket_types()

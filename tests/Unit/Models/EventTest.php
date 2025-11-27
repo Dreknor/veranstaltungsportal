@@ -6,7 +6,7 @@ use PHPUnit\Framework\Attributes\Test;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\EventCategory;
-use App\Models\EventSeries;
+use App\Models\EventDate;
 use App\Models\TicketType;
 use App\Models\Booking;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -37,16 +37,16 @@ class EventTest extends TestCase
     }
 
     #[Test]
-    public function it_can_belong_to_a_series()
+    public function it_can_have_multiple_dates()
     {
-        $series = EventSeries::factory()->create();
         $event = Event::factory()->create([
-            'series_id' => $series->id,
-            'is_series_part' => true,
+            'has_multiple_dates' => true,
         ]);
 
-        $this->assertTrue($event->isPartOfSeries());
-        $this->assertInstanceOf(EventSeries::class, $event->series);
+        EventDate::factory()->count(3)->create(['event_id' => $event->id]);
+
+        $this->assertTrue($event->hasMultipleDates());
+        $this->assertCount(3, $event->dates);
     }
 
     #[Test]

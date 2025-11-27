@@ -127,13 +127,6 @@ class Organization extends Model
         return $this->hasMany(Event::class);
     }
 
-    /**
-     * Event series created by this organization
-     */
-    public function series(): HasMany
-    {
-        return $this->hasMany(EventSeries::class);
-    }
 
     /**
      * Get all bookings for this organization's events

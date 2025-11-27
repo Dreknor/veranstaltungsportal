@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
+            $table->boolean('has_multiple_dates')->default(false);
             $table->string('venue_name');
             $table->text('venue_address');
             $table->string('venue_city');

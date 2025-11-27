@@ -97,6 +97,7 @@ class EventManagementController extends Controller
 
         $validated['organization_id'] = $organization->id;
         $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
+        $validated['has_multiple_dates'] = (bool)$request->input('has_multiple_dates', false);
 
         // Handle Image Upload
         if ($request->hasFile('featured_image')) {
@@ -171,6 +172,7 @@ class EventManagementController extends Controller
             'description' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
+            'has_multiple_dates' => 'boolean',
             'venue_name' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
             'venue_address' => 'required_if:event_type,physical,hybrid|nullable|string',
             'venue_city' => 'required_if:event_type,physical,hybrid|nullable|string|max:255',
@@ -219,6 +221,9 @@ class EventManagementController extends Controller
                     ->with('redirect_to_settings', true);
             }
         }
+
+        // Ensure boolean fields are properly set
+        $validated['has_multiple_dates'] = (bool)$request->input('has_multiple_dates', false);
 
         // Handle Image Upload
         if ($request->hasFile('featured_image')) {

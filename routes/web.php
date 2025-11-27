@@ -35,10 +35,6 @@ Route::get('/events/{slug}/calendar', [EventController::class, 'exportToCalendar
 Route::get('/events/{slug}/access', [EventController::class, 'access'])->name('events.access');
 Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])->middleware('recaptcha:access_code')->name('events.verify-access');
 
-// Event Series Routes (Public)
-Route::get('/series/{series}', [\App\Http\Controllers\SeriesController::class, 'show'])->name('series.show');
-Route::get('/series/{series}/book', [\App\Http\Controllers\SeriesController::class, 'book'])->name('series.book');
-Route::post('/series/{series}/book', [\App\Http\Controllers\SeriesController::class, 'store'])->name('series.book.store');
 
 // Waitlist Routes
 Route::post('/events/{event}/waitlist/join', [\App\Http\Controllers\WaitlistController::class, 'join'])->name('waitlist.join');
@@ -153,6 +149,13 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::post('/events/{event}/attendees/contact', [Organizer\EventManagementController::class, 'contactAttendees'])->name('events.attendees.contact.send');
         Route::post('/events/{event}/calculate-costs', [Organizer\EventManagementController::class, 'calculateCosts'])->name('events.calculate-costs');
 
+        // Event Dates (for events with multiple dates)
+        Route::post('/events/{event}/dates', [Organizer\EventDateController::class, 'store'])->name('events.dates.store');
+        Route::put('/events/{event}/dates/{eventDate}', [Organizer\EventDateController::class, 'update'])->name('events.dates.update');
+        Route::delete('/events/{event}/dates/{eventDate}', [Organizer\EventDateController::class, 'destroy'])->name('events.dates.destroy');
+        Route::post('/events/{event}/dates/{eventDate}/cancel', [Organizer\EventDateController::class, 'cancel'])->name('events.dates.cancel');
+        Route::post('/events/{event}/dates/{eventDate}/reactivate', [Organizer\EventDateController::class, 'reactivate'])->name('events.dates.reactivate');
+
         // Media Upload Routes
         Route::post('/events/{event}/upload-image', [Organizer\EventManagementController::class, 'uploadImage'])->name('events.upload-image');
         Route::post('/events/{event}/upload-gallery', [Organizer\EventManagementController::class, 'uploadGalleryImage'])->name('events.upload-gallery');
@@ -213,16 +216,6 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::post('/events/{event}/certificates/{booking}/email', [Organizer\CertificateController::class, 'sendEmail'])->name('events.certificates.email');
         Route::delete('/events/{event}/certificates/{booking}', [Organizer\CertificateController::class, 'destroy'])->name('events.certificates.destroy');
 
-        // Event Series
-        Route::get('/series', [Organizer\SeriesController::class, 'index'])->name('series.index');
-        Route::get('/series/create', [Organizer\SeriesController::class, 'create'])->name('series.create');
-        Route::post('/series', [Organizer\SeriesController::class, 'store'])->name('series.store');
-        Route::get('/series/{series}', [Organizer\SeriesController::class, 'show'])->name('series.show');
-        Route::get('/series/{series}/edit', [Organizer\SeriesController::class, 'edit'])->name('series.edit');
-        Route::put('/series/{series}', [Organizer\SeriesController::class, 'update'])->name('series.update');
-        Route::delete('/series/{series}', [Organizer\SeriesController::class, 'destroy'])->name('series.destroy');
-        Route::post('/series/{series}/regenerate', [Organizer\SeriesController::class, 'regenerate'])->name('series.regenerate');
-        Route::post('/series/{series}/add-event', [Organizer\SeriesController::class, 'addEvent'])->name('series.add-event');
 
         // Bank & Billing
         Route::get('/bank-account', [Organizer\BankAccountController::class, 'index'])->name('bank-account.index');

@@ -8,11 +8,13 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * This migration is no longer needed as event_series table was replaced with event_dates
      */
     public function up(): void
     {
-        // No-op: event_series table no longer exists
+        Schema::create('nothing', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
+        });
     }
 
     /**
@@ -20,7 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // No-op
+        Schema::dropIfExists('nothing');
     }
 };
-

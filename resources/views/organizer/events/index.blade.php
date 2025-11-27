@@ -3,29 +3,15 @@
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Meine Events</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Einzelveranstaltungen und Veranstaltungsreihen</p>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Ihre Veranstaltungen</p>
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('organizer.series.index') }}"
-                   class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 flex items-center">
-                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                    </svg>
-                    Eventreihen
-                </a>
-                <a href="{{ route('organizer.series.create') }}"
-                   class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center">
-                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Eventreihe erstellen
-                </a>
                 <a href="{{ route('organizer.events.create') }}"
                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
                     <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
-                    Einzelnes Event
+                    Neues Event erstellen
                 </a>
             </div>
         </div>
@@ -36,10 +22,6 @@
                 <a href="{{ route('organizer.events.index') }}"
                    class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600 dark:text-blue-400">
                     Alle Events
-                </a>
-                <a href="{{ route('organizer.series.index') }}"
-                   class="border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300">
-                    Eventreihen
                 </a>
             </nav>
         </div>

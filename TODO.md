@@ -720,3 +720,4 @@
 
 - Push-Notifications
 
+- [x] **EventSeries Refactoring zu 'Events mit mehreren Terminen' - ABGESCHLOSSEN**

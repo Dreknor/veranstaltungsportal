@@ -24,11 +24,6 @@ class BookingController extends Controller
                 ->with('error', 'Diese Veranstaltung wurde abgesagt und kann nicht mehr gebucht werden.');
         }
 
-        // Check if event is part of a series - redirect to series booking
-        if ($event->isPartOfSeries()) {
-            return redirect()->route('series.show', $event->series_id)
-                ->with('info', 'Dies ist ein Termin einer Veranstaltungsreihe. Bitte buchen Sie die gesamte Reihe.');
-        }
 
         // Check if event has any ticket types, if not create a default one
         if ($event->ticketTypes()->count() === 0) {

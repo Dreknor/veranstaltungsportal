@@ -12,29 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            // Only add columns if they don't exist
-            if (!Schema::hasColumn('events', 'series_position')) {
-                $table->integer('series_position')->nullable()->after('series_id');
-            }
-
-            if (!Schema::hasColumn('events', 'is_series_part')) {
-                $table->boolean('is_series_part')->default(false)->after('series_position');
+            // Add flag to indicate if event has multiple dates
+            if (!Schema::hasColumn('events', 'has_multiple_dates')) {
+                $table->boolean('has_multiple_dates')->default(false)->after('end_date');
             }
         });
-
-        // Add foreign key constraint separately to avoid issues
-        if (Schema::hasColumn('events', 'series_id') && Schema::hasTable('event_series')) {
-            try {
-                Schema::table('events', function (Blueprint $table) {
-                    $table->foreign('series_id')
-                        ->references('id')
-                        ->on('event_series')
-                        ->onDelete('set null');
-                });
-            } catch (\Exception $e) {
-                // Foreign key might already exist, ignore
-            }
-        }
     }
 
     /**
@@ -43,19 +25,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            // Try to drop foreign key
-            try {
-                $table->dropForeign(['series_id']);
-            } catch (\Exception $e) {
-                // Foreign key might not exist, ignore
-            }
-
-            // Drop columns if they exist
-            if (Schema::hasColumn('events', 'series_position')) {
-                $table->dropColumn('series_position');
-            }
-            if (Schema::hasColumn('events', 'is_series_part')) {
-                $table->dropColumn('is_series_part');
+            if (Schema::hasColumn('events', 'has_multiple_dates')) {
+                $table->dropColumn('has_multiple_dates');
             }
         });
     }

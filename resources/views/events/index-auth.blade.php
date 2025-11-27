@@ -167,68 +167,6 @@
                                     </div>
                                 </div>
                             </div>
-                        @else
-                            @php $series = $itemData['item']; @endphp
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition border-2 border-purple-200">
-                                <!-- Series Bild -->
-                                <div class="relative aspect-w-16 aspect-h-9 bg-gray-200">
-                                    <div class="w-full h-48 bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                                        <div class="text-center text-white">
-                                            <x-icon.calendar class="w-12 h-12 mx-auto mb-2 opacity-75" />
-                                            <div class="text-sm font-semibold">Veranstaltungsreihe</div>
-                                        </div>
-                                    </div>
-
-                                    <span class="absolute top-2 left-2 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                        {{ $series->events->count() }} Termine
-                                    </span>
-                                </div>
-
-                                <!-- Series Details -->
-                                <div class="p-5">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                              style="background-color: {{ $series->category->color }}20; color: {{ $series->category->color }}">
-                                            {{ $series->category->name }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                            Reihe
-                                        </span>
-                                    </div>
-
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                        <a href="{{ route('series.show', $series->id) }}" class="hover:text-purple-600">
-                                            {{ $series->title }}
-                                        </a>
-                                    </h3>
-
-                                    <div class="space-y-2 mb-4">
-                                        @if($series->events->first())
-                                            <div class="flex items-center text-sm text-gray-600">
-                                                <x-icon.calendar class="w-4 h-4 mr-2" />
-                                                Start: {{ $series->events->first()->start_date->format('d.m.Y') }}
-                                            </div>
-                                        @endif
-
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.list class="w-4 h-4 mr-2" />
-                                            {{ $series->events->count() }} Termine
-                                        </div>
-
-                                        @if($series->events->first() && $series->events->first()->venue_city)
-                                            <div class="flex items-center text-sm text-gray-600">
-                                                <x-icon.location class="w-4 h-4 mr-2" />
-                                                {{ $series->events->first()->venue_city }}
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <a href="{{ route('series.show', $series->id) }}"
-                                       class="block w-full text-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-                                        Reihe ansehen
-                                    </a>
-                                </div>
-                            </div>
                         @endif
                     @endforeach
                 </div>

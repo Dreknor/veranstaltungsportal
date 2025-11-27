@@ -21,6 +21,14 @@
                             <div class="border-l-4 border-blue-600 pl-4">
                                 <h3 class="text-xl font-semibold mb-2">1. Veranstaltung auswählen</h3>
                                 <p class="text-gray-700 dark:text-gray-300">Klicken Sie auf einer Event-Seite auf den Button <strong>"Jetzt buchen"</strong></p>
+                                <div class="mt-2 bg-blue-50 dark:bg-blue-900/20 p-3 rounded text-sm">
+                                    <p class="font-semibold text-blue-900 dark:text-blue-200">💡 Events mit mehreren Terminen</p>
+                                    <p class="text-gray-700 dark:text-gray-300 mt-1">
+                                        Einige Veranstaltungen bestehen aus mehreren Terminen (z.B. ein 8-Wochen-Kurs).
+                                        Bei diesen Events sehen Sie alle Termine aufgelistet. Die Buchung gilt automatisch für <strong>alle Termine</strong> -
+                                        es ist nicht möglich, nur einzelne Termine zu buchen.
+                                    </p>
+                                </div>
                             </div>
                             <div class="border-l-4 border-blue-600 pl-4">
                                 <h3 class="text-xl font-semibold mb-2">2. Ticket-Typ wählen</h3>
@@ -74,7 +82,7 @@
                         </div>
                     </section>
                     <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4">
-                        <p><strong>Wichtig:</strong> Tickets für Präsenz-Events werden erst nach Zahlungseingang per E-Mail versendet. 
+                        <p><strong>Wichtig:</strong> Tickets für Präsenz-Events werden erst nach Zahlungseingang per E-Mail versendet.
                         Zugangsdaten für Online-Events erhalten Sie ebenfalls nach Bezahlung.</p>
                     </div>
                 </div>

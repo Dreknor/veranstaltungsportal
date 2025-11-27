@@ -8,19 +8,21 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * This migration is no longer needed as event_series table was replaced with event_dates
+     * Drop event_series table as it's been replaced by event_dates
      */
     public function up(): void
     {
-        // No-op: event_series table no longer exists
+        Schema::dropIfExists('event_series');
     }
 
     /**
      * Reverse the migrations.
+     * Note: This is a destructive migration. Rollback is not recommended.
      */
     public function down(): void
     {
-        // No-op
+        // Not implementing rollback for deprecated table
+        // If needed, restore from backup
     }
 };
 

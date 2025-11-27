@@ -190,17 +190,6 @@ class EdgeCasesTest extends TestCase
         $this->assertEquals(200, $booking->subtotal); // 2*50 + 1*100
     }
 
-    #[Test]
-    public function series_with_no_recurrence_count_or_end_date()
-    {
-        $series = \App\Models\EventSeries::factory()->create([
-            'recurrence_count' => null,
-            'recurrence_end_date' => null,
-        ]);
-
-        $this->assertNull($series->recurrence_count);
-        $this->assertNull($series->recurrence_end_date);
-    }
 
     #[Test]
     public function event_with_same_start_and_end_date()

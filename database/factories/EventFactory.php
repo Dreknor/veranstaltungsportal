@@ -153,4 +153,22 @@ class EventFactory extends Factory
             'access_code' => Str::random(8),
         ]);
     }
+
+    /**
+     * Event with multiple dates
+     */
+    public function withMultipleDates(int $numberOfDates = 5): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'has_multiple_dates' => true,
+        ])->afterCreating(function (Event $event) use ($numberOfDates) {
+            for ($i = 0; $i < $numberOfDates; $i++) {
+                \App\Models\EventDate::factory()->create([
+                    'event_id' => $event->id,
+                    'start_date' => $event->start_date->copy()->addWeeks($i),
+                    'end_date' => $event->end_date->copy()->addWeeks($i),
+                ]);
+            }
+        });
+    }
 }

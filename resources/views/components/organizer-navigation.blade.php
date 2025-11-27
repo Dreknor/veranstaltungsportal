@@ -48,7 +48,6 @@
                             </svg>
                         </button>
                         <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
-                            <a href="{{ route('organizer.series.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Serien</a>
                             <a href="{{ route('organizer.reviews.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Bewertungen</a>
                             <a href="{{ route('organizer.invoices.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rechnungen</a>
                             <a href="{{ route('organizer.settings.invoice.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rechnungseinstellungen</a>
@@ -80,7 +79,9 @@
             <a href="{{ route('organizer.events.index') }}" class="block py-2 text-gray-700">Events</a>
             <a href="{{ route('organizer.bookings.index') }}" class="block py-2 text-gray-700">Buchungen</a>
             <a href="{{ route('organizer.statistics.index') }}" class="block py-2 text-gray-700">Statistiken</a>
+            @if(Route::has('organizer.series.index'))
             <a href="{{ route('organizer.series.index') }}" class="block py-2 text-gray-700">Serien</a>
+            @endif
             <a href="{{ route('organizer.reviews.index') }}" class="block py-2 text-gray-700">Bewertungen</a>
             <a href="{{ route('organizer.invoices.index') }}" class="block py-2 text-gray-700">Rechnungen</a>
             <a href="{{ route('organizer.settings.invoice.index') }}" class="block py-2 text-gray-700">Rechnungseinstellungen</a>

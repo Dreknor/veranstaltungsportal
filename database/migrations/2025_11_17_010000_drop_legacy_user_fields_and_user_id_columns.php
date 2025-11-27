@@ -32,14 +32,21 @@ return new class extends Migration
 
         Schema::table('event_series', function (Blueprint $table) {
             if (Schema::hasColumn('event_series', 'user_id')) {
-                // Drop indexes first (SQLite compatibility)
-                try {
-                    $table->dropIndex(['user_id', 'is_active']);
-                } catch (\Exception $e) {
-                    // Index might not exist
-                }
-
+                // Drop foreign key first
                 $table->dropForeign(['user_id']);
+            }
+        });
+
+        Schema::table('event_series', function (Blueprint $table) {
+            if (Schema::hasColumn('event_series', 'user_id')) {
+                // Drop composite index
+                $table->dropIndex('event_series_user_id_is_active_index');
+            }
+        });
+
+        Schema::table('event_series', function (Blueprint $table) {
+            if (Schema::hasColumn('event_series', 'user_id')) {
+                // Finally drop the column
                 $table->dropColumn('user_id');
             }
         });
@@ -73,9 +80,6 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
         });
 
-        Schema::table('event_series', function (Blueprint $table) {
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-        });
     }
 };
 

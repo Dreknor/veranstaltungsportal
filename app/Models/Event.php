@@ -71,6 +71,7 @@ class Event extends Model implements HasMedia
         return [
             'start_date' => 'datetime',
             'end_date' => 'datetime',
+            'has_multiple_dates' => 'boolean',
             'gallery_images' => 'array',
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
@@ -150,9 +151,12 @@ class Event extends Model implements HasMedia
         return $this->belongsTo(EventCategory::class, 'event_category_id');
     }
 
-    public function series(): BelongsTo
+    /**
+     * Get all dates for this event (for events with multiple dates)
+     */
+    public function dates(): HasMany
     {
-        return $this->belongsTo(EventSeries::class, 'series_id');
+        return $this->hasMany(EventDate::class)->orderBy('start_date');
     }
 
     public function ticketTypes(): HasMany
@@ -195,9 +199,52 @@ class Event extends Model implements HasMedia
             ->first();
     }
 
-    public function isPartOfSeries(): bool
+    /**
+     * Check if this event has multiple dates
+     */
+    public function hasMultipleDates(): bool
     {
-        return $this->is_series_part && $this->series_id !== null;
+        return $this->has_multiple_dates && $this->dates()->count() > 0;
+    }
+
+    /**
+     * Get all event dates (includes main date if single event)
+     */
+    public function getAllDates(): \Illuminate\Support\Collection
+    {
+        if ($this->hasMultipleDates()) {
+            return $this->dates;
+        }
+
+        // For single events, return main start/end date as collection
+        return collect([
+            (object)[
+                'start_date' => $this->start_date,
+                'end_date' => $this->end_date,
+                'venue_name' => $this->venue_name,
+                'venue_address' => $this->venue_address,
+                'venue_city' => $this->venue_city,
+                'venue_postal_code' => $this->venue_postal_code,
+                'venue_country' => $this->venue_country,
+                'is_cancelled' => $this->is_cancelled,
+            ]
+        ]);
+    }
+
+    /**
+     * Get next upcoming date for this event
+     */
+    public function getNextDate()
+    {
+        if ($this->hasMultipleDates()) {
+            return $this->dates()
+                ->where('start_date', '>', now())
+                ->where('is_cancelled', false)
+                ->orderBy('start_date')
+                ->first();
+        }
+
+        return $this->start_date > now() ? $this : null;
     }
 
     public function availableTickets(): int
@@ -309,13 +356,6 @@ class Event extends Model implements HasMedia
         return !$this->isPartOfSeries();
     }
 
-    /**
-     * Get the series this event belongs to
-     */
-    public function getParentSeries(): ?EventSeries
-    {
-        return $this->isPartOfSeries() ? $this->series : null;
-    }
 
     /**
      * Check if event is an online event

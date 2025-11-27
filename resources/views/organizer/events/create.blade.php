@@ -167,6 +167,23 @@
                             @enderror
                         </div>
                     </div>
+
+                    <div class="mt-4">
+                        <label class="flex items-start">
+                            <input type="checkbox" name="has_multiple_dates" value="1" {{ old('has_multiple_dates') ? 'checked' : '' }}
+                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 mt-1">
+                            <span class="ml-2">
+                                <span class="block text-sm font-medium text-gray-700">Event hat mehrere Termine</span>
+                                <span class="block text-xs text-gray-500 mt-1">
+                                    Aktivieren Sie diese Option, wenn die Veranstaltung aus mehreren aufeinanderfolgenden Terminen besteht (z.B. ein 8-Wochen-Kurs).
+                                    Teilnehmer buchen dann automatisch alle Termine gemeinsam.
+                                </span>
+                            </span>
+                        </label>
+                        <div class="mt-2 text-xs text-blue-600 italic">
+                            Hinweis: Nach dem Erstellen des Events können Sie weitere Termine hinzufügen.
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Veranstaltungsort (Nur für Präsenz & Hybrid) -->

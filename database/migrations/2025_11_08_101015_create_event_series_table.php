@@ -8,39 +8,29 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * Creates event_dates table for events with multiple dates
      */
     public function up(): void
     {
-        Schema::create('event_series', function (Blueprint $table) {
+        // Create event_dates table - one event can have multiple dates
+        Schema::create('event_dates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->foreignId('event_category_id')->constrained()->onDelete('cascade');
-
-            // Recurrence Settings
-            $table->enum('recurrence_type', ['none', 'daily', 'weekly', 'monthly', 'yearly', 'custom'])->default('none');
-            $table->integer('recurrence_interval')->default(1); // Every X days/weeks/months
-            $table->json('recurrence_days')->nullable(); // For weekly: [1,3,5] = Mon, Wed, Fri
-            $table->integer('recurrence_count')->nullable(); // Number of occurrences
-            $table->date('recurrence_end_date')->nullable(); // End date for series
-
-            // Template data for all events in series
-            $table->json('template_data')->nullable(); // Venue, price, ticket types, etc.
-
-            // Meta
-            $table->boolean('is_active')->default(true);
-            $table->integer('total_events')->default(0);
+            $table->foreignId('event_id')->constrained()->onDelete('cascade');
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
+            $table->string('venue_name')->nullable(); // Optional: override event venue
+            $table->text('venue_address')->nullable();
+            $table->string('venue_city')->nullable();
+            $table->string('venue_postal_code')->nullable();
+            $table->string('venue_country')->nullable();
+            $table->decimal('venue_latitude', 10, 7)->nullable();
+            $table->decimal('venue_longitude', 10, 7)->nullable();
+            $table->text('notes')->nullable(); // Special notes for this date
+            $table->boolean('is_cancelled')->default(false);
+            $table->text('cancellation_reason')->nullable();
             $table->timestamps();
 
-            $table->index(['user_id', 'is_active']);
-        });
-
-        // Add series_id to events table
-        Schema::table('events', function (Blueprint $table) {
-            $table->foreignId('series_id')->nullable()->after('user_id')->constrained('event_series')->onDelete('set null');
-            $table->integer('series_position')->nullable()->after('series_id'); // Position in series (1, 2, 3...)
-            $table->boolean('is_series_exception')->default(false)->after('series_position'); // Modified from series template
+            $table->index(['event_id', 'start_date']);
         });
     }
 
@@ -49,12 +39,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('events', function (Blueprint $table) {
-            $table->dropForeign(['series_id']);
-            $table->dropColumn(['series_id', 'series_position', 'is_series_exception']);
-        });
-
-        Schema::dropIfExists('event_series');
+        Schema::dropIfExists('event_dates');
     }
 };
 

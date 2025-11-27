@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
-use App\Models\EventSeries;
 use App\Models\EventCategory;
 use Illuminate\Http\Request;
 
@@ -11,24 +10,14 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        // Einzelne Events (keine Serie-Teile)
+        // All published events
         $eventsQuery = Event::query()
-            ->with(['category', 'organization.users'])
-            ->published()
-            ->where(function($q) {
-                $q->where('is_series_part', false)
-                  ->orWhereNull('is_series_part');
-            });
-
-        // Aktive Veranstaltungsreihen
-        $seriesQuery = EventSeries::query()
-            ->with(['category', 'organization.users', 'events'])
-            ->where('is_active', true);
+            ->with(['category', 'organization.users', 'dates'])
+            ->published();
 
         // Filter nach Kategorie
         if ($request->filled('category')) {
             $eventsQuery->where('event_category_id', $request->category);
-            $seriesQuery->where('event_category_id', $request->category);
         }
 
         // Filter nach Stadt (nur für Events)
@@ -44,13 +33,9 @@ class EventController extends Controller
                     ->orWhere('description', 'LIKE', "%{$search}%")
                     ->orWhere('venue_name', 'LIKE', "%{$search}%");
             });
-            $seriesQuery->where(function ($q) use ($search) {
-                $q->where('title', 'LIKE', "%{$search}%")
-                    ->orWhere('description', 'LIKE', "%{$search}%");
-            });
         }
 
-        // Datum Filter (nur für Events)
+        // Datum Filter
         if ($request->filled('date_from')) {
             $eventsQuery->where('start_date', '>=', $request->date_from);
         }
@@ -59,50 +44,25 @@ class EventController extends Controller
             $eventsQuery->where('start_date', '<=', $request->date_to);
         }
 
-        // Events und Serien abrufen
-        $events = $eventsQuery->get();
-        $series = $seriesQuery->get();
-
-        // Kombiniere Events und Serien für die Anzeige
-        // Erstelle eine Collection mit beiden Typen
-        $allItems = collect([]);
-
-        foreach ($events as $event) {
-            $allItems->push([
-                'type' => 'event',
-                'item' => $event,
-                'date' => $event->start_date,
-            ]);
-        }
-
-        foreach ($series as $seriesItem) {
-            // Nehme das Datum des ersten Events in der Serie
-            $firstEvent = $seriesItem->events->first();
-            $allItems->push([
-                'type' => 'series',
-                'item' => $seriesItem,
-                'date' => $firstEvent ? $firstEvent->start_date : now(),
-            ]);
-        }
-
         // Sortierung
-        $sortBy = $request->get('sort', 'date');
+        $sortBy = $request->get('sort', 'start_date');
         $sortOrder = $request->get('order', 'asc');
+        $eventsQuery->orderBy($sortBy, $sortOrder);
 
-        $allItems = $sortOrder === 'asc'
-            ? $allItems->sortBy('date')
-            : $allItems->sortByDesc('date');
+        // Events abrufen mit Paginierung
+        $events = $eventsQuery->paginate(12);
 
-        // Manuelle Paginierung
-        $perPage = 12;
-        $currentPage = $request->get('page', 1);
-        $items = $allItems->forPage($currentPage, $perPage)->values();
-
+        // Transform events into the expected format for the view
         $paginatedItems = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $allItems->count(),
-            $perPage,
-            $currentPage,
+            $events->map(function ($event) {
+                return [
+                    'type' => 'event',
+                    'item' => $event
+                ];
+            }),
+            $events->total(),
+            $events->perPage(),
+            $events->currentPage(),
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
@@ -142,17 +102,12 @@ class EventController extends Controller
     public function show($slug)
     {
         $event = Event::where('slug', $slug)
-            ->with(['category', 'organization.users', 'series', 'ticketTypes', 'reviews.user'])
+            ->with(['category', 'organization.users', 'ticketTypes', 'reviews.user', 'dates'])
             ->firstOrFail();
 
         // Increment view count
         $event->incrementViews();
 
-        // Wenn Event Teil einer Serie ist, zur Serie umleiten
-        if ($event->isPartOfSeries() && $event->series) {
-            return redirect()->route('series.show', $event->series->id)
-                ->with('info', 'Dieses Event ist Teil einer Veranstaltungsreihe. Bitte buchen Sie die gesamte Reihe.');
-        }
 
         // Prüfe ob Event privat ist und Access Code benötigt
         if ($event->is_private && !session()->has('event_access_' . $event->id)) {
