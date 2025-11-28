@@ -32,7 +32,11 @@
                                     <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                     </svg>
-                                    {{ $date->start_date->format('d.m.Y, H:i') }} - {{ $date->end_date->format('H:i') }} Uhr
+                                    @if($date->start_date->day === $date->end_date->day)
+                                        {{ $date->start_date->format('d.m.Y') }}, {{ $date->start_date->format('H:i') }} - {{ $date->end_date->format('H:i') }} Uhr
+                                    @else
+                                        {{ $date->start_date->format('d.m.Y, H:i') }} - {{ $date->end_date->format('d.m.Y H:i') }} Uhr
+                                    @endif
                                 </div>
                                 @if($date->is_cancelled)
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
@@ -79,7 +83,7 @@
                                     </svg>
                                 </button>
                             @else
-                                <form method="POST" action="{{ route('organizer.events.dates.reactivate', [$event->id, $date]) }}" class="inline">
+                                <form method="POST" action="{{ route('organizer.events.dates.reactivate', [$event->slug, $date]) }}" class="inline">
                                     @csrf
                                     <button type="submit"
                                             class="p-2 text-green-600 hover:bg-green-100 rounded transition"
@@ -92,7 +96,7 @@
                             @endif
 
                             @if($event->dates()->count() > 1)
-                                <form method="POST" action="{{ route('organizer.events.dates.destroy', [$event->id, $date]) }}" class="inline">
+                                <form method="POST" action="{{ route('organizer.events.dates.destroy', [$event->slug, $date]) }}" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit"
@@ -331,7 +335,7 @@
 <script>
 function cancelDate(dateId) {
     const form = document.getElementById('cancel-date-form');
-    form.action = '{{ route('organizer.events.dates.cancel', [$event->id, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
+    form.action = '{{ route('organizer.events.dates.cancel', [$event->slug, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
     document.getElementById('cancel-date-modal').classList.remove('hidden');
 }
 
@@ -358,7 +362,7 @@ function editDate(dateId) {
 
         // Setze die Form-Action
         const form = document.getElementById('edit-date-form');
-        form.action = '{{ route('organizer.events.dates.update', [$event->id, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
+        form.action = '{{ route('organizer.events.dates.update', [$event->slug, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
 
         // Zeige das Modal
         document.getElementById('edit-date-modal').classList.remove('hidden');

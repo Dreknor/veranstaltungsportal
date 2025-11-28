@@ -340,27 +340,28 @@
                     @endif
 
                     <!-- Veranstalter Info -->
-                    @if($event->organizer_info || $event->organizer_email || $event->organizer_phone || $event->organizer_website)
+                    @if($event->organization && ($event->organization->description || $event->organization->email || $event->organization->phone || $event->organization->website))
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Veranstalter</h3>
                             <div class="space-y-2">
-                                @if($event->organizer_info)
-                                    <p class="text-sm text-gray-700">{{ $event->organizer_info }}</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $event->organization->name }}</p>
+                                @if($event->organization->description)
+                                    <p class="text-sm text-gray-700">{{ $event->organization->description }}</p>
                                 @endif
-                                @if($event->organizer_email)
-                                    <a href="mailto:{{ $event->organizer_email }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                                @if($event->organization->email)
+                                    <a href="mailto:{{ $event->organization->email }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
                                         <x-icon.mail class="w-4 h-4 mr-2" />
-                                        {{ $event->organizer_email }}
+                                        {{ $event->organization->email }}
                                     </a>
                                 @endif
-                                @if($event->organizer_phone)
-                                    <a href="tel:{{ $event->organizer_phone }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                                @if($event->organization->phone)
+                                    <a href="tel:{{ $event->organization->phone }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
                                         <x-icon.phone class="w-4 h-4 mr-2" />
-                                        {{ $event->organizer_phone }}
+                                        {{ $event->organization->phone }}
                                     </a>
                                 @endif
-                                @if($event->organizer_website)
-                                    <a href="{{ $event->organizer_website }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
+                                @if($event->organization->website)
+                                    <a href="{{ $event->organization->website }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
                                         <x-icon.globe class="w-4 h-4 mr-2" />
                                         Website besuchen
                                     </a>

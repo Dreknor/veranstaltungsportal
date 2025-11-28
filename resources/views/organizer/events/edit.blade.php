@@ -558,41 +558,6 @@
                             </div>
                         </div>
 
-                        <!-- Veranstalter-Informationen -->
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h2 class="text-xl font-bold text-gray-900 mb-4">Veranstalter-Informationen</h2>
-
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="organizer_info" class="block text-sm font-medium text-gray-700 mb-1">Informationen</label>
-                                    <textarea id="organizer_info" name="organizer_info" rows="3"
-                                              class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('organizer_info', $event->organizer_info) }}</textarea>
-                                </div>
-
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div>
-                                        <label for="organizer_email" class="block text-sm font-medium text-gray-700 mb-1">E-Mail</label>
-                                        <input type="email" id="organizer_email" name="organizer_email"
-                                               value="{{ old('organizer_email', $event->organizer_email) }}"
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    </div>
-
-                                    <div>
-                                        <label for="organizer_phone" class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-                                        <input type="tel" id="organizer_phone" name="organizer_phone"
-                                               value="{{ old('organizer_phone', $event->organizer_phone) }}"
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    </div>
-
-                                    <div>
-                                        <label for="organizer_website" class="block text-sm font-medium text-gray-700 mb-1">Website</label>
-                                        <input type="url" id="organizer_website" name="organizer_website"
-                                               value="{{ old('organizer_website', $event->organizer_website) }}"
-                                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="flex justify-end space-x-4">
                             <a href="{{ route('organizer.events.index') }}" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">

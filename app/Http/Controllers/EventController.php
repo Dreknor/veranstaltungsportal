@@ -84,10 +84,6 @@ class EventController extends Controller
 
         $events = Event::query()
             ->published()
-            ->where(function($q) {
-                $q->where('is_series_part', false)
-                  ->orWhereNull('is_series_part');
-            }) // Keine Serien-Termine im Kalender
             ->whereYear('start_date', $year)
             ->whereMonth('start_date', $month)
             ->with(['category', 'organization.users'])
@@ -123,10 +119,6 @@ class EventController extends Controller
         }
 
         $relatedEvents = Event::published()
-            ->where(function($q) {
-                $q->where('is_series_part', false)
-                  ->orWhereNull('is_series_part');
-            }) // Keine Serien-Teile
             ->where('event_category_id', $event->event_category_id)
             ->where('id', '!=', $event->id)
             ->limit(3)

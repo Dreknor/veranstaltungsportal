@@ -1,5 +1,30 @@
 <!-- Notification Bell Component -->
-<div x-data="{ open: false, unreadCount: {{ auth()->user()->unreadNotifications()->count() }}, notifications: [] }"
+<div x-data="{
+        open: false,
+        unreadCount: {{ auth()->user()->unreadNotifications()->count() }},
+        notifications: [],
+        loadNotifications() {
+            fetch('/notifications/unread')
+                .then(response => response.json())
+                .then(data => {
+                    this.notifications = data.notifications;
+                    this.unreadCount = data.unread_count;
+                })
+                .catch(error => console.error('Error loading notifications:', error));
+        },
+        formatTime(datetime) {
+            const date = new Date(datetime);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+
+            if (diff < 60) return 'Gerade eben';
+            if (diff < 3600) return Math.floor(diff / 60) + ' Min.';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' Std.';
+            if (diff < 604800) return Math.floor(diff / 86400) + ' Tage';
+
+            return date.toLocaleDateString('de-DE');
+        }
+     }"
      @click.away="open = false"
      class="relative">
 
@@ -134,26 +159,3 @@
     </div>
 </div>
 
-<script>
-function loadNotifications() {
-    fetch('/notifications/unread')
-        .then(response => response.json())
-        .then(data => {
-            this.notifications = data.notifications;
-            this.unreadCount = data.unread_count;
-        });
-}
-
-function formatTime(datetime) {
-    const date = new Date(datetime);
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000); // seconds
-
-    if (diff < 60) return 'Gerade eben';
-    if (diff < 3600) return Math.floor(diff / 60) + ' Min.';
-    if (diff < 86400) return Math.floor(diff / 3600) + ' Std.';
-    if (diff < 604800) return Math.floor(diff / 86400) + ' Tage';
-
-    return date.toLocaleDateString('de-DE');
-}
-</script>
