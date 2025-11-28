@@ -246,7 +246,6 @@
   - [x] Scheduler-Integration für automatische Erinnerungen
   - [x] Queue-Support für asynchronen Versand
   - [ ] Push Notifications (Web Push) - geplant
-  - [ ] SMS-Benachrichtigungen - geplant
 - [x] **Erweiterte Benutzerprofile**
   - [x] User Vor- und Nachname erfassen
   - [x] User Vorname und Nachname anzeigen
