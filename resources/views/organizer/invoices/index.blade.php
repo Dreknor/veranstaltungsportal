@@ -1,9 +1,9 @@
 <x-layouts.app :title="'Rechnungen - ' . config('app.name')" :header="false">
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Platform-Fee Rechnungen</h1>
+        <h1 class="text-3xl font-bold">Platform-Gebühren Rechnungen</h1>
         <a href="{{ route('organizer.invoices.platform-fees') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-            Platform Fees Übersicht
+            Platform Gebühren Übersicht
         </a>
     </div>
 

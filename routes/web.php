@@ -230,10 +230,10 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::put('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
         Route::post('/settings/invoice/preview', [Organizer\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
         Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
-        Route::get('/invoices/{invoice}', [Organizer\InvoiceController::class, 'show'])->name('invoices.show');
-        Route::get('/invoices/{invoice}/download', [Organizer\InvoiceController::class, 'download'])->name('invoices.download');
         Route::get('/invoices/export', [Organizer\InvoiceController::class, 'export'])->name('invoices.export');
         Route::get('/platform-fees', [Organizer\InvoiceController::class, 'platformFees'])->name('invoices.platform-fees');
+        Route::get('/invoices/{invoice}', [Organizer\InvoiceController::class, 'show'])->name('invoices.show');
+        Route::get('/invoices/{invoice}/download', [Organizer\InvoiceController::class, 'download'])->name('invoices.download');
 
         // Reviews
         Route::get('/reviews', [Organizer\ReviewController::class, 'index'])->name('reviews.index');
