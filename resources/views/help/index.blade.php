@@ -37,6 +37,24 @@
 
             <!-- Help Categories -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @if(in_array($userType, ['organizer', 'admin']))
+                    <!-- Organizer Help (only for organizers/admin) -->
+                    <a href="{{ route('help.category', 'organizer') }}"
+                       class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg shadow-md hover:shadow-xl transition-shadow p-6 border-2 border-purple-400">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <h3 class="ml-4 text-lg font-semibold text-white">Veranstalter-Hilfe</h3>
+                        </div>
+                        <p class="text-white/90">
+                            Leitfäden für Organisationen: Events erstellen, Buchungen verwalten, Marketing und mehr.
+                        </p>
+                    </a>
+                @endif
+
                 <!-- Getting Started -->
                 <a href="{{ route('help.article', ['category' => 'user', 'article' => 'getting-started']) }}"
                    class="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow p-6 border border-gray-200 dark:border-gray-700">
@@ -251,4 +269,3 @@
         </div>
     </div>
 </x-layouts.app>
-

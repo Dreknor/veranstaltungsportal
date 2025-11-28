@@ -216,8 +216,47 @@
                         </div>
                     </div>
                 </a>
+
+                <a href="{{ route('organizer.featured-events.history') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-100 rounded-full">
+                            <x-icon.star class="w-6 h-6 text-yellow-600" />
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-semibold text-gray-900">Featured Events</h3>
+                            <p class="text-sm text-gray-600">Anträge, Zahlungen & Verlängerungen</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('help.category', 'organizer') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-gray-100 rounded-full">
+                            <x-icon.help class="w-6 h-6 text-gray-700" />
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="font-semibold text-gray-900">Hilfe für Veranstalter</h3>
+                            <p class="text-sm text-gray-600">Erste Schritte, Events, Buchungen</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Hilfe-Links -->
+            <div class="mt-8 bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">Hilfe & Ressourcen</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'getting-started']) }}">Erste Schritte als Organisator</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'creating-events']) }}">Events erstellen & verwalten</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'managing-bookings']) }}">Buchungen & Teilnehmer verwalten</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'tickets-pricing']) }}">Tickets & Preisgestaltung</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'analytics-reports']) }}">Statistiken & Berichte</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'communication']) }}">Kommunikation mit Teilnehmern</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'marketing-promotion']) }}">Marketing & Promotion</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'settings-preferences']) }}">Einstellungen & Präferenzen</a>
+                    <a class="text-blue-600 hover:text-blue-800" href="{{ route('help.article', ['organizer', 'troubleshooting']) }}">Häufige Probleme & FAQ</a>
+                </div>
             </div>
         </div>
     </div>
 </x-layouts.app>
-

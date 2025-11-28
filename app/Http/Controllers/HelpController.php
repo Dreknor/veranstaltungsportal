@@ -267,7 +267,76 @@ class HelpController extends Controller
             ],
         ];
 
-        // Filter based on user type
+        // Add organizer articles for organizers and admins
+        if (in_array($userType, ['organizer', 'admin'])) {
+            $organizerArticles = [
+                [
+                    'category' => 'organizer',
+                    'slug' => 'getting-started',
+                    'title' => 'Erste Schritte als Organisator',
+                    'description' => 'Organisation anlegen, Rechnungs- und Bankdaten, Team einladen, erstes Event erstellen',
+                    'keywords' => ['organisator', 'organisation', 'rechnung', 'bank', 'team', 'event erstellen'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'creating-events',
+                    'title' => 'Events erstellen & verwalten',
+                    'description' => 'Datenpflege, Kategorien, Online/Hybrid, Bilder, Veröffentlichung und Entwürfe',
+                    'keywords' => ['events', 'verwalten', 'kategorien', 'online', 'hybrid', 'veröffentlichen'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'managing-bookings',
+                    'title' => 'Buchungen & Teilnehmer verwalten',
+                    'description' => 'Buchungsstatus, Zahlungen, Check-In, Export und Kommunikation mit Teilnehmern',
+                    'keywords' => ['buchungen', 'teilnehmer', 'check-in', 'export', 'kommunikation'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'tickets-pricing',
+                    'title' => 'Tickets & Preisgestaltung',
+                    'description' => 'Ticketarten, Preisstaffeln, Rabatte, Kapazitäten und Frühbucher',
+                    'keywords' => ['tickets', 'preise', 'rabatte', 'kapazität', 'frühbucher'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'analytics-reports',
+                    'title' => 'Statistiken & Berichte',
+                    'description' => 'Kennzahlen, Konversionsraten, Kategorie-Performance und CSV-Exporte',
+                    'keywords' => ['statistiken', 'berichte', 'analytics', 'export', 'konversion'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'communication',
+                    'title' => 'Kommunikation mit Teilnehmern',
+                    'description' => 'E-Mails, Erinnerungen, Kontaktfunktionen und Datenschutz',
+                    'keywords' => ['kommunikation', 'emails', 'erinnerungen', 'kontakt', 'datenschutz'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'marketing-promotion',
+                    'title' => 'Marketing & Promotion',
+                    'description' => 'Featured Events, Social Sharing, Netzwerk und Sichtbarkeit',
+                    'keywords' => ['marketing', 'promotion', 'featured', 'sharing', 'sichtbarkeit'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'settings-preferences',
+                    'title' => 'Einstellungen & Präferenzen',
+                    'description' => 'Organisationsdaten, Logo, Rechnungseinstellungen, Team, Profil',
+                    'keywords' => ['einstellungen', 'logo', 'rechnung', 'team', 'profil'],
+                ],
+                [
+                    'category' => 'organizer',
+                    'slug' => 'troubleshooting',
+                    'title' => 'Häufige Probleme & FAQ (Organizer)',
+                    'description' => 'Veröffentlichung, E-Mail-Zustellung, Zahlungsstatus, Check-In, Berechtigungen',
+                    'keywords' => ['probleme', 'fehler', 'faq', 'veröffentlichung', 'zahlung', 'berechtigungen'],
+                ],
+            ];
+            $articles = array_merge($articles, $organizerArticles);
+        }
+
         if ($userType === 'guest') {
             return array_filter($articles, fn($a) => $a['category'] === 'user');
         }
