@@ -23,6 +23,7 @@ class FeaturedEventFee extends Model
         'payment_method',
         'payment_reference',
         'notes',
+        'expiry_notified_at',
     ];
 
     protected $casts = [
@@ -30,6 +31,7 @@ class FeaturedEventFee extends Model
         'featured_end_date' => 'date',
         'fee_amount' => 'decimal:2',
         'paid_at' => 'datetime',
+        'expiry_notified_at' => 'datetime',
     ];
 
     /**

@@ -46,6 +46,12 @@ Schedule::command('featured:disable-expired')
     ->timezone('Europe/Berlin')
     ->description('Disable expired featured events');
 
+// Benachrichtige Veranstalter 3 Tage vor Ablauf des Featured-Status
+Schedule::command('featured:notify-expiry')
+    ->dailyAt('08:00')
+    ->timezone('Europe/Berlin')
+    ->description('Send expiry reminders for featured events (3 days before)');
+
 // Queue Worker Mode Configuration (set in .env: QUEUE_WORKER_MODE)
 // - 'cronjob': Queue jobs are processed every minute via cronjob (default, simple setup)
 // - 'supervisor': Queue worker runs continuously as daemon (recommended for production)
