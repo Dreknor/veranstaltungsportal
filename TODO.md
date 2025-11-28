@@ -201,6 +201,8 @@
     - [x] Scheduler täglich 08:00 Uhr
     - [x] Migration für `expiry_notified_at` Feld
     - [x] Model aktualisiert (fillable + casts)
+    - [x] Feature Tests erstellt (6 Tests abgedeckt)
+    - [x] Tests migriert auf PHP 8 Attributes (#[Test])
 
 ## 🔄 In Arbeit / Fehlend
 
@@ -504,6 +506,9 @@
     - [x] Fortlaufende Nummerierung pro Jahr/Monat
     - [x] Beispiele und Hilfetext in View
     - [x] Validation und Speicherung im Controller
+    - [x] Feature Tests erstellt (11 Tests abgedeckt)
+    - [x] Unit Tests für InvoiceService (10 Tests abgedeckt)
+    - [x] Tests migriert auf PHP 8 Attributes (#[Test])
 
 ### 4. Admin Features
 - [x] Admin Dashboard (Super-Admin)

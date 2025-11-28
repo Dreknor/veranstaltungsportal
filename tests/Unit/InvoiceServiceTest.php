@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Organization;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class InvoiceServiceTest extends TestCase
@@ -20,7 +21,7 @@ class InvoiceServiceTest extends TestCase
         $this->service = new InvoiceService();
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_default_invoice_number_format()
     {
         $number = $this->service->generateInvoiceNumber('TN');
@@ -29,7 +30,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertMatchesRegularExpression("/^TN-{$year}-\d{5}$/", $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_extracts_counter_from_format_with_year_placeholder()
     {
         $org = Organization::factory()->create([
@@ -44,7 +45,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals("RE-{$year}-00001", $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_different_counter_lengths()
     {
         $formats = [
@@ -63,7 +64,7 @@ class InvoiceServiceTest extends TestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function it_replaces_all_placeholders_correctly()
     {
         $org = Organization::factory()->create([
@@ -80,7 +81,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals("INV-42-{$year}-{$month}-001", $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_pads_counter_with_zeros()
     {
         $org = Organization::factory()->create([
@@ -92,7 +93,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals('00000001', $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_increments_existing_counter()
     {
         $org = Organization::factory()->create([
@@ -111,7 +112,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals("RE-{$year}-00006", $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_uses_fallback_for_format_without_counter()
     {
         $org = Organization::factory()->create([
@@ -124,7 +125,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertStringContainsString('INV-' . date('Y') . '-' . date('m'), $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_organization_without_billing_data()
     {
         $org = Organization::factory()->create([
@@ -137,7 +138,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals("PF-{$year}-00001", $number);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_null_organization()
     {
         $number = $this->service->generateInvoiceNumber('TN', null);
@@ -146,7 +147,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertMatchesRegularExpression("/^TN-{$year}-\d{5}$/", $number);
     }
 
-    /** @test */
+    #[Test]
     public function counter_increments_independently_per_format_pattern()
     {
         $org = Organization::factory()->create([

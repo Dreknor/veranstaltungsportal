@@ -10,6 +10,7 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class FeaturedEventExpiryNotificationTest extends TestCase
@@ -41,7 +42,7 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_sends_notification_for_featured_event_expiring_in_3_days()
     {
         Mail::fake();
@@ -73,7 +74,7 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         $this->assertNotNull($fee->fresh()->expiry_notified_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_send_notification_for_non_expiring_events()
     {
         Mail::fake();
@@ -97,7 +98,7 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         Mail::assertNotSent(FeaturedExpiryReminder::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_send_notification_twice()
     {
         Mail::fake();
@@ -122,7 +123,7 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         Mail::assertNotSent(FeaturedExpiryReminder::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_send_notification_for_unpaid_fees()
     {
         Mail::fake();
@@ -145,7 +146,7 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         Mail::assertNotSent(FeaturedExpiryReminder::class);
     }
 
-    /** @test */
+    #[Test]
     public function expiry_reminder_email_contains_correct_data()
     {
         $fee = FeaturedEventFee::create([
@@ -174,7 +175,7 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         $this->assertArrayHasKey('user', $content->with);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_multiple_expiring_fees()
     {
         Mail::fake();
@@ -217,4 +218,3 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         Mail::assertQueued(FeaturedExpiryReminder::class, 2);
     }
 }
-

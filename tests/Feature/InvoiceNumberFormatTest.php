@@ -8,6 +8,7 @@ use App\Models\Organization;
 use App\Models\User;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class InvoiceNumberFormatTest extends TestCase
@@ -33,7 +34,7 @@ class InvoiceNumberFormatTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_invoice_number_with_default_format()
     {
         $invoiceNumber = $this->invoiceService->generateInvoiceNumber('TN');
@@ -43,7 +44,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("TN-{$expectedYear}-00001", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_invoice_number_with_custom_year_month_format()
     {
         $this->organization->update([
@@ -59,7 +60,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("{$expectedPrefix}-0001", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_invoice_number_with_org_id_placeholder()
     {
         $this->organization->update([
@@ -75,7 +76,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("INV-{$orgId}-{$expectedYear}-001", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_generates_invoice_number_with_custom_counter_length()
     {
         $this->organization->update([
@@ -90,7 +91,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("RE-{$expectedYear}-00000001", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_increments_counter_correctly()
     {
         $this->organization->update([
@@ -124,7 +125,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("RE-{$year}-00002", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_increments_counter_across_multiple_invoices()
     {
         $this->organization->update([
@@ -160,7 +161,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("{$year}-006", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_falls_back_to_default_format_when_no_custom_format()
     {
         // Organization without custom format
@@ -170,7 +171,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("PF-{$year}-00001", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function it_handles_month_placeholder_correctly()
     {
         $this->organization->update([
@@ -186,7 +187,7 @@ class InvoiceNumberFormatTest extends TestCase
         $this->assertEquals("INV-{$year}-{$month}-0001", $invoiceNumber);
     }
 
-    /** @test */
+    #[Test]
     public function organizer_can_update_invoice_number_format()
     {
         $this->actingAs($this->user);
@@ -212,7 +213,7 @@ class InvoiceNumberFormatTest extends TestCase
         );
     }
 
-    /** @test */
+    #[Test]
     public function invoice_number_format_field_is_required()
     {
         $this->actingAs($this->user);
@@ -232,7 +233,7 @@ class InvoiceNumberFormatTest extends TestCase
         $response->assertSessionHasErrors('invoice_number_format');
     }
 
-    /** @test */
+    #[Test]
     public function it_resets_counter_for_new_year()
     {
         $this->organization->update([
