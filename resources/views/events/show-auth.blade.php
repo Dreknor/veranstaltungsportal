@@ -343,8 +343,17 @@
                     @if($event->organization && ($event->organization->description || $event->organization->email || $event->organization->phone || $event->organization->website))
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Veranstalter</h3>
-                            <div class="space-y-2">
-                                <p class="text-sm font-semibold text-gray-900">{{ $event->organization->name }}</p>
+                            <div class="space-y-3">
+                                @if($event->organization->logo)
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <img src="{{ Storage::url($event->organization->logo) }}"
+                                             alt="{{ $event->organization->name }} Logo"
+                                             class="h-16 w-16 object-contain rounded-lg border border-gray-200 bg-white p-2">
+                                        <p class="text-sm font-semibold text-gray-900">{{ $event->organization->name }}</p>
+                                    </div>
+                                @else
+                                    <p class="text-sm font-semibold text-gray-900">{{ $event->organization->name }}</p>
+                                @endif
                                 @if($event->organization->description)
                                     <p class="text-sm text-gray-700">{{ $event->organization->description }}</p>
                                 @endif

@@ -61,7 +61,7 @@ class SocialShareService
                 "Ort: " . $event->venue_name . "\n\n" .
                 "Mehr Informationen: " . $url;
 
-        return 'mailto:?subject=' . urlencode($subject) . '&body=' . urlencode($body);
+        return 'mailto:?subject=' . rawurlencode($subject) . '&body=' . rawurlencode($body);
     }
 
     /**

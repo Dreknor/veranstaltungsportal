@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\Organizer;
 use App\Http\Controllers\Settings;
+use App\Http\Controllers\FeaturedEventController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -244,8 +245,8 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         // Featured Events
         Route::get('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'create'])->name('featured-events.create');
         Route::post('/events/{event}/featured', [\App\Http\Controllers\FeaturedEventController::class, 'store'])->name('featured-events.store');
-        Route::get('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'payment'])->name('featured-events.payment');
-        Route::post('/featured-events/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'processPayment'])->name('featured-events.process-payment');
+        Route::get('/featured/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'payment'])->name('featured-events.payment');
+        Route::post('/featured/{featuredEventFee}/payment', [\App\Http\Controllers\FeaturedEventController::class, 'processPayment'])->name('featured-events.process-payment');
         Route::get('/featured-events/history', [\App\Http\Controllers\FeaturedEventController::class, 'history'])->name('featured-events.history');
         Route::get('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'extend'])->name('featured-events.extend');
         Route::post('/events/{event}/featured/extend', [\App\Http\Controllers\FeaturedEventController::class, 'processExtension'])->name('featured-events.process-extension');

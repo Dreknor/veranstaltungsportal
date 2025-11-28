@@ -19,6 +19,13 @@
             padding: 20px;
             text-align: center;
         }
+        .header img {
+            max-height: 40px;
+            max-width: 150px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+            margin-bottom: 10px;
+        }
         .content {
             background-color: #f9fafb;
             padding: 20px;
@@ -40,6 +47,10 @@
 </head>
 <body>
     <div class="header">
+        @if($booking->event->organization?->logo)
+            <img src="{{ asset('storage/' . $booking->event->organization->logo) }}"
+                 alt="{{ $booking->event->organization->name }} Logo">
+        @endif
         <h1>Stornierungsbestätigung</h1>
     </div>
 

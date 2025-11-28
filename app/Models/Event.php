@@ -128,17 +128,22 @@ class Event extends Model implements HasMedia
 
     public function getOrganizerEmail(): ?string
     {
-        return $this->organizer_email ?? $this->organization?->email;
+        return $this->organization?->email;
     }
 
     public function getOrganizerPhone(): ?string
     {
-        return $this->organizer_phone ?? $this->organization?->phone;
+        return $this->organization?->phone;
     }
 
     public function getOrganizerWebsite(): ?string
     {
-        return $this->organizer_website ?? $this->organization?->website;
+        return $this->organization?->website;
+    }
+
+    public function getOrganizerInfo(): ?string
+    {
+        return $this->organization?->description;
     }
 
     public function category(): BelongsTo

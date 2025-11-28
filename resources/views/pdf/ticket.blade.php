@@ -181,7 +181,15 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="logo">Bildungsportal</div>
+            @if($event->organization?->logo)
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="{{ public_path('storage/' . $event->organization->logo) }}"
+                         alt="{{ $event->organization->name }} Logo"
+                         style="max-height: 50px; max-width: 200px; object-fit: contain;">
+                </div>
+            @else
+                <div class="logo">Bildungsportal</div>
+            @endif
             <div class="ticket-title">Veranstaltungs-Ticket</div>
             <div class="ticket-subtitle">{{ $event->title }}</div>
         </div>
@@ -302,7 +310,7 @@
             <p><strong>Wichtige Hinweise:</strong></p>
             <p>• Bitte bringen Sie dieses Ticket (ausgedruckt oder digital) zur Veranstaltung mit.</p>
             <p>• Der Check-In erfolgt über den QR-Code am Eingang.</p>
-            <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organizer_email ?? $event->organizer->email ?? 'support@bildungsportal.de' }}</p>
+            <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organization?->email ?? 'support@bildungsportal.de' }}</p>
             @if($event->special_instructions)
             <p>• {{ $event->special_instructions }}</p>
             @endif

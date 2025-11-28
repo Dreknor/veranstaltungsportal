@@ -98,8 +98,9 @@ class CalendarService
         $ical .= "CREATED:{$created}\r\n";
         $ical .= "LAST-MODIFIED:{$modified}\r\n";
 
-        if ($event->organizer_email) {
-            $ical .= "ORGANIZER;CN=\"{$event->user->fullName()}\":MAILTO:{$event->organizer_email}\r\n";
+        if ($event->organization?->email) {
+            $organizerName = $event->organization->name;
+            $ical .= "ORGANIZER;CN=\"{$organizerName}\":MAILTO:{$event->organization->email}\r\n";
         }
 
         $ical .= "CATEGORIES:{$event->category->name}\r\n";

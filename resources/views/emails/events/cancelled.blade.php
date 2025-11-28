@@ -88,6 +88,13 @@
 </head>
 <body>
     <div class="header">
+        @if($event->organization?->logo)
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="{{ asset('storage/' . $event->organization->logo) }}"
+                     alt="{{ $event->organization->name }} Logo"
+                     style="max-height: 40px; max-width: 150px; object-fit: contain; filter: brightness(0) invert(1);">
+            </div>
+        @endif
         <h1>⚠️ Veranstaltung abgesagt</h1>
     </div>
 
@@ -161,11 +168,11 @@
 
         <p>Bei Fragen stehen wir Ihnen gerne zur Verfügung:</p>
         <p>
-            @if($event->organizer_email)
-                <strong>E-Mail:</strong> {{ $event->organizer_email }}<br>
+            @if($event->organization?->email)
+                <strong>E-Mail:</strong> {{ $event->organization->email }}<br>
             @endif
-            @if($event->organizer_phone)
-                <strong>Telefon:</strong> {{ $event->organizer_phone }}<br>
+            @if($event->organization?->phone)
+                <strong>Telefon:</strong> {{ $event->organization->phone }}<br>
             @endif
         </p>
     </div>

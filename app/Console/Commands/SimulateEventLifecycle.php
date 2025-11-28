@@ -193,8 +193,6 @@ class SimulateEventLifecycle extends Command
             'max_attendees' => 50,
             'is_published' => true,
             'registration_required' => true,
-            'organizer_info' => $this->organizer->organization_name,
-            'organizer_email' => $this->organizer->email,
         ]);
 
         $this->line("✓ Event erstellt: {$this->event->title}");

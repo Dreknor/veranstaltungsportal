@@ -92,7 +92,7 @@
         'organizer' => [
             '@type' => 'Organization',
             'name' => $organizationName,
-            'url' => $event->organizer_website ?? url('/'),
+            'url' => $event->organization?->website ?? url('/'),
         ],
         'performer' => [
             '@type' => 'Organization',

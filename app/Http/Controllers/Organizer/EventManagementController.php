@@ -80,10 +80,6 @@ class EventManagementController extends Controller
             'is_private' => 'boolean',
             'has_multiple_dates' => 'boolean',
             'access_code' => 'nullable|string|required_if:is_private,1',
-            'organizer_info' => 'nullable|string',
-            'organizer_email' => 'nullable|email',
-            'organizer_phone' => 'nullable|string',
-            'organizer_website' => 'nullable|url',
         ]);
 
         if ($request->boolean('is_published')) {
@@ -217,10 +213,6 @@ class EventManagementController extends Controller
             'is_featured' => 'boolean',
             'is_private' => 'boolean',
             'access_code' => 'nullable|string|required_if:is_private,1',
-            'organizer_info' => 'nullable|string',
-            'organizer_email' => 'nullable|email',
-            'organizer_phone' => 'nullable|string',
-            'organizer_website' => 'nullable|url',
         ]);
 
         unset($validated['has_multiple_dates']);

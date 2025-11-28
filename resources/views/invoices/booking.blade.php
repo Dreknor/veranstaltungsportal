@@ -140,15 +140,26 @@
 </head>
 <body>
     <div class="header">
-        <h1>RECHNUNG</h1>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="flex: 1;">
+                <h1>RECHNUNG</h1>
+            </div>
+            @if($event->organization?->logo)
+                <div style="text-align: right;">
+                    <img src="{{ public_path('storage/' . $event->organization->logo) }}"
+                         alt="{{ $event->organization->name }} Logo"
+                         style="max-height: 60px; max-width: 150px; object-fit: contain;">
+                </div>
+            @endif
+        </div>
         <div class="company-info">
             Veranstaltungsportal | {{ config('app.name') }}<br>
-            {{ $event->organizer_info ?? 'Musterstraße 123, 12345 Musterstadt' }}<br>
-            @if($event->organizer_email)
-                E-Mail: {{ $event->organizer_email }} |
+            {{ $event->organization?->name ?? 'Musterstraße 123, 12345 Musterstadt' }}<br>
+            @if($event->organization?->email)
+                E-Mail: {{ $event->organization->email }} |
             @endif
-            @if($event->organizer_phone)
-                Tel: {{ $event->organizer_phone }}
+            @if($event->organization?->phone)
+                Tel: {{ $event->organization->phone }}
             @endif
         </div>
     </div>
@@ -270,7 +281,7 @@
     <div class="footer">
         <p><strong>Wichtige Hinweise:</strong></p>
         <p>Bitte bringen Sie diese Rechnung oder Ihre Buchungsnummer zum Event mit.</p>
-        <p>Bei Fragen zur Rechnung wenden Sie sich bitte an {{ $event->organizer_email ?? config('mail.from.address') }}</p>
+        <p>Bei Fragen zur Rechnung wenden Sie sich bitte an {{ $event->organization?->email ?? config('mail.from.address') }}</p>
         <p style="margin-top: 20px;">
             <small>
                 Dies ist eine maschinell erstellte Rechnung und bedarf keiner Unterschrift.<br>

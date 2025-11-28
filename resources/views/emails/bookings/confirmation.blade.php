@@ -7,6 +7,13 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+        @if($booking->event->organization?->logo)
+            <div style="text-align: center; margin-bottom: 15px;">
+                <img src="{{ asset('storage/' . $booking->event->organization->logo) }}"
+                     alt="{{ $booking->event->organization->name }} Logo"
+                     style="max-height: 40px; max-width: 150px; object-fit: contain; filter: brightness(0) invert(1);">
+            </div>
+        @endif
         <h1 style="color: white; margin: 0; font-size: 28px;">Buchungsbestätigung</h1>
         <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">{{ config('app.name') }}</p>
     </div>

@@ -171,33 +171,37 @@
     - [x] Konfiguration aller Gebühren (täglich, wöchentlich, monatlich)
     - [x] Übersichtsseite aller Transaktionen
     - [x] Tab-Navigation mit Badge für ausstehende Zahlungen
-  - [ ] Views für Featured Event Antragstellung (Organizer)
-  - [ ] Views für Zahlungsabwicklung (Organizer)
-  - [ ] Benachrichtigungen 3 Tage vor Ablauf
-
-### Hilfe-System
-- [x] **User-Hilfe-Artikel (12/12 - 100% vollständig)** ✅
-- [ ] **Organizer-Hilfe-Artikel (0/9)** 🎯 NÄCHSTE PRIORITÄT
-  - [ ] getting-started.blade.php - Erste Schritte als Organisator
-  - [ ] creating-events.blade.php - Events erstellen & verwalten
-  - [ ] managing-bookings.blade.php - Buchungen & Teilnehmer verwalten
-  - [ ] tickets-pricing.blade.php - Tickets & Preisgestaltung
-  - [ ] analytics-reports.blade.php - Statistiken & Berichte
-  - [ ] communication.blade.php - Kommunikation mit Teilnehmern
-  - [ ] marketing-promotion.blade.php - Marketing & Promotion
-  - [ ] settings-preferences.blade.php - Einstellungen & Präferenzen
-  - [ ] troubleshooting.blade.php - Häufige Probleme & FAQ
-  - [ ] **Siehe:** `docs/HELP_ORGANIZER_ADMIN_TODO.md` für Details
-- [ ] **Admin-Hilfe-Artikel (0/6)**
-  - [ ] getting-started.blade.php - Admin-Dashboard Einführung
-  - [ ] user-management.blade.php - Benutzerverwaltung
-  - [ ] event-moderation.blade.php - Event-Moderation & Freigabe
-  - [ ] system-settings.blade.php - Systemeinstellungen
-  - [ ] logs-monitoring.blade.php - Logs & System-Überwachung
-  - [ ] troubleshooting.blade.php - Admin-Troubleshooting
-  - [ ] **Siehe:** `docs/HELP_ORGANIZER_ADMIN_TODO.md` für Details
+  - [x] **Organizer-Hilfe-Artikel (9/9 - 100% vollständig)** ✅ NEU
+  - [x] getting-started.blade.php - Erste Schritte als Organisator (vollständig mit Best Practices)
+  - [x] creating-events.blade.php - Events erstellen & verwalten (vollständig mit 5 Abschnitten)
+  - [x] managing-bookings.blade.php - Buchungen & Teilnehmer verwalten (vollständig mit Best Practices)
+  - [x] tickets-pricing.blade.php - Tickets & Preisgestaltung (vollständig mit Tipps)
+  - [x] analytics-reports.blade.php - Statistiken & Berichte (vollständig mit 5 Abschnitten)
+  - [x] communication.blade.php - Kommunikation mit Teilnehmern (vollständig mit 5 Abschnitten)
+  - [x] marketing-promotion.blade.php - Marketing & Promotion (vollständig mit 6 Abschnitten)
+  - [x] settings-preferences.blade.php - Einstellungen & Präferenzen (vollständig mit 6 Abschnitten)
+  - [x] troubleshooting.blade.php - Häufige Probleme & FAQ (vollständig mit 8 FAQs)
+  - [x] index.blade.php - Kategorie-Übersicht mit Grid-Layout (9 Artikel-Karten)
+  - [x] Integration in /help Bereich (Zugriffskontrolle nur für Organizers/Admin)
+  - [x] Erweiterte Suche: Organizer-Inhalte für Organizers/Admin durchsuchbar
+  - [x] Kategorie-Badges in Suchergebnissen (farbcodiert: Nutzer/Veranstalter)
+  - [x] Organizer-Hilfe Kachel auf Help-Index (prominent für Organizers/Admin)
+  - [x] Vollständige Inhalte mit Breadcrumbs, Best Practices & farbigen Tipps-Boxen
+  - [x] Konsistentes Design passend zu User-Hilfe (Dark Mode Support)
+  - [x] **Featured Events Organizer-Flow**
+  - [x] Views für Antragstellung (create)
+  - [x] Views für Zahlungsabwicklung (payment)
+  - [x] Views für Verlängerung (extend)
+  - [x] History-View mit Aktionen
+  - [x] Routen integriert
+  - [x] Quick Action im Organizer-Dashboard
+  - [ ] Benachrichtigung 3 Tage vor Ablauf (Job + Mail + Scheduler)
 
 ## 🔄 In Arbeit / Fehlend
+- [ ] Benachrichtigung „3 Tage vor Ablauf“ für Featured Events
+  - [ ] Console Job `NotifyFeaturedExpiry`
+  - [ ] Mail Template `FeaturedExpiryReminder`
+  - [ ] Scheduler täglich 08:00 Uhr
 
 ### 1. Core Features (Hohe Priorität)
 - [x] **QR-Code & PDF Generator**
@@ -587,6 +591,20 @@
 - [ ] Support Ticket System
 - [x] Hinterlegung Rechnungsnummern in den Einstellungen der Plattform-Rechnungsdaten mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
 - [ ] Trennung des Benutzerkontos von den Organisator-Einstellungen, sodass mehrere Benutzer als ein Organisator auftreten können
+- [ ] Admin-Interface für Featured Events Management
+- [ ] Monetarisierungs-Einstellungen im Admin-Panel
+- [ ] Admin-Übersicht über alle Rechnungen
+- [ ] Admin-Benachrichtigungen für ausstehende Zahlungen bei Featured Events
+- [ ] Admin-Interface für Data Privacy Anfragen
+- [ ] Admin-Interface für Newsletter-Verwaltung
+- [ ] SEO-Tools im Admin-Panel
+- [ ] Error Page Management im Admin-Panel
+- [ ] Admin-Hilfe-Artikel (siehe oben)
+- [ ] Frontend zur Badge-Verwaltung im Admin-Panel
+  - [ ] Übersicht über bestehende Badges
+  - [ ] Erstellung neuer Badges
+  - [ ] Bearbeitung und Löschung von Badges
+- [ ] Frontend zur User Connection Verwaltung im Admin-Panel
 ### 5. Erweiterte Features
 - [x] **Error Pages (404, 500 etc.)** ✅ NEU
   - [x] 404 Not Found Page
@@ -671,15 +689,17 @@
   - [x] Personalisierte Newsletter mit Empfehlungen
   - [x] Settings View für Interessen & Newsletter
   - [x] Integration in User-Einstellungen
-- [x] **SEO-Optimierung**
-  - [x] Sitemap.xml Generator
-  - [x] Robots.txt Generator
-  - [x] Meta-Tags Component (bereits vorhanden)
-  - [x] Open Graph Tags
-  - [x] Twitter Cards
-  - [x] Schema.org Structured Data
-  - [x] SEO-freundliche URLs
-  - [x] Sitemap Routes konfiguriert
+- [ ] **SEO-Optimierung**
+  - [ ] Sitemap.xml Generator
+  - [ ] Robots.txt Generator
+  - [ ] Meta-Tags Component (bereits vorhanden)
+  - [ ] Open Graph Tags
+  - [ ] Twitter Cards
+  - [ ] Schema.org Structured Data
+  - [ ] SEO-freundliche URLs
+  - [ ] Sitemap Routes konfiguriert
+- [ ] SEO-Analyse Tool integriert
+- [ ] Performance-Optimierungen (Caching, Lazy Loading)
 
 ### 6. Testing & Qualität
 - [x] **Weitere Unit Tests für Models**
@@ -695,6 +715,17 @@
   - [x] Unit/Unit Duplikat-Ordner entfernt
   - [x] Namespace-Konflikte gelöst
 - [ ] Integration Tests für komplexe Workflows
+- [ ] Testabdeckung auf mindestens 100% erhöhen
+- [ ] Automatisierte Tests im CI/CD Pipeline integrieren
+- [ ] **Code Quality & Refactoring**
+  - [ ] Code-Reviews durchgeführt
+  - [ ] Redundanten Code entfernt
+  - [ ] Performance-Optimierungen vorgenommen
+  - [ ] PSR-12 Coding Standards eingehalten
+  - [ ] Static Analysis Tools (PHPStan, Psalm) integriert
+  - [ ] Linter (PHP_CodeSniffer) konfiguriert
+  - [ ] Automatisierte Code-Formatierung (PHP CS Fixer)
+  - [ ] Continuous Integration (GitHub Actions) eingerichtet
 
 ### 7. UI/UX Verbesserungen
 - [x] Review-System UI in Event Show View integrieren
