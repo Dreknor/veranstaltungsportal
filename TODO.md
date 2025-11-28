@@ -188,20 +188,21 @@
   - [x] Organizer-Hilfe Kachel auf Help-Index (prominent für Organizers/Admin)
   - [x] Vollständige Inhalte mit Breadcrumbs, Best Practices & farbigen Tipps-Boxen
   - [x] Konsistentes Design passend zu User-Hilfe (Dark Mode Support)
-  - [x] **Featured Events Organizer-Flow**
+  - [x] **Featured Events Organizer-Flow** ✅ VOLLSTÄNDIG
   - [x] Views für Antragstellung (create)
   - [x] Views für Zahlungsabwicklung (payment)
   - [x] Views für Verlängerung (extend)
   - [x] History-View mit Aktionen
   - [x] Routen integriert
   - [x] Quick Action im Organizer-Dashboard
-  - [ ] Benachrichtigung 3 Tage vor Ablauf (Job + Mail + Scheduler)
+  - [x] Benachrichtigung 3 Tage vor Ablauf (Job + Mail + Scheduler)
+    - [x] Console Command `NotifyFeaturedExpiry` erstellt
+    - [x] Mail Template `FeaturedExpiryReminder` mit professionellem Design
+    - [x] Scheduler täglich 08:00 Uhr
+    - [x] Migration für `expiry_notified_at` Feld
+    - [x] Model aktualisiert (fillable + casts)
 
 ## 🔄 In Arbeit / Fehlend
-- [ ] Benachrichtigung „3 Tage vor Ablauf“ für Featured Events
-  - [ ] Console Job `NotifyFeaturedExpiry`
-  - [ ] Mail Template `FeaturedExpiryReminder`
-  - [ ] Scheduler täglich 08:00 Uhr
 
 ### 1. Core Features (Hohe Priorität)
 - [x] **QR-Code & PDF Generator**
@@ -496,8 +497,13 @@
   - [x] Series Edit View (series/edit.blade.php)
   - [x] 8 neue Routes konfiguriert
   - [x] Migration ausgeführt
-  - [ ] Hinterlegung Rechnungsnummern in den Einstellungen der Kontoverbindung mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
-  - 
+  - [x] **Hinterlegung Rechnungsnummern in den Einstellungen** ✅ NEU
+    - [x] Rechnungsnummern-Format-Feld in Billing Data
+    - [x] Platzhalter-System: {YEAR}, {MONTH}, {COUNTER:X}, {ORG}
+    - [x] InvoiceService erweitert für custom Formate
+    - [x] Fortlaufende Nummerierung pro Jahr/Monat
+    - [x] Beispiele und Hilfetext in View
+    - [x] Validation und Speicherung im Controller
 
 ### 4. Admin Features
 - [x] Admin Dashboard (Super-Admin)

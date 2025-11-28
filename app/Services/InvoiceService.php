@@ -60,7 +60,7 @@ class InvoiceService
 
         // Create invoice
         $invoice = Invoice::create([
-            'invoice_number' => $this->generateInvoiceNumber('PF'),
+            'invoice_number' => $this->generateInvoiceNumber('PF', $event->user->currentOrganization()),
             'event_id' => $event->id,
             'user_id' => $event->user_id,
             'type' => 'platform_fee',
@@ -109,7 +109,7 @@ class InvoiceService
         }
 
         $invoice = Invoice::create([
-            'invoice_number' => $this->generateInvoiceNumber('TN'),
+            'invoice_number' => $this->generateInvoiceNumber('TN', $booking->event->user->currentOrganization()),
             'event_id' => $booking->event_id,
             'booking_id' => $booking->id,
             'user_id' => $booking->event->user_id, // Organizer
@@ -145,9 +145,19 @@ class InvoiceService
 
     /**
      * Generate unique invoice number
+     * Supports custom format with placeholders: {YEAR}, {MONTH}, {COUNTER:X}, {ORG}
      */
-    public function generateInvoiceNumber($prefix = 'TN')
+    public function generateInvoiceNumber($prefix = 'TN', $organization = null)
     {
+        // If organization provided and has custom format, use it
+        if ($organization && isset($organization->billing_data['invoice_number_format'])) {
+            return $this->generateInvoiceNumberFromFormat(
+                $organization->billing_data['invoice_number_format'],
+                $organization
+            );
+        }
+
+        // Fallback to legacy format
         $year = date('Y');
         $lastInvoice = Invoice::where('invoice_number', 'like', "{$prefix}-{$year}-%")->latest()->first();
 
@@ -159,6 +169,62 @@ class InvoiceService
         }
 
         return sprintf('%s-%s-%05d', $prefix, $year, $newNumber);
+    }
+
+    /**
+     * Generate invoice number from custom format
+     */
+    private function generateInvoiceNumberFromFormat($format, $organization)
+    {
+        $year = date('Y');
+        $month = date('m');
+        $orgId = $organization->id ?? 0;
+
+        // Find highest counter for this year
+        $pattern = str_replace(
+            ['{YEAR}', '{MONTH}', '{ORG}'],
+            [$year, $month, $orgId],
+            $format
+        );
+
+        // Extract counter pattern (e.g., {COUNTER:5})
+        if (preg_match('/{COUNTER:(\d+)}/', $format, $matches)) {
+            $counterLength = (int)$matches[1];
+
+            // Build SQL pattern for finding existing numbers
+            $searchPattern = str_replace('{COUNTER:' . $counterLength . '}', '%', $pattern);
+
+            $lastInvoice = Invoice::where('invoice_number', 'like', $searchPattern)
+                ->latest()
+                ->first();
+
+            if ($lastInvoice) {
+                // Extract counter from last invoice number
+                $regex = '/' . preg_quote(str_replace('%', '', $searchPattern), '/') . '(\d+)/';
+                if (preg_match($regex, $lastInvoice->invoice_number, $extractMatches)) {
+                    $lastCounter = (int)$extractMatches[1];
+                    $newCounter = $lastCounter + 1;
+                } else {
+                    $newCounter = 1;
+                }
+            } else {
+                $newCounter = 1;
+            }
+
+            $counterStr = str_pad($newCounter, $counterLength, '0', STR_PAD_LEFT);
+
+            // Replace all placeholders
+            $invoiceNumber = str_replace(
+                ['{YEAR}', '{MONTH}', '{COUNTER:' . $counterLength . '}', '{ORG}'],
+                [$year, $month, $counterStr, $orgId],
+                $format
+            );
+
+            return $invoiceNumber;
+        }
+
+        // Fallback if no counter found
+        return $pattern . '-' . date('YmdHis');
     }
 
     /**
