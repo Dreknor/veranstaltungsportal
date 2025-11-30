@@ -103,8 +103,21 @@ class InvoiceServiceTest extends TestCase
         $year = date('Y');
 
         // Create existing invoice
-        Invoice::factory()->create([
+        \App\Models\Invoice::create([
             'invoice_number' => "RE-{$year}-00005",
+            'user_id' => 1,
+            'type' => 'platform_fee',
+            'recipient_name' => 'Test',
+            'recipient_email' => 'test@test.com',
+            'recipient_address' => 'Test Address',
+            'amount' => 100.00,
+            'tax_rate' => 19.0,
+            'tax_amount' => 19.00,
+            'total_amount' => 119.00,
+            'currency' => 'EUR',
+            'invoice_date' => now(),
+            'due_date' => now()->addDays(14),
+            'status' => 'sent',
         ]);
 
         $number = $this->service->generateInvoiceNumber('TN', $org);
@@ -158,8 +171,21 @@ class InvoiceServiceTest extends TestCase
         $month = date('m');
 
         // Create invoice with current year/month
-        Invoice::factory()->create([
+        \App\Models\Invoice::create([
             'invoice_number' => "{$year}-{$month}-0003",
+            'user_id' => 1,
+            'type' => 'platform_fee',
+            'recipient_name' => 'Test',
+            'recipient_email' => 'test@test.com',
+            'recipient_address' => 'Test Address',
+            'amount' => 100.00,
+            'tax_rate' => 19.0,
+            'tax_amount' => 19.00,
+            'total_amount' => 119.00,
+            'currency' => 'EUR',
+            'invoice_date' => now(),
+            'due_date' => now()->addDays(14),
+            'status' => 'sent',
         ]);
 
         // New invoice should increment

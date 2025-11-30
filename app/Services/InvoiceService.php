@@ -180,51 +180,46 @@ class InvoiceService
         $month = date('m');
         $orgId = $organization->id ?? 0;
 
-        // Find highest counter for this year
-        $pattern = str_replace(
+        // Replace non-counter placeholders to build base pattern
+        $basePattern = str_replace(
             ['{YEAR}', '{MONTH}', '{ORG}'],
             [$year, $month, $orgId],
             $format
         );
 
-        // Extract counter pattern (e.g., {COUNTER:5})
+        // Extract counter length
         if (preg_match('/{COUNTER:(\d+)}/', $format, $matches)) {
             $counterLength = (int)$matches[1];
 
-            // Build SQL pattern for finding existing numbers
-            $searchPattern = str_replace('{COUNTER:' . $counterLength . '}', '%', $pattern);
+            // Build search pattern replacing counter with wildcard
+            $searchPattern = str_replace('{COUNTER:' . $counterLength . '}', '%', $basePattern);
 
-            $lastInvoice = Invoice::where('invoice_number', 'like', $searchPattern)
-                ->latest()
+            // Fetch latest matching invoice and derive highest counter
+            $lastInvoice = \App\Models\Invoice::where('invoice_number', 'like', $searchPattern)
+                ->orderBy('invoice_number', 'desc')
                 ->first();
 
+            $newCounter = 1;
             if ($lastInvoice) {
-                // Extract counter from last invoice number
-                $regex = '/' . preg_quote(str_replace('%', '', $searchPattern), '/') . '(\d+)/';
-                if (preg_match($regex, $lastInvoice->invoice_number, $extractMatches)) {
-                    $lastCounter = (int)$extractMatches[1];
-                    $newCounter = $lastCounter + 1;
-                } else {
-                    $newCounter = 1;
+                // Build regex to capture trailing counter digits of given length
+                $counterRegex = '/(\d{' . $counterLength . '})$/';
+                if (preg_match($counterRegex, $lastInvoice->invoice_number, $m)) {
+                    $newCounter = ((int) $m[1]) + 1;
                 }
-            } else {
-                $newCounter = 1;
             }
 
             $counterStr = str_pad($newCounter, $counterLength, '0', STR_PAD_LEFT);
 
-            // Replace all placeholders
-            $invoiceNumber = str_replace(
+            // Final replacement including counter
+            return str_replace(
                 ['{YEAR}', '{MONTH}', '{COUNTER:' . $counterLength . '}', '{ORG}'],
                 [$year, $month, $counterStr, $orgId],
                 $format
             );
-
-            return $invoiceNumber;
         }
 
-        // Fallback if no counter found
-        return $pattern . '-' . date('YmdHis');
+        // Fallback if no counter placeholder
+        return $basePattern . '-' . date('YmdHis');
     }
 
     /**

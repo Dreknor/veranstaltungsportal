@@ -64,8 +64,8 @@ class FeaturedEventExpiryNotificationTest extends TestCase
         $this->artisan('featured:notify-expiry')
             ->assertExitCode(0);
 
-        // Assert email was sent
-        Mail::assertSent(FeaturedExpiryReminder::class, function ($mail) use ($fee) {
+        // Assert email was queued
+        Mail::assertQueued(FeaturedExpiryReminder::class, function ($mail) use ($fee) {
             return $mail->featuredEventFee->id === $fee->id
                 && $mail->hasTo($this->user->email);
         });
