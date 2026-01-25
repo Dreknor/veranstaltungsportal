@@ -71,8 +71,6 @@ class EventManagementController extends Controller
             'online_url' => 'required_if:event_type,online,hybrid|nullable|url',
             'online_access_code' => 'nullable|string|max:255',
             'featured_image' => 'nullable|image|max:2048',
-            'video_url' => 'nullable|url',
-            'livestream_url' => 'nullable|url',
             'price_from' => 'nullable|numeric|min:0',
             'max_attendees' => 'nullable|integer|min:1',
             'is_published' => 'boolean',
@@ -80,6 +78,8 @@ class EventManagementController extends Controller
             'is_private' => 'boolean',
             'has_multiple_dates' => 'boolean',
             'access_code' => 'nullable|string|required_if:is_private,1',
+            'ticket_notes' => 'nullable|string|max:1000',
+            'show_qr_code_on_ticket' => 'boolean',
         ]);
 
         if ($request->boolean('is_published')) {
@@ -205,14 +205,14 @@ class EventManagementController extends Controller
             'online_url' => 'required_if:event_type,online,hybrid|nullable|url',
             'online_access_code' => 'nullable|string|max:255',
             'featured_image' => 'nullable|image|max:2048',
-            'video_url' => 'nullable|url',
-            'livestream_url' => 'nullable|url',
             'price_from' => 'nullable|numeric|min:0',
             'max_attendees' => 'nullable|integer|min:1',
             'is_published' => 'boolean',
             'is_featured' => 'boolean',
             'is_private' => 'boolean',
             'access_code' => 'nullable|string|required_if:is_private,1',
+            'ticket_notes' => 'nullable|string|max:1000',
+            'show_qr_code_on_ticket' => 'boolean',
         ]);
 
         unset($validated['has_multiple_dates']);

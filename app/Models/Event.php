@@ -45,8 +45,6 @@ class Event extends Model implements HasMedia
         'directions',
         'featured_image',
         'gallery_images',
-        'video_url',
-        'livestream_url',
         'online_url',
         'online_access_code',
         'price_from',
@@ -60,6 +58,8 @@ class Event extends Model implements HasMedia
         'is_cancelled',
         'cancelled_at',
         'cancellation_reason',
+        'ticket_notes',
+        'show_qr_code_on_ticket',
     ];
 
     protected function casts(): array
@@ -79,6 +79,7 @@ class Event extends Model implements HasMedia
             'venue_longitude' => 'decimal:7',
             'is_cancelled' => 'boolean',
             'cancelled_at' => 'datetime',
+            'show_qr_code_on_ticket' => 'boolean',
         ];
     }
 

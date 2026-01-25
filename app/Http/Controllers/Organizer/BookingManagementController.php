@@ -83,9 +83,14 @@ class BookingManagementController extends Controller
         $booking->update(['payment_status' => $request->payment_status]);
         if ($request->payment_status === 'paid' && $oldPaymentStatus !== 'paid') {
             try {
-                \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                    ->send(new \App\Mail\PaymentConfirmed($booking));
-                return back()->with('success', 'Zahlungsstatus aktualisiert und Tickets per E-Mail versendet!');
+                // Nur Tickets versenden, wenn keine Personalisierung erforderlich ist oder diese abgeschlossen ist
+                if (!$booking->needsPersonalization() || $booking->tickets_personalized) {
+                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                        ->send(new \App\Mail\PaymentConfirmed($booking));
+                    return back()->with('success', 'Zahlungsstatus aktualisiert und Tickets per E-Mail versendet!');
+                } else {
+                    return back()->with('warning', 'Zahlungsstatus aktualisiert. Tickets werden versendet, sobald die Personalisierung durch den Kunden abgeschlossen ist.');
+                }
             } catch (\Exception $e) {
                 Log::error('Fehler beim Senden der Zahlungsbestätigungs-E-Mail: ',[
                     'booking_id' => $booking->id,

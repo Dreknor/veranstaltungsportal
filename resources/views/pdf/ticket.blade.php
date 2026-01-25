@@ -225,6 +225,48 @@
                     <div class="info-label">Uhrzeit:</div>
                     <div class="info-value">{{ $event->start_date->format('H:i') }} Uhr</div>
                 </div>
+                @if($event->isOnline())
+                <div class="info-row">
+                    <div class="info-label">Format:</div>
+                    <div class="info-value">Online-Veranstaltung</div>
+                </div>
+                @if($event->online_url)
+                <div class="info-row">
+                    <div class="info-label">Online-Zugang:</div>
+                    <div class="info-value" style="word-break: break-all; color: #2563eb;">{{ $event->online_url }}</div>
+                </div>
+                @endif
+                @if($event->online_access_code)
+                <div class="info-row">
+                    <div class="info-label">Zugangscode:</div>
+                    <div class="info-value" style="font-family: monospace; background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">{{ $event->online_access_code }}</div>
+                </div>
+                @endif
+                @elseif($event->isHybrid())
+                <div class="info-row">
+                    <div class="info-label">Format:</div>
+                    <div class="info-value">Hybrid-Veranstaltung (Präsenz & Online)</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Präsenz-Ort:</div>
+                    <div class="info-value">
+                        @if($event->venue_name){{ $event->venue_name }}<br>@endif
+                        {{ $event->venue_address }}, {{ $event->venue_postal_code }} {{ $event->venue_city }}
+                    </div>
+                </div>
+                @if($event->online_url)
+                <div class="info-row">
+                    <div class="info-label">Online-Zugang:</div>
+                    <div class="info-value" style="word-break: break-all; color: #2563eb;">{{ $event->online_url }}</div>
+                </div>
+                @endif
+                @if($event->online_access_code)
+                <div class="info-row">
+                    <div class="info-label">Zugangscode:</div>
+                    <div class="info-value" style="font-family: monospace; background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">{{ $event->online_access_code }}</div>
+                </div>
+                @endif
+                @else
                 <div class="info-row">
                     <div class="info-label">Ort:</div>
                     <div class="info-value">{{ $event->location }}</div>
@@ -234,6 +276,7 @@
                     <div class="info-label">Veranstaltungsort:</div>
                     <div class="info-value">{{ $event->venue_name }}</div>
                 </div>
+                @endif
                 @endif
             </div>
         </div>
@@ -258,6 +301,36 @@
                 @endif
             </div>
         </div>
+
+        <!-- Individual Ticket Holders (wenn personalisiert) -->
+        @if($booking->tickets_personalized && $items->count() > 1)
+        <div class="section">
+            <div class="section-title">Personalisierte Tickets</div>
+            <div class="important-info">
+                <p><strong>Hinweis:</strong> Diese Buchung umfasst mehrere personalisierte Tickets für verschiedene Teilnehmer.</p>
+            </div>
+            <table class="tickets-table" style="margin-top: 15px;">
+                <thead>
+                    <tr>
+                        <th>Ticket-Nr.</th>
+                        <th>Teilnehmer</th>
+                        <th>E-Mail</th>
+                        <th>Ticket-Typ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($items as $item)
+                    <tr>
+                        <td>{{ $item->ticket_number }}</td>
+                        <td>{{ $item->attendee_name ?? $booking->customer_name }}</td>
+                        <td style="font-size: 10px;">{{ $item->attendee_email ?? $booking->customer_email }}</td>
+                        <td>{{ $item->ticketType->name }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
 
         <!-- Ticket Details -->
         <div class="section">
@@ -295,6 +368,7 @@
         </div>
 
         <!-- QR Code -->
+        @if($event->show_qr_code_on_ticket)
         <div class="qr-section">
             <div class="section-title">Check-In QR-Code</div>
             <p style="font-size: 11px; color: #6b7280; margin-bottom: 10px;">
@@ -304,15 +378,22 @@
                 <img src="{{ $qrCode }}" alt="QR Code">
             </div>
         </div>
+        @endif
 
         <!-- Important Information -->
         <div class="important-info">
             <p><strong>Wichtige Hinweise:</strong></p>
-            <p>• Bitte bringen Sie dieses Ticket (ausgedruckt oder digital) zur Veranstaltung mit.</p>
-            <p>• Der Check-In erfolgt über den QR-Code am Eingang.</p>
+            @if($event->ticket_notes)
+                {!! nl2br(e($event->ticket_notes)) !!}
+            @else
+                <p>• Bitte bringen Sie dieses Ticket zur Veranstaltung mit.</p>
+            @endif
+            @if($event->show_qr_code_on_ticket)
+                <p>• Der Check-In erfolgt über den QR-Code am Eingang.</p>
+            @endif
             <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organization?->email ?? 'support@bildungsportal.de' }}</p>
             @if($event->special_instructions)
-            <p>• {{ $event->special_instructions }}</p>
+                <p>• {{ $event->special_instructions }}</p>
             @endif
         </div>
 

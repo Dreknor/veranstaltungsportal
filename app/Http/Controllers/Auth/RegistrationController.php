@@ -19,7 +19,9 @@ class RegistrationController extends Controller
 {
     public function create(): View
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'allowOrganizerRegistration' => config('app.allow_organizer_registration', true),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -28,7 +30,15 @@ class RegistrationController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'account_type' => ['required', 'in:participant,organizer'],
+            'account_type' => [
+                'required',
+                'in:participant,organizer',
+                function ($attribute, $value, $fail) {
+                    if ($value === 'organizer' && !config('app.allow_organizer_registration', true)) {
+                        $fail('Die Registrierung als Veranstalter ist derzeit nicht möglich.');
+                    }
+                },
+            ],
             'organization_name' => [
                 'required_if:account_type,organizer',
                 'nullable',

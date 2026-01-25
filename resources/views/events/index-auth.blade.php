@@ -118,11 +118,12 @@
 
                                 <!-- Event Details -->
                                 <div class="p-5">
-                                    <div class="flex items-center gap-2 mb-2">
+                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                                               style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
                                             {{ $event->category->name }}
                                         </span>
+                                        <x-event-type-badge :event="$event" />
                                     </div>
 
                                     <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">

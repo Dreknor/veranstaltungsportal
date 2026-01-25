@@ -58,16 +58,72 @@
             <!-- Tickets -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Tickets</h2>
+
+                @if($booking->needsPersonalization())
+                    <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-yellow-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-800">
+                                    Personalisierung erforderlich - Der Kunde muss die Tickets noch personalisieren, bevor sie versendet werden können.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @elseif($booking->tickets_personalized)
+                    <div class="bg-green-50 border border-green-300 rounded-lg p-4 mb-4">
+                        <div class="flex items-start">
+                            <svg class="w-5 h-5 text-green-600 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm font-medium text-green-800">
+                                    Tickets personalisiert am {{ $booking->tickets_personalized_at->format('d.m.Y H:i') }} Uhr
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="space-y-4">
                     @foreach($booking->items as $item)
-                        <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg">
-                            <div>
-                                <h3 class="font-semibold text-gray-900">{{ $item->ticketType->name }}</h3>
-                                <p class="text-sm text-gray-600">Anzahl: {{ $item->quantity }}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-gray-900">{{ number_format($item->price, 2, ',', '.') }} €</p>
-                                <p class="text-sm text-gray-600">Gesamt: {{ number_format($item->price * $item->quantity, 2, ',', '.') }} €</p>
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold text-gray-900">{{ $item->ticketType->name }}</h3>
+                                    <p class="text-sm text-gray-600">Ticket-Nr: {{ $item->ticket_number }}</p>
+                                    @if($item->attendee_name)
+                                        <div class="mt-2 pt-2 border-t border-gray-100">
+                                            <p class="text-sm text-blue-600">
+                                                <span class="font-medium">Teilnehmer:</span> {{ $item->attendee_name }}
+                                            </p>
+                                            @if($item->attendee_email)
+                                                <p class="text-xs text-gray-500">{{ $item->attendee_email }}</p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    @if($item->checked_in)
+                                        <div class="mt-2 pt-2 border-t border-gray-100">
+                                            <p class="text-sm text-green-600">
+                                                <svg class="w-4 h-4 inline mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                Eingecheckt am {{ $item->checked_in_at->format('d.m.Y H:i') }} Uhr
+                                            </p>
+                                            @if($booking->event->end_date->isPast())
+                                                <p class="text-xs text-purple-600 mt-1">
+                                                    ✓ Zertifikat verfügbar
+                                                </p>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-semibold text-gray-900">{{ number_format($item->price, 2, ',', '.') }} €</p>
+                                    <p class="text-sm text-gray-600">Anzahl: {{ $item->quantity }}</p>
+                                </div>
                             </div>
                         </div>
                     @endforeach

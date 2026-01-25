@@ -16,11 +16,12 @@
 
             <div class="absolute bottom-0 left-0 right-0 p-8">
                 <div class="max-w-7xl mx-auto">
-                    <div class="flex items-center gap-2 mb-3">
+                    <div class="flex items-center gap-2 mb-3 flex-wrap">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
                               style="background-color: {{ $event->category->color }}; color: white;">
                             {{ $event->category->name }}
                         </span>
+                        <x-event-type-badge :event="$event" size="md" class="!bg-white/90 !text-gray-800 !border-white" />
                         @if($event->is_cancelled)
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-500 text-white">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,28 +83,6 @@
                         </div>
                     </div>
 
-                    <!-- Video -->
-                    @if($event->video_url)
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-4">Video</h2>
-                            <div class="aspect-w-16 aspect-h-9">
-                                <iframe src="{{ $event->video_url }}" frameborder="0" allowfullscreen class="w-full h-64 rounded-lg"></iframe>
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Livestream -->
-                    @if($event->livestream_url)
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-4">
-                                <x-icon.video class="w-6 h-6 inline-block mr-2 text-red-600" />
-                                Live Stream
-                            </h2>
-                            <a href="{{ $event->livestream_url }}" target="_blank" class="text-blue-600 hover:text-blue-800">
-                                {{ $event->livestream_url }}
-                            </a>
-                        </div>
-                    @endif
 
                     <!-- Bewertungen -->
                     <div class="bg-white rounded-lg shadow-md p-6">

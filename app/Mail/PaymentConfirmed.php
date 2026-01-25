@@ -35,15 +35,20 @@ class PaymentConfirmed extends Mailable
 
     public function attachments(): array
     {
-        $ticketPdfService = app(TicketPdfService::class);
+        $attachments = [];
 
-        return [
-            // Ticket-PDF anhängen
-            Attachment::fromData(
-                fn () => $ticketPdfService->getTicketContent($this->booking),
-                "Ticket_{$this->booking->booking_number}.pdf"
-            )->withMime('application/pdf'),
-        ];
+        // Nur Tickets anhängen, wenn sie personalisiert sind (bei mehreren Tickets) oder nur ein Ticket vorhanden ist
+        if ($this->booking->canSendTickets()) {
+            $ticketPdfService = app(TicketPdfService::class);
+
+            // Generiere individuelle Tickets für alle BookingItems
+            $attachments[] = Attachment::fromData(
+                fn () => $ticketPdfService->getAllIndividualTicketsContent($this->booking),
+                "Tickets_{$this->booking->booking_number}.pdf"
+            )->withMime('application/pdf');
+        }
+
+        return $attachments;
     }
 }
 

@@ -52,7 +52,7 @@
                             </span>
                         </td>
                     </tr>
-                    @if($booking->payment_status === 'paid')
+                    @if($booking->event->online_url)
                     <tr>
                         <td style="padding: 8px 0; color: #666;">
                             <strong>🔗 Zugangslink:</strong>
@@ -63,6 +63,7 @@
                             </a>
                         </td>
                     </tr>
+                    @endif
                     @if($booking->event->online_access_code)
                     <tr>
                         <td style="padding: 8px 0; color: #666;">
@@ -75,12 +76,12 @@
                         </td>
                     </tr>
                     @endif
-                    @else
+                    @if($booking->payment_status !== 'paid')
                     <tr>
                         <td colspan="2" style="padding: 12px 0;">
                             <div style="background: #fff3cd; padding: 12px; border-radius: 4px; border-left: 3px solid #ffc107;">
                                 <p style="margin: 0; color: #856404; font-size: 14px;">
-                                    ℹ️ Die Zugangsdaten zur Online-Veranstaltung werden Ihnen nach Zahlungseingang zugesendet.
+                                    ℹ️ Bitte beachten Sie: Die Zugangsdaten werden nach Zahlungseingang freigeschaltet.
                                 </p>
                             </div>
                         </td>
@@ -107,7 +108,7 @@
                             {{ $booking->event->venue_postal_code }} {{ $booking->event->venue_city }}
                         </td>
                     </tr>
-                    @if($booking->payment_status === 'paid')
+                    @if($booking->event->online_url)
                     <tr>
                         <td style="padding: 8px 0; color: #666;">
                             <strong>🔗 Online-Zugang:</strong>
@@ -125,12 +126,13 @@
                             @endif
                         </td>
                     </tr>
-                    @else
+                    @endif
+                    @if($booking->payment_status !== 'paid')
                     <tr>
                         <td colspan="2" style="padding: 12px 0;">
                             <div style="background: #fff3cd; padding: 12px; border-radius: 4px; border-left: 3px solid #ffc107;">
                                 <p style="margin: 0; color: #856404; font-size: 14px;">
-                                    ℹ️ Die Online-Zugangsdaten werden Ihnen nach Zahlungseingang zugesendet.
+                                    ℹ️ Die Online-Zugangsdaten werden nach Zahlungseingang freigeschaltet.
                                 </p>
                             </div>
                         </td>
@@ -248,7 +250,6 @@
                 Bitte überweisen Sie den Betrag von <strong>{{ number_format($booking->total, 2, ',', '.') }} €</strong>
                 unter Angabe der Buchungsnummer <strong>{{ $booking->booking_number }}</strong> auf folgendes Konto:
             </p>
-            <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 4px;">
                 <table style="width: 100%;">
                     <tr>
                         <td style="padding: 5px 0; color: #666; width: 140px;">Empfänger:</td>
@@ -275,10 +276,24 @@
                         <td style="padding: 5px 0;"><strong>{{ $booking->booking_number }}</strong></td>
                     </tr>
                 </table>
-            </div>
             <p style="margin: 15px 0 0 0; font-size: 14px; color: #666;">
                 Nach Zahlungseingang erhalten Sie Ihre Tickets per E-Mail.
             </p>
+        </div>
+        @elseif($booking->needsPersonalization())
+        <!-- Personalization Required -->
+        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+            <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">👥 Ticket-Personalisierung erforderlich</h3>
+            <p style="margin: 0 0 15px 0; color: #333;">
+                Sie haben mehrere Tickets gebucht. Bitte personalisieren Sie Ihre Tickets, damit diese versendet werden können.
+            </p>
+            <div style="text-align: center;">
+                <a href="{{ route('bookings.personalize', $booking->booking_number) }}"
+                   style="display: inline-block; padding: 12px 30px; background-color: #ffc107; color: #000;
+                          text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 10px;">
+                    Jetzt personalisieren
+                </a>
+            </div>
         </div>
         @endif
 

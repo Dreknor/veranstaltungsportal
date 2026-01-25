@@ -228,6 +228,16 @@
                         Admin Dashboard
                     </x-layouts.sidebar-link>
 
+                    <!-- User & Content Management -->
+                    <li class="pt-4 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                Content-Verwaltung
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
+
                     <x-layouts.sidebar-link href="{{ route('admin.users.index') }}" icon='fas-users'
                         :active="request()->routeIs('admin.users.*')">
                         Benutzerverwaltung
@@ -238,15 +248,70 @@
                         Event-Verwaltung
                     </x-layouts.sidebar-link>
 
+                    <x-layouts.sidebar-link href="{{ route('admin.categories.index') }}" icon='fas-tags'
+                        :active="request()->routeIs('admin.categories.*')">
+                        Kategorien
+                    </x-layouts.sidebar-link>
+
                     <x-layouts.sidebar-link href="{{ route('admin.reviews.index') }}" icon='fas-star'
                         :active="request()->routeIs('admin.reviews.*')">
                         Bewertungen
                     </x-layouts.sidebar-link>
 
-                    <x-layouts.sidebar-link href="{{ route('admin.categories.index') }}" icon='fas-tags'
-                        :active="request()->routeIs('admin.categories.*')">
-                        Kategorien
+                    <!-- Gamification & Social -->
+                    <li class="pt-4 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                Gamification & Social
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.badges.index') }}" icon='fas-medal'
+                        :active="request()->routeIs('admin.badges.*')">
+                        Badge-Verwaltung
                     </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.connections.index') }}" icon='fas-user-group'
+                        :active="request()->routeIs('admin.connections.*')">
+                        Verbindungen
+                    </x-layouts.sidebar-link>
+
+                    <!-- Monetization & Billing -->
+                    <li class="pt-4 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                Monetarisierung
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.featured-events.index') }}" icon='fas-certificate'
+                        :active="request()->routeIs('admin.featured-events.*')">
+                        Featured Events
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.invoices.index') }}" icon='fas-file-invoice-dollar'
+                        :active="request()->routeIs('admin.invoices.*')">
+                        Rechnungen
+                    </x-layouts.sidebar-link>
+
+                    <x-layouts.sidebar-link href="{{ route('admin.monetization.index') }}" icon='fas-coins'
+                        :active="request()->routeIs('admin.monetization.*')">
+                        Einstellungen
+                    </x-layouts.sidebar-link>
+
+                    <!-- Analytics & Reports -->
+                    <li class="pt-4 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                Analytics & Logs
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
 
                     <x-layouts.sidebar-link href="{{ route('admin.reporting.index') }}" icon='fas-chart-bar'
                         :active="request()->routeIs('admin.reporting.*')">
@@ -258,19 +323,19 @@
                         Audit Logs
                     </x-layouts.sidebar-link>
 
-                    <x-layouts.sidebar-link href="{{ route('admin.invoices.index') }}" icon='fas-file-invoice-dollar'
-                        :active="request()->routeIs('admin.invoices.*')">
-                        Rechnungen
-                    </x-layouts.sidebar-link>
+                    <!-- Communication -->
+                    <li class="pt-4 pb-2">
+                        <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">
+                            <h3 x-show="sidebarOpen" class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                                Kommunikation
+                            </h3>
+                            <div x-show="!sidebarOpen" class="h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+                    </li>
 
                     <x-layouts.sidebar-link href="{{ route('admin.newsletter.index') }}" icon='fas-envelope'
                         :active="request()->routeIs('admin.newsletter.*')">
                         Newsletter
-                    </x-layouts.sidebar-link>
-
-                    <x-layouts.sidebar-link href="{{ route('admin.monetization.index') }}" icon='fas-coins'
-                        :active="request()->routeIs('admin.monetization.*')">
-                        Monetarisierung
                     </x-layouts.sidebar-link>
 
 

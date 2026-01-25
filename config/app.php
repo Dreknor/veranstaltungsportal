@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Organizer Registration
+    |--------------------------------------------------------------------------
+    |
+    | This option controls whether new users can register as organizers.
+    | When set to false, only participant registration will be allowed.
+    |
+    */
+
+    'allow_organizer_registration' => env('ALLOW_ORGANIZER_REGISTRATION', true),
+
 ];

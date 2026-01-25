@@ -189,6 +189,7 @@
         </div>
 
         <!-- QR Code -->
+        @if($ticket['event']->show_qr_code_on_ticket)
         <div class="qr-section">
             <div class="section-title">Check-In QR-Code</div>
             <p style="font-size: 11px; color: #6b7280; margin-bottom: 10px;">
@@ -198,6 +199,7 @@
                 <img src="{{ $ticket['qrCode'] }}" alt="QR Code">
             </div>
         </div>
+        @endif
 
         <!-- Footer -->
         <div class="footer">

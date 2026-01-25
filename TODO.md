@@ -28,6 +28,7 @@
 - [x] Migrations
 - [x] Routing-Struktur
 - [x] Home-View mit Hero-Section und Features
+- [x] **Veranstalter-Registrierung über ENV-Variable steuerbar** (ALLOW_ORGANIZER_REGISTRATION)
 - [x] Event-Views (index, show, calendar, access)
 - [x] Organizer Dashboard und Event-Views
 - [x] **EventController - Vollständige Implementierung**
@@ -600,21 +601,46 @@
   - [x] Feature Tests (ImpersonateControllerTest)
 - [ ] Support Ticket System
 - [x] Hinterlegung Rechnungsnummern in den Einstellungen der Plattform-Rechnungsdaten mit Platzhaltern und der Möglichkeit der fortlaufenden Nummerierung
-- [ ] Trennung des Benutzerkontos von den Organisator-Einstellungen, sodass mehrere Benutzer als ein Organisator auftreten können
-- [ ] Admin-Interface für Featured Events Management
-- [ ] Monetarisierungs-Einstellungen im Admin-Panel
-- [ ] Admin-Übersicht über alle Rechnungen
+- [x] Trennung des Benutzerkontos von den Organisator-Einstellungen, sodass mehrere Benutzer als ein Organisator auftreten können
+- [x] **Admin-Interface für Featured Events Management** ✅ NEU
+  - [x] FeaturedEventManagementController implementiert
+  - [x] Index View mit Statistiken und Filtern
+  - [x] Detail View für einzelne Gebühren
+  - [x] Statistik-Ansicht mit Umsatzanalyse
+  - [x] Zahlungsstatus-Verwaltung
+  - [x] Zeitraum-Verlängerung
+  - [x] Zahlungserinnerungen versenden
+  - [x] Bulk-Aktionen (mark paid, mark failed, send reminder)
+  - [x] FeaturedEventPaymentReminderNotification erstellt
+  - [x] 8 Admin-Routen konfiguriert
+- [x] Monetarisierungs-Einstellungen im Admin-Panel (bereits vorhanden)
+- [x] Admin-Übersicht über alle Rechnungen (bereits vorhanden)
 - [ ] Admin-Benachrichtigungen für ausstehende Zahlungen bei Featured Events
 - [ ] Admin-Interface für Data Privacy Anfragen
 - [ ] Admin-Interface für Newsletter-Verwaltung
 - [ ] SEO-Tools im Admin-Panel
 - [ ] Error Page Management im Admin-Panel
 - [ ] Admin-Hilfe-Artikel (siehe oben)
-- [ ] Frontend zur Badge-Verwaltung im Admin-Panel
-  - [ ] Übersicht über bestehende Badges
-  - [ ] Erstellung neuer Badges
-  - [ ] Bearbeitung und Löschung von Badges
-- [ ] Frontend zur User Connection Verwaltung im Admin-Panel
+- [x] **Frontend zur Badge-Verwaltung im Admin-Panel** ✅ NEU
+  - [x] BadgeManagementController implementiert
+  - [x] Index View mit Badge-Grid und Statistiken
+  - [x] Create View für neue Badges
+  - [x] Edit View für bestehende Badges
+  - [x] Detail View mit vergebenen Badges
+  - [x] Award/Revoke Funktionen
+  - [x] Löschen von Badges (nur ohne Vergaben)
+  - [x] Filter und Suche
+  - [x] 9 Admin-Routen konfiguriert
+- [x] **Frontend zur User Connection Verwaltung im Admin-Panel** ✅ NEU
+  - [x] ConnectionManagementController implementiert
+  - [x] Index View mit Connection-Übersicht und Statistiken
+  - [x] Detail View für einzelne Verbindungen
+  - [x] Statistik-Ansicht mit Analysen
+  - [x] Status-Verwaltung (pending, accepted, blocked)
+  - [x] Löschen von Verbindungen
+  - [x] Bulk-Aktionen (approve, block, delete)
+  - [x] Filter und Suche
+  - [x] 6 Admin-Routen konfiguriert
 ### 5. Erweiterte Features
 - [x] **Error Pages (404, 500 etc.)** ✅ NEU
   - [x] 404 Not Found Page
@@ -699,15 +725,16 @@
   - [x] Personalisierte Newsletter mit Empfehlungen
   - [x] Settings View für Interessen & Newsletter
   - [x] Integration in User-Einstellungen
-- [ ] **SEO-Optimierung**
-  - [ ] Sitemap.xml Generator
-  - [ ] Robots.txt Generator
-  - [ ] Meta-Tags Component (bereits vorhanden)
-  - [ ] Open Graph Tags
-  - [ ] Twitter Cards
-  - [ ] Schema.org Structured Data
-  - [ ] SEO-freundliche URLs
-  - [ ] Sitemap Routes konfiguriert
+- [x] **SEO-Optimierung**
+  - [x] Sitemap.xml Generator
+  - [x] Robots.txt Generator
+  - [x] Meta-Tags Component (bereits vorhanden)
+  - [x] Open Graph Tags (bereits vorhanden)
+  - [x] Twitter Cards (bereits vorhanden)
+  - [x] Schema.org Structured Data (bereits vorhanden)
+  - [x] SEO-freundliche URLs (bereits vorhanden)
+  - [x] Sitemap Routes konfiguriert
+  - [x] SitemapController mit 4 Sitemaps (static, events, categories, organizers)
 - [ ] SEO-Analyse Tool integriert
 - [ ] Performance-Optimierungen (Caching, Lazy Loading)
 
@@ -717,12 +744,22 @@
   - [x] BadgeServiceTest (9 Tests)
 - [x] **Weitere Feature Tests für Controller**
   - [x] BadgeControllerTest (11 Tests)
+  - [x] **FeaturedEventManagementControllerTest** (11 Tests) ✅ NEU
+  - [x] **BadgeManagementControllerTest** (16 Tests) ✅ NEU
+  - [x] **ConnectionManagementControllerTest** (13 Tests) ✅ NEU
+  - [x] **SitemapControllerTest** (11 Tests) ✅ NEU
 - [x] **Test-Namenskonflikte behoben**
   - [x] EventTest.php → EventControllerTest.php (Feature)
   - [x] EventSeriesTest.php → EventSeriesControllerTest.php (Feature)
   - [x] BookingTest.php → BookingControllerTest.php (Feature)
   - [x] ExampleTest.php Duplikate entfernt
   - [x] Unit/Unit Duplikat-Ordner entfernt
+  - [x] Namespace-Konflikte gelöst
+- [x] **Test-Coverage für neue Features (51 Tests)** ✅ NEU
+  - [x] SEO & Sitemap (11 Tests)
+  - [x] Featured Events Management (11 Tests)
+  - [x] Badge Management (16 Tests)
+  - [x] Connection Management (13 Tests)
   - [x] Namespace-Konflikte gelöst
 - [ ] Integration Tests für komplexe Workflows
 - [ ] Testabdeckung auf mindestens 100% erhöhen

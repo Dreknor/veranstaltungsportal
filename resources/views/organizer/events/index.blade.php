@@ -59,10 +59,13 @@
 
                         <!-- Event Details -->
                         <div class="p-6">
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ $event->category->name }}
-                                </span>
+                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        {{ $event->category->name }}
+                                    </span>
+                                    <x-event-type-badge :event="$event" size="xs" />
+                                </div>
                                 <div class="flex gap-2">
                                     @if($event->is_cancelled)
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">

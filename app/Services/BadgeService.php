@@ -153,7 +153,7 @@ class BadgeService
             case 'early_bird_bookings':
                 return $user->bookings()
                     ->join('events', 'bookings.event_id', '=', 'events.id')
-                    ->whereRaw("bookings.created_at < datetime(events.start_date, '-7 days')")
+                    ->whereRaw("bookings.created_at < DATE_SUB(events.start_date, INTERVAL 7 DAY)")
                     ->count();
 
             default:

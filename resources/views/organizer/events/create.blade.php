@@ -336,17 +336,6 @@
                             </div>
                         </div>
 
-                        <div>
-                            <label for="video_url" class="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
-                            <input type="url" id="video_url" name="video_url" value="{{ old('video_url') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label for="livestream_url" class="block text-sm font-medium text-gray-700 mb-1">Livestream URL</label>
-                            <input type="url" id="livestream_url" name="livestream_url" value="{{ old('livestream_url') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
 
                         <div class="space-y-3">
                             <label class="flex items-center">
@@ -383,6 +372,43 @@
                             <label for="access_code" class="block text-sm font-medium text-gray-700 mb-1">Zugriffscode</label>
                             <input type="text" id="access_code" name="access_code" value="{{ old('access_code') }}"
                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket-Einstellungen -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Einstellungen</h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label for="ticket_notes" class="block text-sm font-medium text-gray-700 mb-1">
+                                Hinweise auf dem Ticket
+                                <span class="text-gray-500 text-xs font-normal">(optional)</span>
+                            </label>
+                            <textarea id="ticket_notes" name="ticket_notes" rows="4"
+                                      placeholder="z.B. Bitte Personalausweis mitbringen, Einlass ab 18:30 Uhr, etc."
+                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('ticket_notes') }}</textarea>
+                            <p class="mt-1 text-xs text-gray-500">
+                                Diese Hinweise werden auf allen generierten Tickets für diese Veranstaltung angezeigt.
+                                Maximal 1000 Zeichen.
+                            </p>
+                            @error('ticket_notes')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="flex items-center">
+                                <input type="hidden" name="show_qr_code_on_ticket" value="0">
+                                <input type="checkbox" name="show_qr_code_on_ticket" value="1"
+                                       {{ old('show_qr_code_on_ticket', true) ? 'checked' : '' }}
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">QR-Code auf Tickets anzeigen</span>
+                            </label>
+                            <p class="mt-1 ml-6 text-xs text-gray-500">
+                                Wenn aktiviert, wird auf jedem Ticket ein QR-Code für den Check-In angezeigt.
+                            </p>
                         </div>
                     </div>
                 </div>

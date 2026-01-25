@@ -94,6 +94,9 @@ class BookingController extends Controller
                 ->with('error', 'Diese Veranstaltung wurde abgesagt und kann nicht mehr gebucht werden.');
         }
 
+        // Load organization to check PayPal availability
+        $event->load('organization');
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
@@ -106,7 +109,14 @@ class BookingController extends Controller
             'tickets.*.ticket_type_id' => 'required|exists:ticket_types,id',
             'tickets.*.quantity' => 'required|integer|min:0',
             'discount_code' => 'nullable|string',
+            'payment_method' => 'nullable|string|in:invoice,paypal',
         ]);
+
+        // Validate PayPal selection
+        if ($request->payment_method === 'paypal' && !$event->organization->hasPayPalConfigured()) {
+            return back()->withInput()
+                ->with('error', 'PayPal ist für diesen Veranstalter nicht verfügbar.');
+        }
 
         try {
             return DB::transaction(function () use ($request, $event) {
@@ -237,9 +247,10 @@ class BookingController extends Controller
                     'total' => $total,
                     'status' => $initialStatus,
                     'payment_status' => $initialPaymentStatus,
+                    'payment_method' => $request->payment_method ?? 'invoice',
                     'confirmed_at' => $confirmedAt,
                     'discount_code_id' => $discountCodeId,
-                    'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code']),
+                    'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code', 'payment_method']),
                 ]);
 
                 // Erstelle Buchungspositionen
@@ -250,11 +261,22 @@ class BookingController extends Controller
                             'ticket_type_id' => $data['ticket_type']->id,
                             'price' => $data['price'],
                             'quantity' => 1,
+                            // Bei nur einem Ticket automatisch den Käufer als Teilnehmer eintragen
+                            'attendee_name' => $totalQuantity === 1 ? $request->customer_name : null,
+                            'attendee_email' => $totalQuantity === 1 ? $request->customer_email : null,
                         ]);
                     }
 
                     // Aktualisiere verkaufte Menge
                     $data['ticket_type']->increment('quantity_sold', $data['quantity']);
+                }
+
+                // Wenn nur ein Ticket, markiere als personalisiert
+                if ($totalQuantity === 1) {
+                    $booking->update([
+                        'tickets_personalized' => true,
+                        'tickets_personalized_at' => now(),
+                    ]);
                 }
 
                 // Lade Beziehungen für E-Mail-Versand
@@ -263,6 +285,45 @@ class BookingController extends Controller
                     'event.organization.users',
                     'event.category'
                 ]);
+
+                // PayPal-Zahlung: Redirect zu PayPal
+                if (!$isFree && $request->payment_method === 'paypal') {
+                    // Initialize PayPal service with organization credentials
+                    $paypalService = new \App\Services\PayPalService($event->organization);
+
+                    if (!$paypalService->isAvailable()) {
+                        throw new \Exception('PayPal ist für diesen Veranstalter nicht konfiguriert.');
+                    }
+
+                    $paypalOrder = $paypalService->createOrder($booking);
+
+                    if (!$paypalOrder || !isset($paypalOrder['id'])) {
+                        throw new \Exception('PayPal-Bestellung konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsmethode.');
+                    }
+
+                    // Find approval URL
+                    $approvalUrl = null;
+                    foreach ($paypalOrder['links'] ?? [] as $link) {
+                        if ($link['rel'] === 'approve') {
+                            $approvalUrl = $link['href'];
+                            break;
+                        }
+                    }
+
+                    if (!$approvalUrl) {
+                        throw new \Exception('PayPal-Zahlungs-URL konnte nicht gefunden werden.');
+                    }
+
+                    // Store PayPal order ID temporarily
+                    $booking->update([
+                        'additional_data' => array_merge($booking->additional_data ?? [], [
+                            'paypal_order_id' => $paypalOrder['id'],
+                        ]),
+                    ]);
+
+                    // Redirect to PayPal
+                    return redirect()->away($approvalUrl);
+                }
 
                 // Sende entsprechende E-Mail
                 if ($isFree) {
@@ -503,7 +564,13 @@ class BookingController extends Controller
         }
 
         $pdfService = app(TicketPdfService::class);
-        return $pdfService->downloadTicket($booking);
+
+        // Verwende individuelle Tickets für alle Buchungen
+        $filename = "Tickets_{$booking->booking_number}.pdf";
+        return response($pdfService->getAllIndividualTicketsContent($booking), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     public function downloadCertificate($bookingNumber)
@@ -527,6 +594,33 @@ class BookingController extends Controller
         }
 
         return $certificateService->downloadCertificate($booking);
+    }
+
+    /**
+     * Download individual certificate for a specific attendee
+     */
+    public function downloadIndividualCertificate($bookingNumber, $itemId)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event.organization', 'items.ticketType'])
+            ->firstOrFail();
+
+        // Prüfe Zugriff
+        if (!$this->hasBookingAccess($booking)) {
+            abort(403, 'Kein Zugriff auf dieses Zertifikat');
+        }
+
+        // Finde das BookingItem
+        $item = $booking->items()->findOrFail($itemId);
+
+        $certificateService = app(\App\Services\CertificateService::class);
+
+        // Check if certificate can be generated for this item
+        if (!$certificateService->canGenerateIndividualCertificate($item)) {
+            return back()->with('error', 'Zertifikat kann nur für eingecheckte Teilnehmer nach Ende der Veranstaltung heruntergeladen werden.');
+        }
+
+        return $certificateService->downloadIndividualCertificate($item);
     }
 
     /**
@@ -631,5 +725,110 @@ class BookingController extends Controller
                 ]);
             }
         }
+    }
+
+    /**
+     * Show personalization form for tickets
+     */
+    public function personalizeTickets($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event', 'items.ticketType'])
+            ->firstOrFail();
+
+        // Check access
+        if (!$this->hasBookingAccess($booking)) {
+            return redirect()->route('bookings.verify', $bookingNumber)
+                ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
+        }
+
+        // Check if personalization is needed
+        if (!$booking->needsPersonalization()) {
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('info', 'Diese Tickets sind bereits personalisiert oder benötigen keine Personalisierung.');
+        }
+
+        return view('bookings.personalize', compact('booking'));
+    }
+
+    /**
+     * Save personalized ticket information
+     */
+    public function savePersonalization(Request $request, $bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event', 'items'])
+            ->firstOrFail();
+
+        // Check access
+        if (!$this->hasBookingAccess($booking)) {
+            abort(403, 'Nicht berechtigt.');
+        }
+
+        // Validate
+        $request->validate([
+            'attendees' => 'required|array',
+            'attendees.*.attendee_name' => 'required|string|max:255',
+            'attendees.*.attendee_email' => 'required|email|max:255',
+        ], [
+            'attendees.*.attendee_name.required' => 'Name ist erforderlich.',
+            'attendees.*.attendee_email.required' => 'E-Mail ist erforderlich.',
+            'attendees.*.attendee_email.email' => 'Bitte eine gültige E-Mail-Adresse eingeben.',
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $booking) {
+                foreach ($request->attendees as $itemId => $attendeeData) {
+                    $item = $booking->items()->find($itemId);
+                    if ($item) {
+                        $item->update([
+                            'attendee_name' => $attendeeData['attendee_name'],
+                            'attendee_email' => $attendeeData['attendee_email'],
+                        ]);
+                    }
+                }
+
+                // Mark booking as personalized
+                $booking->update([
+                    'tickets_personalized' => true,
+                    'tickets_personalized_at' => now(),
+                ]);
+
+                // Send tickets if payment is already confirmed
+                if ($booking->payment_status === 'paid' && !$booking->event->isOnline()) {
+                    Mail::to($booking->customer_email)
+                        ->send(new \App\Mail\PaymentConfirmed($booking));
+                }
+            });
+
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('success', 'Tickets erfolgreich personalisiert! Die Tickets wurden per E-Mail versendet.');
+        } catch (\Exception $e) {
+            Log::error('Fehler bei Ticket-Personalisierung', [
+                'booking_number' => $bookingNumber,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Fehler beim Speichern: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Check if user has access to booking
+     */
+    protected function hasBookingAccess(Booking $booking): bool
+    {
+        // Logged in user with matching user_id
+        if (auth()->check() && auth()->id() === $booking->user_id) {
+            return true;
+        }
+
+        // Guest with session access (after email verification)
+        if (session()->has('booking_access_' . $booking->id)) {
+            return true;
+        }
+
+        return false;
     }
 }

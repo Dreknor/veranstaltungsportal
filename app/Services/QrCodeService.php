@@ -94,6 +94,51 @@ class QrCodeService
     }
 
     /**
+     * Generate QR code for an individual ticket (BookingItem)
+     *
+     * @param \App\Models\BookingItem $item
+     * @param int $size
+     * @return string
+     */
+    public function generateTicketQrCodeDataUri(\App\Models\BookingItem $item, int $size = 300): string
+    {
+        $data = $this->getTicketQrData($item);
+
+        $qrCode = QrCode::format('svg')
+            ->errorCorrection('H')
+            ->generate($data);
+
+        return 'data:image/svg+xml;base64,' . base64_encode($qrCode);
+    }
+
+    /**
+     * Get QR code data for an individual ticket
+     *
+     * @param \App\Models\BookingItem $item
+     * @return string JSON encoded ticket data
+     */
+    protected function getTicketQrData(\App\Models\BookingItem $item): string
+    {
+        // Load relationships if not already loaded
+        if (!$item->relationLoaded('booking')) {
+            $item->load('booking.event');
+        }
+
+        return json_encode([
+            'ticket_id' => $item->id,
+            'ticket_number' => $item->ticket_number,
+            'booking_id' => $item->booking_id,
+            'booking_reference' => $item->booking->booking_number,
+            'event_id' => $item->booking->event_id,
+            'event_name' => $item->booking->event->title ?? 'Event',
+            'attendee_name' => $item->attendee_name ?? $item->booking->customer_name,
+            'attendee_email' => $item->attendee_email ?? $item->booking->customer_email,
+            'ticket_type' => $item->ticketType->name ?? 'Standard',
+            'check_in_url' => route('organizer.bookings.check-in', ['booking' => $item->booking_id]),
+        ]);
+    }
+
+    /**
      * Verify QR code data
      *
      * @param string $qrData JSON encoded data

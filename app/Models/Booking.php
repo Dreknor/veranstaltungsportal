@@ -31,6 +31,8 @@ class Booking extends Model
         'total',
         'status',
         'payment_status',
+        'tickets_personalized',
+        'tickets_personalized_at',
         'payment_method',
         'payment_transaction_id',
         'discount_code_id',
@@ -57,6 +59,8 @@ class Booking extends Model
             'confirmed_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'certificate_generated_at' => 'datetime',
+            'tickets_personalized' => 'boolean',
+            'tickets_personalized_at' => 'datetime',
             'checked_in' => 'boolean',
             'checked_in_at' => 'datetime',
             'invoice_date' => 'datetime',
@@ -188,5 +192,46 @@ class Booking extends Model
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
+    }
+
+    /**
+     * Check if this booking needs ticket personalization
+     */
+    public function needsPersonalization(): bool
+    {
+        // Only needs personalization if:
+        // 1. Payment is confirmed (paid)
+        // 2. Has more than one ticket item
+        // 3. Not yet personalized
+        return $this->payment_status === 'paid'
+            && $this->items()->count() > 1
+            && !$this->tickets_personalized;
+    }
+
+    /**
+     * Check if all tickets are personalized
+     */
+    public function allTicketsPersonalized(): bool
+    {
+        // If only one ticket, it's automatically personalized with buyer's name
+        if ($this->items()->count() <= 1) {
+            return true;
+        }
+
+        // Check if all items have attendee names using collection filter
+        $unpersonalizedCount = $this->items->filter(function ($item) {
+            return empty($item->attendee_name);
+        })->count();
+
+        return $unpersonalizedCount === 0;
+    }
+
+    /**
+     * Check if tickets can be sent (paid and personalized if needed)
+     */
+    public function canSendTickets(): bool
+    {
+        return $this->payment_status === 'paid'
+            && (!$this->needsPersonalization() || $this->tickets_personalized);
     }
 }

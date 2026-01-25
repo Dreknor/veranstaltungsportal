@@ -131,7 +131,14 @@
                                     <div class="flex flex-col items-center text-center">
                                         <div class="w-20 h-20 rounded-full flex items-center justify-center mb-3"
                                              style="background-color: {{ $badge->color }}20;">
-                                            <i class="fas fa-medal text-4xl" style="color: {{ $badge->color }};"></i>
+                                            @if($badge->image_path)
+                                                <img src="{{ asset($badge->image_path) }}"
+                                                     alt="{{ $badge->name }}"
+                                                     class="w-20 h-20 rounded-full object-cover border-2"
+                                                     style="border-color: {{ $badge->color }}">
+                                            @else
+                                                <i class="fas fa-medal text-4xl" style="color: {{ $badge->color }};"></i>
+                                            @endif
                                         </div>
                                         <h4 class="font-semibold text-gray-900 mb-1">{{ $badge->name }}</h4>
                                         <p class="text-sm text-gray-600 mb-2 line-clamp-2">{{ $badge->description }}</p>
@@ -192,7 +199,13 @@
                                      onclick="window.location.href='{{ route('badges.show', $badge) }}'">
                                     <div class="flex flex-col items-center text-center">
                                         <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-3 relative">
-                                            <i class="fas fa-medal text-4xl text-gray-400"></i>
+                                            @if($badge->image_path)
+                                                <img src="{{ asset($badge->image_path) }}"
+                                                     alt="{{ $badge->name }}"
+                                                     class="w-20 h-20 rounded-full object-cover border-2 border-gray-300 grayscale">
+                                            @else
+                                                <i class="fas fa-medal text-4xl text-gray-400"></i>
+                                            @endif
                                             <div class="absolute inset-0 flex items-center justify-center">
                                                 <i class="fas fa-lock text-gray-600 text-sm"></i>
                                             </div>

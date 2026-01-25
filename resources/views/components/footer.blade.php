@@ -33,9 +33,10 @@
                             <li><a href="{{ route('organizer.events.index') }}" class="hover:text-white transition">Meine Veranstaltungen</a></li>
                         @endif
                     @else
-                        <li><a href="{{ route('register') }}" class="hover:text-white transition">Als Veranstalter registrieren</a></li>
+                        @if(config('app.allow_organizer_registration', true))
+                            <li><a href="{{ route('register') }}" class="hover:text-white transition">Als Veranstalter registrieren</a></li>
+                        @endif
                     @endauth
-                    <li><a href="#" class="hover:text-white transition">Informationen für Anbieter</a></li>
                 </ul>
             </div>
             <div>

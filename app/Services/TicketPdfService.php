@@ -118,6 +118,108 @@ class TicketPdfService
     }
 
     /**
+     * Generate individual ticket for a specific booking item
+     *
+     * @param \App\Models\BookingItem $item
+     * @return \Barryvdh\DomPDF\PDF
+     */
+    public function generateIndividualTicket(\App\Models\BookingItem $item): \Barryvdh\DomPDF\PDF
+    {
+        // Eager load relationships
+        $item->load(['booking.event.organizer', 'ticketType']);
+
+        // Generate QR code for this specific ticket
+        $qrCodeDataUri = $this->qrCodeService->generateTicketQrCodeDataUri($item, 200);
+
+        $data = [
+            'item' => $item,
+            'booking' => $item->booking,
+            'event' => $item->booking->event,
+            'qrCode' => $qrCodeDataUri,
+        ];
+
+        return Pdf::loadView('pdf.ticket-individual', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-bottom', 10)
+            ->setOption('margin-left', 10)
+            ->setOption('margin-right', 10);
+    }
+
+    /**
+     * Generate all individual tickets for a booking as one PDF
+     *
+     * @param Booking $booking
+     * @return \Barryvdh\DomPDF\PDF
+     */
+    public function generateAllIndividualTickets(Booking $booking): \Barryvdh\DomPDF\PDF
+    {
+        // Eager load relationships
+        $booking->load(['event.organization', 'items.ticketType']);
+
+        // Debug: Log the number of items
+        \Log::info('Generating tickets for booking', [
+            'booking_id' => $booking->id,
+            'items_count' => $booking->items->count(),
+        ]);
+
+        $ticketsData = [];
+
+        // Generate individual tickets - handle both quantity=1 items and quantity>1 items
+        foreach ($booking->items as $item) {
+            // If quantity is 1, create one ticket
+            if ($item->quantity == 1) {
+                $qrCodeDataUri = $this->qrCodeService->generateTicketQrCodeDataUri($item, 200);
+
+                $ticketsData[] = [
+                    'item' => $item,
+                    'qrCode' => $qrCodeDataUri,
+                ];
+            } else {
+                // If quantity > 1, create multiple tickets for this item
+                // This handles legacy bookings where quantity might be > 1
+                for ($i = 0; $i < $item->quantity; $i++) {
+                    $qrCodeDataUri = $this->qrCodeService->generateTicketQrCodeDataUri($item, 200);
+
+                    $ticketsData[] = [
+                        'item' => $item,
+                        'qrCode' => $qrCodeDataUri,
+                        'ticket_index' => $i + 1,
+                    ];
+                }
+            }
+        }
+
+        \Log::info('Tickets data prepared', [
+            'tickets_count' => count($ticketsData),
+        ]);
+
+        $data = [
+            'booking' => $booking,
+            'event' => $booking->event,
+            'tickets' => $ticketsData,
+        ];
+
+        return Pdf::loadView('pdf.tickets-individual-all', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-bottom', 10)
+            ->setOption('margin-left', 10)
+            ->setOption('margin-right', 10);
+    }
+
+    /**
+     * Get content of all individual tickets for email attachment
+     *
+     * @param Booking $booking
+     * @return string
+     */
+    public function getAllIndividualTicketsContent(Booking $booking): string
+    {
+        return $this->generateAllIndividualTickets($booking)->output();
+    }
+
+    /**
      * Generate invoice PDF (different from ticket)
      *
      * @param Booking $booking

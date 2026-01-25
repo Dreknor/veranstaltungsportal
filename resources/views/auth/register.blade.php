@@ -24,7 +24,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                 {{ __('Kontotyp') }}
                             </label>
-                            <div class="grid grid-cols-2 gap-3">
+                            <div class="grid grid-cols-{{ $allowOrganizerRegistration ? '2' : '1' }} gap-3">
                                 <label class="relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all"
                                        :class="userType === 'participant' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'">
                                     <input type="radio" name="account_type" value="participant"
@@ -40,6 +40,7 @@
                                     <span class="text-xs text-gray-600 dark:text-gray-400 text-center mt-1">{{ __('Ich möchte Events besuchen') }}</span>
                                 </label>
 
+                                @if($allowOrganizerRegistration)
                                 <label class="relative flex flex-col p-4 border-2 rounded-lg cursor-pointer transition-all"
                                        :class="userType === 'organizer' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'">
                                     <input type="radio" name="account_type" value="organizer"
@@ -53,6 +54,7 @@
                                     <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 text-center">{{ __('Organisator') }}</span>
                                     <span class="text-xs text-gray-600 dark:text-gray-400 text-center mt-1">{{ __('Ich möchte Events erstellen') }}</span>
                                 </label>
+                                @endif
                             </div>
                             @error('account_type')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>

@@ -30,13 +30,13 @@ class MonetizationSettingsController extends Controller
             'featured_event_auto_disable_on_expiry' => config('monetization.featured_event_auto_disable_on_expiry', true),
         ];
 
-        // Get organizers with custom fees
-        $organizersWithCustomFees = \App\Models\User::role('organizer')
-            ->whereNotNull('custom_platform_fee')
+        // Get organizations with custom fees
+        $organizersWithCustomFees = \App\Models\Organization::whereNotNull('custom_platform_fee')
+            ->where('is_active', true)
             ->orderBy('name')
             ->get()
-            ->filter(function($user) {
-                return !empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false);
+            ->filter(function($organization) {
+                return !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false);
             });
 
         // Get Featured Event Statistics

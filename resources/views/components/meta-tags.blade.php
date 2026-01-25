@@ -76,7 +76,7 @@
         'startDate' => $event->start_date ? $event->start_date->toIso8601String() : now()->toIso8601String(),
         'endDate' => $event->end_date ? $event->end_date->toIso8601String() : now()->addHours(2)->toIso8601String(),
         'eventStatus' => 'https://schema.org/EventScheduled',
-        'eventAttendanceMode' => ($event->livestream_url ?? false) ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
+        'eventAttendanceMode' => ($event->event_type === 'online') ? 'https://schema.org/OnlineEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode',
         'location' => [
             '@type' => 'Place',
             'name' => $event->venue_name ?? 'Veranstaltungsort',

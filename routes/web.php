@@ -15,6 +15,10 @@ Route::get('/', function () {
 
 // SEO Routes
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+Route::get('/sitemap-static.xml', [\App\Http\Controllers\SitemapController::class, 'static'])->name('sitemap.static');
+Route::get('/sitemap-events.xml', [\App\Http\Controllers\SitemapController::class, 'events'])->name('sitemap.events');
+Route::get('/sitemap-categories.xml', [\App\Http\Controllers\SitemapController::class, 'categories'])->name('sitemap.categories');
+Route::get('/sitemap-organizers.xml', [\App\Http\Controllers\SitemapController::class, 'organizers'])->name('sitemap.organizers');
 Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
 
 // Account Types Info Page
@@ -52,14 +56,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::get('/events/{event}/book', [BookingController::class, 'create'])->name('bookings.create');
 Route::post('/events/{event}/book', [BookingController::class, 'store'])->middleware('recaptcha:booking')->name('bookings.store');
 Route::get('/bookings/{bookingNumber}', [BookingController::class, 'show'])->name('bookings.show');
+Route::get('/bookings/{bookingNumber}/personalize', [BookingController::class, 'personalizeTickets'])->name('bookings.personalize');
+Route::post('/bookings/{bookingNumber}/personalize', [BookingController::class, 'savePersonalization'])->name('bookings.save-personalization');
 Route::get('/bookings/{bookingNumber}/invoice', [BookingController::class, 'downloadInvoice'])->name('bookings.invoice');
 Route::get('/bookings/{bookingNumber}/ticket', [BookingController::class, 'downloadTicket'])->name('bookings.ticket');
 Route::get('/bookings/{bookingNumber}/certificate', [BookingController::class, 'downloadCertificate'])->name('bookings.certificate');
+Route::get('/bookings/{bookingNumber}/certificate/{itemId}', [BookingController::class, 'downloadIndividualCertificate'])->name('bookings.certificate.individual');
 Route::get('/bookings/{bookingNumber}/ical', [BookingController::class, 'downloadIcal'])->name('bookings.ical');
 Route::get('/bookings/{bookingNumber}/verify', [BookingController::class, 'verify'])->name('bookings.verify');
 Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->name('bookings.verify-email');
 Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController::class, 'verifyEmailToken'])->name('bookings.verify-email-token');
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+
+// PayPal Routes
+Route::get('/paypal/success/{booking}', [\App\Http\Controllers\PayPalController::class, 'success'])->name('paypal.success');
+Route::get('/paypal/cancel/{booking}', [\App\Http\Controllers\PayPalController::class, 'cancel'])->name('paypal.cancel');
+Route::post('/paypal/webhook', [\App\Http\Controllers\PayPalController::class, 'webhook'])->name('paypal.webhook');
+
 Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])->name('api.validate-discount-code');
 
 // User Dashboard Routes
@@ -123,6 +136,11 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::get('/organization', [Organizer\OrganizationController::class, 'edit'])->name('organization.edit');
         Route::put('/organization', [Organizer\OrganizationController::class, 'update'])->name('organization.update');
         Route::delete('/organization/logo', [Organizer\OrganizationController::class, 'deleteLogo'])->name('organization.delete-logo');
+
+        // PayPal Settings
+        Route::get('/organization/paypal', [Organizer\OrganizationController::class, 'paypalSettings'])->name('organization.paypal');
+        Route::put('/organization/paypal', [Organizer\OrganizationController::class, 'updatePayPalSettings'])->name('organization.paypal.update');
+
         Route::get('/team', [Organizer\OrganizationController::class, 'team'])->name('team.index');
         Route::post('/team/invite', [Organizer\OrganizationController::class, 'inviteMember'])->name('team.invite');
         Route::put('/team/{user}/role', [Organizer\OrganizationController::class, 'updateMemberRole'])->name('team.update-role');
@@ -395,6 +413,35 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     // Impersonate User
     Route::post('/users/{user}/impersonate', [\App\Http\Controllers\Admin\ImpersonateController::class, 'impersonate'])->name('users.impersonate');
+
+    // Featured Events Management
+    Route::get('/featured-events', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'index'])->name('featured-events.index');
+    Route::get('/featured-events/statistics', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'statistics'])->name('featured-events.statistics');
+    Route::get('/featured-events/{fee}', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'show'])->name('featured-events.show');
+    Route::post('/featured-events/{fee}/update-status', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'updateStatus'])->name('featured-events.update-status');
+    Route::post('/featured-events/{fee}/cancel', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'cancel'])->name('featured-events.cancel');
+    Route::post('/featured-events/{fee}/extend', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'extend'])->name('featured-events.extend');
+    Route::post('/featured-events/{fee}/send-reminder', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'sendReminder'])->name('featured-events.send-reminder');
+    Route::post('/featured-events/bulk', [\App\Http\Controllers\Admin\FeaturedEventManagementController::class, 'bulkAction'])->name('featured-events.bulk');
+
+    // Badge Management
+    Route::get('/badges', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'index'])->name('badges.index');
+    Route::get('/badges/create', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'create'])->name('badges.create');
+    Route::post('/badges', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'store'])->name('badges.store');
+    Route::get('/badges/{badge}', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'show'])->name('badges.show');
+    Route::get('/badges/{badge}/edit', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'edit'])->name('badges.edit');
+    Route::put('/badges/{badge}', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'update'])->name('badges.update');
+    Route::delete('/badges/{badge}', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'destroy'])->name('badges.destroy');
+    Route::post('/badges/{badge}/award', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'award'])->name('badges.award');
+    Route::post('/badges/{badge}/revoke', [\App\Http\Controllers\Admin\BadgeManagementController::class, 'revoke'])->name('badges.revoke');
+
+    // Connection Management
+    Route::get('/connections', [\App\Http\Controllers\Admin\ConnectionManagementController::class, 'index'])->name('connections.index');
+    Route::get('/connections/statistics', [\App\Http\Controllers\Admin\ConnectionManagementController::class, 'statistics'])->name('connections.statistics');
+    Route::get('/connections/{connection}', [\App\Http\Controllers\Admin\ConnectionManagementController::class, 'show'])->name('connections.show');
+    Route::post('/connections/{connection}/update-status', [\App\Http\Controllers\Admin\ConnectionManagementController::class, 'updateStatus'])->name('connections.update-status');
+    Route::delete('/connections/{connection}', [\App\Http\Controllers\Admin\ConnectionManagementController::class, 'destroy'])->name('connections.destroy');
+    Route::post('/connections/bulk', [\App\Http\Controllers\Admin\ConnectionManagementController::class, 'bulkAction'])->name('connections.bulk');
 });
 
 // Impersonate Leave (available for all authenticated users)

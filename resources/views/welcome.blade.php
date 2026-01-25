@@ -165,11 +165,12 @@
                                 @endif
                             </div>
                             <div class="p-6">
-                                <div class="flex items-center gap-2 mb-3">
+                                <div class="flex items-center gap-2 mb-3 flex-wrap">
                                     <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold"
                                           style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
                                         {{ $event->category->name }}
                                     </span>
+                                    <x-event-type-badge :event="$event" size="xs" />
                                     @if($event->ticketTypes()->available()->count() === 0)
                                         <span class="text-red-600 text-xs font-semibold">Ausverkauft</span>
                                     @endif
@@ -251,10 +252,13 @@
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-bold text-gray-900 mb-1 line-clamp-1">{{ $event->title }}</h3>
                                     <p class="text-sm text-gray-600 mb-2 line-clamp-1">{{ $event->location ?? $event->venue_city }}</p>
-                                    <span class="inline-block px-2 py-1 rounded text-xs font-medium"
-                                          style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
-                                        {{ $event->category->name }}
-                                    </span>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="inline-block px-2 py-1 rounded text-xs font-medium"
+                                              style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
+                                            {{ $event->category->name }}
+                                        </span>
+                                        <x-event-type-badge :event="$event" size="xs" />
+                                    </div>
                                 </div>
                             </div>
                         </a>
@@ -312,6 +316,7 @@
     </div>
 
     <!-- CTA Section for Organizers -->
+    @if(config('app.allow_organizer_registration', true) || (auth()->check() && auth()->user()->hasRole('organizer')))
     <div class="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="text-4xl font-bold mb-4">Sie möchten Fortbildungen anbieten?</h2>
@@ -339,6 +344,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <!-- Footer -->
     <x-footer />
