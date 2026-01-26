@@ -199,8 +199,13 @@
                         Kontoverbindung
                     </x-layouts.sidebar-link>
 
+                    <x-layouts.sidebar-link href="{{ route('organizer.organization.paypal') }}" icon='fab-paypal'
+                        :active="request()->routeIs('organizer.organization.paypal*')">
+                        PayPal-Einstellungen
+                    </x-layouts.sidebar-link>
+
                     <x-layouts.sidebar-link href="{{ route('organizer.organization.edit') }}" icon='fas-building'
-                        :active="request()->routeIs('organizer.organization.*')">
+                        :active="request()->routeIs('organizer.organization.edit')">
                         Veranstalter-Profil
                     </x-layouts.sidebar-link>
 

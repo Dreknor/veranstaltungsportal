@@ -374,9 +374,97 @@ class OrganizationController extends Controller
     }
 
     /**
-     * Download CSV template
+     * Show PayPal settings form
      */
-    public function downloadTemplate()
+    public function paypalSettings()
+    {
+        $organization = auth()->user()->currentOrganization();
+
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $this->authorize('update', $organization);
+
+        return view('organizer.organizations.paypal-settings', compact('organization'));
+    }
+
+    /**
+     * Update PayPal settings
+     */
+    public function updatePayPalSettings(Request $request)
+    {
+        $organization = auth()->user()->currentOrganization();
+
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $this->authorize('update', $organization);
+
+        // Determine if PayPal should be enabled
+        $paypalEnabled = $request->has('paypal_enabled');
+
+        // Validate based on whether fields have values
+        $rules = [
+            'paypal_enabled' => ['nullable', 'boolean'],
+            'paypal_mode' => ['required_if:paypal_enabled,1', 'nullable', 'in:sandbox,live'],
+            'paypal_webhook_id' => ['nullable', 'string', 'max:255'],
+        ];
+
+        // Only require credentials if PayPal is being enabled AND no credentials exist yet
+        if ($paypalEnabled && !$organization->hasPayPalConfigured()) {
+            $rules['paypal_client_id'] = ['required', 'string', 'max:500'];
+            $rules['paypal_client_secret'] = ['required', 'string', 'max:500'];
+        } else {
+            $rules['paypal_client_id'] = ['nullable', 'string', 'max:500'];
+            $rules['paypal_client_secret'] = ['nullable', 'string', 'max:500'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Prepare update data
+        $updateData = [
+            'paypal_enabled' => $paypalEnabled,
+            'paypal_mode' => $validated['paypal_mode'] ?? $organization->paypal_mode ?? 'sandbox',
+            'paypal_webhook_id' => $validated['paypal_webhook_id'] ?? null,
+        ];
+
+        // Only update client_id if a new value was provided (not empty, not placeholder)
+        if (!empty($validated['paypal_client_id']) && $validated['paypal_client_id'] !== '********') {
+            $updateData['paypal_client_id'] = $validated['paypal_client_id'];
+        }
+
+        // Only update client_secret if a new value was provided (not empty, not placeholder)
+        if (!empty($validated['paypal_client_secret']) && $validated['paypal_client_secret'] !== '********') {
+            $updateData['paypal_client_secret'] = $validated['paypal_client_secret'];
+        }
+
+        // If PayPal is being disabled, clear all credentials
+        if (!$paypalEnabled) {
+            $updateData['paypal_client_id'] = null;
+            $updateData['paypal_client_secret'] = null;
+            $updateData['paypal_webhook_id'] = null;
+        }
+
+        // Log the update for debugging
+        \Log::info('PayPal settings update', [
+            'organization_id' => $organization->id,
+            'paypal_enabled' => $updateData['paypal_enabled'],
+            'client_id_updated' => isset($updateData['paypal_client_id']),
+            'client_secret_updated' => isset($updateData['paypal_client_secret']),
+            'mode' => $updateData['paypal_mode'],
+        ]);
+
+        $organization->update($updateData);
+
+        return back()->with('success', 'PayPal-Einstellungen erfolgreich gespeichert!');
+    }
+
+    /**
+     * Download CSV template for team import
+     */
+    public function downloadTeamImportTemplate()
     {
         $csv = "email,role\n";
         $csv .= "beispiel@email.com,member\n";

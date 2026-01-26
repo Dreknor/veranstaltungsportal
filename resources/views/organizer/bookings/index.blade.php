@@ -134,6 +134,17 @@
                                         {{ ucfirst($booking->payment_status) }}
                                     </span>
                                 @endif
+                                @if($booking->payment_method)
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        @if($booking->payment_method === 'paypal')
+                                            PayPal
+                                        @elseif($booking->payment_method === 'invoice')
+                                            Rechnung
+                                        @else
+                                            {{ $booking->payment_method }}
+                                        @endif
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($booking->status === 'confirmed')

@@ -39,6 +39,11 @@ class Organization extends Model
         'is_active',
         'is_verified',
         'verified_at',
+        'paypal_enabled',
+        'paypal_client_id',
+        'paypal_client_secret',
+        'paypal_mode',
+        'paypal_webhook_id',
     ];
 
     protected function casts(): array
@@ -52,6 +57,9 @@ class Organization extends Model
             'is_active' => 'boolean',
             'is_verified' => 'boolean',
             'verified_at' => 'datetime',
+            'paypal_enabled' => 'boolean',
+            'paypal_client_id' => 'encrypted',
+            'paypal_client_secret' => 'encrypted',
         ];
     }
 
@@ -261,9 +269,72 @@ class Organization extends Model
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn (string $word) => Str::of($word)->substr(0, 1))
+            ->map(fn($word) => Str::upper(Str::substr($word, 0, 1)))
             ->take(2)
             ->implode('');
     }
-}
 
+    /**
+     * Check if PayPal is configured and enabled
+     */
+    public function hasPayPalConfigured(): bool
+    {
+        // Check if PayPal is enabled
+        if (!$this->paypal_enabled) {
+            return false;
+        }
+
+        // Get decrypted values
+        $clientId = $this->paypal_client_id;
+        $clientSecret = $this->paypal_client_secret;
+
+        // Check if credentials exist and are not the placeholder value
+        if (empty($clientId) || empty($clientSecret)) {
+            return false;
+        }
+
+        if ($clientId === '********' || $clientSecret === '********') {
+            return false;
+        }
+
+        // Client ID and Secret must be different
+        if ($clientId === $clientSecret) {
+            \Log::warning('PayPal configuration error: Client ID and Secret are identical', [
+                'organization_id' => $this->id,
+            ]);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get PayPal credentials array
+     */
+    public function getPayPalCredentials(): ?array
+    {
+        if (!$this->hasPayPalConfigured()) {
+            return null;
+        }
+
+        $clientId = $this->paypal_client_id;
+        $clientSecret = $this->paypal_client_secret;
+
+        // Double-check credentials are not placeholder values
+        if ($clientId === '********' || $clientSecret === '********') {
+            return null;
+        }
+
+        // Double-check they are not identical
+        if ($clientId === $clientSecret) {
+            return null;
+        }
+
+        return [
+            'mode' => $this->paypal_mode ?? 'sandbox',
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'webhook_id' => $this->paypal_webhook_id,
+        ];
+    }
+}
