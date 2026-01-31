@@ -23,9 +23,7 @@ class OrganizationTeamInvitationTest extends TestCase
         parent::setUp();
 
         // Create organizer with organization
-        $this->organizer = User::factory()->create([
-            'is_organizer' => true,
-        ]);
+        $this->organizer = User::factory()->create();
 
         $this->organization = Organization::factory()->create();
         $this->organization->users()->attach($this->organizer->id, [
@@ -107,7 +105,6 @@ class OrganizationTeamInvitationTest extends TestCase
         // Assert user was created
         $this->assertDatabaseHas('users', [
             'email' => 'newuser@example.com',
-            'is_organizer' => true,
         ]);
 
         $newUser = User::where('email', 'newuser@example.com')->first();
@@ -198,9 +195,7 @@ class OrganizationTeamInvitationTest extends TestCase
     /** @test */
     public function non_owner_cannot_invite_members()
     {
-        $regularMember = User::factory()->create([
-            'is_organizer' => true,
-        ]);
+        $regularMember = User::factory()->create();
 
         $this->organization->users()->attach($regularMember->id, [
             'role' => 'member',

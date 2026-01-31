@@ -224,7 +224,6 @@ class OrganizationController extends Controller
                 'name' => $name,
                 'email' => $validated['email'],
                 'password' => bcrypt($temporaryPassword),
-                'is_organizer' => true,
                 'email_verified_at' => null,
             ]);
 
