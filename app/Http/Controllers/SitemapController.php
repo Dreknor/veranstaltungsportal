@@ -51,17 +51,22 @@ class SitemapController extends Controller
      */
     public function events(): Response
     {
+        // Include upcoming events and recent past events (last 3 months)
         $events = Event::where('published', true)
-            ->where('starts_at', '>=', now()->subMonths(6))
-            ->orderBy('updated_at', 'desc')
+            ->where('start_date', '>=', now()->subMonths(3))
+            ->orderBy('start_date', 'desc')
+            ->limit(5000) // Google sitemap limit
             ->get();
 
         $urls = $events->map(function ($event) {
+            $isFuture = $event->start_date->isFuture();
+            $isFeatured = $event->is_featured ?? false;
+
             return [
                 'loc' => route('events.show', $event->slug),
                 'lastmod' => $event->updated_at->toW3cString(),
-                'priority' => $event->featured ? '0.9' : '0.8',
-                'changefreq' => $event->starts_at->isFuture() ? 'daily' : 'weekly',
+                'priority' => $isFeatured ? '0.9' : ($isFuture ? '0.8' : '0.7'),
+                'changefreq' => 'daily' ,
             ];
         })->toArray();
 

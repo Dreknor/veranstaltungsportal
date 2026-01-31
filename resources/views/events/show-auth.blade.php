@@ -1,7 +1,15 @@
 <x-layouts.public :title="$event->title">
     <!-- SEO & Social Media Meta Tags -->
     @push('meta')
-        <x-meta-tags :event="$event" />
+        @php
+            $breadcrumbs = [
+                ['name' => 'Home', 'url' => route('home')],
+                ['name' => 'Veranstaltungen', 'url' => route('events.index')],
+                ['name' => $event->category->name ?? 'Event', 'url' => route('events.index', ['category' => $event->event_category_id])],
+                ['name' => $event->title, 'url' => route('events.show', $event->slug)],
+            ];
+        @endphp
+        <x-meta-tags :event="$event" :breadcrumbs="$breadcrumbs" />
     @endpush
 
     <div class="min-h-screen bg-gray-50">

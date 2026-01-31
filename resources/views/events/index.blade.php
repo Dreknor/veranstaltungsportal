@@ -1,4 +1,19 @@
-<x-layouts.public title="Veranstaltungen">
+<x-layouts.public title="Veranstaltungen - Fort- und Weiterbildungen entdecken">
+    @push('meta')
+        @php
+            $breadcrumbs = [
+                ['name' => 'Home', 'url' => route('home')],
+                ['name' => 'Veranstaltungen', 'url' => route('events.index')],
+            ];
+            $description = 'Entdecken Sie Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Filter nach Kategorie, Ort und Datum.';
+        @endphp
+        <x-meta-tags
+            :title="'Veranstaltungen - Fort- und Weiterbildungen entdecken'"
+            :description="$description"
+            :breadcrumbs="$breadcrumbs"
+        />
+    @endpush
+
     <div class="min-h-screen bg-gray-50">
         <!-- Header mit Suche und Filter -->
         <div class="bg-white shadow-sm border-b">
@@ -223,6 +238,32 @@
                 <div class="mt-8">
                     {{ $items->links() }}
                 </div>
+
+                <!-- ItemList Schema for Events -->
+                @if($items->isNotEmpty())
+                @php
+                    $itemListSchema = [
+                        '@context' => 'https://schema.org',
+                        '@type' => 'ItemList',
+                        'itemListElement' => []
+                    ];
+
+                    foreach ($items as $index => $itemData) {
+                        if ($itemData['type'] === 'event') {
+                            $event = $itemData['item'];
+                            $itemListSchema['itemListElement'][] = [
+                                '@type' => 'ListItem',
+                                'position' => $index + 1,
+                                'url' => route('events.show', $event->slug),
+                                'name' => $event->title,
+                            ];
+                        }
+                    }
+                @endphp
+                <script type="application/ld+json">
+                {!! json_encode($itemListSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+                </script>
+                @endif
             @endif
         </div>
     </div>

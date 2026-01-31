@@ -3,8 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bildungsportal - Fort- und Weiterbildungen für Schulen</title>
+    <title>{{ config('app.name') }} - Fort- und Weiterbildungen für Bildungseinrichtungen</title>
     <meta name="description" content="Das zentrale Portal für Fort- und Weiterbildungen an evangelischen Schulen. Entdecken Sie Angebote im Rahmen der Aktion Hauptfach Mensch und weitere pädagogische Veranstaltungen.">
+
+    <x-meta-tags
+        :title="config('app.name') . ' - Fort- und Weiterbildungen für Bildungseinrichtungen'"
+        :description="'Das zentrale Portal für Fort- und Weiterbildungen an evangelischen Schulen. Entdecken Sie Angebote im Rahmen der Aktion Hauptfach Mensch und weitere pädagogische Veranstaltungen.'"
+    />
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50">
