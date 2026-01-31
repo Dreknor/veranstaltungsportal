@@ -7,7 +7,7 @@
                         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Konto erstellen') }}</h1>
                     </div>
 
-                    <form method="POST" action="{{ route('register') }}" class="space-y-3" x-data="{ userType: 'participant' }">
+                    <form method="POST" action="{{ route('register') }}" class="space-y-3" x-data="{ userType: 'participant' }" data-recaptcha data-recaptcha-action="register">
                         @csrf
                         <!-- Full Name Input -->
                         <div>
