@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('user_registration_tokens', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('token', 64)->unique();
+            $table->string('email');
+            $table->timestamp('expires_at');
             $table->timestamps();
         });
     }
