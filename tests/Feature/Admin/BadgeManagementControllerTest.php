@@ -146,15 +146,27 @@ class BadgeManagementControllerTest extends TestCase
     {
         $badge = Badge::factory()->create();
 
+        // Extract requirement_type and requirement_value from the requirements array
+        // Copy to local variable to avoid "Indirect modification of overloaded property" error
+        $requirements = $badge->requirements ?? [];
+        $requirements = is_array($requirements) ? $requirements : [];
+
+        $requirementType = count($requirements) > 0
+            ? array_key_first($requirements)
+            : 'events_attended';
+        $requirementValue = count($requirements) > 0
+            ? reset($requirements)
+            : 1;
+
         $updatedData = [
             'name' => 'Updated Badge Name',
             'description' => $badge->description,
             'type' => $badge->type,
-            'icon' => $badge->icon,
+            'icon' => $badge->icon ?? 'fas fa-medal',
             'color' => $badge->color,
             'points' => 100,
-            'requirement_type' => $badge->requirement_type,
-            'requirement_value' => $badge->requirement_value,
+            'requirement_type' => $requirementType,
+            'requirement_value' => $requirementValue,
         ];
 
         $response = $this->actingAs($this->admin)

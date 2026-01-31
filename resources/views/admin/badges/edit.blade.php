@@ -159,7 +159,9 @@
                             Anforderungstyp <span class="text-red-500">*</span>
                         </label>
                         @php
-                            $currentRequirementType = old('requirement_type') ?: (is_array($badge->requirements) && count($badge->requirements) > 0 ? array_key_first($badge->requirements) : '');
+                            $requirements = $badge->requirements ?? [];
+                            $requirements = is_array($requirements) ? $requirements : [];
+                            $currentRequirementType = old('requirement_type', (count($requirements) > 0 ? array_key_first($requirements) : ''));
                         @endphp
                         <select name="requirement_type" id="requirement_type" class="input" required>
                             <option value="">Typ auswählen...</option>
@@ -186,7 +188,7 @@
                             Anforderungswert <span class="text-red-500">*</span>
                         </label>
                         @php
-                            $currentRequirementValue = old('requirement_value') ?: (is_array($badge->requirements) && count($badge->requirements) > 0 ? reset($badge->requirements) : 1);
+                            $currentRequirementValue = old('requirement_value', (count($requirements) > 0 ? reset($requirements) : 1));
                         @endphp
                         <input type="number" name="requirement_value" id="requirement_value" value="{{ $currentRequirementValue }}" min="1" class="input" required>
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
