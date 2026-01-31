@@ -15,6 +15,7 @@ class FeaturedEventManagementControllerTest extends TestCase
     private User $admin;
     private User $organizer;
     private Event $event;
+    private \App\Models\Organization $organization;
 
     protected function setUp(): void
     {
@@ -23,12 +24,20 @@ class FeaturedEventManagementControllerTest extends TestCase
         $this->admin = User::factory()->create();
         $this->admin->assignRole('admin');
 
-        $this->organizer = User::factory()->create(['is_organizer' => true]);
+        $this->organizer = User::factory()->create();
         $this->organizer->assignRole('organizer');
 
+        // Create organization for the organizer
+        $this->organization = \App\Models\Organization::factory()->create();
+        $this->organization->users()->attach($this->organizer->id, [
+            'role' => 'owner',
+            'is_active' => true,
+            'joined_at' => now(),
+        ]);
+
         $this->event = Event::factory()->create([
-            'organizer_id' => $this->organizer->id,
-            'published' => true,
+            'organization_id' => $this->organization->id,
+            'is_published' => true,
         ]);
     }
 
@@ -62,7 +71,7 @@ class FeaturedEventManagementControllerTest extends TestCase
         ]);
 
         $paidFee = FeaturedEventFee::factory()->create([
-            'event_id' => Event::factory()->create(['organizer_id' => $this->organizer->id])->id,
+            'event_id' => Event::factory()->create(['organization_id' => $this->organization->id])->id,
             'payment_status' => 'paid',
         ]);
 
@@ -87,7 +96,7 @@ class FeaturedEventManagementControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('admin.featured-events.show');
         $response->assertSee($fee->event->title);
-        $response->assertSee(number_format($fee->amount, 2, ',', '.'));
+        $response->assertSee(number_format($fee->fee_amount, 2, ',', '.'));
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
@@ -158,10 +167,10 @@ class FeaturedEventManagementControllerTest extends TestCase
         $fee = FeaturedEventFee::factory()->create([
             'event_id' => $this->event->id,
             'payment_status' => 'paid',
-            'expires_at' => now()->addDays(7),
+            'featured_end_date' => now()->addDays(7),
         ]);
 
-        $originalExpiry = $fee->expires_at;
+        $originalExpiry = $fee->featured_end_date;
 
         $response = $this->actingAs($this->admin)
             ->post(route('admin.featured-events.extend', $fee), [
@@ -173,14 +182,14 @@ class FeaturedEventManagementControllerTest extends TestCase
         $response->assertSessionHas('success');
 
         $fee->refresh();
-        $this->assertTrue($fee->expires_at->greaterThan($originalExpiry));
+        $this->assertTrue($fee->featured_end_date->greaterThan($originalExpiry));
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function admin_can_view_statistics(): void
     {
         FeaturedEventFee::factory()->count(5)->create([
-            'event_id' => Event::factory()->create(['organizer_id' => $this->organizer->id])->id,
+            'event_id' => Event::factory()->create(['organization_id' => $this->organization->id])->id,
             'payment_status' => 'paid',
         ]);
 
@@ -196,7 +205,7 @@ class FeaturedEventManagementControllerTest extends TestCase
     public function admin_can_perform_bulk_actions(): void
     {
         $fees = FeaturedEventFee::factory()->count(3)->create([
-            'event_id' => Event::factory()->create(['organizer_id' => $this->organizer->id])->id,
+            'event_id' => Event::factory()->create(['organization_id' => $this->organization->id])->id,
             'payment_status' => 'pending',
         ]);
 
