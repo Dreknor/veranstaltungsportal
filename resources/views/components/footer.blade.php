@@ -2,9 +2,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-                <h3 class="text-xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    📚 Bildungsportal
-                </h3>
+                <div class="flex items-center gap-3 mb-4">
+                    <img src="{{ asset('images/logo.png') }}" alt="Bildungsportal Logo" class="h-12 w-12 object-contain">
+                    <h3 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        Bildungsportal
+                    </h3>
+                </div>
                 <p class="text-gray-400">
                     Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen.
                 </p>
