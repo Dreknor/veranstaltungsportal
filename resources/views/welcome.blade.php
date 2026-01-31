@@ -20,7 +20,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <a href="/" class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" class="h-10 w-10 object-contain">
+                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" class="h-14 w-14 object-contain">
                         <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             {{ config('app.name') }}
                         </span>
