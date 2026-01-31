@@ -196,22 +196,81 @@ class OrganizationController extends Controller
         $this->authorize('update', $organization);
 
         $validated = $request->validate([
-            'email' => ['required', 'email', 'exists:users,email'],
+            'email' => ['required', 'email'],
             'role' => ['required', Rule::in(['admin', 'member'])],
+            'create_account' => ['nullable', 'boolean'],
         ]);
 
         $user = \App\Models\User::where('email', $validated['email'])->first();
 
+        // User doesn't exist yet
+        if (!$user) {
+            // If create_account is not checked, inform the user
+            if (!$request->has('create_account')) {
+                return back()
+                    ->with('warning', 'Der Benutzer mit der E-Mail "' . $validated['email'] . '" ist noch nicht registriert.')
+                    ->with('pending_email', $validated['email'])
+                    ->with('pending_role', $validated['role']);
+            }
+
+            // Create new user account
+            $temporaryPassword = \Str::random(16);
+
+            // Extract name from email if possible
+            $emailName = explode('@', $validated['email'])[0];
+            $name = ucfirst(str_replace(['.', '_', '-'], ' ', $emailName));
+
+            $user = \App\Models\User::create([
+                'name' => $name,
+                'email' => $validated['email'],
+                'password' => bcrypt($temporaryPassword),
+                'is_organizer' => true,
+                'email_verified_at' => null,
+            ]);
+
+            // Create cancellation token
+            $registrationToken = \App\Models\UserRegistrationToken::createForUser($user);
+
+            // Attach to organization
+            $organization->users()->attach($user->id, [
+                'role' => $validated['role'],
+                'is_active' => true,
+                'invited_at' => now(),
+                'joined_at' => now(),
+            ]);
+
+            // Send welcome email with credentials and cancellation link
+            \Mail::to($user->email)->send(new \App\Mail\NewUserAccountCreated(
+                $user,
+                $temporaryPassword,
+                $organization,
+                auth()->user(),
+                $validated['role'],
+                $registrationToken->token
+            ));
+
+            return back()->with('success', 'Konto wurde erstellt und der Benutzer per E-Mail mit Zugangsdaten informiert!');
+        }
+
+        // User exists, check if already member
         if ($organization->users()->where('user_id', $user->id)->exists()) {
             return back()->with('error', 'Dieser Benutzer ist bereits Mitglied der Organisation.');
         }
 
+        // Add existing user to organization
         $organization->users()->attach($user->id, [
             'role' => $validated['role'],
             'is_active' => true,
             'invited_at' => now(),
             'joined_at' => now(),
         ]);
+
+        // Send invitation email
+        \Mail::to($user->email)->send(new \App\Mail\OrganizationInvitation(
+            $organization,
+            auth()->user(),
+            $validated['role']
+        ));
 
         return back()->with('success', 'Teammitglied erfolgreich hinzugefügt!');
     }

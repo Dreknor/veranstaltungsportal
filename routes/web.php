@@ -73,6 +73,10 @@ Route::get('/paypal/success/{booking}', [\App\Http\Controllers\PayPalController:
 Route::get('/paypal/cancel/{booking}', [\App\Http\Controllers\PayPalController::class, 'cancel'])->name('paypal.cancel');
 Route::post('/paypal/webhook', [\App\Http\Controllers\PayPalController::class, 'webhook'])->name('paypal.webhook');
 
+// Registration Cancellation Routes
+Route::get('/cancel-registration/{token}', [UserRegistrationCancellationController::class, 'show'])->name('user.cancel-registration');
+Route::post('/cancel-registration/{token}', [UserRegistrationCancellationController::class, 'cancel'])->name('user.cancel-registration.process');
+
 Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])->name('api.validate-discount-code');
 
 // User Dashboard Routes

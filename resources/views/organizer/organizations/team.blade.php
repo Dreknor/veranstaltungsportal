@@ -29,6 +29,45 @@
         </div>
     @endif
 
+    @if(session('warning'))
+        <div class="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 rounded" x-data="{ expanded: true }">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div class="ml-3 flex-1">
+                    <p class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                        {{ session('warning') }}
+                    </p>
+                    <p class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
+                        Möchten Sie automatisch ein Konto für diesen Benutzer erstellen? Der Benutzer erhält eine E-Mail mit den Zugangsdaten und der Möglichkeit, die Registrierung rückgängig zu machen.
+                    </p>
+                    <form method="POST" action="{{ route('organizer.team.invite') }}" class="mt-3">
+                        @csrf
+                        <input type="hidden" name="email" value="{{ session('pending_email') }}">
+                        <input type="hidden" name="role" value="{{ session('pending_role') }}">
+                        <input type="hidden" name="create_account" value="1">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium rounded-lg transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Ja, Konto erstellen und einladen
+                        </button>
+                    </form>
+                </div>
+                <div class="ml-3 flex-shrink-0">
+                    <button @click="expanded = false" class="inline-flex text-yellow-400 hover:text-yellow-500">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Mitglied einladen -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Mitglied einladen</h2>
