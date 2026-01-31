@@ -8,6 +8,9 @@
     <meta name="description" content="{{ $description ?? 'Veranstaltungsportal für Fort- und Weiterbildungen' }}">
     @stack('meta')
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {!! RecaptchaV3::initJs() !!}
+
     <script>
         function applyTheme() {
             const userPref = localStorage.getItem('darkMode');

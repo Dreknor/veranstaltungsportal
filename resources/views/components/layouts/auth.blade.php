@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Login - {{ config('app.name') }}</title>
     @vite('resources/css/app.css')
+    {!! RecaptchaV3::initJs() !!}
+
     <script>
         function applyTheme() {
             const userPref = localStorage.getItem('darkMode');
