@@ -12,7 +12,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/" class="text-2xl font-bold text-blue-600">EventPortal</a>
+                    <a href="/" class="flex items-center gap-3">
+                        <img src="{{ asset('images/logo.png') }}" alt="EventPortal Logo" class="h-10 w-10 object-contain">
+                        <span class="text-xl font-bold text-blue-600">EventPortal</span>
+                    </a>
                 </div>
                 <div class="flex items-center gap-4">
                     <a href="{{ route('events.index') }}" class="text-gray-700 hover:text-gray-900">Events</a>

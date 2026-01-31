@@ -735,6 +735,17 @@
   - [x] SEO-freundliche URLs (bereits vorhanden)
   - [x] Sitemap Routes konfiguriert
   - [x] SitemapController mit 4 Sitemaps (static, events, categories, organizers)
+  - [x] **Erweiterte Event Schema.org Daten** (Geo-Koordinaten, VirtualLocation, EventStatus, Offers) ✅ NEU
+  - [x] **BreadcrumbList Schema** für bessere Navigation ✅ NEU
+  - [x] **ItemList Schema** für Event-Listen ✅ NEU
+  - [x] **Organization Schema** (EducationalOrganization) ✅ NEU
+  - [x] **Dynamische Keywords** basierend auf Event-Daten ✅ NEU
+  - [x] **Geo-Meta-Tags** für lokale Suche ✅ NEU
+  - [x] **Verbesserte robots.txt** mit Crawl-Delay und detaillierten Regeln ✅ NEU
+  - [x] **Optimierte Sitemap-Prioritäten** und Changefreq ✅ NEU
+  - [x] **SEO-Dokumentation** (SEO-GUIDE.md, IMAGES-GUIDE.md) ✅ NEU
+- [ ] SEO-Bilder erstellen (og-default.jpg, logo.png, favicons)
+- [ ] Google Search Console einrichten und Sitemaps einreichen
 - [ ] SEO-Analyse Tool integriert
 - [ ] Performance-Optimierungen (Caching, Lazy Loading)
 
