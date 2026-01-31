@@ -79,12 +79,37 @@ class TicketType extends Model
 
         $now = now();
 
-        if ($this->sale_start && $now->lt($this->sale_start)) {
-            return false;
+        // Verkaufsstart prüfen
+        if ($this->sale_start) {
+            // Wenn Zeit auf 00:00:00 ist, wurde vermutlich nur ein Datum eingegeben
+            // In diesem Fall: Verkauf beginnt am Anfang des Tages
+            if ($this->sale_start->format('H:i:s') === '00:00:00') {
+                // Vergleiche nur Datum - gleicher Tag oder später ist ok
+                if ($now->toDateString() < $this->sale_start->toDateString()) {
+                    return false;
+                }
+            } else {
+                // Spezifische Zeit angegeben - verwende exakten Zeitvergleich
+                if ($now->isBefore($this->sale_start)) {
+                    return false;
+                }
+            }
         }
 
-        if ($this->sale_end && $now->gt($this->sale_end)) {
-            return false;
+        // Verkaufsende prüfen
+        if ($this->sale_end) {
+            // Wenn Zeit auf 00:00:00 ist, gilt der ganze Tag bis 23:59:59
+            if ($this->sale_end->format('H:i:s') === '00:00:00') {
+                // Verkauf läuft bis Ende des Tages
+                if ($now->toDateString() > $this->sale_end->toDateString()) {
+                    return false;
+                }
+            } else {
+                // Spezifische Zeit angegeben - verwende exakten Zeitvergleich
+                if ($now->isAfter($this->sale_end)) {
+                    return false;
+                }
+            }
         }
 
         return true;

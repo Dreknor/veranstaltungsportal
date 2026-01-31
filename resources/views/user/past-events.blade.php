@@ -31,7 +31,11 @@
                                     <div class="space-y-1 text-sm text-gray-600 mb-4">
                                         <div class="flex items-center">
                                             <x-icon.calendar class="w-4 h-4 mr-2" />
-                                            {{ $booking->event->start_date->format('d.m.Y H:i') }} Uhr
+                                            @if($booking->event->start_date->isSameDay($booking->event->end_date))
+                                                {{ $booking->event->start_date->format('d.m.Y H:i') }} Uhr
+                                            @else
+                                                {{ $booking->event->start_date->format('d.m.Y') }} - {{ $booking->event->end_date->format('d.m.Y') }}
+                                            @endif
                                         </div>
                                         <div class="flex items-center">
                                             <x-icon.location class="w-4 h-4 mr-2" />

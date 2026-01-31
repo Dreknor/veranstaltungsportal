@@ -298,16 +298,29 @@
                                     Jetzt buchen
                                 </a>
 
-                                @if($event->ticketTypes->count() > 0)
+                                @if($event->ticketTypes->count() > 0 || $event->price_from !== null)
                                     <div class="mt-4 pt-4 border-t">
                                         <div class="text-sm font-medium text-gray-700 mb-2">Verfügbare Tickets:</div>
                                         <div class="space-y-2">
-                                            @foreach($event->ticketTypes->where('is_available', true) as $ticket)
+                                            @php
+                                                $availableTickets = $event->ticketTypes
+                                                    ->where('is_available', true)
+                                                    ->filter(fn($t) => $t->isOnSale() && $t->availableQuantity() > 0);
+                                            @endphp
+
+                                            @foreach($availableTickets as $ticket)
                                                 <div class="flex justify-between text-sm">
                                                     <span class="text-gray-600">{{ $ticket->name }}</span>
                                                     <span class="font-medium text-gray-900">{{ number_format($ticket->price, 2, ',', '.') }} €</span>
                                                 </div>
                                             @endforeach
+
+                                            @if($event->price_from !== null && ($availableTickets->isEmpty() || $availableTickets->where('price', '!=', $event->price_from)->count() > 0))
+                                                <div class="flex justify-between text-sm">
+                                                    <span class="text-gray-600">Standard-Ticket</span>
+                                                    <span class="font-medium text-gray-900">{{ number_format($event->price_from, 2, ',', '.') }} €</span>
+                                                </div>
+                                            @endif
                                         </div>
                                     </div>
                                 @endif
@@ -404,8 +417,19 @@
                                 <div class="flex items-start">
                                     <x-icon.calendar class="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
                                     <div>
-                                        <div class="font-medium text-gray-900">{{ $event->start_date->format('d. F Y') }}</div>
-                                        <div class="text-sm text-gray-600">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }} Uhr</div>
+                                        @if($event->start_date->isSameDay($event->end_date))
+                                            {{-- Same day event --}}
+                                            <div class="font-medium text-gray-900">{{ $event->start_date->format('d. F Y') }}</div>
+                                            <div class="text-sm text-gray-600">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }} Uhr</div>
+                                        @else
+                                            {{-- Multi-day event --}}
+                                            <div class="font-medium text-gray-900">
+                                                {{ $event->start_date->format('d. F Y') }} - {{ $event->end_date->format('d. F Y') }}
+                                            </div>
+                                            <div class="text-sm text-gray-600">
+                                                {{ $event->start_date->format('H:i') }} Uhr - {{ $event->end_date->format('H:i') }} Uhr
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -441,7 +465,7 @@
                     </div>
 
                     <!-- Tickets -->
-                    @if($event->ticketTypes->count() > 0)
+                    @if($event->ticketTypes->count() > 0 || $event->price_from !== null)
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Tickets</h3>
                             <div class="space-y-3">
@@ -454,23 +478,54 @@
                                         @if($ticket->description)
                                             <p class="text-sm text-gray-600">{{ $ticket->description }}</p>
                                         @endif
-                                        @if($ticket->quantity)
+
+                                        @if(!$ticket->is_available)
+                                            <p class="text-xs text-red-600 mt-1">Nicht verfügbar</p>
+                                        @elseif(!$ticket->isOnSale())
+                                            @if($ticket->sale_start && now()->lt($ticket->sale_start))
+                                                <p class="text-xs text-orange-600 mt-1">
+                                                    Verkauf ab {{ $ticket->sale_start->format('d.m.Y') }}
+                                                    @if($ticket->sale_start->format('H:i') !== '00:00')
+                                                        um {{ $ticket->sale_start->format('H:i') }} Uhr
+                                                    @endif
+                                                </p>
+                                            @elseif($ticket->sale_end && now()->gt($ticket->sale_end))
+                                                <p class="text-xs text-gray-500 mt-1">Verkauf beendet</p>
+                                            @endif
+                                        @elseif($ticket->availableQuantity() === 0)
+                                            <p class="text-xs text-red-600 mt-1">Ausverkauft</p>
+                                        @elseif($ticket->quantity)
                                             <p class="text-xs text-gray-500 mt-1">
                                                 Noch {{ $ticket->availableQuantity() }} verfügbar
                                             </p>
+                                        @else
+                                            <p class="text-xs text-green-600 mt-1">Verfügbar</p>
                                         @endif
                                     </div>
                                 @endforeach
+
+                                @if($event->price_from !== null && $event->ticketTypes->isEmpty())
+                                    <div class="border-b pb-3 last:border-b-0">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span class="font-medium text-gray-900">
+                                                @if($event->price_from > 0)
+                                                    Standard-Ticket
+                                                @else
+                                                    Kostenlose Teilnahme
+                                                @endif
+                                            </span>
+                                            <span class="font-bold text-blue-600">{{ number_format($event->price_from, 2, ',', '.') }} €</span>
+                                        </div>
+                                        <p class="text-sm text-gray-600">Regulärer Zugang zur Veranstaltung</p>
+                                        <p class="text-xs text-green-600 mt-1">Verfügbar</p>
+                                    </div>
+                                @endif
                             </div>
 
                             <!-- Waitlist if sold out -->
                             <x-waitlist-join :event="$event" />
 
-                            @php
-                                $hasAvailableTickets = $event->ticketTypes->some(fn($ticket) => $ticket->availableQuantity() > 0);
-                            @endphp
-
-                            @if($hasAvailableTickets)
+                            @if($event->hasAvailableTickets())
                                 <a href="{{ route('bookings.create', $event) }}"
                                    class="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold mt-4">
                                     Jetzt Tickets buchen

@@ -246,5 +246,54 @@ class QrCodeService
 
         return $filename;
     }
+
+    /**
+     * Generate EPC/GiroCode QR code for bank transfer (SEPA)
+     *
+     * @param array $bankAccount Bank account data
+     * @param float $amount Amount to transfer
+     * @param string $reference Payment reference
+     * @param string $recipientName Recipient name
+     * @param int $size QR code size
+     * @return string Data URI for embedding in HTML/PDF
+     */
+    public function generatePaymentQrCode(array $bankAccount, float $amount, string $reference, string $recipientName, int $size = 200): string
+    {
+        // EPC QR Code format (GiroCode) - SEPA Credit Transfer
+        // Format: https://www.europeanpaymentscouncil.eu/sites/default/files/kb/file/2018-05/EPC069-12%20v2.1%20Quick%20Response%20Code%20-%20Guidelines%20to%20Enable%20the%20Data%20Capture%20for%20the%20Initiation%20of%20a%20SCT.pdf
+
+        $iban = $bankAccount['iban'] ?? '';
+        $bic = $bankAccount['bic'] ?? '';
+        $accountHolder = $bankAccount['account_holder'] ?? $recipientName;
+
+        // Remove spaces from IBAN
+        $iban = str_replace(' ', '', $iban);
+
+        // Build EPC QR Code data
+        $epcData = [
+            'BCD',                                      // Service Tag
+            '002',                                      // Version
+            '1',                                        // Character Set (1 = UTF-8)
+            'SCT',                                      // Identification (SEPA Credit Transfer)
+            $bic,                                       // BIC (can be empty for SEPA zone)
+            substr($accountHolder, 0, 70),             // Beneficiary Name (max 70 chars)
+            $iban,                                      // Beneficiary Account (IBAN)
+            'EUR' . number_format($amount, 2, '.', ''), // Amount (EUR123.45)
+            '',                                         // Purpose (empty)
+            substr($reference, 0, 140),                // Remittance Information (max 140 chars)
+            '',                                         // Beneficiary to Originator Information (empty)
+        ];
+
+        // Join with line breaks
+        $qrContent = implode("\n", $epcData);
+
+        // Generate QR code
+        $qrCode = QrCode::format('svg')
+            ->size($size)
+            ->errorCorrection('M')
+            ->generate($qrContent);
+
+        return 'data:image/svg+xml;base64,' . base64_encode($qrCode);
+    }
 }
 

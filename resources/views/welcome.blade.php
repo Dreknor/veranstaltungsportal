@@ -180,9 +180,13 @@
                                 <div class="space-y-2 mb-4">
                                     <div class="flex items-center text-sm text-gray-700">
                                         <span class="mr-2">📅</span>
-                                        {{ $event->start_date->format('d.m.Y') }}
-                                        @if($event->start_time)
-                                            um {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} Uhr
+                                        @if($event->start_date->isSameDay($event->end_date))
+                                            {{ $event->start_date->format('d.m.Y') }}
+                                            @if($event->start_time)
+                                                um {{ \Carbon\Carbon::parse($event->start_time)->format('H:i') }} Uhr
+                                            @endif
+                                        @else
+                                            {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
                                         @endif
                                     </div>
                                     <div class="flex items-center text-sm text-gray-700">

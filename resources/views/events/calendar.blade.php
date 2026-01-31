@@ -33,9 +33,24 @@
                     $date = \Carbon\Carbon::create($year, $month, 1);
                     $daysInMonth = $date->daysInMonth;
                     $firstDayOfWeek = $date->dayOfWeekIso;
-                    $eventsGroupedByDay = $events->groupBy(function($event) {
-                        return $event->start_date->format('Y-m-d');
-                    });
+
+                    // Gruppiere Events nach Tag - mehrtägige Events erscheinen an jedem Tag
+                    $eventsGroupedByDay = collect();
+                    foreach($events as $event) {
+                        $startDate = $event->start_date->copy()->startOfDay();
+                        $endDate = $event->end_date->copy()->startOfDay();
+
+                        // Durchlaufe jeden Tag des Events
+                        $currentEventDate = $startDate->copy();
+                        while($currentEventDate <= $endDate) {
+                            $dateString = $currentEventDate->format('Y-m-d');
+                            if (!$eventsGroupedByDay->has($dateString)) {
+                                $eventsGroupedByDay->put($dateString, collect());
+                            }
+                            $eventsGroupedByDay->get($dateString)->push($event);
+                            $currentEventDate->addDay();
+                        }
+                    }
                 @endphp
 
                 <div class="grid grid-cols-7 gap-4">

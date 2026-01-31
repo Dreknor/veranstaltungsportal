@@ -101,7 +101,11 @@
                                 <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ $event->title }}</h3>
                                 <p class="text-gray-600 text-sm mb-4">{{ Str::limit($event->description, 100) }}</p>
                                 <div class="flex items-center text-sm text-gray-500 mb-4">
-                                    <span>📅 {{ $event->start_date->format('d.m.Y') }}</span>
+                                    <span>📅 @if($event->start_date->isSameDay($event->end_date))
+                                        {{ $event->start_date->format('d.m.Y') }}
+                                    @else
+                                        {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                                    @endif</span>
                                     <span class="mx-2">•</span>
                                     <span>📍 {{ $event->venue_city }}</span>
                                 </div>

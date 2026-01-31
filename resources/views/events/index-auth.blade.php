@@ -135,7 +135,11 @@
                                     <div class="space-y-2 mb-4">
                                         <div class="flex items-center text-sm text-gray-600">
                                             <x-icon.calendar class="w-4 h-4 mr-2" />
-                                            {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                                            @if($event->start_date->isSameDay($event->end_date))
+                                                {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                                            @else
+                                                {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                                            @endif
                                         </div>
 
                                         <div class="flex items-center text-sm text-gray-600">

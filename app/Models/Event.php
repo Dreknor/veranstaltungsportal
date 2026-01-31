@@ -269,7 +269,7 @@ class Event extends Model implements HasMedia
     }
 
     /**
-     * Check if event has available tickets
+     * Check if event has available tickets (either ticket types or base price)
      */
     public function hasAvailableTickets(): bool
     {
@@ -278,14 +278,39 @@ class Event extends Model implements HasMedia
             return false;
         }
 
-        // If event has ticket types, check if any ticket type has availability and is on sale
+        // If event has ticket types, check if any are available
+        $hasAvailableTicketType = false;
         if ($this->ticketTypes()->exists()) {
-            return $this->ticketTypes()
+            $hasAvailableTicketType = $this->ticketTypes()
                 ->where('is_available', true)
                 ->get()
                 ->contains(function ($ticketType) {
-                    return $ticketType->availableQuantity() > 0 && $ticketType->isOnSale();
+                    // Check if ticket is on sale (considering sale_start and sale_end)
+                    if (!$ticketType->isOnSale()) {
+                        return false;
+                    }
+
+                    // If quantity is null (unlimited), it's available
+                    if ($ticketType->quantity === null) {
+                        return true;
+                    }
+
+                    // Otherwise check if there's quantity available
+                    return $ticketType->availableQuantity() > 0;
                 });
+        }
+
+        // Event is bookable if:
+        // 1. At least one ticket type is available OR
+        // 2. Event has a base price (price_from) set
+        // This allows for both ticket types AND price_from to coexist
+        if ($hasAvailableTicketType) {
+            return true;
+        }
+
+        // If no ticket types are available, check if price_from is set
+        if ($this->price_from !== null && $this->price_from >= 0) {
+            return true;
         }
 
         // Otherwise check general availability based on max_attendees
@@ -307,21 +332,30 @@ class Event extends Model implements HasMedia
 
     /**
      * Get the minimum price for this event
-     * Returns price_from if set, otherwise the cheapest available ticket type
+     * Returns the lowest price between price_from and available ticket types
      */
     public function getMinimumPrice(): ?float
     {
-        // If price_from is set, use it
-        if ($this->price_from !== null && $this->price_from > 0) {
-            return (float) $this->price_from;
+        $prices = [];
+
+        // Add price_from if set
+        if ($this->price_from !== null && $this->price_from >= 0) {
+            $prices[] = (float) $this->price_from;
         }
 
-        // Otherwise, get the minimum price from available ticket types
+        // Add minimum price from available ticket types
         $minTicketPrice = $this->ticketTypes()
-            ->available()
+            ->where('is_available', true)
+            ->get()
+            ->filter(fn($t) => $t->isOnSale() && $t->availableQuantity() > 0)
             ->min('price');
 
-        return $minTicketPrice ? (float) $minTicketPrice : null;
+        if ($minTicketPrice !== null) {
+            $prices[] = (float) $minTicketPrice;
+        }
+
+        // Return the minimum of all prices, or null if no prices exist
+        return !empty($prices) ? min($prices) : null;
     }
 
     public function getLocationAttribute(): string

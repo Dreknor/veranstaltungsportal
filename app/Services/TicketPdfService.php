@@ -232,40 +232,63 @@ class TicketPdfService
 
         // Prepare items array
         $items = [];
-        $netTotal = 0;
+        $grossTotal = 0; // Total including VAT
         $taxRate = 19; // Default VAT rate for Germany
 
         foreach ($booking->items as $item) {
+            // Prices are stored as gross prices (including VAT)
             $itemTotal = $item->price * $item->quantity;
-            $netTotal += $itemTotal;
+            $grossTotal += $itemTotal;
 
             $items[] = [
                 'description' => $booking->event->title,
                 'ticket_type' => $item->ticketType->name,
                 'quantity' => $item->quantity,
-                'unit_price' => $item->price,
+                'unit_price' => $item->price, // This is the gross price (inkl. MwSt.)
                 'tax_rate' => $taxRate,
-                'total' => $itemTotal,
+                'total' => $itemTotal, // This is also gross (inkl. MwSt.)
             ];
         }
 
         $discountAmount = $booking->discount ?? 0;
-        $netAfterDiscount = $netTotal - $discountAmount;
-        $taxAmount = $netAfterDiscount * ($taxRate / 100);
-        $totalAmount = $netAfterDiscount + $taxAmount;
+        $totalAmount = $grossTotal - $discountAmount; // Final amount is gross
+
+        // Calculate net amount and tax from gross amount
+        $netAfterDiscount = $totalAmount / (1 + ($taxRate / 100));
+        $taxAmount = $totalAmount - $netAfterDiscount;
+
+        // Generate payment QR code if not paid and bank account is available
+        $paymentQrCode = null;
+        if ($booking->payment_status !== 'paid' && $booking->event->organizer->bank_account) {
+            $bankAccount = is_string($booking->event->organizer->bank_account)
+                ? json_decode($booking->event->organizer->bank_account, true)
+                : $booking->event->organizer->bank_account;
+
+            if (is_array($bankAccount) && !empty($bankAccount['iban'])) {
+                $paymentQrCode = $this->qrCodeService->generatePaymentQrCode(
+                    $bankAccount,
+                    $totalAmount,
+                    'Rechnung ' . $this->generateInvoiceNumber($booking),
+                    $booking->event->organizer->name,
+                    200
+                );
+            }
+        }
 
         $data = [
             'booking' => $booking,
             'event' => $booking->event,
             'items' => $items,
-            'netTotal' => $netTotal,
+            'grossTotal' => $grossTotal, // Gross total before discount
+            'netTotal' => $netAfterDiscount, // Net amount (for reference)
             'discountAmount' => $discountAmount,
             'taxRate' => $taxRate,
             'taxAmount' => $taxAmount,
-            'totalAmount' => $totalAmount,
+            'totalAmount' => $totalAmount, // Final gross amount
             'notes' => null,
             'invoiceNumber' => $this->generateInvoiceNumber($booking),
             'invoiceDate' => $booking->invoice_date ? $booking->invoice_date->format('d.m.Y') : now()->format('d.m.Y'),
+            'paymentQrCode' => $paymentQrCode,
         ];
 
         return Pdf::loadView('pdf.invoice', $data)
@@ -280,7 +303,9 @@ class TicketPdfService
      */
     public function downloadInvoice(Booking $booking): \Illuminate\Http\Response
     {
-        $filename = "invoice-{$booking->booking_number}.pdf";
+        $invoiceNumber = $this->generateInvoiceNumber($booking);
+        $eventSlug = \Illuminate\Support\Str::slug($booking->event->title);
+        $filename = "Rechnung_{$invoiceNumber}_{$eventSlug}.pdf";
 
         return $this->generateInvoice($booking)->download($filename);
     }

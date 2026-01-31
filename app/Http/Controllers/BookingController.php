@@ -24,13 +24,19 @@ class BookingController extends Controller
                 ->with('error', 'Diese Veranstaltung wurde abgesagt und kann nicht mehr gebucht werden.');
         }
 
+        // Get available ticket types
+        $ticketTypes = $event->ticketTypes()
+            ->where('is_available', true)
+            ->get()
+            ->filter(function ($ticket) {
+                return $ticket->isOnSale() && $ticket->availableQuantity() > 0;
+            });
 
-        // Check if event has any ticket types, if not create a default one
-        if ($event->ticketTypes()->count() === 0) {
-            // Create default ticket type based on event price_from or make it free
-            $price = $event->price_from ?? 0;
+        // If price_from is set and there are no ticket types, create a default one
+        if ($ticketTypes->isEmpty() && $event->price_from !== null) {
+            $price = $event->price_from;
 
-            TicketType::create([
+            $defaultTicket = TicketType::create([
                 'event_id' => $event->id,
                 'name' => $price > 0 ? 'Standard-Ticket' : 'Kostenlose Teilnahme',
                 'description' => 'Regulärer Zugang zur Veranstaltung',
@@ -44,16 +50,9 @@ class BookingController extends Controller
                 'sale_end' => null,
             ]);
 
-            // Lade die Ticket-Types neu
-            $event->load('ticketTypes');
+            // Add to collection
+            $ticketTypes = collect([$defaultTicket]);
         }
-
-        $ticketTypes = $event->ticketTypes()
-            ->where('is_available', true)
-            ->get()
-            ->filter(function ($ticket) {
-                return $ticket->isOnSale() && $ticket->availableQuantity() > 0;
-            });
 
         if ($ticketTypes->isEmpty()) {
             // Check why no tickets are available

@@ -8,10 +8,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Configure the reCAPTCHA v3 settings for your application.
+    | By default, reCAPTCHA is only enabled in production environments.
     |
     */
 
-    'enabled' => env('RECAPTCHA_ENABLED', true),
+    'enabled' => env('RECAPTCHA_ENABLED', env('APP_ENV') === 'production'),
 
     'site_key' => env('RECAPTCHA_SITE_KEY'),
 

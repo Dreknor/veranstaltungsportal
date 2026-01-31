@@ -136,7 +136,11 @@
                                             <h3 class="font-semibold text-gray-900">{{ $booking->event->title }}</h3>
                                             <div class="flex items-center text-sm text-gray-600 mt-2">
                                                 <x-icon.calendar class="w-4 h-4 mr-1" />
-                                                {{ $booking->event->start_date->format('d.m.Y H:i') }} Uhr
+                                                @if($booking->event->start_date->isSameDay($booking->event->end_date))
+                                                    {{ $booking->event->start_date->format('d.m.Y H:i') }} Uhr
+                                                @else
+                                                    {{ $booking->event->start_date->format('d.m.Y') }} - {{ $booking->event->end_date->format('d.m.Y') }}
+                                                @endif
                                             </div>
                                             <div class="flex items-center text-sm text-gray-600 mt-1">
                                                 <x-icon.location class="w-4 h-4 mr-1" />
@@ -266,7 +270,11 @@
                             </h3>
                             <div class="flex items-center text-sm text-gray-600 mb-2">
                                 <i class="far fa-calendar mr-2"></i>
-                                {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                                @if($event->start_date->isSameDay($event->end_date))
+                                    {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                                @else
+                                    {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                                @endif
                             </div>
                             <div class="flex items-center text-sm text-gray-600 mb-3">
                                 <i class="far fa-map-marker-alt mr-2"></i>

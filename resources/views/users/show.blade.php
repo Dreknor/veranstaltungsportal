@@ -186,7 +186,11 @@
                                         <h3 class="font-semibold text-gray-900 mb-1">{{ $event->title }}</h3>
                                         <p class="text-sm text-gray-600">
                                             <x-icon.calendar class="inline w-4 h-4 mr-1" />
-                                            {{ $event->start_date->format('d.m.Y') }}
+                                            @if($event->start_date->isSameDay($event->end_date))
+                                                {{ $event->start_date->format('d.m.Y') }}
+                                            @else
+                                                {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                                            @endif
                                         </p>
                                     </a>
                                 @endforeach

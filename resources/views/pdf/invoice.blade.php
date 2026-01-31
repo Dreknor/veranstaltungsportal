@@ -12,74 +12,73 @@
         }
         body {
             font-family: 'DejaVu Sans', sans-serif;
-            font-size: 11pt;
-            line-height: 1.6;
+            font-size: 9pt;
+            line-height: 1.3;
             color: #333;
         }
         .container {
-            padding: 20px;
+            padding: 20px 25px;
         }
         .header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #3b82f6;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #3b82f6;
         }
         .company-info h1 {
             color: #3b82f6;
-            font-size: 20pt;
-            margin-bottom: 5px;
+            font-size: 16pt;
+            margin-bottom: 3px;
         }
         .company-info p {
             color: #64748b;
-            font-size: 9pt;
-            line-height: 1.4;
+            font-size: 8pt;
+            line-height: 1.2;
         }
         .invoice-info {
             text-align: right;
         }
         .invoice-info h2 {
             color: #1e293b;
-            font-size: 24pt;
-            margin-bottom: 10px;
+            font-size: 18pt;
+            margin-bottom: 3px;
         }
         .invoice-info p {
             color: #64748b;
-            font-size: 10pt;
+            font-size: 8pt;
+            line-height: 1.2;
         }
         .addresses {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
+            margin-bottom: 12px;
         }
         .address-block {
             width: 48%;
         }
         .address-block h3 {
             color: #1e293b;
-            font-size: 12pt;
-            margin-bottom: 10px;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 5px;
+            font-size: 10pt;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2px;
         }
         .address-block p {
             color: #475569;
-            font-size: 10pt;
-            line-height: 1.5;
+            font-size: 8pt;
+            line-height: 1.3;
         }
         .invoice-details {
             background: #f8fafc;
-            padding: 15px;
-            margin-bottom: 30px;
-            border-radius: 4px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            border-radius: 3px;
         }
         .invoice-details table {
             width: 100%;
         }
         .invoice-details td {
-            padding: 5px 0;
-            font-size: 10pt;
+            padding: 2px 0;
+            font-size: 8pt;
         }
         .invoice-details td:first-child {
             color: #64748b;
@@ -92,21 +91,21 @@
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .items-table thead {
             background: #3b82f6;
             color: white;
         }
         .items-table th {
-            padding: 12px;
+            padding: 6px 8px;
             text-align: left;
-            font-size: 10pt;
+            font-size: 8pt;
         }
         .items-table td {
-            padding: 10px 12px;
+            padding: 5px 8px;
             border-bottom: 1px solid #e2e8f0;
-            font-size: 10pt;
+            font-size: 8pt;
         }
         .items-table tbody tr:nth-child(even) {
             background: #f8fafc;
@@ -119,15 +118,15 @@
         }
         .totals {
             margin-left: 60%;
-            margin-bottom: 30px;
+            margin-bottom: 12px;
         }
         .totals table {
             width: 100%;
             border-collapse: collapse;
         }
         .totals td {
-            padding: 8px 12px;
-            font-size: 10pt;
+            padding: 4px 8px;
+            font-size: 8pt;
         }
         .totals td:first-child {
             color: #64748b;
@@ -141,70 +140,70 @@
             background: #3b82f6;
             color: white;
             font-weight: bold;
-            font-size: 12pt;
+            font-size: 10pt;
         }
         .totals .total-row td {
             color: white;
-            padding: 12px;
+            padding: 8px;
         }
         .tax-info {
             background: #f1f5f9;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            border-radius: 3px;
         }
         .tax-info h4 {
             color: #1e293b;
-            font-size: 11pt;
-            margin-bottom: 10px;
+            font-size: 9pt;
+            margin-bottom: 5px;
         }
         .tax-info table {
             width: 100%;
-            font-size: 9pt;
+            font-size: 8pt;
         }
         .tax-info td {
-            padding: 5px;
+            padding: 3px;
             color: #475569;
         }
         .payment-info {
             background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 15px;
-            margin-bottom: 20px;
+            border-left: 3px solid #f59e0b;
+            padding: 10px;
+            margin-bottom: 10px;
         }
         .payment-info h4 {
             color: #92400e;
-            font-size: 11pt;
-            margin-bottom: 10px;
+            font-size: 9pt;
+            margin-bottom: 5px;
         }
         .payment-info p {
             color: #78350f;
-            font-size: 9pt;
-            line-height: 1.5;
+            font-size: 8pt;
+            line-height: 1.3;
         }
         .notes {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .notes h4 {
             color: #1e293b;
-            font-size: 11pt;
-            margin-bottom: 10px;
+            font-size: 9pt;
+            margin-bottom: 5px;
         }
         .notes p {
             color: #64748b;
-            font-size: 9pt;
-            line-height: 1.5;
+            font-size: 7pt;
+            line-height: 1.3;
         }
         .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e2e8f0;
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 1px solid #e2e8f0;
             text-align: center;
             color: #94a3b8;
-            font-size: 8pt;
+            font-size: 7pt;
         }
         .footer p {
-            margin-bottom: 5px;
+            margin-bottom: 2px;
         }
     </style>
 </head>
@@ -213,17 +212,31 @@
         <!-- Header -->
         <div class="header">
             <div class="company-info">
-                <h1>🎓 Bildungsportal</h1>
-                <p>
-                    Evangelische Schulen in Sachsen<br>
-                    Fort- und Weiterbildungen<br>
-                    {{ config('app.name') }}
+                @if($event->organizer->logo)
+                    <img src="{{ public_path('storage/' . $event->organizer->logo) }}" alt="{{ $event->organizer->name }}" style="max-height: 50px; max-width: 180px; margin-bottom: 4px;">
+                @else
+                    <h1 style="color: #3b82f6; font-size: 16pt; margin-bottom: 3px;">{{ $event->organizer->name }}</h1>
+                @endif
+                <p style="font-size: 7pt; line-height: 1.2;">
+                    @if($event->organizer->billing_address && $event->organizer->billing_postal_code && $event->organizer->billing_city)
+                        {{ $event->organizer->billing_address }}, {{ $event->organizer->billing_postal_code }} {{ $event->organizer->billing_city }}
+                    @elseif($event->organizer->billing_address)
+                        {{ $event->organizer->billing_address }}
+                    @endif
+                    @if($event->organizer->email || $event->organizer->phone)
+                        @if($event->organizer->billing_address) • @endif
+                        @if($event->organizer->email){{ $event->organizer->email }}@endif
+                        @if($event->organizer->email && $event->organizer->phone) • @endif
+                        @if($event->organizer->phone){{ $event->organizer->phone }}@endif
+                    @endif
+                    @if($event->organizer->tax_id)
+                        <br>USt-IdNr: {{ $event->organizer->tax_id }}
+                    @endif
                 </p>
             </div>
             <div class="invoice-info">
                 <h2>RECHNUNG</h2>
-                <p>Nr. {{ $invoiceNumber }}</p>
-                <p>Datum: {{ $invoiceDate }}</p>
+                <p>Nr. {{ $invoiceNumber }}<br>{{ $invoiceDate }}</p>
             </div>
         </div>
 
@@ -233,19 +246,9 @@
                 <h3>Rechnungsempfänger</h3>
                 <p>
                     <strong>{{ $booking->customer_name }}</strong><br>
-                    {{ $booking->customer_email }}<br>
+                    {{ $booking->customer_email }}
                     @if($booking->customer_phone)
-                    Tel: {{ $booking->customer_phone }}<br>
-                    @endif
-                </p>
-            </div>
-            <div class="address-block">
-                <h3>Veranstalter</h3>
-                <p>
-                    <strong>{{ $event->organizer->name }}</strong><br>
-                    {{ $event->organizer->email }}<br>
-                    @if($event->organizer->phone)
-                    Tel: {{ $event->organizer->phone }}<br>
+                        • {{ $booking->customer_phone }}
                     @endif
                 </p>
             </div>
@@ -255,27 +258,18 @@
         <div class="invoice-details">
             <table>
                 <tr>
-                    <td>Buchungsnummer:</td>
-                    <td><strong>{{ $booking->booking_number }}</strong></td>
-                </tr>
-                <tr>
-                    <td>Buchungsdatum:</td>
-                    <td>{{ $booking->created_at->format('d.m.Y H:i') }} Uhr</td>
+                    <td>Buchung:</td>
+                    <td><strong>{{ $booking->booking_number }}</strong> vom {{ $booking->created_at->format('d.m.Y') }}</td>
                 </tr>
                 <tr>
                     <td>Veranstaltung:</td>
-                    <td><strong>{{ $event->title }}</strong></td>
+                    <td>
+                        <strong>{{ $event->title }}</strong> am {{ \Carbon\Carbon::parse($event->start_date)->format('d.m.Y H:i') }} Uhr
+                        @if($event->location)
+                            , {{ $event->location }}
+                        @endif
+                    </td>
                 </tr>
-                <tr>
-                    <td>Veranstaltungsdatum:</td>
-                    <td>{{ \Carbon\Carbon::parse($event->start_date)->format('d.m.Y H:i') }} Uhr</td>
-                </tr>
-                @if($event->location)
-                <tr>
-                    <td>Veranstaltungsort:</td>
-                    <td>{{ $event->location }}</td>
-                </tr>
-                @endif
             </table>
         </div>
 
@@ -283,11 +277,11 @@
         <table class="items-table">
             <thead>
                 <tr>
-                    <th>Position</th>
+                    <th>Pos.</th>
                     <th>Beschreibung</th>
-                    <th class="text-center">Menge</th>
-                    <th class="text-right">Einzelpreis</th>
-                    <th class="text-right">MwSt. %</th>
+                    <th class="text-center">Anz.</th>
+                    <th class="text-right">Preis</th>
+                    <th class="text-right">MwSt.</th>
                     <th class="text-right">Gesamt</th>
                 </tr>
             </thead>
@@ -296,8 +290,8 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>
-                        <strong>{{ $item['description'] }}</strong><br>
-                        <small style="color: #64748b;">Ticket-Typ: {{ $item['ticket_type'] }}</small>
+                        <strong>{{ $item['description'] }}</strong>
+                        <small style="color: #64748b; display: block;">{{ $item['ticket_type'] }}</small>
                     </td>
                     <td class="text-center">{{ $item['quantity'] }}</td>
                     <td class="text-right">{{ number_format($item['unit_price'], 2, ',', '.') }} €</td>
@@ -311,19 +305,20 @@
         <!-- Totals -->
         <div class="totals">
             <table>
-                <tr>
-                    <td>Zwischensumme (Netto):</td>
-                    <td>{{ number_format($netTotal, 2, ',', '.') }} €</td>
-                </tr>
                 @if($discountAmount > 0)
+                <tr>
+                    <td>Zwischensumme:</td>
+                    <td>{{ number_format($totalAmount + $discountAmount, 2, ',', '.') }} €</td>
+                </tr>
                 <tr>
                     <td>Rabatt:</td>
                     <td>-{{ number_format($discountAmount, 2, ',', '.') }} €</td>
                 </tr>
                 @endif
                 <tr>
-                    <td>MwSt. ({{ $taxRate }}%):</td>
-                    <td>{{ number_format($taxAmount, 2, ',', '.') }} €</td>
+                    <td colspan="2" style="padding-top: 3px; border-top: 1px solid #e2e8f0; font-size: 7pt; color: #64748b;">
+                        inkl. {{ number_format($taxAmount, 2, ',', '.') }} € MwSt. ({{ $taxRate }}%)
+                    </td>
                 </tr>
                 <tr class="total-row">
                     <td>Gesamtbetrag:</td>
@@ -336,11 +331,11 @@
         <div class="tax-info">
             <h4>Steueraufschlüsselung</h4>
             <table>
-                <tr>
-                    <td style="width: 25%;"><strong>MwSt.-Satz</strong></td>
-                    <td style="width: 25%; text-align: right;"><strong>Netto</strong></td>
-                    <td style="width: 25%; text-align: right;"><strong>MwSt.</strong></td>
-                    <td style="width: 25%; text-align: right;"><strong>Brutto</strong></td>
+                <tr style="font-weight: bold;">
+                    <td style="width: 25%;">MwSt.-Satz</td>
+                    <td style="width: 25%; text-align: right;">Netto</td>
+                    <td style="width: 25%; text-align: right;">MwSt.</td>
+                    <td style="width: 25%; text-align: right;">Brutto</td>
                 </tr>
                 <tr>
                     <td>{{ $taxRate }}%</td>
@@ -355,23 +350,46 @@
         @if($booking->payment_status !== 'paid')
         <div class="payment-info">
             <h4>💳 Zahlungsinformationen</h4>
-            <p>
-                <strong>Zahlungsstatus:</strong> {{ ucfirst($booking->payment_status) }}<br>
-                <strong>Zahlungsmethode:</strong> {{ ucfirst($booking->payment_method ?? 'Überweisung') }}<br>
-                <br>
-                Bitte überweisen Sie den Betrag von <strong>{{ number_format($totalAmount, 2, ',', '.') }} €</strong> unter Angabe der Buchungsnummer <strong>{{ $booking->booking_number }}</strong> auf folgendes Konto:<br>
-                <br>
-                <em>Bankverbindung wird vom Veranstalter bereitgestellt.</em>
-            </p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div style="flex: 1; padding-right: 15px;">
+                    <p>
+                        Bitte überweisen Sie <strong>{{ number_format($totalAmount, 2, ',', '.') }} €</strong> unter Angabe <strong>{{ $booking->booking_number }}</strong>:<br>
+                        @if($event->organizer->bank_account)
+                            @php
+                                $bankAccount = is_string($event->organizer->bank_account)
+                                    ? json_decode($event->organizer->bank_account, true)
+                                    : $event->organizer->bank_account;
+                            @endphp
+                            @if(is_array($bankAccount) && !empty($bankAccount))
+                                <strong>{{ $bankAccount['account_holder'] ?? $event->organizer->name }}</strong><br>
+                                IBAN: {{ $bankAccount['iban'] ?? 'N/A' }}
+                                @if(isset($bankAccount['bic']))
+                                    • BIC: {{ $bankAccount['bic'] }}
+                                @endif
+                            @else
+                                <em>Bankverbindung wird vom Veranstalter bereitgestellt.</em>
+                            @endif
+                        @else
+                            <em>Bankverbindung wird vom Veranstalter bereitgestellt.</em>
+                        @endif
+                    </p>
+                </div>
+                @if(isset($paymentQrCode))
+                <div style="text-align: center; padding-left: 15px; border-left: 2px solid #f59e0b;">
+                    <img src="{{ $paymentQrCode }}" alt="Payment QR Code" style="width: 110px; height: 110px; display: block;">
+                    <p style="font-size: 6pt; color: #78350f; margin-top: 3px; line-height: 1.2;">
+                        <strong>QR-Code scannen</strong><br>
+                        für einfache Überweisung
+                    </p>
+                </div>
+                @endif
+            </div>
         </div>
         @else
         <div class="payment-info" style="background: #d1fae5; border-left-color: #10b981;">
             <h4 style="color: #065f46;">✅ Zahlungsinformationen</h4>
             <p style="color: #064e3b;">
-                <strong>Zahlungsstatus:</strong> Bezahlt<br>
-                <strong>Zahlungsmethode:</strong> {{ ucfirst($booking->payment_method ?? 'Überweisung') }}<br>
-                <strong>Zahlungsdatum:</strong> {{ $booking->updated_at->format('d.m.Y H:i') }} Uhr<br>
-                <br>
+                <strong>Bezahlt</strong> am {{ $booking->updated_at->format('d.m.Y') }} via {{ ucfirst($booking->payment_method ?? 'Überweisung') }}<br>
                 Vielen Dank für Ihre Zahlung!
             </p>
         </div>
@@ -386,20 +404,39 @@
         @endif
 
         <div class="notes">
-            <h4>Allgemeine Hinweise</h4>
             <p>
-                • Diese Rechnung wurde elektronisch erstellt und ist ohne Unterschrift gültig.<br>
-                • Bei Fragen zur Rechnung wenden Sie sich bitte an den Veranstalter.<br>
-                • Stornierungen gemäß den Geschäftsbedingungen des Veranstalters.<br>
-                • Kleinunternehmerregelung gemäß § 19 UStG (falls zutreffend).<br>
+                Diese Rechnung wurde elektronisch erstellt und ist ohne Unterschrift gültig.
+                @if(isset($paymentQrCode))
+                    QR-Code für schnelle Überweisung scannen.
+                @endif
+                Bei Fragen wenden Sie sich an den Veranstalter.
             </p>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <p>Bildungsportal für Fort- und Weiterbildungen</p>
-            <p>Evangelische Schulen in Sachsen | {{ config('app.url') }}</p>
-            <p>Erstellt am {{ now()->format('d.m.Y H:i') }} Uhr</p>
+            <p>
+                <strong>{{ $event->organizer->name }}</strong>
+                @if($event->organizer->website || $event->organizer->email || $event->organizer->phone)
+                    •
+                    @if($event->organizer->website)
+                        {{ $event->organizer->website }}
+                    @endif
+                    @if($event->organizer->website && ($event->organizer->email || $event->organizer->phone))
+                        •
+                    @endif
+                    @if($event->organizer->email)
+                        {{ $event->organizer->email }}
+                    @endif
+                    @if($event->organizer->email && $event->organizer->phone)
+                        •
+                    @endif
+                    @if($event->organizer->phone)
+                        {{ $event->organizer->phone }}
+                    @endif
+                @endif
+            </p>
+            <p>Erstellt: {{ now()->format('d.m.Y H:i') }}</p>
         </div>
     </div>
 </body>

@@ -123,7 +123,11 @@
                 <div class="event-card">
                     <div class="event-title">{{ $event->title }}</div>
                     <div class="event-meta">
-                        📅 {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                        📅 @if($event->start_date->isSameDay($event->end_date))
+                            {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                        @else
+                            {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                        @endif
                     </div>
                     <div class="event-meta">
                         📍 {{ $event->isOnline() ? 'Online-Veranstaltung' : $event->venue_name }}
@@ -150,7 +154,11 @@
                 <div class="event-card">
                     <div class="event-title">{{ $event->title }}</div>
                     <div class="event-meta">
-                        📅 {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                        📅 @if($event->start_date->isSameDay($event->end_date))
+                            {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                        @else
+                            {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                        @endif
                     </div>
                     <div class="event-meta">
                         📍 {{ $event->isOnline() ? 'Online-Veranstaltung' : $event->venue_name }}
@@ -174,7 +182,11 @@
                 <div class="event-card">
                     <div class="event-title">{{ $event->title }}</div>
                     <div class="event-meta">
-                        📅 {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                        📅 @if($event->start_date->isSameDay($event->end_date))
+                            {{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                        @else
+                            {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
+                        @endif
                     </div>
                     <div class="event-meta">
                         📍 {{ $event->isOnline() ? 'Online-Veranstaltung' : $event->venue_name }}
