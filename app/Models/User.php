@@ -17,6 +17,7 @@ use App\Models\UserBadge;
 use App\Models\EventReview;
 use App\Models\Organization;
 use App\Models\UserConnection;
+use App\Notifications\CustomVerifyEmail;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -101,6 +102,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return Attribute::make(
             get: fn ($value) => is_array($value) ? $value : [],
         );
+    }
+
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new CustomVerifyEmail);
     }
 
     /**
