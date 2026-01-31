@@ -54,7 +54,7 @@
             </div>
         </div>
         <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }} - Ein Angebot der <a href="https://www.esdigmbh.de/" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">ESDI GmbH</a></p>
+            <p>&copy; {{ date('Y') }}  {{ config('app.name') }} - Ein Angebot der <a href="https://www.esdigmbh.de/" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">ESDI GmbH</a></p>
             <p class="text-sm mt-2">
                 Ein Angebot im Rahmen der Aktion <a href="https://www.ev-schulen-sachsen.de/hauptfach-mensch-1" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">Hauptfach Mensch</a>.
             </p>
