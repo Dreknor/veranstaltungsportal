@@ -65,7 +65,7 @@ Route::get('/bookings/{bookingNumber}/certificate', [BookingController::class, '
 Route::get('/bookings/{bookingNumber}/certificate/{itemId}', [BookingController::class, 'downloadIndividualCertificate'])->name('bookings.certificate.individual');
 Route::get('/bookings/{bookingNumber}/ical', [BookingController::class, 'downloadIcal'])->name('bookings.ical');
 Route::get('/bookings/{bookingNumber}/verify', [BookingController::class, 'verify'])->name('bookings.verify');
-Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->name('bookings.verify-email');
+Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->middleware('recaptcha:booking_verify')->name('bookings.verify-email');
 Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController::class, 'verifyEmailToken'])->name('bookings.verify-email-token');
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 

@@ -66,6 +66,10 @@ return [
             'enabled' => true,
             'threshold' => 0.5,
         ],
+        'booking_verify' => [
+            'enabled' => true,
+            'threshold' => 0.5,
+        ],
         'contact' => [
             'enabled' => true,
             'threshold' => 0.3,

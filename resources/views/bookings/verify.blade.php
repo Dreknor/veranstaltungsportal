@@ -25,7 +25,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('bookings.verify-email', $booking->booking_number) }}" method="POST">
+                <form action="{{ route('bookings.verify-email', $booking->booking_number) }}" method="POST" data-recaptcha data-recaptcha-action="booking_verify">
                     @csrf
                     <div class="mb-6">
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
@@ -41,6 +41,9 @@
                             Verwende die E-Mail-Adresse, die du bei der Buchung angegeben hast.
                         </p>
                     </div>
+
+                    <!-- reCAPTCHA -->
+                    <x-recaptcha action="booking_verify" />
 
                     <button type="submit"
                             class="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition">
