@@ -336,18 +336,27 @@
             </div>
 
             <!-- Organizers with Custom Fees -->
-            @if($organizersWithCustomFees->count() > 0)
-                <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">
-                            Organisatoren mit individuellen Gebühren
-                            <span class="ml-2 text-sm font-normal text-gray-500">({{ $organizersWithCustomFees->count() }})</span>
-                        </h2>
-                        <p class="mt-1 text-sm text-gray-600">
-                            Diese Organisatoren haben Sonderkonditionen, die von den globalen Einstellungen abweichen
-                        </p>
+            <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900">
+                                Organisatoren mit individuellen Gebühren
+                                <span class="ml-2 text-sm font-normal text-gray-500">({{ $organizersWithCustomFees->count() }})</span>
+                            </h2>
+                            <p class="mt-1 text-sm text-gray-600">
+                                Diese Organisatoren haben Sonderkonditionen, die von den globalen Einstellungen abweichen
+                            </p>
+                        </div>
+                        <a href="{{ route('admin.organizations.index') }}"
+                           class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                            <i class="fas fa-building mr-2"></i>
+                            Alle Organisationen
+                        </a>
                     </div>
-                    <div class="overflow-x-auto">
+                </div>
+                @if($organizersWithCustomFees->count() > 0)
+                <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
@@ -432,23 +441,30 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-            @else
-                <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <div class="text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">Keine individuellen Gebühren</h3>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Derzeit haben keine Organisationen individuelle Gebühren-Regelungen.
-                        </p>
-                        <p class="mt-2 text-sm text-gray-500">
-                            Sie können individuelle Gebühren für Organisationen festlegen.
-                        </p>
+                @else
+                    <div class="p-6">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900">Keine individuellen Gebühren</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                Derzeit haben keine Organisationen individuelle Gebühren-Regelungen.
+                            </p>
+                            <p class="mt-2 text-sm text-gray-500">
+                                Sie können individuelle Gebühren über die Organisationenverwaltung festlegen.
+                            </p>
+                            <div class="mt-4">
+                                <a href="{{ route('admin.organizations.index') }}"
+                                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                    <i class="fas fa-building mr-2"></i>
+                                    Zur Organisationenverwaltung
+                                </a>
+                            </div>
+                        </div>
                     </div>
+                @endif
                 </div>
-            @endif
         </div>
     </div>
 

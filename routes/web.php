@@ -356,6 +356,12 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/monetization/billing-data', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'updateBillingData'])->name('monetization.billing-data.update');
     Route::get('/monetization/featured-events', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'featuredEvents'])->name('monetization.featured-events');
 
+    // Organization Management
+    Route::get('/organizations', [\App\Http\Controllers\Admin\OrganizationManagementController::class, 'index'])->name('organizations.index');
+    Route::get('/organizations/{organization}', [\App\Http\Controllers\Admin\OrganizationManagementController::class, 'show'])->name('organizations.show');
+    Route::post('/organizations/{organization}/toggle-active', [\App\Http\Controllers\Admin\OrganizationManagementController::class, 'toggleActive'])->name('organizations.toggle-active');
+    Route::delete('/organizations/{organization}', [\App\Http\Controllers\Admin\OrganizationManagementController::class, 'destroy'])->name('organizations.destroy');
+
     // Individual Organizer Fees
     Route::get('/organizer-fees/{organization}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'edit'])->name('organizer-fees.edit');
     Route::put('/organizer-fees/{organization}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'update'])->name('organizer-fees.update');

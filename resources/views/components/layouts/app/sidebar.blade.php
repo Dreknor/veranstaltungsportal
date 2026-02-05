@@ -248,6 +248,11 @@
                         Benutzerverwaltung
                     </x-layouts.sidebar-link>
 
+                    <x-layouts.sidebar-link href="{{ route('admin.organizations.index') }}" icon='fas-building'
+                        :active="request()->routeIs('admin.organizations.*') || request()->routeIs('admin.organizer-fees.*')">
+                        Organisationen
+                    </x-layouts.sidebar-link>
+
                     <x-layouts.sidebar-link href="{{ route('admin.events.index') }}" icon='fas-calendar-check'
                         :active="request()->routeIs('admin.events.*')">
                         Event-Verwaltung
