@@ -3,22 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class OrganizerFeeController extends Controller
 {
     /**
-     * Show organizer fee settings
+     * Show organization fee settings
      */
-    public function edit(User $user)
+    public function edit(Organization $organization)
     {
-        if (!$user->hasRole('organizer')) {
-            return redirect()->route('admin.users.index')
-                ->with('error', 'Dieser Benutzer ist kein Organisator.');
-        }
-
-        $customFee = $user->custom_platform_fee ?? [];
+        $customFee = $organization->custom_platform_fee ?? [];
         $globalSettings = [
             'fee_percentage' => config('monetization.platform_fee_percentage', 5.0),
             'fee_type' => config('monetization.platform_fee_type', 'percentage'),
@@ -26,19 +21,14 @@ class OrganizerFeeController extends Controller
             'minimum_fee' => config('monetization.platform_fee_minimum', 1.00),
         ];
 
-        return view('admin.organizer-fees.edit', compact('user', 'customFee', 'globalSettings'));
+        return view('admin.organizer-fees.edit', compact('organization', 'customFee', 'globalSettings'));
     }
 
     /**
-     * Update organizer fee settings
+     * Update organization fee settings
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Organization $organization)
     {
-        if (!$user->hasRole('organizer')) {
-            return redirect()->route('admin.users.index')
-                ->with('error', 'Dieser Benutzer ist kein Organisator.');
-        }
-
         $validated = $request->validate([
             'use_custom_fee' => 'boolean',
             'custom_fee_type' => 'nullable|in:percentage,fixed',
@@ -63,26 +53,26 @@ class OrganizerFeeController extends Controller
             ];
         }
 
-        $user->update([
+        $organization->update([
             'custom_platform_fee' => $customFee
         ]);
 
         return redirect()
-            ->route('admin.organizer-fees.edit', $user)
+            ->route('admin.organizer-fees.edit', $organization)
             ->with('success', 'Individuelle Gebühren-Einstellungen wurden gespeichert.');
     }
 
     /**
      * Remove custom fee settings
      */
-    public function destroy(User $user)
+    public function destroy(Organization $organization)
     {
-        $user->update([
+        $organization->update([
             'custom_platform_fee' => null
         ]);
 
         return redirect()
-            ->route('admin.organizer-fees.edit', $user)
+            ->route('admin.organizer-fees.edit', $organization)
             ->with('success', 'Individuelle Gebühren wurden entfernt. Es gelten nun die Standard-Einstellungen.');
     }
 }

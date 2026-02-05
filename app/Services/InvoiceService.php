@@ -50,7 +50,7 @@ class InvoiceService
         }
 
         // Get platform fee percentage (check for custom fee first)
-        $feePercentage = $this->getOrganizerFeePercentage($event->user);
+        $feePercentage = $this->getOrganizationFeePercentage($event->organization);
 
         // Combine both fee types into items
         $invoiceItems = array_merge(
@@ -482,13 +482,13 @@ class InvoiceService
     }
 
     /**
-     * Get organizer's fee percentage (custom or global)
+     * Get organization's fee percentage (custom or global)
      */
-    private function getOrganizerFeePercentage($user)
+    private function getOrganizationFeePercentage($organization)
     {
-        // Check if organizer has custom fee settings
-        if (!empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false)) {
-            $customFee = $user->custom_platform_fee;
+        // Check if organization has custom fee settings
+        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+            $customFee = $organization->custom_platform_fee;
 
             if ($customFee['fee_type'] === 'percentage') {
                 return $customFee['fee_percentage'] ?? config('monetization.platform_fee_percentage', 5.0);
@@ -500,13 +500,13 @@ class InvoiceService
     }
 
     /**
-     * Get organizer's fee amount for a booking
+     * Get organization's fee amount for a booking
      */
-    private function getOrganizerFeeAmount($user, $bookingTotal)
+    private function getOrganizationFeeAmount($organization, $bookingTotal)
     {
-        // Check if organizer has custom fee settings
-        if (!empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false)) {
-            $customFee = $user->custom_platform_fee;
+        // Check if organization has custom fee settings
+        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+            $customFee = $organization->custom_platform_fee;
 
             if ($customFee['fee_type'] === 'fixed') {
                 return $customFee['fee_fixed_amount'] ?? 0;

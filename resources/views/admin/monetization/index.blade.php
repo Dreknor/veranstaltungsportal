@@ -352,7 +352,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Organisator
+                                        Organisation
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Gebührentyp
@@ -372,9 +372,9 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($organizersWithCustomFees as $organizer)
+                                @foreach($organizersWithCustomFees as $organization)
                                     @php
-                                        $customFee = $organizer->custom_platform_fee;
+                                        $customFee = $organization->custom_platform_fee;
                                         $feeType = $customFee['fee_type'] ?? 'percentage';
                                         $feeValue = $feeType === 'percentage'
                                             ? ($customFee['fee_percentage'] ?? 0) . '%'
@@ -385,10 +385,10 @@
                                             <div class="flex items-center">
                                                 <div>
                                                     <div class="text-sm font-medium text-gray-900">
-                                                        {{ $organizer->name }}
+                                                        {{ $organization->name }}
                                                     </div>
                                                     <div class="text-sm text-gray-500">
-                                                        {{ $organizer->email }}
+                                                        {{ $organization->email }}
                                                     </div>
                                                 </div>
                                             </div>
@@ -422,7 +422,7 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('admin.organizer-fees.edit', $organizer) }}"
+                                            <a href="{{ route('admin.organizer-fees.edit', $organization) }}"
                                                class="text-blue-600 hover:text-blue-900">
                                                 Bearbeiten
                                             </a>
@@ -441,10 +441,10 @@
                         </svg>
                         <h3 class="mt-2 text-sm font-medium text-gray-900">Keine individuellen Gebühren</h3>
                         <p class="mt-1 text-sm text-gray-500">
-                            Derzeit haben keine Organisatoren individuelle Gebühren-Regelungen.
+                            Derzeit haben keine Organisationen individuelle Gebühren-Regelungen.
                         </p>
                         <p class="mt-2 text-sm text-gray-500">
-                            Sie können individuelle Gebühren in der Benutzerverwaltung festlegen.
+                            Sie können individuelle Gebühren für Organisationen festlegen.
                         </p>
                     </div>
                 </div>

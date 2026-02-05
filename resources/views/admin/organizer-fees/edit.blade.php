@@ -1,14 +1,14 @@
-<x-layouts.app title="Individuelle Gebühren für {{ $user->name }}">
+<x-layouts.app title="Individuelle Gebühren für {{ $organization->name }}">
     <div class="min-h-screen bg-gray-50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="mb-8">
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">Individuelle Gebühren</h1>
-                        <p class="text-gray-600 mt-2">Ausnahme-Einstellungen für: <strong>{{ $user->name }}</strong></p>
+                        <p class="text-gray-600 mt-2">Ausnahme-Einstellungen für: <strong>{{ $organization->name }}</strong></p>
                     </div>
-                    <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:text-blue-800">
-                        ← Zurück zum Profil
+                    <a href="{{ route('admin.monetization.index') }}" class="text-blue-600 hover:text-blue-800">
+                        ← Zurück zur Übersicht
                     </a>
                 </div>
             </div>
@@ -50,14 +50,14 @@
                     </div>
                     <div>
                         <span class="font-medium">Gilt für:</span>
-                        Alle Organisatoren
+                        Alle Organisationen
                     </div>
                 </div>
             </div>
 
             <!-- Custom Fee Form -->
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <form method="POST" action="{{ route('admin.organizer-fees.update', $user) }}">
+                <form method="POST" action="{{ route('admin.organizer-fees.update', $organization) }}">
                     @csrf
                     @method('PUT')
 
@@ -74,7 +74,7 @@
                                     Individuelle Gebühren aktivieren
                                 </label>
                                 <p class="text-sm text-gray-500">
-                                    Überschreibt die globalen Einstellungen für diesen Organisator
+                                    Überschreibt die globalen Einstellungen für diese Organisation
                                 </p>
                             </div>
                         </div>
@@ -195,7 +195,7 @@
 
                         <div class="flex items-center justify-between pt-6 border-t border-gray-200">
                             @if(!empty($customFee))
-                                <form method="POST" action="{{ route('admin.organizer-fees.destroy', $user) }}" class="inline">
+                                <form method="POST" action="{{ route('admin.organizer-fees.destroy', $organization) }}" class="inline">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-800 text-sm font-medium"
@@ -227,7 +227,7 @@
                         <h3 class="text-sm font-medium text-yellow-800">Wichtiger Hinweis</h3>
                         <div class="mt-2 text-sm text-yellow-700">
                             <ul class="list-disc list-inside space-y-1">
-                                <li>Individuelle Gebühren gelten für alle neuen Buchungen dieses Organisators</li>
+                                <li>Individuelle Gebühren gelten für alle neuen Buchungen dieser Organisation</li>
                                 <li>Bestehende Rechnungen werden nicht rückwirkend angepasst</li>
                                 <li>Bei Deaktivierung gelten wieder die globalen Einstellungen</li>
                             </ul>

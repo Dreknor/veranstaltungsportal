@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\Organizer;
 use App\Http\Controllers\Settings;
 use App\Http\Controllers\FeaturedEventController;
+use App\Http\Controllers\UserRegistrationCancellationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -74,8 +75,8 @@ Route::get('/paypal/cancel/{booking}', [\App\Http\Controllers\PayPalController::
 Route::post('/paypal/webhook', [\App\Http\Controllers\PayPalController::class, 'webhook'])->name('paypal.webhook');
 
 // Registration Cancellation Routes
-Route::get('/cancel-registration/{token}', [UserRegistrationCancellationController::class, 'show'])->name('user.cancel-registration');
-Route::post('/cancel-registration/{token}', [UserRegistrationCancellationController::class, 'cancel'])->name('user.cancel-registration.process');
+Route::get('/cancel-registration/{token}', [\App\Http\Controllers\UserRegistrationCancellationController::class, 'show'])->name('user.cancel-registration');
+Route::post('/cancel-registration/{token}', [\App\Http\Controllers\UserRegistrationCancellationController::class, 'cancel'])->name('user.cancel-registration.process');
 
 Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])->name('api.validate-discount-code');
 
@@ -356,9 +357,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('/monetization/featured-events', [\App\Http\Controllers\Admin\MonetizationSettingsController::class, 'featuredEvents'])->name('monetization.featured-events');
 
     // Individual Organizer Fees
-    Route::get('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'edit'])->name('organizer-fees.edit');
-    Route::put('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'update'])->name('organizer-fees.update');
-    Route::delete('/organizer-fees/{user}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'destroy'])->name('organizer-fees.destroy');
+    Route::get('/organizer-fees/{organization}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'edit'])->name('organizer-fees.edit');
+    Route::put('/organizer-fees/{organization}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'update'])->name('organizer-fees.update');
+    Route::delete('/organizer-fees/{organization}', [\App\Http\Controllers\Admin\OrganizerFeeController::class, 'destroy'])->name('organizer-fees.destroy');
 
     // Invoice Management
     Route::get('/invoices', [\App\Http\Controllers\Admin\InvoiceManagementController::class, 'index'])->name('invoices.index');

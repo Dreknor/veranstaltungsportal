@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Booking;
 use App\Models\PlatformFee;
-use App\Models\User;
 
 class PlatformFeeService
 {
@@ -14,13 +13,13 @@ class PlatformFeeService
     public function calculateAndCreateFee(Booking $booking): ?PlatformFee
     {
         $event = $booking->event;
-        $organizer = $event->user;
+        $organization = $event->organization;
 
-        // Get organizer's fee settings
-        $feeType = $this->getOrganizerFeeType($organizer);
-        $feePercentage = $this->getOrganizerFeePercentage($organizer);
-        $fixedFee = $this->getOrganizerFixedFee($organizer);
-        $minimumFee = $this->getOrganizerMinimumFee($organizer);
+        // Get organization's fee settings
+        $feeType = $this->getOrganizationFeeType($organization);
+        $feePercentage = $this->getOrganizationFeePercentage($organization);
+        $fixedFee = $this->getOrganizationFixedFee($organization);
+        $minimumFee = $this->getOrganizationMinimumFee($organization);
 
         $bookingAmount = $booking->total;
 
@@ -47,24 +46,24 @@ class PlatformFeeService
     }
 
     /**
-     * Get organizer's fee type
+     * Get organization's fee type
      */
-    private function getOrganizerFeeType(User $user): string
+    private function getOrganizationFeeType($organization): string
     {
-        if (!empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false)) {
-            return $user->custom_platform_fee['fee_type'] ?? 'percentage';
+        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+            return $organization->custom_platform_fee['fee_type'] ?? 'percentage';
         }
 
         return config('monetization.platform_fee_type', 'percentage');
     }
 
     /**
-     * Get organizer's fee percentage
+     * Get organization's fee percentage
      */
-    private function getOrganizerFeePercentage(User $user): float
+    private function getOrganizationFeePercentage($organization): float
     {
-        if (!empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false)) {
-            $customFee = $user->custom_platform_fee;
+        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+            $customFee = $organization->custom_platform_fee;
             if ($customFee['fee_type'] === 'percentage') {
                 return $customFee['fee_percentage'] ?? config('monetization.platform_fee_percentage', 5.0);
             }
@@ -74,12 +73,12 @@ class PlatformFeeService
     }
 
     /**
-     * Get organizer's fixed fee amount
+     * Get organization's fixed fee amount
      */
-    private function getOrganizerFixedFee(User $user): float
+    private function getOrganizationFixedFee($organization): float
     {
-        if (!empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false)) {
-            $customFee = $user->custom_platform_fee;
+        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+            $customFee = $organization->custom_platform_fee;
             if ($customFee['fee_type'] === 'fixed') {
                 return $customFee['fee_fixed_amount'] ?? 0;
             }
@@ -89,12 +88,12 @@ class PlatformFeeService
     }
 
     /**
-     * Get organizer's minimum fee
+     * Get organization's minimum fee
      */
-    private function getOrganizerMinimumFee(User $user): float
+    private function getOrganizationMinimumFee($organization): float
     {
-        if (!empty($user->custom_platform_fee) && ($user->custom_platform_fee['enabled'] ?? false)) {
-            $customFee = $user->custom_platform_fee;
+        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+            $customFee = $organization->custom_platform_fee;
             if (isset($customFee['minimum_fee'])) {
                 return (float) $customFee['minimum_fee'];
             }
