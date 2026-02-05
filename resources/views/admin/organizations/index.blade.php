@@ -197,23 +197,23 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div class="flex justify-end space-x-2">
+                                        <div class="flex justify-end items-center space-x-3">
                                             <a href="{{ route('admin.organizations.show', $organization) }}"
-                                               class="text-blue-600 hover:text-blue-900"
+                                               class="inline-flex items-center text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                                                title="Details">
-                                                <i class="fas fa-eye"></i>
+                                                <i class="fas fa-eye text-lg"></i>
                                             </a>
                                             <a href="{{ route('admin.organizer-fees.edit', $organization) }}"
-                                               class="text-purple-600 hover:text-purple-900"
+                                               class="inline-flex items-center text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300"
                                                title="Gebühren festlegen">
-                                                <i class="fas fa-dollar-sign"></i>
+                                                <i class="fas fa-dollar-sign text-lg"></i>
                                             </a>
                                             <form method="POST" action="{{ route('admin.organizations.toggle-active', $organization) }}" class="inline">
                                                 @csrf
                                                 <button type="submit"
-                                                        class="{{ $organization->is_active ? 'text-yellow-600 hover:text-yellow-900' : 'text-green-600 hover:text-green-900' }}"
+                                                        class="inline-flex items-center {{ $organization->is_active ? 'text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300' : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300' }}"
                                                         title="{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}">
-                                                    <i class="fas fa-{{ $organization->is_active ? 'ban' : 'check-circle' }}"></i>
+                                                    <i class="fas fa-{{ $organization->is_active ? 'ban' : 'check-circle' }} text-lg"></i>
                                                 </button>
                                             </form>
                                         </div>

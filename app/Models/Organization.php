@@ -113,9 +113,16 @@ class Organization extends Model
 
     /**
      * Get the primary owner of the organization
+     * Uses already loaded owners if available to avoid N+1 queries
      */
     public function getOwnerAttribute()
     {
+        // If owners relationship is already loaded, use it
+        if ($this->relationLoaded('owners')) {
+            return $this->owners->first();
+        }
+
+        // Otherwise query for the first owner
         return $this->owners()->first();
     }
 
