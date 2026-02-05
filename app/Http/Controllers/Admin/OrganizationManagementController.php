@@ -14,7 +14,7 @@ class OrganizationManagementController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Organization::with(['owner', 'events']);
+        $query = Organization::with(['owners', 'events']);
 
         // Search filter
         if ($request->filled('search')) {
@@ -71,7 +71,7 @@ class OrganizationManagementController extends Controller
      */
     public function show(Organization $organization)
     {
-        $organization->load(['owner', 'events', 'members']);
+        $organization->load(['owners', 'events', 'members']);
 
         $stats = [
             'total_events' => $organization->events()->count(),
