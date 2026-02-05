@@ -104,6 +104,14 @@ class Organization extends Model
     }
 
     /**
+     * Primary organization owner (first owner)
+     */
+    public function owner(): BelongsToMany
+    {
+        return $this->users()->wherePivot('role', 'owner')->limit(1);
+    }
+
+    /**
      * Organization owners
      */
     public function owners(): BelongsToMany
