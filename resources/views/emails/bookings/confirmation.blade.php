@@ -27,6 +27,21 @@
             vielen Dank für Ihre Buchung! Wir freuen uns, Sie bei folgender Veranstaltung begrüßen zu dürfen:
         </p>
 
+        <!-- Booking Confirmation Link -->
+        <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
+            <p style="margin: 0 0 10px 0; color: #333; font-size: 14px;">
+                📋 <strong>Ihre Buchungsbestätigung:</strong>
+            </p>
+            <a href="{{ route('bookings.show', $booking->booking_number) }}"
+               style="display: inline-block; padding: 10px 20px; background-color: #0066cc; color: white;
+                      text-decoration: none; border-radius: 5px; font-weight: bold;">
+                Buchungsdetails ansehen
+            </a>
+            <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                Über diesen Link können Sie jederzeit Ihre vollständigen Buchungsdetails einsehen.
+            </p>
+        </div>
+
         <!-- Event Information -->
         <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea;">
             <h2 style="color: #667eea; margin: 0 0 15px 0; font-size: 20px;">{{ $booking->event->title }}</h2>
@@ -304,10 +319,14 @@
                 <li style="margin-bottom: 8px;">
                     <strong>Rechnung</strong> - Rechnung_{{ $booking->invoice_number ?? $booking->booking_number }}.pdf
                 </li>
-                @if($booking->payment_status === 'paid' && !$booking->event->isOnline())
+                @if($booking->event->requires_ticket && $booking->payment_status === 'paid' && !$booking->event->isOnline())
                 <li style="margin-bottom: 8px;">
                     <strong>Tickets</strong> - Ticket_{{ $booking->booking_number }}.pdf
                     <span style="color: #28a745; font-size: 12px;">(QR-Code für Check-In)</span>
+                </li>
+                @elseif(!$booking->event->requires_ticket)
+                <li style="margin-bottom: 8px; color: #666;">
+                    <em>Für diese Veranstaltung ist kein separates Ticket erforderlich.</em>
                 </li>
                 @endif
             </ul>
@@ -323,8 +342,10 @@
                     Nach Zahlungseingang erhalten Sie
                     @if($booking->event->isOnline())
                         die Zugangsdaten zur Online-Veranstaltung
-                    @else
+                    @elseif($booking->event->requires_ticket)
                         Ihre Tickets
+                    @else
+                        eine Zahlungsbestätigung
                     @endif
                 </li>
                 @else
@@ -335,11 +356,21 @@
                     @elseif($booking->event->isHybrid())
                     <li style="margin-bottom: 10px;">Entscheiden Sie, ob Sie vor Ort oder online teilnehmen</li>
                     <li style="margin-bottom: 10px;">Bei Online-Teilnahme: Nutzen Sie die angegebenen Zugangsdaten</li>
+                    @if($booking->event->requires_ticket)
                     <li style="margin-bottom: 10px;">Bei Präsenz-Teilnahme: Bringen Sie Ihre Tickets (ausgedruckt oder digital) mit</li>
                     @else
+                    <li style="margin-bottom: 10px;">Bei Präsenz-Teilnahme: Ihre Buchungsnummer dient als Zugangsnachweis</li>
+                    @endif
+                    @else
+                    @if($booking->event->requires_ticket)
                     <li style="margin-bottom: 10px;">Bewahren Sie Ihre Tickets sicher auf</li>
                     <li style="margin-bottom: 10px;">Bringen Sie Ihre Tickets (ausgedruckt oder digital) zur Veranstaltung mit</li>
                     <li style="margin-bottom: 10px;">Der QR-Code wird beim Check-In gescannt</li>
+                    @else
+                    <li style="margin-bottom: 10px;">Notieren Sie sich Ihre Buchungsnummer: <strong>{{ $booking->booking_number }}</strong></li>
+                    <li style="margin-bottom: 10px;">Ihre Buchungsnummer dient als Zugangsnachweis zur Veranstaltung</li>
+                    <li style="margin-bottom: 10px;">Sie können die Buchungsbestätigung ausgedruckt oder digital vorzeigen</li>
+                    @endif
                     @endif
                 @endif
             </ol>

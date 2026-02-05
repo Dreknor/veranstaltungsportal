@@ -305,13 +305,25 @@
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Aktionen</h2>
                 <div class="space-y-3">
                     @if($booking->status === 'confirmed' && $booking->payment_status === 'paid')
-                        <a href="{{ route('bookings.ticket', $booking->booking_number) }}" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition block text-center">🎫 Ticket herunterladen (PDF)</a>
+                        @if($booking->event->requires_ticket)
+                            <a href="{{ route('bookings.ticket', $booking->booking_number) }}" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition block text-center">🎫 Ticket herunterladen (PDF)</a>
+                        @else
+                            <div class="w-full px-4 py-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-center text-sm">
+                                ℹ️ Für diese Veranstaltung ist kein separates Ticket erforderlich. Ihre Buchungsnummer dient als Zugangsnachweis.
+                            </div>
+                        @endif
                         <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition block text-center">📄 Rechnung herunterladen (PDF)</a>
                         @if($booking->event->end_date->isPast())
                             <a href="{{ route('bookings.certificate', $booking->booking_number) }}" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition block text-center">🏆 Teilnahmezertifikat herunterladen</a>
                         @endif
                     @else
-                        <div class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">Tickets und Dokumente sind verfügbar, sobald die Buchung bestätigt und bezahlt wurde.</div>
+                        <div class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
+                            @if($booking->event->requires_ticket)
+                                Tickets und Dokumente sind verfügbar, sobald die Buchung bestätigt und bezahlt wurde.
+                            @else
+                                Dokumente sind verfügbar, sobald die Buchung bestätigt und bezahlt wurde.
+                            @endif
+                        </div>
                     @endif
 
                     <button onclick="window.print()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">🖨️ Diese Seite drucken</button>

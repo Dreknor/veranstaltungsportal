@@ -56,8 +56,15 @@ class BookingConfirmation extends Mailable
             )->withMime('application/pdf'),
         ];
 
-        // Ticket-PDF nur anhängen, wenn Buchung bezahlt ist UND Event NICHT rein online ist UND Personalisierung abgeschlossen ist
-        if ($this->booking->payment_status === 'paid' && !$this->booking->event->isOnline() && $this->booking->canSendTickets()) {
+        // Ticket-PDF nur anhängen, wenn:
+        // - Event Tickets erfordert (requires_ticket)
+        // - Buchung bezahlt ist
+        // - Event NICHT rein online ist
+        // - Personalisierung abgeschlossen ist
+        if ($this->booking->event->requires_ticket
+            && $this->booking->payment_status === 'paid'
+            && !$this->booking->event->isOnline()
+            && $this->booking->canSendTickets()) {
             $ticketPdfService = app(TicketPdfService::class);
             $attachments[] = Attachment::fromData(
                 fn () => $ticketPdfService->getAllIndividualTicketsContent($this->booking),

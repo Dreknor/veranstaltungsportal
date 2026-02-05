@@ -400,6 +400,20 @@
 
                         <div>
                             <label class="flex items-center">
+                                <input type="hidden" name="requires_ticket" value="0">
+                                <input type="checkbox" name="requires_ticket" value="1"
+                                       {{ old('requires_ticket', true) ? 'checked' : '' }}
+                                       id="requires_ticket"
+                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm font-medium text-gray-700">Ticket-Versand erforderlich</span>
+                            </label>
+                            <p class="mt-1 ml-6 text-xs text-gray-500">
+                                Wenn deaktiviert, werden keine Tickets per E-Mail versendet. Teilnehmer erhalten nur eine Buchungsbestätigung mit Link zur Buchungsseite.
+                            </p>
+                        </div>
+
+                        <div id="qr_code_option">
+                            <label class="flex items-center">
                                 <input type="hidden" name="show_qr_code_on_ticket" value="0">
                                 <input type="checkbox" name="show_qr_code_on_ticket" value="1"
                                        {{ old('show_qr_code_on_ticket', true) ? 'checked' : '' }}
@@ -433,6 +447,19 @@
         document.getElementById('is_private').addEventListener('change', function() {
             document.getElementById('access_code_field').style.display = this.checked ? 'block' : 'none';
         });
+
+        // Toggle QR Code option based on requires_ticket
+        const requiresTicketCheckbox = document.getElementById('requires_ticket');
+        const qrCodeOption = document.getElementById('qr_code_option');
+
+        if (requiresTicketCheckbox && qrCodeOption) {
+            // Initial state
+            qrCodeOption.style.display = requiresTicketCheckbox.checked ? 'block' : 'none';
+
+            requiresTicketCheckbox.addEventListener('change', function() {
+                qrCodeOption.style.display = this.checked ? 'block' : 'none';
+            });
+        }
 
         // Toggle Multiple Dates Info Box
         const multipleDatesCheckbox = document.getElementById('has_multiple_dates');

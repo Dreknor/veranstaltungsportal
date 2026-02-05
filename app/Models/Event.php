@@ -60,6 +60,7 @@ class Event extends Model implements HasMedia
         'cancellation_reason',
         'ticket_notes',
         'show_qr_code_on_ticket',
+        'requires_ticket',
     ];
 
     protected function casts(): array
@@ -80,6 +81,7 @@ class Event extends Model implements HasMedia
             'is_cancelled' => 'boolean',
             'cancelled_at' => 'datetime',
             'show_qr_code_on_ticket' => 'boolean',
+            'requires_ticket' => 'boolean',
         ];
     }
 
