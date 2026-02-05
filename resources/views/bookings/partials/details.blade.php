@@ -61,7 +61,9 @@
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Veranstaltung</h2>
                 <div class="flex gap-4">
                     @if($booking->event->featured_image)
-                        <img src="{{ Storage::url($booking->event->featured_image) }}" alt="{{ $booking->event->title }}" class="w-24 h-24 object-cover rounded-lg">
+                        <div class="flex-shrink-0">
+                            <img src="{{ Storage::url($booking->event->featured_image) }}" alt="{{ $booking->event->title }}" class="w-32 h-32 object-contain rounded-lg border border-gray-200">
+                        </div>
                     @endif
                     <div class="flex-1">
                         <h3 class="font-semibold text-gray-900 mb-2">{{ $booking->event->title }}</h3>
