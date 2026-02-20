@@ -256,6 +256,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::get('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
         Route::put('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
         Route::post('/settings/invoice/preview', [Organizer\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
+        Route::get('/settings/invoice/sample', [Organizer\InvoiceSettingsController::class, 'sampleInvoice'])->name('settings.invoice.sample');
         Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/export', [Organizer\InvoiceController::class, 'export'])->name('invoices.export');
         Route::get('/platform-fees', [Organizer\InvoiceController::class, 'platformFees'])->name('invoices.platform-fees');

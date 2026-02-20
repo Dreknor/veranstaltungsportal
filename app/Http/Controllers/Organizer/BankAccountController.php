@@ -98,7 +98,6 @@ class BankAccountController extends Controller
             'vat_id' => 'nullable|string|max:50',
             'company_email' => 'required|email|max:255',
             'company_phone' => 'required|string|max:50',
-            'invoice_number_format' => 'required|string|max:100',
         ]);
 
         $organization->update([

@@ -158,5 +158,40 @@ class InvoiceNumberService
     {
         return $this->replacePlaceholders($format, 1, $padding);
     }
+
+    /**
+     * Get next booking invoice number WITHOUT incrementing the counter
+     * Used for sample/preview invoices
+     */
+    public function previewNextBookingInvoiceNumber(User $organizer): string
+    {
+        $organization = $organizer->currentOrganization();
+
+        if (!$organization) {
+            throw new \Exception('Organizer must have an active organization to generate invoice numbers.');
+        }
+
+        // Get organization-specific invoice settings
+        $settings = $organization->invoice_settings ?? [];
+
+        $format = $settings['invoice_number_format_booking'] ?? "RE-{YEAR}-{NUMBER}";
+        $padding = (int) ($settings['invoice_number_padding'] ?? 5);
+        $resetYearly = $settings['invoice_reset_yearly'] ?? true;
+
+        // Get the next counter WITHOUT incrementing it
+        $currentYear = now()->format('Y');
+        $lastYear = $organization->invoice_counter_booking_year ?? $currentYear;
+        $currentCounter = $organization->invoice_counter_booking ?? 1;
+
+        // If yearly reset is enabled and year has changed, use 1
+        if ($resetYearly && $lastYear !== $currentYear) {
+            $nextCounter = 1;
+        } else {
+            $nextCounter = $currentCounter;
+        }
+
+        // Return the preview number
+        return $this->replacePlaceholders($format, $nextCounter, $padding);
+    }
 }
 

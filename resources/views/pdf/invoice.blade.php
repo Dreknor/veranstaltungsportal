@@ -1,3 +1,25 @@
+{{-- Daten aus billing_data (JSON) mit Fallback auf direkte DB-Spalten --}}
+@php
+    $billingData  = $event->organizer->billing_data ?? [];
+    $orgAddress   = $billingData['company_address']     ?? $event->organizer->billing_address     ?? '';
+    $orgPostal    = $billingData['company_postal_code'] ?? $event->organizer->billing_postal_code ?? '';
+    $orgCity      = $billingData['company_city']        ?? $event->organizer->billing_city        ?? '';
+    $orgEmail     = $billingData['company_email']       ?? $event->organizer->email               ?? '';
+    $orgPhone     = $billingData['company_phone']       ?? $event->organizer->phone               ?? '';
+    $orgTaxId     = $billingData['tax_id']              ?? $event->organizer->tax_id              ?? '';
+    $orgVatId     = $billingData['vat_id']              ?? '';
+    $orgName      = $billingData['company_name']        ?? $event->organizer->name                ?? '';
+
+    // Logo als base64 einbetten, damit DomPDF es zuverlässig darstellt
+    $logoBase64 = null;
+    if ($event->organizer->logo) {
+        $logoAbs = public_path('storage/' . $event->organizer->logo);
+        if (file_exists($logoAbs)) {
+            $mime = mime_content_type($logoAbs);
+            $logoBase64 = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($logoAbs));
+        }
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -209,28 +231,37 @@
 </head>
 <body>
     <div class="container">
+        @if(!empty($isSample))
+        <div style="background:#fef9c3;border:2px solid #f59e0b;color:#92400e;padding:8px 12px;margin-bottom:12px;border-radius:4px;font-size:8pt;font-weight:bold;text-align:center;">
+            ⚠ BEISPIELRECHNUNG – Diese Rechnung ist nicht gültig und dient nur zur Vorschau des Formats.
+        </div>
+        @endif
+
         <!-- Header -->
         <div class="header">
             <div class="company-info">
-                @if($event->organizer->logo)
-                    <img src="{{ public_path('storage/' . $event->organizer->logo) }}" alt="{{ $event->organizer->name }}" style="max-height: 50px; max-width: 180px; margin-bottom: 4px;">
+                @if($logoBase64)
+                    <img src="{{ $logoBase64 }}" alt="{{ $orgName }}" style="max-height: 60px; max-width: 200px; margin-bottom: 5px; display: block;">
                 @else
-                    <h1 style="color: #3b82f6; font-size: 16pt; margin-bottom: 3px;">{{ $event->organizer->name }}</h1>
+                    <h1 style="color: #3b82f6; font-size: 16pt; margin-bottom: 3px;">{{ $orgName }}</h1>
                 @endif
-                <p style="font-size: 7pt; line-height: 1.2;">
-                    @if($event->organizer->billing_address && $event->organizer->billing_postal_code && $event->organizer->billing_city)
-                        {{ $event->organizer->billing_address }}, {{ $event->organizer->billing_postal_code }} {{ $event->organizer->billing_city }}
-                    @elseif($event->organizer->billing_address)
-                        {{ $event->organizer->billing_address }}
+                <p style="font-size: 7pt; line-height: 1.4;">
+                    @if($orgAddress && $orgPostal && $orgCity)
+                        {{ $orgAddress }}, {{ $orgPostal }} {{ $orgCity }}
+                    @elseif($orgAddress)
+                        {{ $orgAddress }}
                     @endif
-                    @if($event->organizer->email || $event->organizer->phone)
-                        @if($event->organizer->billing_address) • @endif
-                        @if($event->organizer->email){{ $event->organizer->email }}@endif
-                        @if($event->organizer->email && $event->organizer->phone) • @endif
-                        @if($event->organizer->phone){{ $event->organizer->phone }}@endif
+                    @if($orgEmail || $orgPhone)
+                        @if($orgAddress)<br>@endif
+                        @if($orgEmail){{ $orgEmail }}@endif
+                        @if($orgEmail && $orgPhone) • @endif
+                        @if($orgPhone){{ $orgPhone }}@endif
                     @endif
-                    @if($event->organizer->tax_id)
-                        <br>USt-IdNr: {{ $event->organizer->tax_id }}
+                    @if($orgTaxId)
+                        <br>Steuer-Nr.: {{ $orgTaxId }}
+                    @endif
+                    @if($orgVatId)
+                        <br>USt-IdNr.: {{ $orgVatId }}
                     @endif
                 </p>
             </div>
@@ -416,24 +447,14 @@
         <!-- Footer -->
         <div class="footer">
             <p>
-                <strong>{{ $event->organizer->name }}</strong>
-                @if($event->organizer->website || $event->organizer->email || $event->organizer->phone)
+                <strong>{{ $orgName }}</strong>
+                @if($event->organizer->website || $orgEmail || $orgPhone)
                     •
-                    @if($event->organizer->website)
-                        {{ $event->organizer->website }}
-                    @endif
-                    @if($event->organizer->website && ($event->organizer->email || $event->organizer->phone))
-                        •
-                    @endif
-                    @if($event->organizer->email)
-                        {{ $event->organizer->email }}
-                    @endif
-                    @if($event->organizer->email && $event->organizer->phone)
-                        •
-                    @endif
-                    @if($event->organizer->phone)
-                        {{ $event->organizer->phone }}
-                    @endif
+                    @if($event->organizer->website){{ $event->organizer->website }}@endif
+                    @if($event->organizer->website && ($orgEmail || $orgPhone)) • @endif
+                    @if($orgEmail){{ $orgEmail }}@endif
+                    @if($orgEmail && $orgPhone) • @endif
+                    @if($orgPhone){{ $orgPhone }}@endif
                 @endif
             </p>
             <p>Erstellt: {{ now()->format('d.m.Y H:i') }}</p>

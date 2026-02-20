@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organizer;
 use App\Http\Controllers\Controller;
 use App\Models\Organization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -132,7 +133,7 @@ class OrganizationController extends Controller
         if ($request->hasFile('logo')) {
             // Delete old logo if exists
             if ($organization->logo) {
-                \Storage::disk('public')->delete($organization->logo);
+                Storage::disk('public')->delete($organization->logo);
             }
 
             $validated['logo'] = $request->file('logo')->store('organizations/logos', 'public');

@@ -191,41 +191,7 @@
                     </div>
                 </div>
 
-                {{-- Rechnungsnummern-Format --}}
-                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-                        Rechnungsnummern-Format
-                    </h3>
 
-                    <div>
-                        <label for="invoice_number_format" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Format <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="invoice_number_format" id="invoice_number_format" required
-                               value="{{ old('invoice_number_format', $billingData['invoice_number_format'] ?? 'RE-{YEAR}-{COUNTER:5}') }}"
-                               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100 font-mono"
-                               placeholder="RE-{YEAR}-{COUNTER:5}">
-                        @error('invoice_number_format')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-
-                        <div class="mt-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                            <p class="text-sm text-blue-900 dark:text-blue-200 font-semibold mb-2">📝 Verfügbare Platzhalter:</p>
-                            <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
-                                <li><code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">{YEAR}</code> - Aktuelles Jahr (z.B. 2025)</li>
-                                <li><code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">{MONTH}</code> - Aktueller Monat (z.B. 11)</li>
-                                <li><code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">{COUNTER:X}</code> - Fortlaufende Nummer mit X Stellen (z.B. {COUNTER:5} = 00001)</li>
-                                <li><code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">{ORG}</code> - Organisations-ID</li>
-                            </ul>
-                            <p class="text-xs text-blue-700 dark:text-blue-400 mt-2">
-                                <strong>Beispiele:</strong><br>
-                                • <code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">RE-{YEAR}-{COUNTER:5}</code> → RE-2025-00001<br>
-                                • <code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">{YEAR}{MONTH}-{COUNTER:4}</code> → 202511-0001<br>
-                                • <code class="bg-blue-100 dark:bg-blue-900 px-1 rounded">INV-{ORG}-{YEAR}-{COUNTER:3}</code> → INV-1-2025-001
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700 mt-6">

@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Models\Booking;
+use App\Models\Organization;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class TicketPdfService
@@ -308,6 +310,90 @@ class TicketPdfService
         $filename = "Rechnung_{$invoiceNumber}_{$eventSlug}.pdf";
 
         return $this->generateInvoice($booking)->download($filename);
+    }
+
+    /**
+     * Generate a sample invoice PDF for a given organization.
+     * Uses the exact same template as real invoices, counter is NOT incremented.
+     */
+    public function generateSampleInvoice(Organization $organization, string $invoiceNumber): \Barryvdh\DomPDF\PDF
+    {
+        $billingData = $organization->billing_data ?? [];
+        $bankAccount = $organization->bank_account ?? [];
+        $taxRate = 19;
+        $grossTotal = 99.99;
+        $discountAmount = 0;
+        $totalAmount = $grossTotal;
+        $netTotal = round($totalAmount / (1 + $taxRate / 100), 2);
+        $taxAmount = round($totalAmount - $netTotal, 2);
+
+        // Build fake organizer object (stdClass) matching what the template expects
+        $organizer = new \stdClass();
+        $organizer->name         = $billingData['company_name'] ?? $organization->name;
+        $organizer->email        = $organization->email ?? $billingData['company_email'] ?? '';
+        $organizer->phone        = $organization->phone ?? $billingData['company_phone'] ?? '';
+        $organizer->website      = $organization->website ?? null;
+        $organizer->tax_id       = $organization->tax_id ?? $billingData['tax_id'] ?? '';
+        $organizer->logo         = $organization->logo ?? null;
+        $organizer->bank_account = $bankAccount ?: null;
+        $organizer->billing_data = $billingData; // Template liest primär aus billing_data
+
+        // Direktspalten als Fallback (werden vom Template nur verwendet wenn billing_data leer)
+        $organizer->billing_address     = $organization->billing_address ?? '';
+        $organizer->billing_postal_code = $organization->billing_postal_code ?? '';
+        $organizer->billing_city        = $organization->billing_city ?? '';
+
+        // Build fake event object
+        $event = new \stdClass();
+        $event->title     = 'Beispiel-Veranstaltung';
+        $event->location  = 'Musterstadt';
+        $event->start_date = Carbon::now()->addDays(14);
+        $event->organizer = $organizer;
+
+        // Build fake booking object
+        $booking = new \stdClass();
+        $booking->booking_number  = 'DEMO-00001';
+        $booking->customer_name   = 'Max Mustermann';
+        $booking->customer_email  = 'max.mustermann@example.com';
+        $booking->customer_phone  = null;
+        $booking->payment_status  = 'pending';
+        $booking->payment_method  = null;
+        $booking->discount        = 0;
+        $booking->created_at      = Carbon::now();
+        $booking->updated_at      = Carbon::now();
+        $booking->invoice_number  = $invoiceNumber;
+        $booking->invoice_date    = Carbon::now();
+
+        $items = [
+            [
+                'description' => 'Beispiel-Veranstaltung',
+                'ticket_type' => 'Standard-Ticket',
+                'quantity'    => 1,
+                'unit_price'  => $grossTotal,
+                'tax_rate'    => $taxRate,
+                'total'       => $grossTotal,
+            ],
+        ];
+
+        $data = [
+            'booking'       => $booking,
+            'event'         => $event,
+            'items'         => $items,
+            'grossTotal'    => $grossTotal,
+            'netTotal'      => $netTotal,
+            'discountAmount' => $discountAmount,
+            'taxRate'       => $taxRate,
+            'taxAmount'     => $taxAmount,
+            'totalAmount'   => $totalAmount,
+            'notes'         => null,
+            'invoiceNumber' => $invoiceNumber,
+            'invoiceDate'   => now()->format('d.m.Y'),
+            'paymentQrCode' => null,
+            'isSample'      => true,
+        ];
+
+        return Pdf::loadView('pdf.invoice', $data)
+            ->setPaper('a4', 'portrait');
     }
 
     /**

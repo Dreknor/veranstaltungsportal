@@ -130,7 +130,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>Rechnung</h1>
+        @if(!empty($organizer['logo_path']))
+            <img src="{{ $organizer['logo_path'] }}" alt="{{ $organizer['company_name'] ?? 'Logo' }}" style="max-height: 60px; max-width: 200px; margin-bottom: 8px; display: block;">
+        @else
+            <h1>{{ $organizer['company_name'] ?? 'Rechnung' }}</h1>
+        @endif
         <div class="organizer-info">
             <strong>{{ $organizer['company_name'] ?? 'Veranstalter' }}</strong><br>
             {{ $organizer['address'] ?? '' }}<br>

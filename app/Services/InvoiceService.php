@@ -13,6 +13,12 @@ use Carbon\Carbon;
 
 class InvoiceService
 {
+    protected InvoiceNumberService $invoiceNumberService;
+
+    public function __construct(InvoiceNumberService $invoiceNumberService)
+    {
+        $this->invoiceNumberService = $invoiceNumberService;
+    }
     /**
      * Generate platform fee invoice after event ends
      */
@@ -60,7 +66,7 @@ class InvoiceService
 
         // Create invoice
         $invoice = Invoice::create([
-            'invoice_number' => $this->generateInvoiceNumber('PF', $event->user->currentOrganization()),
+            'invoice_number' => $this->invoiceNumberService->generatePlatformFeeInvoiceNumber(),
             'event_id' => $event->id,
             'user_id' => $event->user_id,
             'type' => 'platform_fee',
@@ -109,7 +115,7 @@ class InvoiceService
         }
 
         $invoice = Invoice::create([
-            'invoice_number' => $this->generateInvoiceNumber('TN', $booking->event->user->currentOrganization()),
+            'invoice_number' => $this->invoiceNumberService->generateBookingInvoiceNumber($booking->event->user),
             'event_id' => $booking->event_id,
             'booking_id' => $booking->id,
             'user_id' => $booking->event->user_id, // Organizer
@@ -262,6 +268,7 @@ class InvoiceService
                     'email' => $event->getOrganizerEmail() ?? '',
                     'phone' => $event->getOrganizerPhone() ?? '',
                     'bank_account' => [],
+                    'logo_path' => null,
                 ];
             }
 
@@ -277,6 +284,7 @@ class InvoiceService
                 'email' => '',
                 'phone' => '',
                 'bank_account' => [],
+                'logo_path' => null,
             ];
         }
 
@@ -285,6 +293,15 @@ class InvoiceService
 
         if ($organization) {
             $billingData = $organization->billing_data ?? [];
+
+            // Resolve absolute logo path for DomPDF
+            $logoPath = null;
+            if ($organization->logo) {
+                $abs = public_path('storage/' . $organization->logo);
+                if (file_exists($abs)) {
+                    $logoPath = $abs;
+                }
+            }
 
             return [
                 'company_name' => $billingData['company_name'] ?? $organization->name,
@@ -297,6 +314,7 @@ class InvoiceService
                 'email' => $organization->email ?? $billingData['company_email'] ?? $user->email,
                 'phone' => $organization->phone ?? $billingData['company_phone'] ?? '',
                 'bank_account' => $organization->bank_account ?? [],
+                'logo_path' => $logoPath,
             ];
         }
 
@@ -314,6 +332,7 @@ class InvoiceService
             'email' => $billingData['company_email'] ?? $user->email,
             'phone' => $billingData['company_phone'] ?? $user->phone ?? '',
             'bank_account' => $user->bank_account ?? [],
+            'logo_path' => null,
         ];
     }
 

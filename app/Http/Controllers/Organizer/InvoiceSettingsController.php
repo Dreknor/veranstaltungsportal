@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Services\InvoiceNumberService;
+use App\Services\TicketPdfService;
 use Illuminate\Http\Request;
 
 class InvoiceSettingsController extends Controller
 {
-    protected InvoiceNumberService $invoiceNumberService;
-
-    public function __construct(InvoiceNumberService $invoiceNumberService)
-    {
+    public function __construct(
+        protected InvoiceNumberService $invoiceNumberService,
+        protected TicketPdfService $ticketPdfService,
+    ) {
         $this->middleware(['auth']);
-        $this->invoiceNumberService = $invoiceNumberService;
     }
 
     /**
@@ -104,5 +104,23 @@ class InvoiceSettingsController extends Controller
             'success' => true,
             'preview' => $preview
         ]);
+    }
+
+    /**
+     * Download sample invoice as PDF without incrementing counter.
+     * Uses the exact same template as real ticket invoices.
+     */
+    public function sampleInvoice()
+    {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $invoiceNumber = $this->invoiceNumberService->previewNextBookingInvoiceNumber(auth()->user());
+
+        $pdf = $this->ticketPdfService->generateSampleInvoice($organization, $invoiceNumber);
+
+        return $pdf->download('Beispielrechnung_' . $invoiceNumber . '.pdf');
     }
 }
