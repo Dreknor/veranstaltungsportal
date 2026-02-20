@@ -7,10 +7,12 @@ use App\Models\BookingItem;
 use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\TicketType;
+use App\Models\User;
 use App\Services\InvoiceService;
 use App\Services\TicketPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -829,5 +831,155 @@ class BookingController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Show create account form for guest booking
+     */
+    public function createAccount($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->whereNull('user_id')
+            ->firstOrFail();
+
+        // Check access
+        if (!session()->has('booking_access_' . $booking->id)) {
+            return redirect()->route('bookings.verify', $bookingNumber)
+                ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
+        }
+
+        // Check if user with this email already exists
+        $existingUser = User::where('email', $booking->customer_email)->first();
+
+        return view('bookings.create-account', compact('booking', 'existingUser'));
+    }
+
+    /**
+     * Store newly created account and link to booking
+     */
+    public function storeAccount(Request $request, $bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->whereNull('user_id')
+            ->firstOrFail();
+
+        // Check access
+        if (!session()->has('booking_access_' . $booking->id)) {
+            return redirect()->route('bookings.verify', $bookingNumber)
+                ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
+        }
+
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+            'terms' => 'required|accepted',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Create new user account
+            $user = User::create([
+                'name' => $booking->customer_name,
+                'email' => $booking->customer_email,
+                'password' => bcrypt($request->password),
+                'email_verified_at' => now(), // Already verified via booking
+                'phone' => $booking->customer_phone,
+            ]);
+
+            // Link booking to user
+            $booking->update(['user_id' => $user->id]);
+
+            // Find all other bookings with the same email and link them
+            Booking::where('customer_email', $booking->customer_email)
+                ->whereNull('user_id')
+                ->update(['user_id' => $user->id]);
+
+            DB::commit();
+
+            // Log the user in
+            auth()->login($user);
+
+            // Clear session access
+            session()->forget('booking_access_' . $booking->id);
+
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('success', 'Ihr Benutzerkonto wurde erfolgreich erstellt und mit Ihrer Buchung verknüpft!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating account from booking', [
+                'booking_number' => $bookingNumber,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withInput()
+                ->with('error', 'Fehler beim Erstellen des Kontos: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Link booking to existing account
+     */
+    public function linkAccount(Request $request, $bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->whereNull('user_id')
+            ->firstOrFail();
+
+        // Check access
+        if (!session()->has('booking_access_' . $booking->id)) {
+            return redirect()->route('bookings.verify', $bookingNumber)
+                ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
+        }
+
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        // Find user by email
+        $user = User::where('email', $booking->customer_email)->first();
+
+        if (!$user) {
+            return back()->withErrors(['password' => 'Kein Konto mit dieser E-Mail-Adresse gefunden.']);
+        }
+
+        // Verify password
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'Falsches Passwort.']);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Link booking to user
+            $booking->update(['user_id' => $user->id]);
+
+            // Find all other bookings with the same email and link them
+            Booking::where('customer_email', $booking->customer_email)
+                ->whereNull('user_id')
+                ->update(['user_id' => $user->id]);
+
+            DB::commit();
+
+            // Log the user in if not already
+            if (!auth()->check()) {
+                auth()->login($user);
+            }
+
+            // Clear session access
+            session()->forget('booking_access_' . $booking->id);
+
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('success', 'Ihre Buchung wurde erfolgreich mit Ihrem Konto verknüpft!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error linking booking to account', [
+                'booking_number' => $bookingNumber,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'Fehler beim Verknüpfen: ' . $e->getMessage());
+        }
     }
 }

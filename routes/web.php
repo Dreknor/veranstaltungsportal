@@ -68,6 +68,10 @@ Route::get('/bookings/{bookingNumber}/verify', [BookingController::class, 'verif
 Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->middleware('recaptcha:booking_verify')->name('bookings.verify-email');
 Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController::class, 'verifyEmailToken'])->name('bookings.verify-email-token');
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+Route::get('/bookings/{bookingNumber}/create-account', [BookingController::class, 'createAccount'])->name('bookings.create-account');
+Route::post('/bookings/{bookingNumber}/create-account', [BookingController::class, 'storeAccount'])->name('bookings.store-account');
+Route::post('/bookings/{bookingNumber}/link-account', [BookingController::class, 'linkAccount'])->name('bookings.link-account');
+
 
 // PayPal Routes
 Route::get('/paypal/success/{booking}', [\App\Http\Controllers\PayPalController::class, 'success'])->name('paypal.success');

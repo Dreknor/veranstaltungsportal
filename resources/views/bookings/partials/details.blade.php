@@ -12,6 +12,80 @@
         </div>
     @endif
 
+    <!-- Account Creation/Linking Prompt for Guest Bookings -->
+    @if(!auth()->check() && !$booking->user_id && session()->has('booking_access_' . $booking->id))
+        @php
+            $existingUser = \App\Models\User::where('email', $booking->customer_email)->first();
+        @endphp
+
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg p-6 mb-6 shadow-sm">
+            <div class="flex items-start">
+                <svg class="w-8 h-8 text-blue-600 mr-4 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <div class="flex-1">
+                    <h3 class="font-bold text-blue-900 mb-2 text-lg">
+                        @if($existingUser)
+                            Buchung mit Ihrem Konto verknüpfen
+                        @else
+                            Erstellen Sie ein Benutzerkonto
+                        @endif
+                    </h3>
+
+                    @if($existingUser)
+                        <p class="text-blue-800 mb-4">
+                            Wir haben festgestellt, dass für Ihre E-Mail-Adresse bereits ein Konto existiert.
+                            Verknüpfen Sie diese Buchung mit Ihrem Konto, um:
+                        </p>
+                    @else
+                        <p class="text-blue-800 mb-4">
+                            Erstellen Sie ein kostenloses Benutzerkonto, um diese und zukünftige Buchungen besser zu verwalten:
+                        </p>
+                    @endif
+
+                    <ul class="text-sm text-blue-700 space-y-2 mb-4 ml-4">
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Alle Buchungen an einem Ort verwalten
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Schnellerer Buchungsprozess bei zukünftigen Veranstaltungen
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Zugriff auf persönliche Empfehlungen
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Teilnahmezertifikate automatisch im Profil
+                        </li>
+                    </ul>
+
+                    <a href="{{ route('bookings.create-account', $booking->booking_number) }}"
+                       class="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                        </svg>
+                        @if($existingUser)
+                            Jetzt verknüpfen
+                        @else
+                            Konto erstellen
+                        @endif
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Personalization Alert -->
     @if($booking->needsPersonalization())
         <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-6 mb-6">
