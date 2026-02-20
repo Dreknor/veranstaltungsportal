@@ -36,16 +36,10 @@ class NewBookingNotification extends Notification implements ShouldQueue
     {
         return (new MailMessage)
             ->subject('Neue Buchung für ' . $this->booking->event->title)
-            ->greeting('Hallo ' . $notifiable->fullName() . ',')
-            ->line('Sie haben eine neue Buchung für Ihre Veranstaltung erhalten!')
-            ->line('**Veranstaltung:** ' . $this->booking->event->title)
-            ->line('**Buchungsnummer:** ' . $this->booking->booking_number)
-            ->line('**Teilnehmer:** ' . $this->booking->customer_name)
-            ->line('**E-Mail:** ' . $this->booking->customer_email)
-            ->line('**Anzahl Tickets:** ' . $this->booking->items->sum('quantity'))
-            ->line('**Gesamtbetrag:** ' . number_format($this->booking->total, 2, ',', '.') . ' €')
-            ->action('Buchung ansehen', route('organizer.bookings.show', $this->booking))
-            ->line('Vielen Dank für die Nutzung unserer Plattform!');
+            ->view('emails.bookings.new-booking-notification', [
+                'booking' => $this->booking,
+                'organizer' => $notifiable,
+            ]);
     }
 
     /**
