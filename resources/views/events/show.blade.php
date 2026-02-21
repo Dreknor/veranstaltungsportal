@@ -574,22 +574,22 @@
                                     <p class="text-sm text-gray-700">{{ $event->organization->description }}</p>
                                 @endif
                                 @if($event->organization->email)
-                                    <a href="mailto:{{ $event->organization->email }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                                        <x-icon.mail class="w-4 h-4 mr-2" />
-                                        {{ $event->organization->email }}
-                                    </a>
+                                    <div class="flex items-center text-sm">
+                                        <x-icon.mail class="w-4 h-4 mr-2 text-blue-600" />
+                                        <x-protected-email :email="$event->organization->email" />
+                                    </div>
                                 @endif
                                 @if($event->organization->phone)
-                                    <a href="tel:{{ $event->organization->phone }}" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                                        <x-icon.phone class="w-4 h-4 mr-2" />
-                                        {{ $event->organization->phone }}
-                                    </a>
+                                    <div class="flex items-center text-sm">
+                                        <x-icon.phone class="w-4 h-4 mr-2 text-blue-600" />
+                                        <x-protected-phone :phone="$event->organization->phone" />
+                                    </div>
                                 @endif
                                 @if($event->organization->website)
-                                    <a href="{{ $event->organization->website }}" target="_blank" class="text-sm text-blue-600 hover:text-blue-800 flex items-center">
-                                        <x-icon.globe class="w-4 h-4 mr-2" />
-                                        Website besuchen
-                                    </a>
+                                    <div class="flex items-center text-sm">
+                                        <x-icon.globe class="w-4 h-4 mr-2 text-blue-600" />
+                                        <x-protected-url :url="$event->organization->website" />
+                                    </div>
                                 @endif
                             </div>
                         </div>
