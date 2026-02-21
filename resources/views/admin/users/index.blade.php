@@ -62,7 +62,7 @@
         @endif
 
         <!-- Users Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -98,6 +98,13 @@
                                             @endif
                                         </div>
                                         <div class="text-sm text-gray-500 dark:text-gray-400">{{ $user->email }}</div>
+                                        <div class="text-xs mt-0.5">
+                                            @if($user->hasVerifiedEmail())
+                                                <span class="text-green-600 dark:text-green-400">✓ E-Mail verifiziert</span>
+                                            @else
+                                                <span class="text-amber-600 dark:text-amber-400">⚠ Nicht verifiziert</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                             </td>
@@ -130,67 +137,116 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $user->created_at->format('d.m.Y') }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end space-x-2">
-                                    <a href="{{ route('admin.users.edit', $user) }}"
-                                       class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-                                        Bearbeiten
-                                    </a>
+                            <td class="px-6 py-4 text-right text-sm font-medium">
+                                <div x-data="{
+                                    open: false,
+                                    top: 0, left: 0,
+                                    btnRect: null,
+                                    toggle(btn) {
+                                        if (this.open) { this.open = false; return; }
+                                        this.btnRect = btn.getBoundingClientRect();
+                                        this.left = this.btnRect.right - 192;
+                                        this.top = this.btnRect.bottom + 4;
+                                        this.open = true;
+                                        this.$nextTick(() => {
+                                            const menu = document.querySelector('[data-menu-uid=\'{{ $user->id }}\']');
+                                            if (!menu) return;
+                                            const menuH = menu.offsetHeight;
+                                            const spaceBelow = window.innerHeight - this.btnRect.bottom;
+                                            if (spaceBelow < menuH + 8) {
+                                                this.top = this.btnRect.top - menuH - 4;
+                                            }
+                                        });
+                                    }
+                                }" @click.outside="open = false" @keydown.escape.window="open = false">
 
-                                    @if(auth()->id() !== $user->id)
-                                        <!-- Impersonate User -->
-                                        @if(!$user->hasRole('admin'))
-                                            <form action="{{ route('admin.users.impersonate', $user) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                        class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
-                                                        title="Als {{ $user->name }} anmelden">
-                                                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                    Verkörpern
-                                                </button>
-                                            </form>
-                                        @endif
+                                    <button @click="toggle($el)"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium">
+                                        Aktionen
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                        </svg>
+                                    </button>
 
-                                        <!-- Quick Promote/Demote for Organizer -->
-                                        @if(!$user->hasRole('organizer') && !$user->hasRole('admin'))
-                                            <form action="{{ route('admin.users.promote-organizer', $user) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit"
-                                                        class="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
-                                                        title="Zum Organisator befördern">
-                                                    ↑ Organisator
-                                                </button>
-                                            </form>
-                                        @elseif($user->hasRole('organizer') && !$user->hasRole('admin'))
-                                            <form action="{{ route('admin.users.demote-participant', $user) }}" method="POST" class="inline"
-                                                  onsubmit="return confirm('Organisator-Rechte wirklich entfernen?');">
-                                                @csrf
-                                                <button type="submit"
-                                                        class="text-orange-600 dark:text-orange-400 hover:text-orange-900 dark:hover:text-orange-300"
-                                                        title="Zum Teilnehmer degradieren">
-                                                    ↓ Teilnehmer
-                                                </button>
-                                            </form>
-                                        @endif
+                                    <template x-teleport="body">
+                                        <div x-show="open"
+                                             x-transition:enter="transition ease-out duration-100"
+                                             x-transition:enter-start="opacity-0 scale-95"
+                                             x-transition:enter-end="opacity-100 scale-100"
+                                             x-transition:leave="transition ease-in duration-75"
+                                             x-transition:leave-start="opacity-100 scale-100"
+                                             x-transition:leave-end="opacity-0 scale-95"
+                                             :style="`position:fixed; top:${top}px; left:${left}px; width:192px; z-index:9999;`"
+                                             data-menu-uid="{{ $user->id }}"
+                                             class="rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700"
+                                             style="display:none;">
 
-                                        <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300">
-                                                {{ $user->hasRole('admin') ? 'Admin entfernen' : 'Zu Admin' }}
-                                            </button>
-                                        </form>
+                                            {{-- Bearbeiten --}}
+                                            <div class="py-1">
+                                                <a href="{{ route('admin.users.edit', $user) }}"
+                                                   class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                    ✏️ Bearbeiten
+                                                </a>
+                                            </div>
 
-                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                              class="inline" onsubmit="return confirm('Benutzer wirklich löschen?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-                                                Löschen
-                                            </button>
-                                        </form>
-                                    @endif
+                                            @if(auth()->id() !== $user->id)
+                                                <div class="py-1">
+                                                    {{-- Verkörpern --}}
+                                                    @if(!$user->hasRole('admin'))
+                                                        <form action="{{ route('admin.users.impersonate', $user) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-indigo-700 dark:text-indigo-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+                                                                👤 Verkörpern
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                    {{-- Organisator befördern / degradieren --}}
+                                                    @if(!$user->hasRole('organizer') && !$user->hasRole('admin'))
+                                                        <form action="{{ route('admin.users.promote-organizer', $user) }}" method="POST">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-green-700 dark:text-green-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+                                                                ↑ Zum Organisator
+                                                            </button>
+                                                        </form>
+                                                    @elseif($user->hasRole('organizer') && !$user->hasRole('admin'))
+                                                        <form action="{{ route('admin.users.demote-participant', $user) }}" method="POST"
+                                                              onsubmit="return confirm('Organisator-Rechte wirklich entfernen?');">
+                                                            @csrf
+                                                            <button type="submit"
+                                                                    class="w-full flex items-center gap-2 px-4 py-2 text-sm text-orange-700 dark:text-orange-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+                                                                ↓ Zum Teilnehmer
+                                                            </button>
+                                                        </form>
+                                                    @endif
+
+                                                    {{-- Admin-Rolle --}}
+                                                    <form action="{{ route('admin.users.toggle-admin', $user) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit"
+                                                                class="w-full flex items-center gap-2 px-4 py-2 text-sm text-purple-700 dark:text-purple-300 hover:bg-gray-100 dark:hover:bg-gray-700 text-left">
+                                                            {{ $user->hasRole('admin') ? '🔓 Admin entfernen' : '🔒 Zu Admin' }}
+                                                        </button>
+                                                    </form>
+                                                </div>
+
+                                                {{-- Löschen --}}
+                                                <div class="py-1">
+                                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                                                          onsubmit="return confirm('Benutzer wirklich löschen?');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                                class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 text-left">
+                                                            🗑️ Löschen
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </template>
                                 </div>
                             </td>
                         </tr>
