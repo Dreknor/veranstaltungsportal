@@ -30,8 +30,13 @@
     </script>
 </head>
 
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased min-h-screen">
-    {{ $slot }}
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased min-h-screen flex flex-col">
+    <div class="flex-1">
+        {{ $slot }}
+    </div>
+
+    <!-- Footer -->
+    <x-footer />
 </body>
 
 </html>

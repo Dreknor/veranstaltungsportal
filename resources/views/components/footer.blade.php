@@ -45,11 +45,12 @@
             <div>
                 <h4 class="font-semibold mb-4">Hilfe & Support</h4>
                 <ul class="space-y-2 text-gray-400">
-                    <li><a href="#" class="hover:text-white transition">FAQ</a></li>
-                    <li><a href="#" class="hover:text-white transition">Kontakt</a></li>
+                    <li><a href="{{ route('faq') }}" class="hover:text-white transition">FAQ</a></li>
+                    <li><a href="{{ route('help.index') }}" class="hover:text-white transition">Hilfe</a></li>
+                    <li><a href="{{ route('contact.show') }}" class="hover:text-white transition">Kontakt</a></li>
                     <li><a href="#" class="hover:text-white transition">AGB</a></li>
-                    <li><a href="#" class="hover:text-white transition">Datenschutz</a></li>
-                    <li><a href="#" class="hover:text-white transition">Impressum</a></li>
+                    <li><a href="https://www.esdigmbh.de/datenschutz/" class="hover:text-white transition">Datenschutz</a></li>
+                    <li><a href="https://www.esdigmbh.de/impressum/" class="hover:text-white transition">Impressum</a></li>
                 </ul>
             </div>
         </div>

@@ -27,6 +27,15 @@ Route::get('/account-types', function () {
     return view('account-types');
 })->name('account-types');
 
+// FAQ Routes
+Route::get('/faq', function () {
+    return view('faq');
+})->name('faq');
+
+// Contact Routes
+Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])->name('contact.show');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->middleware('recaptcha:contact')->name('contact.store');
+
 // Help Center Routes
 Route::get('/help', [\App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
 Route::get('/help/search', [\App\Http\Controllers\HelpController::class, 'search'])->name('help.search');
