@@ -21,6 +21,7 @@ test('user can create a booking', function () {
         'billing_postal_code' => '12345',
         'billing_city' => 'Berlin',
         'billing_country' => 'Germany',
+        'privacy_accepted' => '1',
         'tickets' => [
             [
                 'ticket_type_id' => $ticketType->id,
@@ -59,6 +60,7 @@ test('booking applies discount code correctly', function () {
         'billing_postal_code' => '54321',
         'billing_city' => 'Munich',
         'billing_country' => 'Germany',
+        'privacy_accepted' => '1',
         'tickets' => [
             [
                 'ticket_type_id' => $ticketType->id,
@@ -89,6 +91,7 @@ test('booking cannot exceed ticket quantity', function () {
         'billing_postal_code' => '11111',
         'billing_city' => 'Hamburg',
         'billing_country' => 'Germany',
+        'privacy_accepted' => '1',
         'tickets' => [
             [
                 'ticket_type_id' => $ticketType->id,

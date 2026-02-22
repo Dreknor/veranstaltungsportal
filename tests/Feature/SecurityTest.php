@@ -82,12 +82,12 @@ class SecurityTest extends TestCase
 
         $booking = Booking::factory()->create(['user_id' => $user2->id]);
 
-        // Nutzer 1 versucht auf Buchung von Nutzer 2 zuzugreifen
+        // Nutzer 1 versucht auf Buchung von Nutzer 2 zuzugreifen.
+        // Der Controller gibt bewusst 404 zurück (Enumeration-Schutz) – kein 302 oder 403,
+        // um nicht zu verraten, ob die Buchungsnummer existiert.
         $response = $this->actingAs($user1)->get(route('bookings.show', $booking->booking_number));
 
-        // Der Controller leitet bei fehlendem Zugriff zur Verifizierungsseite um (302), kein 403
-        $response->assertStatus(302);
-        $response->assertRedirect(route('bookings.verify', $booking->booking_number));
+        $response->assertStatus(404);
     }
 
     #[Test]

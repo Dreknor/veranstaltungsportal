@@ -98,6 +98,10 @@ class BookingController extends Controller
         // Load organization to check PayPal availability
         $event->load('organization');
 
+        // Gäste müssen aktiv der Datenschutzerklärung zustimmen.
+        // Eingeloggte User haben bei der Registrierung bereits zugestimmt.
+        $privacyRule = auth()->check() ? 'nullable' : 'required|accepted';
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
@@ -111,7 +115,7 @@ class BookingController extends Controller
             'tickets.*.quantity' => 'required|integer|min:0',
             'discount_code' => 'nullable|string',
             'payment_method' => 'nullable|string|in:invoice,paypal',
-            'privacy_accepted' => 'required|accepted',
+            'privacy_accepted' => $privacyRule,
         ], [
             'privacy_accepted.required' => 'Bitte stimmen Sie der Datenschutzerklärung zu.',
             'privacy_accepted.accepted' => 'Bitte stimmen Sie der Datenschutzerklärung zu.',

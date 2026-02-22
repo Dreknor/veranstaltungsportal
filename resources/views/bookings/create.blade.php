@@ -252,7 +252,7 @@
             <!-- reCAPTCHA -->
             <x-recaptcha action="booking" />
 
-            <!-- Datenschutz-Einwilligung -->
+            @guest
             <div class="mt-4">
                 <label class="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox"
@@ -273,6 +273,7 @@
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+            @endguest
 
             <button type="submit" id="submit-button" {{ $ticketTypes->isEmpty() ? 'disabled' : 'disabled' }}
                     class="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center">
