@@ -1,5 +1,5 @@
 <!-- SEO & Social Media Meta Tags Component -->
-@props(['event' => null, 'title' => null, 'description' => null, 'image' => null, 'breadcrumbs' => null])
+@props(['event' => null, 'title' => null, 'description' => null, 'image' => null, 'breadcrumbs' => null, 'canonical' => null])
 
 @php
     // Default values
@@ -239,7 +239,12 @@
 @endif
 
 <!-- Canonical URL -->
-<link rel="canonical" href="{{ $pageUrl }}">
+@php $canonicalUrl = $canonical ?? $pageUrl; @endphp
+<link rel="canonical" href="{{ $canonicalUrl }}">
+
+<!-- Hreflang für Deutsch -->
+<link rel="alternate" hreflang="de" href="{{ $canonicalUrl }}" />
+<link rel="alternate" hreflang="x-default" href="{{ $canonicalUrl }}" />
 
 <!-- Robots -->
 <meta name="robots" content="index, follow">

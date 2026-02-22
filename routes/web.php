@@ -89,7 +89,7 @@ Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'veri
     ->name('bookings.verify-email');
 Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController::class, 'verifyEmailToken'])->name('bookings.verify-email-token');
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])
-    ->middleware('throttle:10,1')
+    ->middleware('throttle:5,1')
     ->name('bookings.cancel');
 Route::get('/bookings/{bookingNumber}/create-account', [BookingController::class, 'createAccount'])->name('bookings.create-account');
 Route::post('/bookings/{bookingNumber}/create-account', [BookingController::class, 'storeAccount'])
@@ -110,7 +110,7 @@ Route::get('/cancel-registration/{token}', [\App\Http\Controllers\UserRegistrati
 Route::post('/cancel-registration/{token}', [\App\Http\Controllers\UserRegistrationCancellationController::class, 'cancel'])->name('user.cancel-registration.process');
 
 Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:10,1')
     ->name('api.validate-discount-code');
 
 // User Dashboard Routes

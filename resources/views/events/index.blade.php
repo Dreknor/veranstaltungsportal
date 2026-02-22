@@ -6,12 +6,19 @@
                 ['name' => 'Veranstaltungen', 'url' => route('events.index')],
             ];
             $description = 'Entdecken Sie Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Filter nach Kategorie, Ort und Datum.';
+            // Canonical immer auf Seite 1 (ohne ?page=N) setzen
+            $canonicalUrl = route('events.index');
+            $isFilteredPage = request()->hasAny(['search', 'category', 'city', 'date_from', 'date_to', 'type', 'page']);
         @endphp
         <x-meta-tags
             :title="'Veranstaltungen - Fort- und Weiterbildungen entdecken'"
             :description="$description"
             :breadcrumbs="$breadcrumbs"
+            :canonical="$canonicalUrl"
         />
+        @if($isFilteredPage)
+            <meta name="robots" content="noindex, follow">
+        @endif
     @endpush
 
     <div class="min-h-screen bg-gray-50">

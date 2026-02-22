@@ -52,6 +52,12 @@ Schedule::command('featured:notify-expiry')
     ->timezone('Europe/Berlin')
     ->description('Send expiry reminders for featured events (3 days before)');
 
+// Benachrichtige Admins über ausstehende Featured-Zahlungen (> 7 Tage offen)
+Schedule::command('featured:notify-pending-payments')
+    ->dailyAt('08:30')
+    ->timezone('Europe/Berlin')
+    ->description('Notify admins about pending featured event payments older than 7 days');
+
 // Queue Worker Mode Configuration (set in .env: QUEUE_WORKER_MODE)
 // - 'cronjob': Queue jobs are processed every minute via cronjob (default, simple setup)
 // - 'supervisor': Queue worker runs continuously as daemon (recommended for production)

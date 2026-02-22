@@ -195,4 +195,54 @@ class SecurityTest extends TestCase
         // Sicherstellen, dass das Public-Navi-Element "Registrieren" nicht angezeigt wird
         $response->assertDontSee('Registrieren', false);
     }
+
+    #[Test]
+    public function discount_code_api_is_rate_limited_to_10_per_minute(): void
+    {
+        // Das Rate-Limit für die Discount-Code-API ist auf 10 pro Minute gesetzt.
+        // Wir prüfen, ob die Route mit dem korrekten Middleware konfiguriert ist.
+        $route = collect(\Route::getRoutes())->first(
+            fn ($r) => $r->getName() === 'api.validate-discount-code'
+        );
+
+        $this->assertNotNull($route, 'Die Route api.validate-discount-code muss existieren.');
+
+        $middlewares = $route->middleware();
+        $this->assertContains('throttle:10,1', $middlewares,
+            'Die Discount-Code-Route muss mit throttle:10,1 geschützt sein.'
+        );
+    }
+
+    #[Test]
+    public function booking_cancel_is_rate_limited_to_5_per_minute(): void
+    {
+        // Das Rate-Limit für das Booking-Storno ist auf 5 pro Minute gesetzt.
+        $route = collect(\Route::getRoutes())->first(
+            fn ($r) => $r->getName() === 'bookings.cancel'
+        );
+
+        $this->assertNotNull($route, 'Die Route bookings.cancel muss existieren.');
+
+        $middlewares = $route->middleware();
+        $this->assertContains('throttle:5,1', $middlewares,
+            'Die Storno-Route muss mit throttle:5,1 geschützt sein.'
+        );
+    }
+
+    #[Test]
+    public function booking_store_does_not_log_pii_data(): void
+    {
+        // Sicherheitstest: BookingController::store darf keine personenbezogenen Daten loggen.
+        // Wir prüfen, ob der Log::info-Aufruf mit Ticket-Rohdaten entfernt wurde.
+        $controllerContent = file_get_contents(
+            app_path('Http/Controllers/BookingController.php')
+        );
+
+        // Der entfernte Log::info-Aufruf mit PII-Daten
+        $this->assertStringNotContainsString(
+            "Log::info('Booking store - Incoming tickets data'",
+            $controllerContent,
+            'DSGVO: Der Log::info-Aufruf mit Ticket-Rohdaten (PII) muss aus BookingController::store entfernt sein.'
+        );
+    }
 }

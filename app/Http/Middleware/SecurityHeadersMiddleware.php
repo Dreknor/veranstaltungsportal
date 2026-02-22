@@ -50,8 +50,8 @@ class SecurityHeadersMiddleware
         $csp = implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://www.gstatic.com https://www.paypal.com https://www.paypalobjects.com https://js.sentry-cdn.com https://browser.sentry-cdn.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "font-src 'self' https://fonts.gstatic.com",
+            "style-src 'self' 'unsafe-inline'",
+            "font-src 'self'",
             "img-src 'self' data: blob: https:",
             "connect-src 'self' https://sentry.io https://*.sentry.io https://www.paypal.com https://api.paypal.com https://api.sandbox.paypal.com",
             "frame-src 'self' https://www.google.com https://www.paypal.com",

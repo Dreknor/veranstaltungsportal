@@ -12,6 +12,8 @@
         </div>
     @endif
 
+
+
     <!-- Account Creation/Linking Prompt for Guest Bookings -->
     @if(!auth()->check() && !$booking->user_id && session()->has('booking_access_' . $booking->id))
         @php

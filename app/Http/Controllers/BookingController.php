@@ -124,11 +124,6 @@ class BookingController extends Controller
                 $subtotal = 0;
                 $ticketData = [];
 
-                // Log die eingehenden Ticket-Daten für Debugging
-                Log::info('Booking store - Incoming tickets data', [
-                    'tickets' => $request->tickets,
-                    'event_id' => $event->id,
-                ]);
 
                 // Validiere und berechne Tickets
                 foreach ($request->tickets as $index => $ticketInput) {
