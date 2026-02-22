@@ -68,7 +68,30 @@
                        class="flex flex-col items-center p-6 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition">
                         <div class="w-16 h-16 rounded-full flex items-center justify-center mb-3"
                              style="background-color: {{ $category->color }}20;">
-                            <span class="text-2xl">🎉</span>
+                            @php
+                                $faToHeroicon = [
+                                    'fa-heart' => 'heart', 'fa-graduation-cap' => 'academic-cap',
+                                    'fa-laptop' => 'computer-desktop', 'fa-school' => 'building-office',
+                                    'fa-star' => 'sparkles', 'fa-users' => 'users',
+                                    'fa-book-open' => 'book-open', 'fa-user' => 'user-circle',
+                                    'fa-shield-halved' => 'shield-check', 'fa-comments' => 'chat-bubble-left-right',
+                                    'fa-people-group' => 'user-group', 'fa-heartbeat' => 'heart-pulse',
+                                    'fa-scale-balanced' => 'scale', 'fa-link' => 'link',
+                                    'fa-ellipsis' => 'ellipsis-horizontal', 'fa-calendar' => 'calendar',
+                                ];
+                                $raw = $category->icon ?: 'calendar';
+                                $faKey = preg_replace('/^fa[srlbd]\s+/', '', $raw);
+                                $iconName = $faToHeroicon[$faKey] ?? $raw;
+                                $iconComponent = 'icon.' . $iconName;
+                                if (!\Illuminate\Support\Facades\View::exists('components.' . $iconComponent)) {
+                                    $iconComponent = 'icon.calendar';
+                                }
+                            @endphp
+                            <x-dynamic-component
+                                :component="$iconComponent"
+                                class="w-8 h-8"
+                                :style="'color: ' . $category->color"
+                            />
                         </div>
                         <span class="font-medium text-gray-900 text-center">{{ $category->name }}</span>
                     </a>

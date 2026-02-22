@@ -117,14 +117,38 @@
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 @php
                     $categories = \App\Models\EventCategory::where('is_active', true)->get();
-                    $icons = ['👨‍🏫', '📖', '🧠', '🤝', '🎨', '💡', '🌱', '🎯', '🔬', '📊'];
                 @endphp
-                @foreach($categories as $index => $category)
+                @foreach($categories as $category)
                     <a href="{{ route('events.index', ['category' => $category->id]) }}"
                        class="group flex flex-col items-center p-6 rounded-xl border-2 border-gray-200 hover:border-blue-500 hover:shadow-lg transition transform hover:scale-105 bg-white">
                         <div class="w-16 h-16 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition"
                              style="background: linear-gradient(135deg, {{ $category->color }}40, {{ $category->color }}80);">
-                            <span class="text-3xl">{{ $icons[$index % count($icons)] }}</span>
+                            @php
+                                $faToHeroicon = [
+                                    'fa-heart' => 'heart', 'fa-graduation-cap' => 'academic-cap',
+                                    'fa-laptop' => 'computer-desktop', 'fa-school' => 'building-office',
+                                    'fa-star' => 'sparkles', 'fa-users' => 'users',
+                                    'fa-book-open' => 'book-open', 'fa-user' => 'user-circle',
+                                    'fa-shield-halved' => 'shield-check', 'fa-comments' => 'chat-bubble-left-right',
+                                    'fa-people-group' => 'user-group', 'fa-heartbeat' => 'heart-pulse',
+                                    'fa-scale-balanced' => 'scale', 'fa-link' => 'link',
+                                    'fa-ellipsis' => 'ellipsis-horizontal', 'fa-calendar' => 'calendar',
+                                ];
+                                $raw = $category->icon ?: 'calendar';
+                                // FA-Klasse wie "fas fa-school" → "fa-school" → Heroicon
+                                $faKey = preg_replace('/^fa[srlbd]\s+/', '', $raw); // strip "fas ", "far " etc.
+                                $iconName = $faToHeroicon[$faKey] ?? $raw;
+                                // Fallback wenn Blade-Komponente nicht existiert
+                                $iconComponent = 'icon.' . $iconName;
+                                if (!\Illuminate\Support\Facades\View::exists('components.' . $iconComponent)) {
+                                    $iconComponent = 'icon.calendar';
+                                }
+                            @endphp
+                            <x-dynamic-component
+                                :component="$iconComponent"
+                                class="w-8 h-8"
+                                :style="'color: ' . $category->color"
+                            />
                         </div>
                         <span class="font-semibold text-gray-900 text-center">{{ $category->name }}</span>
                         <span class="text-xs text-gray-500 mt-1">
