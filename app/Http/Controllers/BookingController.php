@@ -111,6 +111,10 @@ class BookingController extends Controller
             'tickets.*.quantity' => 'required|integer|min:0',
             'discount_code' => 'nullable|string',
             'payment_method' => 'nullable|string|in:invoice,paypal',
+            'privacy_accepted' => 'required|accepted',
+        ], [
+            'privacy_accepted.required' => 'Bitte stimmen Sie der Datenschutzerklärung zu.',
+            'privacy_accepted.accepted' => 'Bitte stimmen Sie der Datenschutzerklärung zu.',
         ]);
 
         // Validate PayPal selection
@@ -522,24 +526,12 @@ class BookingController extends Controller
 
     public function downloadInvoice($bookingNumber)
     {
-        $booking = Booking::where('booking_number', $bookingNumber)
+        $booking = Booking::withTrashed()
+            ->where('booking_number', $bookingNumber)
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
-        $hasAccess = false;
-
-        if (auth()->check() && auth()->id() === $booking->user_id) {
-            $hasAccess = true;
-        }
-
-        if (session()->has('booking_access_' . $booking->id)) {
-            $hasAccess = true;
-        }
-
-        if (!$hasAccess) {
-            abort(403, 'Kein Zugriff auf diese Rechnung');
-        }
+        $this->authorize('download', $booking);
 
         $pdfService = app(TicketPdfService::class);
         return $pdfService->downloadInvoice($booking);
@@ -547,24 +539,12 @@ class BookingController extends Controller
 
     public function downloadTicket($bookingNumber)
     {
-        $booking = Booking::where('booking_number', $bookingNumber)
+        $booking = Booking::withTrashed()
+            ->where('booking_number', $bookingNumber)
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff - erlaube wenn eingeloggt und Eigentümer ODER Gast mit Session-Zugriff
-        $hasAccess = false;
-
-        if (auth()->check() && auth()->id() === $booking->user_id) {
-            $hasAccess = true;
-        }
-
-        if (session()->has('booking_access_' . $booking->id)) {
-            $hasAccess = true;
-        }
-
-        if (!$hasAccess) {
-            abort(403, 'Kein Zugriff auf dieses Ticket');
-        }
+        $this->authorize('download', $booking);
 
         // Prüfe, ob Ticket heruntergeladen werden darf
         // Nur für bestätigte Buchungen ODER wenn die Buchung kostenlos ist (Gesamtpreis = 0)
@@ -584,16 +564,12 @@ class BookingController extends Controller
 
     public function downloadCertificate($bookingNumber)
     {
-        $booking = Booking::where('booking_number', $bookingNumber)
+        $booking = Booking::withTrashed()
+            ->where('booking_number', $bookingNumber)
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff (nur für Buchungsinhaber oder eingeloggte User)
-        if (!auth()->check() ||
-            (auth()->id() !== $booking->user_id &&
-             !session()->has('booking_access_' . $booking->id))) {
-            abort(403, 'Kein Zugriff auf dieses Zertifikat');
-        }
+        $this->authorize('download', $booking);
 
         $certificateService = app(\App\Services\CertificateService::class);
 
@@ -610,14 +586,12 @@ class BookingController extends Controller
      */
     public function downloadIndividualCertificate($bookingNumber, $itemId)
     {
-        $booking = Booking::where('booking_number', $bookingNumber)
+        $booking = Booking::withTrashed()
+            ->where('booking_number', $bookingNumber)
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff
-        if (!$this->hasBookingAccess($booking)) {
-            abort(403, 'Kein Zugriff auf dieses Zertifikat');
-        }
+        $this->authorize('download', $booking);
 
         // Finde das BookingItem
         $item = $booking->items()->findOrFail($itemId);
@@ -637,16 +611,12 @@ class BookingController extends Controller
      */
     public function downloadIcal($bookingNumber)
     {
-        $booking = Booking::where('booking_number', $bookingNumber)
+        $booking = Booking::withTrashed()
+            ->where('booking_number', $bookingNumber)
             ->with(['event.organization'])
             ->firstOrFail();
 
-        // Prüfe Zugriff (nur für Buchungsinhaber)
-        if (!auth()->check() ||
-            (auth()->id() !== $booking->user_id &&
-             !session()->has('booking_access_' . $booking->id))) {
-            abort(403, 'Kein Zugriff auf diesen Kalender-Export');
-        }
+        $this->authorize('download', $booking);
 
         $calendarService = app(\App\Services\CalendarService::class);
         return $calendarService->downloadBookingIcal($booking);

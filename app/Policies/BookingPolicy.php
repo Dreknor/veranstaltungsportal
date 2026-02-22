@@ -34,6 +34,45 @@ class BookingPolicy
     }
 
     /**
+     * Determine whether the user can download booking documents (ticket, invoice, certificate, ical).
+     *
+     * Erlaubt Zugriff für:
+     * (a) Admin
+     * (b) Eingeloggten Buchungsinhaber
+     * (c) Organisations-Owner/Admin der veranstaltenden Organisation
+     * (d) Gäste mit verifiziertem Session-Token (nach E-Mail-Verifikation)
+     *
+     * ?User: nullable für Gast-Zugriff.
+     */
+    public function download(?User $user, Booking $booking): bool
+    {
+        // Admin hat immer Zugriff
+        if ($user && $user->hasRole('admin')) {
+            return true;
+        }
+
+        // Eingeloggter Buchungsinhaber
+        if ($user && $booking->user_id && $user->id === $booking->user_id) {
+            return true;
+        }
+
+        // Organisationsmitglieder können Dokumente einsehen (z.B. Check-In)
+        if ($user && $booking->event && $booking->event->organization) {
+            $role = $user->getRoleInOrganization($booking->event->organization);
+            if (in_array($role, ['owner', 'admin'])) {
+                return true;
+            }
+        }
+
+        // Gast mit verifiziertem Session-Token (nach E-Mail-Verifikation gesetzt)
+        if (session()->has('booking_access_' . $booking->id)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Determine whether the user can create models.
      */
     public function create(User $user): bool
@@ -68,14 +107,16 @@ class BookingPolicy
 
     /**
      * Determine whether the user can restore the model.
+     * Nur Admins dürfen soft-gelöschte Buchungen wiederherstellen.
      */
     public function restore(User $user, Booking $booking): bool
     {
-        return false;
+        return $user->hasRole('admin');
     }
 
     /**
      * Determine whether the user can permanently delete the model.
+     * Niemals erlaubt – DSGVO-Aufbewahrungspflicht (10 Jahre für Rechnungen).
      */
     public function forceDelete(User $user, Booking $booking): bool
     {

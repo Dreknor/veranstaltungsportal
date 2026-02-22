@@ -5,43 +5,44 @@
 
     @once
         @push('scripts')
-        <script src="https://www.google.com/recaptcha/api.js?render={{ config('recaptcha.site_key') }}"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const siteKey = '{{ config('recaptcha.site_key') }}';
+            /**
+             * reCAPTCHA-Integration: Das Script wird NICHT direkt eingebunden.
+             * Es wird erst nach Cookie-Einwilligung durch app.js geladen (DSGVO-konform).
+             * Das 'recaptcha:loaded'-Event wird von app.js gefeuert sobald das Script bereit ist.
+             */
+            function initRecaptchaForms() {
+                const siteKey = document.querySelector('meta[name="recaptcha-site-key"]')?.content;
+                if (!siteKey) return;
 
-                if (!siteKey) {
-                    console.error('reCAPTCHA site key not configured');
-                    return;
-                }
-
-                // Initialize reCAPTCHA for all forms with recaptcha component
                 const forms = document.querySelectorAll('form[data-recaptcha]');
-
                 forms.forEach(form => {
                     const action = form.getAttribute('data-recaptcha-action') || 'submit';
+                    // Vorherigen Listener entfernen (verhindert Doppel-Submission)
+                    const newForm = form.cloneNode(true);
+                    form.parentNode.replaceChild(newForm, form);
 
-                    form.addEventListener('submit', function(e) {
+                    newForm.addEventListener('submit', function(e) {
                         e.preventDefault();
-
                         grecaptcha.ready(function() {
                             grecaptcha.execute(siteKey, { action: action }).then(function(token) {
-                                // Find the hidden input in this form
-                                const input = form.querySelector('input[name="g-recaptcha-response"]');
-                                if (input) {
-                                    input.value = token;
-                                }
-                                // Submit the form
-                                form.submit();
-                            }).catch(function(error) {
-                                console.error('reCAPTCHA error:', error);
-                                // Still submit the form, let the server handle the missing token
-                                form.submit();
+                                const input = newForm.querySelector('input[name="g-recaptcha-response"]');
+                                if (input) input.value = token;
+                                newForm.submit();
+                            }).catch(function() {
+                                newForm.submit();
                             });
                         });
                     });
                 });
-            });
+            }
+
+            // Falls reCAPTCHA bereits geladen wurde (Consent war schon erteilt)
+            if (typeof grecaptcha !== 'undefined') {
+                initRecaptchaForms();
+            }
+            // Sonst auf das Event warten, das app.js nach dem Laden feuert
+            document.addEventListener('recaptcha:loaded', initRecaptchaForms);
         </script>
         @endpush
     @endonce

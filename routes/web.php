@@ -32,6 +32,15 @@ Route::get('/faq', function () {
     return view('faq');
 })->name('faq');
 
+// Legal Pages (Pflichtseiten gemäß §5 TMG & DSGVO)
+Route::get('/datenschutz', function () {
+    return view('legal.datenschutz');
+})->name('datenschutz');
+
+Route::get('/impressum', function () {
+    return view('legal.impressum');
+})->name('impressum');
+
 // Contact Routes
 Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])->name('contact.show');
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])

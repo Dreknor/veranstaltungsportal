@@ -14,7 +14,9 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {!! RecaptchaV3::initJs() !!}
+    @if(config('recaptcha.enabled') && config('recaptcha.site_key'))
+        <meta name="recaptcha-site-key" content="{{ config('recaptcha.site_key') }}">
+    @endif
 
     <script>
         function applyTheme() {

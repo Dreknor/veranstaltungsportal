@@ -252,6 +252,28 @@
             <!-- reCAPTCHA -->
             <x-recaptcha action="booking" />
 
+            <!-- Datenschutz-Einwilligung -->
+            <div class="mt-4">
+                <label class="flex items-start gap-3 cursor-pointer">
+                    <input type="checkbox"
+                           name="privacy_accepted"
+                           id="privacy_accepted"
+                           value="1"
+                           class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                           required>
+                    <span class="text-sm text-gray-700">
+                        Ich habe die
+                        <a href="{{ route('datenschutz') }}" target="_blank" rel="noopener"
+                           class="text-blue-600 hover:underline font-medium">Datenschutzerklärung</a>
+                        gelesen und stimme der Verarbeitung meiner Daten zur Buchungsabwicklung zu.
+                        <span class="text-red-500">*</span>
+                    </span>
+                </label>
+                @error('privacy_accepted')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
             <button type="submit" id="submit-button" {{ $ticketTypes->isEmpty() ? 'disabled' : 'disabled' }}
                     class="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center">
                 <span id="submit-button-text">{{ $ticketTypes->isEmpty() ? 'Keine Tickets verfügbar' : 'Kostenpflichtig buchen' }}</span>
@@ -261,9 +283,7 @@
                 </svg>
             </button>
 
-            <p class="text-xs text-gray-500 mt-4 text-center">
-                Mit der Buchung akzeptieren Sie unsere AGB
-            </p>
+            <p class="text-xs text-gray-400 mt-2 text-center">* Pflichtfeld</p>
                         </div>
                     </div>
                 </div>
