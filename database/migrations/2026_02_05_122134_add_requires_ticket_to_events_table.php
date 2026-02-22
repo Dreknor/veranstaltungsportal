@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            //
+            // Add after show_qr_code_on_ticket which was added in the previous ticket-settings migration.
+            $table->boolean('requires_ticket')->default(true)->after('show_qr_code_on_ticket');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            //
+            $table->dropColumn('requires_ticket');
         });
     }
 };

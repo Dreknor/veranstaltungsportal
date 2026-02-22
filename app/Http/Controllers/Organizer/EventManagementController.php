@@ -80,6 +80,7 @@ class EventManagementController extends Controller
             'access_code' => 'nullable|string|required_if:is_private,1',
             'ticket_notes' => 'nullable|string|max:1000',
             'show_qr_code_on_ticket' => 'boolean',
+            'requires_ticket' => 'boolean',
         ]);
 
         if ($request->boolean('is_published')) {
@@ -213,6 +214,7 @@ class EventManagementController extends Controller
             'access_code' => 'nullable|string|required_if:is_private,1',
             'ticket_notes' => 'nullable|string|max:1000',
             'show_qr_code_on_ticket' => 'boolean',
+            'requires_ticket' => 'boolean',
         ]);
 
         unset($validated['has_multiple_dates']);
