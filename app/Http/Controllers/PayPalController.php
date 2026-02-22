@@ -204,13 +204,32 @@ class PayPalController extends Controller
             $booking->load('event.organization');
 
             // Verify webhook signature (CRITICAL FOR SECURITY)
+            // Signature verification is enforced in live mode.
+            // In sandbox mode it is also enforced when a webhook ID is configured,
+            // so local development without a configured webhook ID is still possible.
             $paypalService = new PayPalService($booking->event->organization);
+            $webhookId = $booking->event->organization->paypal_webhook_id ?? null;
 
-            if ($booking->event->organization->paypal_mode === 'live') {
+            if (!empty($webhookId)) {
                 if (!$paypalService->verifyWebhook($headers, $rawBody)) {
-                    Log::error('PayPal webhook signature verification failed');
+                    Log::error('PayPal webhook signature verification failed', [
+                        'mode' => $booking->event->organization->paypal_mode,
+                        'booking_number' => $booking->booking_number,
+                    ]);
                     return response()->json(['error' => 'Unauthorized'], 401);
                 }
+            } else {
+                // No webhook ID configured – only tolerated in sandbox/testing environments
+                if ($booking->event->organization->paypal_mode === 'live') {
+                    Log::critical('PayPal webhook: Live mode without webhook ID configured – rejecting request', [
+                        'organization_id' => $booking->event->organization->id,
+                    ]);
+                    return response()->json(['error' => 'Webhook not properly configured'], 500);
+                }
+
+                Log::warning('PayPal webhook: Signature verification skipped (no webhook ID configured, sandbox mode)', [
+                    'organization_id' => $booking->event->organization->id,
+                ]);
             }
 
             // Update booking in atomic transaction (prevent race condition with redirect)

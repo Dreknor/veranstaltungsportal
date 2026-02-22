@@ -34,7 +34,9 @@ Route::get('/faq', function () {
 
 // Contact Routes
 Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])->name('contact.show');
-Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->middleware('recaptcha:contact')->name('contact.store');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])
+    ->middleware(['recaptcha:contact', 'throttle:10,1'])
+    ->name('contact.store');
 
 // Help Center Routes
 Route::get('/help', [\App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
@@ -48,12 +50,18 @@ Route::get('/events/calendar', [EventController::class, 'calendar'])->name('even
 Route::get('/events/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/events/{slug}/calendar', [EventController::class, 'exportToCalendar'])->name('events.calendar.export');
 Route::get('/events/{slug}/access', [EventController::class, 'access'])->name('events.access');
-Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])->middleware('recaptcha:access_code')->name('events.verify-access');
+Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])
+    ->middleware(['recaptcha:access_code', 'throttle:10,1'])
+    ->name('events.verify-access');
 
 
 // Waitlist Routes
-Route::post('/events/{event}/waitlist/join', [\App\Http\Controllers\WaitlistController::class, 'join'])->name('waitlist.join');
-Route::post('/events/{event}/waitlist/leave', [\App\Http\Controllers\WaitlistController::class, 'leave'])->name('waitlist.leave');
+Route::post('/events/{event}/waitlist/join', [\App\Http\Controllers\WaitlistController::class, 'join'])
+    ->middleware('throttle:10,1')
+    ->name('waitlist.join');
+Route::post('/events/{event}/waitlist/leave', [\App\Http\Controllers\WaitlistController::class, 'leave'])
+    ->middleware('throttle:20,1')
+    ->name('waitlist.leave');
 
 // Event Review Routes
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -64,7 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 // Booking Routes
 Route::get('/events/{event}/book', [BookingController::class, 'create'])->name('bookings.create');
-Route::post('/events/{event}/book', [BookingController::class, 'store'])->middleware('recaptcha:booking')->name('bookings.store');
+Route::post('/events/{event}/book', [BookingController::class, 'store'])
+    ->middleware(['recaptcha:booking', 'throttle:10,1'])
+    ->name('bookings.store');
 Route::get('/bookings/{bookingNumber}', [BookingController::class, 'show'])->name('bookings.show');
 Route::get('/bookings/{bookingNumber}/personalize', [BookingController::class, 'personalizeTickets'])->name('bookings.personalize');
 Route::post('/bookings/{bookingNumber}/personalize', [BookingController::class, 'savePersonalization'])->name('bookings.save-personalization');
@@ -74,12 +84,20 @@ Route::get('/bookings/{bookingNumber}/certificate', [BookingController::class, '
 Route::get('/bookings/{bookingNumber}/certificate/{itemId}', [BookingController::class, 'downloadIndividualCertificate'])->name('bookings.certificate.individual');
 Route::get('/bookings/{bookingNumber}/ical', [BookingController::class, 'downloadIcal'])->name('bookings.ical');
 Route::get('/bookings/{bookingNumber}/verify', [BookingController::class, 'verify'])->name('bookings.verify');
-Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])->middleware('recaptcha:booking_verify')->name('bookings.verify-email');
+Route::post('/bookings/{bookingNumber}/verify', [BookingController::class, 'verifyEmail'])
+    ->middleware(['recaptcha:booking_verify', 'throttle:10,1'])
+    ->name('bookings.verify-email');
 Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController::class, 'verifyEmailToken'])->name('bookings.verify-email-token');
-Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
+Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])
+    ->middleware('throttle:10,1')
+    ->name('bookings.cancel');
 Route::get('/bookings/{bookingNumber}/create-account', [BookingController::class, 'createAccount'])->name('bookings.create-account');
-Route::post('/bookings/{bookingNumber}/create-account', [BookingController::class, 'storeAccount'])->name('bookings.store-account');
-Route::post('/bookings/{bookingNumber}/link-account', [BookingController::class, 'linkAccount'])->name('bookings.link-account');
+Route::post('/bookings/{bookingNumber}/create-account', [BookingController::class, 'storeAccount'])
+    ->middleware('throttle:5,1')
+    ->name('bookings.store-account');
+Route::post('/bookings/{bookingNumber}/link-account', [BookingController::class, 'linkAccount'])
+    ->middleware('throttle:5,1')
+    ->name('bookings.link-account');
 
 
 // PayPal Routes
@@ -91,7 +109,9 @@ Route::post('/paypal/webhook', [\App\Http\Controllers\PayPalController::class, '
 Route::get('/cancel-registration/{token}', [\App\Http\Controllers\UserRegistrationCancellationController::class, 'show'])->name('user.cancel-registration');
 Route::post('/cancel-registration/{token}', [\App\Http\Controllers\UserRegistrationCancellationController::class, 'cancel'])->name('user.cancel-registration.process');
 
-Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])->name('api.validate-discount-code');
+Route::post('/api/validate-discount-code', [BookingController::class, 'validateDiscountCode'])
+    ->middleware('throttle:30,1')
+    ->name('api.validate-discount-code');
 
 // User Dashboard Routes
 Route::middleware(['auth', 'verified'])->group(function () {

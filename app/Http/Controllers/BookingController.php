@@ -382,31 +382,39 @@ class BookingController extends Controller
 
     public function show($bookingNumber)
     {
+        // Eingeloggte User: direkt nach user_id suchen (kein Enumeration-Leak)
+        if (auth()->check()) {
+            $booking = Booking::where('booking_number', $bookingNumber)
+                ->with(['event.organization', 'items.ticketType'])
+                ->firstOrFail();
+
+            // Eingeloggte User dürfen nur ihre eigenen Buchungen sehen
+            if (auth()->id() === $booking->user_id) {
+                return view('bookings.show', compact('booking'));
+            }
+
+            // Eingeloggte User mit Session-Zugriff (z. B. nach Gast-Verifizierung)
+            if (session()->has('booking_access_' . $booking->id)) {
+                return view('bookings.show', compact('booking'));
+            }
+
+            // Kein Zugriff: 404 statt Redirect (verhindert Enumeration)
+            abort(404);
+        }
+
+        // Gäste: Buchung laden und Session-Zugriff prüfen
         $booking = Booking::where('booking_number', $bookingNumber)
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        // Prüfe Zugriff - erlaube wenn:
-        // 1. Eingeloggt UND Eigentümer der Buchung (user_id match)
-        // 2. Gast mit Session-Zugriff (nach E-Mail-Verifizierung)
-        $hasAccess = false;
-
-        // Eingeloggte User mit matching user_id
-        if (auth()->check() && auth()->id() === $booking->user_id) {
-            $hasAccess = true;
-        }
-
-        // Gäste mit Session-Zugriff (nach E-Mail-Verifizierung)
         if (session()->has('booking_access_' . $booking->id)) {
-            $hasAccess = true;
+            return view('bookings.show', compact('booking'));
         }
 
-        if (!$hasAccess) {
-            return redirect()->route('bookings.verify', $bookingNumber)
-                ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse, um auf die Buchungsdetails zuzugreifen.');
-        }
-
-        return view('bookings.show', compact('booking'));
+        // Gast ohne Session-Zugriff: zur Verifikationsseite leiten
+        // (Existenz der Buchungsnummer ist hier unkritisch, da kein Inhalt preisgegeben wird)
+        return redirect()->route('bookings.verify', $bookingNumber)
+            ->with('info', 'Bitte verifizieren Sie Ihre E-Mail-Adresse, um auf die Buchungsdetails zuzugreifen.');
     }
 
     public function verify($bookingNumber)
@@ -423,12 +431,17 @@ class BookingController extends Controller
 
         $booking = Booking::where('booking_number', $bookingNumber)->firstOrFail();
 
-        if ($booking->customer_email === $request->email) {
+        // Timing-sicherer Vergleich, um Timing-Angriffe zu vermeiden
+        if (hash_equals($booking->customer_email, $request->email)) {
             session()->put('booking_access_' . $booking->id, true);
             return redirect()->route('bookings.show', $bookingNumber);
         }
 
-        return back()->withErrors(['email' => 'E-Mail-Adresse stimmt nicht überein.']);
+        // Generische Fehlermeldung: verrät nicht, ob die Buchungsnummer existiert
+        // oder ob nur die E-Mail falsch ist (verhindert Enumeration)
+        return back()->withErrors([
+            'email' => 'Die eingegebenen Daten konnten nicht verifiziert werden.',
+        ]);
     }
 
     public function cancel(Request $request, $bookingNumber)
