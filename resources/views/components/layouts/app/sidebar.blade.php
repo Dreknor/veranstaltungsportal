@@ -248,6 +248,11 @@
                         Benutzerverwaltung
                     </x-layouts.sidebar-link>
 
+                    <x-layouts.sidebar-link href="{{ route('admin.roles.index') }}" icon='fas-shield-halved'
+                        :active="request()->routeIs('admin.roles.*') || request()->routeIs('admin.permissions.*')">
+                        Rollen & Rechte
+                    </x-layouts.sidebar-link>
+
                     <x-layouts.sidebar-link href="{{ route('admin.organizations.index') }}" icon='fas-building'
                         :active="request()->routeIs('admin.organizations.*') || request()->routeIs('admin.organizer-fees.*')">
                         Organisationen

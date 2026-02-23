@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Services\LogNotificationService;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class LogNotificationSettingsController extends Controller
 {
@@ -40,6 +42,7 @@ class LogNotificationSettingsController extends Controller
 
         $user = User::findOrFail($request->user_id);
         $user->givePermissionTo('receive-critical-log-notifications');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         return back()->with('success', "Benutzer {$user->name} erhält jetzt Benachrichtigungen bei kritischen Fehlern.");
     }
@@ -51,7 +54,36 @@ class LogNotificationSettingsController extends Controller
         ]);
 
         $user = User::findOrFail($request->user_id);
-        $user->revokePermissionTo('receive-critical-log-notifications');
+
+        // Direkte Permission entziehen
+        if ($user->hasDirectPermission('receive-critical-log-notifications')) {
+            $user->revokePermissionTo('receive-critical-log-notifications');
+        }
+
+        // Falls der User die Permission noch über die Admin-Rolle hat,
+        // muss die Permission von der Rolle entfernt werden.
+        // Damit andere Admins sie behalten, bekommen diese die Permission direkt zugewiesen.
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole && $adminRole->hasPermissionTo('receive-critical-log-notifications')) {
+            // Allen anderen Admins die Permission direkt geben (die sie nicht schon direkt haben)
+            User::role('admin')
+                ->where('id', '!=', $user->id)
+                ->get()
+                ->each(function ($admin) {
+                    if (!$admin->hasDirectPermission('receive-critical-log-notifications')) {
+                        $admin->givePermissionTo('receive-critical-log-notifications');
+                    }
+                });
+
+            // Permission von der Rolle entfernen
+            $adminRole->revokePermissionTo('receive-critical-log-notifications');
+
+            // Spatie Permission Cache leeren
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        }
+
+        // Cache auch nach direktem Entzug leeren
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         return back()->with('success', "Benachrichtigungen für {$user->name} wurden deaktiviert.");
     }

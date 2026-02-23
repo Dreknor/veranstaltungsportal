@@ -362,10 +362,22 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::post('/users/{user}/unverify-email', [\App\Http\Controllers\Admin\UserManagementController::class, 'unverifyEmail'])->name('users.unverify-email');
 
     // Role & Permission Management
-    Route::get('/roles', [\App\Http\Controllers\Admin\RoleManagementController::class, 'index'])->name('roles.index');
-    Route::get('/roles/{role}/edit', [\App\Http\Controllers\Admin\RoleManagementController::class, 'edit'])->name('roles.edit');
-    Route::put('/roles/{role}', [\App\Http\Controllers\Admin\RoleManagementController::class, 'update'])->name('roles.update');
-    Route::get('/permissions', [\App\Http\Controllers\Admin\RoleManagementController::class, 'permissions'])->name('roles.permissions');
+    // WICHTIG: statische Segmente (matrix, create) vor {role} damit Laravel sie nicht als Parameter interpretiert
+    Route::get('/roles',                [\App\Http\Controllers\Admin\RoleManagementController::class, 'index'])->name('roles.index');
+    Route::get('/roles/matrix',         [\App\Http\Controllers\Admin\RoleManagementController::class, 'matrix'])->name('roles.matrix');
+    Route::get('/roles/create',         [\App\Http\Controllers\Admin\RoleManagementController::class, 'create'])->name('roles.create');
+    Route::post('/roles',               [\App\Http\Controllers\Admin\RoleManagementController::class, 'store'])->name('roles.store');
+    Route::get('/roles/{role}/edit',    [\App\Http\Controllers\Admin\RoleManagementController::class, 'edit'])->name('roles.edit');
+    Route::put('/roles/{role}',         [\App\Http\Controllers\Admin\RoleManagementController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{role}',      [\App\Http\Controllers\Admin\RoleManagementController::class, 'destroy'])->name('roles.destroy');
+
+    // Permission Management (eigenständige Routen)
+    Route::get('/permissions',                       [\App\Http\Controllers\Admin\PermissionManagementController::class, 'index'])->name('permissions.index');
+    Route::get('/permissions/create',                [\App\Http\Controllers\Admin\PermissionManagementController::class, 'create'])->name('permissions.create');
+    Route::post('/permissions',                      [\App\Http\Controllers\Admin\PermissionManagementController::class, 'store'])->name('permissions.store');
+    Route::get('/permissions/{permission}/edit',     [\App\Http\Controllers\Admin\PermissionManagementController::class, 'edit'])->name('permissions.edit');
+    Route::put('/permissions/{permission}',          [\App\Http\Controllers\Admin\PermissionManagementController::class, 'update'])->name('permissions.update');
+    Route::delete('/permissions/{permission}',       [\App\Http\Controllers\Admin\PermissionManagementController::class, 'destroy'])->name('permissions.destroy');
 
     // Event Management
     Route::get('/events', [\App\Http\Controllers\Admin\EventManagementController::class, 'index'])->name('events.index');

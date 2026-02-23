@@ -84,7 +84,7 @@ class SystemLogController extends Controller
             ->where('id', $id)
             ->delete();
 
-        return redirect()->route('system-logs.index')->with('success', 'System-Log-Eintrag wurde gelöscht.');
+        return redirect()->route('admin.system-logs.index')->with('success', 'System-Log-Eintrag wurde gelöscht.');
     }
 
     public function clear(Request $request)
@@ -98,7 +98,7 @@ class SystemLogController extends Controller
             ->where('datetime', '<', $date)
             ->delete();
 
-        return redirect()->route('system-logs.index')->with('success', "{$count} System-Log-Einträge wurden gelöscht.");
+        return redirect()->route('admin.system-logs.index')->with('success', "{$count} System-Log-Einträge wurden gelöscht.");
     }
 
     public function clearByLevel(Request $request)
