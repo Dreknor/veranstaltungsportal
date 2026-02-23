@@ -3,7 +3,7 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -61,8 +61,8 @@ abstract class TestCase extends BaseTestCase
         }
 
         // Ensure organizer role exists and assign it
-        if (!\Spatie\Permission\Models\Role::where('name', 'organizer')->exists()) {
-            \Spatie\Permission\Models\Role::create(['name' => 'organizer', 'guard_name' => 'web']);
+        if (!Role::where('name', 'organizer')->exists()) {
+            Role::create(['name' => 'organizer', 'guard_name' => 'web']);
         }
         $organizer->assignRole('organizer');
 
