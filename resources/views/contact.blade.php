@@ -140,10 +140,12 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mindestens 10 Zeichen erforderlich</p>
                     </div>
 
-                    <!-- reCAPTCHA -->
-                    <div class="flex items-center">
-                        <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}" data-action="contact"></div>
-                    </div>
+                    <!-- reCAPTCHA v3 (invisible) -->
+                    <x-recaptcha action="contact" />
+
+                    @error('recaptcha')
+                        <p class="text-red-600 dark:text-red-400 text-sm">{{ $message }}</p>
+                    @enderror
                     @error('g-recaptcha-response')
                         <p class="text-red-600 dark:text-red-400 text-sm">{{ $message }}</p>
                     @enderror
