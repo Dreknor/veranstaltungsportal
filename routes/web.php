@@ -47,11 +47,13 @@ Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'
     ->middleware(['recaptcha:contact', 'throttle:10,1'])
     ->name('contact.store');
 
-// Help Center Routes
-Route::get('/help', [\App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
-Route::get('/help/search', [\App\Http\Controllers\HelpController::class, 'search'])->name('help.search');
-Route::get('/help/{category}', [\App\Http\Controllers\HelpController::class, 'category'])->name('help.category');
-Route::get('/help/{category}/{article}', [\App\Http\Controllers\HelpController::class, 'show'])->name('help.article');
+// Help Center Routes (nur für eingeloggte Nutzer)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/help', [\App\Http\Controllers\HelpController::class, 'index'])->name('help.index');
+    Route::get('/help/search', [\App\Http\Controllers\HelpController::class, 'search'])->name('help.search');
+    Route::get('/help/{category}', [\App\Http\Controllers\HelpController::class, 'category'])->name('help.category');
+    Route::get('/help/{category}/{article}', [\App\Http\Controllers\HelpController::class, 'show'])->name('help.article');
+});
 
 // Event Routes (Public)
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
