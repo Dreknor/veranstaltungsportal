@@ -1,6 +1,7 @@
 import "./bootstrap";
 import Alpine from "alpinejs";
 import * as CookieConsent from "vanilla-cookieconsent";
+import { richEditor } from "./rich-editor";
 
 window.Alpine = Alpine;
 window.CookieConsent = CookieConsent;

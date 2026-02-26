@@ -212,6 +212,7 @@
         <x-footer />
     </div>
 
+    @stack('styles')
     @stack('scripts')
 
     <!-- Custom Styles for Animations -->
