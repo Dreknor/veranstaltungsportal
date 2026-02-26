@@ -273,6 +273,11 @@
                         Bewertungen
                     </x-layouts.sidebar-link>
 
+                    <x-layouts.sidebar-link href="{{ route('admin.legal-pages.index') }}" icon='fas-file-contract'
+                        :active="request()->routeIs('admin.legal-pages.*')">
+                        Rechtliche Seiten
+                    </x-layouts.sidebar-link>
+
                     <!-- Gamification & Social -->
                     <li class="pt-4 pb-2">
                         <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">

@@ -48,7 +48,7 @@
                     <li><a href="{{ route('faq') }}" class="hover:text-white transition">FAQ</a></li>
                     <li><a href="{{ route('help.index') }}" class="hover:text-white transition">Hilfe</a></li>
                     <li><a href="{{ route('contact.show') }}" class="hover:text-white transition">Kontakt</a></li>
-                    <li><a href="#" class="hover:text-white transition">AGB</a></li>
+                    <li><a href="{{ route('agb') }}" class="hover:text-white transition">AGB</a></li>
                     <li><a href="{{ route('datenschutz') }}" class="hover:text-white transition">Datenschutz</a></li>
                     <li><a href="{{ route('impressum') }}" class="hover:text-white transition">Impressum</a></li>
                 </ul>
@@ -60,6 +60,8 @@
                 Ein Angebot im Rahmen der Aktion <a href="https://www.ev-schulen-sachsen.de/hauptfach-mensch-1" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">Hauptfach Mensch</a>.
             </p>
             <p class="text-xs mt-3 space-x-3">
+                <a href="{{ route('agb') }}" class="text-gray-500 hover:text-gray-300 transition">AGB</a>
+                <span class="text-gray-700">·</span>
                 <a href="{{ route('datenschutz') }}" class="text-gray-500 hover:text-gray-300 transition">Datenschutz</a>
                 <span class="text-gray-700">·</span>
                 <a href="{{ route('impressum') }}" class="text-gray-500 hover:text-gray-300 transition">Impressum</a>

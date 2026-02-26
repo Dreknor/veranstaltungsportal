@@ -41,6 +41,10 @@ Route::get('/impressum', function () {
     return view('legal.impressum');
 })->name('impressum');
 
+Route::get('/agb', function () {
+    return view('legal.agb');
+})->name('agb');
+
 // Contact Routes
 Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'show'])->name('contact.show');
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])
@@ -395,6 +399,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::put('/categories/{category}', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'destroy'])->name('categories.destroy');
     Route::post('/categories/{category}/toggle-active', [\App\Http\Controllers\Admin\CategoryManagementController::class, 'toggleActive'])->name('categories.toggle-active');
+
+    // Legal Pages Management (Impressum, Datenschutz, AGB)
+    Route::get('/legal-pages', [\App\Http\Controllers\Admin\LegalPageController::class, 'index'])->name('legal-pages.index');
+    Route::get('/legal-pages/{type}/edit', [\App\Http\Controllers\Admin\LegalPageController::class, 'edit'])->name('legal-pages.edit');
+    Route::put('/legal-pages/{type}', [\App\Http\Controllers\Admin\LegalPageController::class, 'update'])->name('legal-pages.update');
 
     // Settings Management
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
