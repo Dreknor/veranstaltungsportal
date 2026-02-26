@@ -3,6 +3,7 @@ import Alpine from "alpinejs";
 import * as CookieConsent from "vanilla-cookieconsent";
 
 window.Alpine = Alpine;
+window.CookieConsent = CookieConsent;
 Alpine.start();
 
 /**
@@ -30,6 +31,9 @@ CookieConsent.run({
         // reCAPTCHA nachladen wenn functional akzeptiert wurde
         if (CookieConsent.acceptedCategory("functional")) {
             loadRecaptcha();
+        } else {
+            // Funktionale Cookies abgelehnt – Warnhinweis anzeigen
+            showRecaptchaWarnings(true);
         }
     },
 
@@ -37,6 +41,7 @@ CookieConsent.run({
         if (changedCategories.includes("functional")) {
             if (CookieConsent.acceptedCategory("functional")) {
                 loadRecaptcha();
+                showRecaptchaWarnings(false);
             } else {
                 // Seite neu laden um Scripts zu entfernen
                 window.location.reload();
@@ -114,6 +119,19 @@ CookieConsent.run({
 });
 
 /**
+ * Warnhinweise ein-/ausblenden wenn funktionale Cookies nicht erlaubt sind
+ */
+function showRecaptchaWarnings(show) {
+    document.querySelectorAll('[id^="recaptcha-cookie-warning-"]').forEach(el => {
+        if (show) {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    });
+}
+
+/**
  * reCAPTCHA dynamisch laden (nur nach Einwilligung)
  */
 function loadRecaptcha() {
@@ -138,6 +156,9 @@ function loadRecaptcha() {
 document.addEventListener("DOMContentLoaded", () => {
     if (CookieConsent.acceptedCategory("functional")) {
         loadRecaptcha();
+    } else if (CookieConsent.validConsent()) {
+        // Nutzer hat bereits entschieden, aber funktionale Cookies abgelehnt
+        showRecaptchaWarnings(true);
     }
 });
 
