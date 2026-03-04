@@ -389,11 +389,14 @@ class TicketPdfService
         $billingData = $organization->billing_data ?? [];
         $bankAccount = $organization->bank_account ?? [];
         $taxRate = 19;
-        $grossTotal = 99.99;
+        // Arithmetik-Fix: Nettobetrag als Basis, damit netTotal * (1 + taxRate/100) = totalAmount
+        // exakt gilt und keine ZUGFeRD-Arithmetik-Warnung entsteht.
+        // 100,00 € netto × 1,19 = 119,00 € brutto (ganzzahlig, fehlerfrei).
+        $netTotal       = 100.00;
+        $taxAmount      = round($netTotal * $taxRate / 100, 2); // 19,00
+        $totalAmount    = round($netTotal + $taxAmount, 2);     // 119,00
+        $grossTotal     = $totalAmount;
         $discountAmount = 0;
-        $totalAmount = $grossTotal;
-        $netTotal = round($totalAmount / (1 + $taxRate / 100), 2);
-        $taxAmount = round($totalAmount - $netTotal, 2);
 
         // Build fake organizer object (stdClass) matching what the template expects
         $organizer = new \stdClass();
@@ -464,8 +467,8 @@ class TicketPdfService
 
         $rawPdf = Pdf::loadView('pdf.invoice', $data)
             ->setPaper('a4', 'portrait')
-            ->setOption('dpi', 72)
-            ->setOption('isFontSubsettingEnabled', true)
+            ->setOption('dpi', 96)
+            ->setOption('isFontSubsettingEnabled', false)
             ->setOption('defaultMediaType', 'print')
             ->output();
 
@@ -478,6 +481,7 @@ class TicketPdfService
         $sampleZugferdData = [
             'invoiceNumber' => $invoiceNumber,
             'invoiceDate'   => now()->format('d.m.Y'),
+            'deliveryDate'  => Carbon::now()->addDays(14)->format('d.m.Y'),
             'taxRate'       => $taxRate,
             'totalAmount'   => $totalAmount,
             'items'         => $items,
