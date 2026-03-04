@@ -424,6 +424,8 @@ class TicketPdfService
         $booking->customer_name   = 'Max Mustermann';
         $booking->customer_email  = 'max.mustermann@example.com';
         $booking->customer_phone  = null;
+        $booking->billing_company = 'Demo-Unternehmen';
+        $booking->billing_vat_id  = null;
         $booking->payment_status  = 'pending';
         $booking->payment_method  = null;
         $booking->discount        = 0;
@@ -488,7 +490,8 @@ class TicketPdfService
                 'bic'     => $resolvedBankAccount['bic'] ?? null,
             ],
             'buyer' => [
-                'name'    => 'Max Mustermann',
+                'name'    => $booking->billing_company ?? 'Max Mustermann',
+                'contact' => $booking->billing_company ? $booking->customer_name : null,
                 'address' => 'Musterstraße 1',
                 'postal'  => '12345',
                 'city'    => 'Musterstadt',

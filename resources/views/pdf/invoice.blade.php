@@ -276,7 +276,7 @@
             <div class="address-block">
                 <h3>Rechnungsempfänger</h3>
                 <p>
-                    @if($booking->billing_company)
+                    @if(isset($booking->billing_company) && $booking->billing_company)
                         <strong>{{ $booking->billing_company }}</strong><br>
                     @endif
                     <strong>{{ $booking->customer_name }}</strong><br>
@@ -284,7 +284,7 @@
                     @if($booking->customer_phone)
                         • {{ $booking->customer_phone }}
                     @endif
-                    @if($booking->billing_vat_id)
+                    @if(isset($booking->billing_vat_id) && $booking->billing_vat_id)
                         <br>USt-IdNr.: {{ $booking->billing_vat_id }}
                     @endif
                 </p>

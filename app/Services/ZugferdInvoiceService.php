@@ -137,8 +137,15 @@ class ZugferdInvoiceService
             $buyer['city']    ?? '',
             $this->isoCountry($buyer['country'] ?? 'DE')
         );
-        if (!empty($buyer['email'])) {
+        // Bei B2B (Firmenname als name): Ansprechpartner über contact-Feld (BT-56)
+        if (!empty($buyer['contact'])) {
+            $builder->setDocumentBuyerContact($buyer['contact'], null, null, null, $buyer['email'] ?? null);
+        } elseif (!empty($buyer['email'])) {
             $builder->setDocumentBuyerCommunication('EM', $buyer['email']);
+        }
+        // USt-IdNr. des Käufers (BT-48)
+        if (!empty($buyer['vat_id'])) {
+            $builder->addDocumentBuyerTaxRegistration('VA', $buyer['vat_id']);
         }
 
         // --- Positionen ---
@@ -489,8 +496,9 @@ class ZugferdInvoiceService
      */
     private function addBuyerFromBooking(ZugferdDocumentBuilder $builder, Booking $booking): void
     {
-        // Bei Firmenbuchungen: Firmenname als Buyer-Name (B2B-konform EN 16931)
-        $buyerName    = $booking->billing_company ?? $booking->customer_name ?? 'Kunde';
+        // Bei Firmenbuchungen: Firmenname als Buyer-Name (BT-44, B2B-konform EN 16931)
+        $isB2B        = !empty($booking->billing_company);
+        $buyerName    = $isB2B ? $booking->billing_company : ($booking->customer_name ?? 'Kunde');
         $buyerAddress = $booking->billing_address ?? '';
         $buyerPostal  = $booking->billing_postal_code ?? '';
         $buyerCity    = $booking->billing_city ?? '';
@@ -499,11 +507,14 @@ class ZugferdInvoiceService
         $builder->setDocumentBuyer($buyerName);
         $builder->setDocumentBuyerAddress($buyerAddress, null, null, $buyerPostal, $buyerCity, $buyerCountry);
 
-        if ($booking->customer_email) {
+        // Bei B2B: Ansprechpartner (BT-56) zusätzlich eintragen
+        if ($isB2B && !empty($booking->customer_name)) {
+            $builder->setDocumentBuyerContact($booking->customer_name, null, null, null, $booking->customer_email ?? null);
+        } elseif ($booking->customer_email) {
             $builder->setDocumentBuyerCommunication('EM', $booking->customer_email);
         }
 
-        // USt-IdNr. bei B2B-Buchungen eintragen
+        // USt-IdNr. bei B2B-Buchungen eintragen (BT-48)
         if ($booking->billing_vat_id) {
             $builder->addDocumentBuyerTaxRegistration('VA', $booking->billing_vat_id);
         }
