@@ -464,6 +464,9 @@ class TicketPdfService
 
         $rawPdf = Pdf::loadView('pdf.invoice', $data)
             ->setPaper('a4', 'portrait')
+            ->setOption('dpi', 72)
+            ->setOption('isFontSubsettingEnabled', true)
+            ->setOption('defaultMediaType', 'print')
             ->output();
 
         // ZUGFeRD-Daten für die Beispielrechnung aufbauen

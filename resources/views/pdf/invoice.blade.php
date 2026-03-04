@@ -11,8 +11,9 @@
     $orgName      = $billingData['company_name']        ?? $event->organizer->name                ?? '';
 
     // Logo als base64 einbetten, damit DomPDF es zuverlässig darstellt
+    // Bei Beispielrechnungen wird das Logo weggelassen, um die Dateigröße zu reduzieren
     $logoBase64 = null;
-    if ($event->organizer->logo) {
+    if (empty($isSample) && $event->organizer->logo) {
         $logoAbs = public_path('storage/' . $event->organizer->logo);
         if (file_exists($logoAbs)) {
             $mime = mime_content_type($logoAbs);
