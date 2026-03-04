@@ -616,5 +616,3 @@ class ZugferdInvoiceService
         return $map[$normalized] ?? 'DE';
     }
 }
-
-
