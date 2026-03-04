@@ -119,19 +119,25 @@
         <!-- Important Notes -->
         <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
             <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">⚠️ Wichtige Hinweise</h3>
-            <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px;">
-                <li style="margin-bottom: 8px;">
-                    Erscheinen Sie bitte ca. 15 Minuten vor Veranstaltungsbeginn zum Check-In
-                </li>
-                <li style="margin-bottom: 8px;">
-                    Der QR-Code wird beim Einlass gescannt
-                </li>
-                @if($booking->event->directions)
-                <li style="margin-bottom: 8px;">
-                    Anfahrtshinweise: {{ $booking->event->directions }}
-                </li>
-                @endif
-            </ul>
+            @if($booking->event->ticket_notes)
+                <div style="color: #856404; font-size: 14px;">{!! nl2br(e($booking->event->ticket_notes)) !!}</div>
+            @else
+                <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px;">
+                    <li style="margin-bottom: 8px;">
+                        Erscheinen Sie bitte ca. 15 Minuten vor Veranstaltungsbeginn
+                    </li>
+                    @if($booking->event->show_qr_code_on_ticket)
+                    <li style="margin-bottom: 8px;">
+                        Der QR-Code wird beim Einlass gescannt
+                    </li>
+                    @endif
+                    @if($booking->event->directions)
+                    <li style="margin-bottom: 8px;">
+                        Anfahrtshinweise: {{ $booking->event->directions }}
+                    </li>
+                    @endif
+                </ul>
+            @endif
         </div>
 
         <!-- Contact Info -->
@@ -143,7 +149,7 @@
                 Bei Fragen erreichen Sie uns unter:
             </p>
             <p style="margin: 0; font-size: 14px;">
-                <strong>{{ settings('contact_email', 'info@bildungsportal.de') }}</strong>
+                <strong>{{ $booking->event->organization?->email ?? config('mail.from.address') }}</strong>
             </p>
         </div>
 

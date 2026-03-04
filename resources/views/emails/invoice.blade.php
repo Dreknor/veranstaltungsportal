@@ -7,7 +7,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-        <h1 style="margin: 0;">Platform-Fee Rechnung</h1>
+        <h1 style="margin: 0;">Platform-Gebühren Rechnung</h1>
         <p style="margin: 10px 0 0 0; font-size: 18px;">{{ $invoice->invoice_number }}</p>
     </div>
 
@@ -85,12 +85,12 @@
         <p style="margin-top: 30px;">Bei Fragen zu dieser Rechnung stehen wir Ihnen gerne zur Verfügung.</p>
 
         <p>Mit freundlichen Grüßen<br>
-        <strong>Ihr Event-Platform Team</strong></p>
+        <strong>Ihr {{ config('app.name') }}-Team</strong></p>
     </div>
 
     <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 5px 5px;">
         <p style="margin: 5px 0;">Diese E-Mail wurde automatisch generiert.</p>
-        <p style="margin: 5px 0;">© {{ date('Y') }} Event Platform - Alle Rechte vorbehalten</p>
+        <p style="margin: 5px 0;">© {{ date('Y') }} {{ config('app.name') }} - Alle Rechte vorbehalten</p>
     </div>
 </body>
 </html>

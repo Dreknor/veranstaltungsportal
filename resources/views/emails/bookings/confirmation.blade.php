@@ -67,7 +67,13 @@
                             </span>
                         </td>
                     </tr>
-                    @if($booking->event->online_url)
+                    @php
+                        $isFreeOnlineNoTicket = $booking->event->isOnline()
+                            && !$booking->event->requires_ticket
+                            && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
+                        $showOnlineAccess = $booking->payment_status === 'paid' || $isFreeOnlineNoTicket;
+                    @endphp
+                    @if($showOnlineAccess && $booking->event->online_url)
                     <tr>
                         <td style="padding: 8px 0; color: #666;">
                             <strong>🔗 Zugangslink:</strong>
@@ -79,7 +85,7 @@
                         </td>
                     </tr>
                     @endif
-                    @if($booking->event->online_access_code)
+                    @if($showOnlineAccess && $booking->event->online_access_code)
                     <tr>
                         <td style="padding: 8px 0; color: #666;">
                             <strong>🔑 Zugangscode:</strong>
@@ -91,12 +97,7 @@
                         </td>
                     </tr>
                     @endif
-                    @php
-                        $isFreeOnlineNoTicket = $booking->event->isOnline()
-                            && !$booking->event->requires_ticket
-                            && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
-                    @endphp
-                    @if($booking->payment_status !== 'paid' && !$isFreeOnlineNoTicket)
+                    @if(!$showOnlineAccess)
                     <tr>
                         <td colspan="2" style="padding: 12px 0;">
                             <div style="background: #fff3cd; padding: 12px; border-radius: 4px; border-left: 3px solid #ffc107;">
@@ -128,7 +129,12 @@
                             {{ $booking->event->venue_postal_code }} {{ $booking->event->venue_city }}
                         </td>
                     </tr>
-                    @if($booking->event->online_url)
+                    @php
+                        $isFreeHybrid = !$booking->event->requires_ticket
+                            && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
+                        $showHybridOnlineAccess = $booking->payment_status === 'paid' || $isFreeHybrid;
+                    @endphp
+                    @if($showHybridOnlineAccess && $booking->event->online_url)
                     <tr>
                         <td style="padding: 8px 0; color: #666;">
                             <strong>🔗 Online-Zugang:</strong>
@@ -147,7 +153,7 @@
                         </td>
                     </tr>
                     @endif
-                    @if($booking->payment_status !== 'paid')
+                    @if(!$showHybridOnlineAccess)
                     <tr>
                         <td colspan="2" style="padding: 12px 0;">
                             <div style="background: #fff3cd; padding: 12px; border-radius: 4px; border-left: 3px solid #ffc107;">

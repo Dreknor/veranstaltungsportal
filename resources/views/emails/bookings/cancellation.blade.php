@@ -76,7 +76,7 @@
 
     <div class="footer">
         <p>Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese E-Mail.</p>
-        <p>&copy; {{ date('Y') }} Veranstaltungsportal. Alle Rechte vorbehalten.</p>
+        <p>&copy; {{ date('Y') }} {{config('app.name')}}. Alle Rechte vorbehalten.</p>
     </div>
 </body>
 </html>

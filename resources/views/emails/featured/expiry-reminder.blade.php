@@ -150,7 +150,7 @@
 
         <p>
             Mit freundlichen Grüßen<br>
-            <strong>Ihr Bildungsportal-Team</strong>
+            <strong>Ihr {{ config('app.name')  }}-Team</strong>
         </p>
     </div>
 
