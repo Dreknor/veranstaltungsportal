@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Storage;
 class TicketPdfService
 {
     public function __construct(
-        protected QrCodeService $qrCodeService
+        protected QrCodeService $qrCodeService,
+        protected ZugferdInvoiceService $zugferdInvoiceService,
     ) {}
 
     /**
@@ -298,7 +299,7 @@ class TicketPdfService
     }
 
     /**
-     * Download invoice PDF
+     * Download invoice PDF (ZUGFeRD/EN 16931 konform)
      *
      * @param Booking $booking
      * @return \Illuminate\Http\Response
@@ -309,14 +310,81 @@ class TicketPdfService
         $eventSlug = \Illuminate\Support\Str::slug($booking->event->title);
         $filename = "Rechnung_{$invoiceNumber}_{$eventSlug}.pdf";
 
-        return $this->generateInvoice($booking)->download($filename);
+        // ZUGFeRD-XML in PDF einbetten
+        $invoiceData = $this->buildInvoiceData($booking);
+        $rawPdf = $this->generateInvoice($booking)->output();
+        $zugferdPdf = $this->zugferdInvoiceService->embedZugferdInPdf($rawPdf, $booking, $invoiceData);
+
+        return response($zugferdPdf, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Gibt den ZUGFeRD-konformen Rechnungs-PDF-Inhalt als String zurück.
+     *
+     * @param Booking $booking
+     * @return string
+     */
+    public function getInvoiceContent(Booking $booking): string
+    {
+        $invoiceData = $this->buildInvoiceData($booking);
+        $rawPdf = $this->generateInvoice($booking)->output();
+        return $this->zugferdInvoiceService->embedZugferdInPdf($rawPdf, $booking, $invoiceData);
+    }
+
+    /**
+     * Erstellt das Daten-Array für die Rechnung (intern wiederverwendbar).
+     */
+    private function buildInvoiceData(Booking $booking): array
+    {
+        $booking->load(['event.organizer', 'items.ticketType']);
+
+        $items      = [];
+        $grossTotal = 0;
+        $taxRate    = 19;
+
+        foreach ($booking->items as $item) {
+            $itemTotal   = $item->price * $item->quantity;
+            $grossTotal += $itemTotal;
+
+            // EN 16931 / ZUGFeRD: 'description' = Bezeichnung der Leistung (Ticketkategorie),
+            // 'ticket_type' = optionaler Zusatz (wird an Produktname angehängt).
+            $items[] = [
+                'description' => $item->ticketType->name ?? $booking->event->title,
+                'ticket_type' => $booking->event->title,
+                'quantity'    => $item->quantity,
+                'unit_price'  => $item->price,
+                'tax_rate'    => $taxRate,
+                'total'       => $itemTotal,
+            ];
+        }
+
+        $discountAmount = $booking->discount ?? 0;
+        $totalAmount    = $grossTotal - $discountAmount;
+        $netAfterDiscount = $totalAmount / (1 + ($taxRate / 100));
+        $taxAmount        = $totalAmount - $netAfterDiscount;
+
+        return [
+            'items'          => $items,
+            'grossTotal'     => $grossTotal,
+            'netTotal'       => $netAfterDiscount,
+            'discountAmount' => $discountAmount,
+            'taxRate'        => $taxRate,
+            'taxAmount'      => $taxAmount,
+            'totalAmount'    => $totalAmount,
+            'invoiceNumber'  => $this->generateInvoiceNumber($booking),
+            'invoiceDate'    => $booking->invoice_date ? $booking->invoice_date->format('d.m.Y') : now()->format('d.m.Y'),
+        ];
     }
 
     /**
      * Generate a sample invoice PDF for a given organization.
      * Uses the exact same template as real invoices, counter is NOT incremented.
+     * Returns the PDF content as a string (with ZUGFeRD embedded).
      */
-    public function generateSampleInvoice(Organization $organization, string $invoiceNumber): \Barryvdh\DomPDF\PDF
+    public function generateSampleInvoice(Organization $organization, string $invoiceNumber): string
     {
         $billingData = $organization->billing_data ?? [];
         $bankAccount = $organization->bank_account ?? [];
@@ -392,8 +460,44 @@ class TicketPdfService
             'isSample'      => true,
         ];
 
-        return Pdf::loadView('pdf.invoice', $data)
-            ->setPaper('a4', 'portrait');
+        $rawPdf = Pdf::loadView('pdf.invoice', $data)
+            ->setPaper('a4', 'portrait')
+            ->output();
+
+        // ZUGFeRD-Daten für die Beispielrechnung aufbauen
+        // $billingData bereits am Methodenbeginn gesetzt; bank_account sicher als Array auflösen
+        $resolvedBankAccount = is_array($bankAccount)
+            ? $bankAccount
+            : (json_decode($bankAccount ?? '[]', true) ?? []);
+
+        $sampleZugferdData = [
+            'invoiceNumber' => $invoiceNumber,
+            'invoiceDate'   => now()->format('d.m.Y'),
+            'taxRate'       => $taxRate,
+            'totalAmount'   => $totalAmount,
+            'items'         => $items,
+            'seller' => [
+                'name'    => $billingData['company_name'] ?? $organization->name,
+                'address' => $billingData['company_address'] ?? ($organization->billing_address ?? ''),
+                'postal'  => $billingData['company_postal_code'] ?? ($organization->billing_postal_code ?? ''),
+                'city'    => $billingData['company_city'] ?? ($organization->billing_city ?? ''),
+                'country' => $billingData['company_country'] ?? 'DE',
+                'vat_id'  => $billingData['vat_id'] ?? '',
+                'tax_id'  => $organization->tax_id ?? ($billingData['tax_id'] ?? ''),
+                'iban'    => $resolvedBankAccount['iban'] ?? null,
+                'bic'     => $resolvedBankAccount['bic'] ?? null,
+            ],
+            'buyer' => [
+                'name'    => 'Max Mustermann',
+                'address' => 'Musterstraße 1',
+                'postal'  => '12345',
+                'city'    => 'Musterstadt',
+                'country' => 'DE',
+                'email'   => 'max.mustermann@example.com',
+            ],
+        ];
+
+        return $this->zugferdInvoiceService->embedZugferdInPdfForSample($rawPdf, $sampleZugferdData);
     }
 
     /**

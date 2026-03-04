@@ -313,7 +313,8 @@
         <strong>Hinweise:</strong><br>
         Diese Rechnung wird gemäß § 14 UStG für erbrachte Leistungen ausgestellt.<br>
         Die Platform-Fee wird für die Bereitstellung der Event-Plattform und Zahlungsabwicklung berechnet.<br>
-        Zahlungsziel: {{ $invoice->due_date->format('d.m.Y') }}
+        Zahlungsziel: {{ $invoice->due_date->format('d.m.Y') }}<br>
+        <span style="font-size:8pt;color:#888;">Diese Rechnung entspricht der europäischen Norm EN 16931 (ZUGFeRD) für die elektronische Rechnungsstellung.</span>
     </div>
 
     <div class="footer">

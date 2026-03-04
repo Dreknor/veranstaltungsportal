@@ -23,7 +23,7 @@ class InvoiceNumberFormatTest extends TestCase
     {
         parent::setUp();
 
-        $this->invoiceService = new InvoiceService();
+        $this->invoiceService = app(InvoiceService::class);
         $this->user = User::factory()->create();
         $this->organization = Organization::factory()->create();
 

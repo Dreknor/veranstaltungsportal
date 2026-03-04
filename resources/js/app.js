@@ -5,6 +5,10 @@ import { richEditor } from "./rich-editor";
 
 window.Alpine = Alpine;
 window.CookieConsent = CookieConsent;
+
+// Rich-Text-Editor als Alpine-Komponente registrieren (vor Alpine.start())
+Alpine.data("richEditor", richEditor);
+
 Alpine.start();
 
 /**

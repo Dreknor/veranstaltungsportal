@@ -14,10 +14,14 @@ use Carbon\Carbon;
 class InvoiceService
 {
     protected InvoiceNumberService $invoiceNumberService;
+    protected ZugferdInvoiceService $zugferdInvoiceService;
 
-    public function __construct(InvoiceNumberService $invoiceNumberService)
-    {
-        $this->invoiceNumberService = $invoiceNumberService;
+    public function __construct(
+        InvoiceNumberService $invoiceNumberService,
+        ZugferdInvoiceService $zugferdInvoiceService
+    ) {
+        $this->invoiceNumberService  = $invoiceNumberService;
+        $this->zugferdInvoiceService = $zugferdInvoiceService;
     }
     /**
      * Generate platform fee invoice after event ends
@@ -123,9 +127,11 @@ class InvoiceService
             'recipient_name' => $booking->customer_name,
             'recipient_email' => $booking->customer_email,
             'recipient_address' => $this->formatBookingAddress($booking),
-            'amount' => $booking->subtotal,
+            // Preise werden als Bruttobeträge (inkl. MwSt.) gespeichert.
+            // Nettobetrag und Steuerbetrag werden aus dem Bruttogesamtbetrag abgeleitet.
+            'amount' => round((float) $booking->total / 1.19, 2),        // BT-109: Netto-Steuerbasis
             'tax_rate' => 19.0,
-            'tax_amount' => $booking->subtotal * 0.19,
+            'tax_amount' => round((float) $booking->total - (float) $booking->total / 1.19, 2), // BT-110
             'total_amount' => $booking->total,
             'currency' => 'EUR',
             'invoice_date' => now(),
@@ -470,7 +476,11 @@ class InvoiceService
             mkdir(storage_path('app/invoices'), 0755, true);
         }
 
-        $pdf->save($path);
+        // ZUGFeRD-XML (EN 16931) in das PDF einbetten
+        $rawPdfContent    = $pdf->output();
+        $zugferdPdfContent = $this->zugferdInvoiceService->embedZugferdInPdfFromInvoice($rawPdfContent, $invoice);
+
+        file_put_contents($path, $zugferdPdfContent);
 
         $invoice->update([
             'pdf_path' => "invoices/{$filename}"
@@ -548,24 +558,62 @@ class InvoiceService
 
     /**
      * Generate invoice PDF output for booking
-     * Returns PDF content as string for email attachment
+     * Returns ZUGFeRD-compatible PDF content as string for email attachment
      */
     public function getInvoiceOutput(Booking $booking)
     {
-        $invoice = [
-            'booking' => $booking,
-            'event' => $booking->event,
-            'items' => $this->getBookingItems($booking),
+        $booking->load(['event.organizer', 'items.ticketType']);
+
+        $invoiceData = [
+            'booking'  => $booking,
+            'event'    => $booking->event,
+            'items'    => $this->getBookingItems($booking),
             'organizer' => $this->getOrganizerBillingData($booking->event->user, $booking->event),
             'customer' => [
-                'name' => $booking->customer_name,
-                'email' => $booking->customer_email,
+                'name'    => $booking->customer_name,
+                'email'   => $booking->customer_email,
                 'address' => $this->formatBookingAddress($booking),
             ],
         ];
 
-        $pdf = PDF::loadView('invoices.booking-pdf', $invoice);
-        return $pdf->output();
+        $rawPdf = PDF::loadView('invoices.booking-pdf', $invoiceData)->output();
+
+        // ZUGFeRD-Daten aufbereiten für den Service
+        $taxRate    = 19.0;
+        $grossTotal = 0.0;
+        $zugferdItems = [];
+
+        foreach ($booking->items as $item) {
+            $itemTotal   = $item->price * $item->quantity;
+            $grossTotal += $itemTotal;
+            $zugferdItems[] = [
+                'description' => $item->ticketType->name ?? 'Ticket',
+                'ticket_type' => $booking->event->title ?? '',
+                'quantity'    => $item->quantity,
+                'unit_price'  => $item->price,
+                'tax_rate'    => $taxRate,
+                'total'       => $itemTotal,
+            ];
+        }
+
+        $discountAmount   = $booking->discount ?? 0;
+        $totalAmount      = $grossTotal - $discountAmount;
+        $netAfterDiscount = $totalAmount / (1 + ($taxRate / 100));
+        $taxAmount        = $totalAmount - $netAfterDiscount;
+
+        $zugferdData = [
+            'items'          => $zugferdItems,
+            'grossTotal'     => $grossTotal,
+            'netTotal'       => $netAfterDiscount,
+            'discountAmount' => $discountAmount,
+            'taxRate'        => $taxRate,
+            'taxAmount'      => $taxAmount,
+            'totalAmount'    => $totalAmount,
+            'invoiceNumber'  => $booking->invoice_number ?? ('INV-' . $booking->id),
+            'invoiceDate'    => $booking->invoice_date ? $booking->invoice_date->format('d.m.Y') : now()->format('d.m.Y'),
+        ];
+
+        return $this->zugferdInvoiceService->embedZugferdInPdf($rawPdf, $booking, $zugferdData);
     }
 }
 

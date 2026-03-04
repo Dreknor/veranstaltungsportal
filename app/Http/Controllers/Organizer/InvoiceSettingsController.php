@@ -119,8 +119,12 @@ class InvoiceSettingsController extends Controller
 
         $invoiceNumber = $this->invoiceNumberService->previewNextBookingInvoiceNumber(auth()->user());
 
-        $pdf = $this->ticketPdfService->generateSampleInvoice($organization, $invoiceNumber);
+        $pdfContent = $this->ticketPdfService->generateSampleInvoice($organization, $invoiceNumber);
+        $filename   = 'Beispielrechnung_' . $invoiceNumber . '.pdf';
 
-        return $pdf->download('Beispielrechnung_' . $invoiceNumber . '.pdf');
+        return response($pdfContent, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }

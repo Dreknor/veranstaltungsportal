@@ -442,6 +442,11 @@
                 @endif
                 Bei Fragen wenden Sie sich an den Veranstalter.
             </p>
+            @if(!isset($isSample) || !$isSample)
+            <p style="margin-top:4px;font-size:8pt;color:#888;">
+                Diese Rechnung entspricht der europäischen Norm EN 16931 und enthält ein eingebettetes ZUGFeRD-XML (Profil EN 16931) für die automatische Weiterverarbeitung.
+            </p>
+            @endif
         </div>
 
         <!-- Footer -->

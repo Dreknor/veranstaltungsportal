@@ -50,9 +50,7 @@
 
                 <!-- Rich-Text-Editor -->
                 <div class="mb-6"
-                     x-data="richEditor({ name: 'content', value: {{ Js::from(old('content', $page->content)) }} })"
-                     x-init="init()"
-                     x-destroy="destroy()">
+                     x-data="richEditor({ name: 'content', value: {{ Js::from(old('content', $page->content)) }} })">
 
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Inhalt</label>
 
@@ -203,10 +201,9 @@
 
                     </div>
 
-                    <!-- Editor-Bereich -->
+                    <!-- Editor-Bereich: leer lassen – Tiptap hängt view.dom per JS ein -->
                     <div x-ref="editorContent"
-                         class="rich-editor-content border border-gray-300 dark:border-gray-600 rounded-b-md bg-white dark:bg-gray-900 min-h-96 p-4 focus:outline-none prose prose-sm dark:prose-invert max-w-none">
-                    </div>
+                         class="rich-editor-content border border-gray-300 dark:border-gray-600 rounded-b-md bg-white dark:bg-gray-900 min-h-96"></div>
                 </div>
 
                 <!-- Meta-Info -->
@@ -267,7 +264,7 @@
         }
         /* Tiptap Editor Styles */
         .rich-editor-content .tiptap {
-            @apply outline-none min-h-96;
+            @apply outline-none min-h-96 p-4 prose prose-sm dark:prose-invert max-w-none;
         }
         .rich-editor-content .tiptap h1 { @apply text-2xl font-bold mt-4 mb-2; }
         .rich-editor-content .tiptap h2 { @apply text-xl font-bold mt-4 mb-2; }
