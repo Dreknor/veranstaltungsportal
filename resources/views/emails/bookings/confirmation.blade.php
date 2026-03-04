@@ -91,7 +91,12 @@
                         </td>
                     </tr>
                     @endif
-                    @if($booking->payment_status !== 'paid')
+                    @php
+                        $isFreeOnlineNoTicket = $booking->event->isOnline()
+                            && !$booking->event->requires_ticket
+                            && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
+                    @endphp
+                    @if($booking->payment_status !== 'paid' && !$isFreeOnlineNoTicket)
                     <tr>
                         <td colspan="2" style="padding: 12px 0;">
                             <div style="background: #fff3cd; padding: 12px; border-radius: 4px; border-left: 3px solid #ffc107;">
@@ -336,7 +341,12 @@
         <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📋 Nächste Schritte</h3>
             <ol style="margin: 0; padding-left: 20px; color: #666;">
-                @if($booking->payment_status !== 'paid')
+                @php
+                    $isFreeOnlineNoTicketSteps = $booking->event->isOnline()
+                        && !$booking->event->requires_ticket
+                        && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
+                @endphp
+                @if($booking->payment_status !== 'paid' && !$isFreeOnlineNoTicketSteps)
                 <li style="margin-bottom: 10px;">Überweisung des Betrags mit Angabe der Buchungsnummer</li>
                 <li style="margin-bottom: 10px;">
                     Nach Zahlungseingang erhalten Sie
