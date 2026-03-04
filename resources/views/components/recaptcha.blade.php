@@ -34,6 +34,10 @@
              * Es wird erst nach Cookie-Einwilligung durch app.js geladen (DSGVO-konform).
              * Das 'recaptcha:loaded'-Event wird von app.js gefeuert sobald das Script bereit ist.
              * Die Cookie-Warnhinweise werden ebenfalls von app.js gesteuert.
+             *
+             * WICHTIG: Kein form.cloneNode() – das würde alle Event-Listener anderer
+             * Skripte (z.B. Ticket-Buttons) zerstören. Stattdessen wird ein data-Attribut
+             * als Flag genutzt um Doppel-Registrierung zu verhindern.
              */
             function initRecaptchaForms() {
                 const siteKey = document.querySelector('meta[name="recaptcha-site-key"]')?.content;
@@ -44,20 +48,21 @@
 
                 const forms = document.querySelectorAll('form[data-recaptcha]');
                 forms.forEach(form => {
-                    const action = form.getAttribute('data-recaptcha-action') || 'submit';
-                    // Vorherigen Listener entfernen (verhindert Doppel-Submission)
-                    const newForm = form.cloneNode(true);
-                    form.parentNode.replaceChild(newForm, form);
+                    // Bereits initialisiert? Überspringen um Doppel-Listener zu vermeiden
+                    if (form.dataset.recaptchaInit === '1') return;
+                    form.dataset.recaptchaInit = '1';
 
-                    newForm.addEventListener('submit', function(e) {
+                    const action = form.getAttribute('data-recaptcha-action') || 'submit';
+
+                    form.addEventListener('submit', function(e) {
                         e.preventDefault();
+                        const input = form.querySelector('input[name="g-recaptcha-response"]');
                         grecaptcha.ready(function() {
                             grecaptcha.execute(siteKey, { action: action }).then(function(token) {
-                                const input = newForm.querySelector('input[name="g-recaptcha-response"]');
                                 if (input) input.value = token;
-                                newForm.submit();
+                                form.submit();
                             }).catch(function() {
-                                newForm.submit();
+                                form.submit();
                             });
                         });
                     });
