@@ -55,17 +55,10 @@
             </div>
         </div>
         <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-            <p>&copy; {{ date('Y') }}  {{ config('app.name') }} - Ein Angebot der <a href="https://www.esdigmbh.de/" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">ESDI GmbH</a></p>
+            <p>&copy; {{ date('Y') }}  {{ config('app.name') }}</p>
             <p class="text-sm mt-2">
-                Ein Angebot im Rahmen der Aktion <a href="https://www.ev-schulen-sachsen.de/hauptfach-mensch-1" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">Hauptfach Mensch</a>.
-            </p>
+                Ein Angebot der <a href="https://www.esdigmbh.de/" target="_blank" rel="noopener" class="text-blue-400 hover:text-blue-300 transition">ESDI GmbH</a>            </p>
             <p class="text-xs mt-3 space-x-3">
-                <a href="{{ route('agb') }}" class="text-gray-500 hover:text-gray-300 transition">AGB</a>
-                <span class="text-gray-700">·</span>
-                <a href="{{ route('datenschutz') }}" class="text-gray-500 hover:text-gray-300 transition">Datenschutz</a>
-                <span class="text-gray-700">·</span>
-                <a href="{{ route('impressum') }}" class="text-gray-500 hover:text-gray-300 transition">Impressum</a>
-                <span class="text-gray-700">·</span>
                 <button onclick="window.showCookiePreferences()" class="text-gray-500 hover:text-gray-300 transition cursor-pointer bg-transparent border-0 p-0 text-xs">
                     Cookie-Einstellungen
                 </button>
