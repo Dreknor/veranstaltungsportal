@@ -21,6 +21,8 @@ class Booking extends Model
         'customer_name',
         'customer_email',
         'customer_phone',
+        'billing_company',
+        'billing_vat_id',
         'billing_address',
         'billing_postal_code',
         'billing_city',

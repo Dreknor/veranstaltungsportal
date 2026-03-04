@@ -154,8 +154,14 @@
                 <td style="width: 60%;">
                     <div class="customer">
                         <strong>Rechnungsempfänger:</strong><br>
+                        @if(!empty($customer['company']))
+                            <strong>{{ $customer['company'] }}</strong><br>
+                        @endif
                         {{ $customer['name'] }}<br>
                         {{ $customer['address'] ?? '' }}
+                        @if(!empty($customer['vat_id']))
+                            <br>USt-IdNr.: {{ $customer['vat_id'] }}
+                        @endif
                     </div>
                 </td>
                 <td style="width: 40%;"></td>

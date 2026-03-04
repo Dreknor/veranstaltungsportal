@@ -46,10 +46,16 @@
                     <!-- Kunde -->
                     <div>
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Kunde</h3>
+                        @if($booking->billing_company)
+                            <p class="text-sm font-semibold text-blue-700">{{ $booking->billing_company }}</p>
+                        @endif
                         <p class="text-lg font-semibold text-gray-900">{{ $booking->customer_name }}</p>
                         <p class="text-sm text-gray-600">{{ $booking->customer_email }}</p>
                         @if($booking->customer_phone)
                             <p class="text-sm text-gray-600">{{ $booking->customer_phone }}</p>
+                        @endif
+                        @if($booking->billing_vat_id)
+                            <p class="text-sm text-gray-500">USt-IdNr.: {{ $booking->billing_vat_id }}</p>
                         @endif
                     </div>
                 </div>

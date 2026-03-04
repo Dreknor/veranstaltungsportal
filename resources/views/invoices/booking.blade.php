@@ -184,10 +184,16 @@
 
     <div class="customer-info">
         <h3>Rechnungsempfänger</h3>
+        @if($booking->billing_company)
+            <div><strong>{{ $booking->billing_company }}</strong></div>
+        @endif
         <div>{{ $booking->customer_name }}</div>
         <div>{{ $booking->customer_email }}</div>
         @if($booking->customer_phone)
             <div>{{ $booking->customer_phone }}</div>
+        @endif
+        @if($booking->billing_vat_id)
+            <div>USt-IdNr.: {{ $booking->billing_vat_id }}</div>
         @endif
     </div>
 

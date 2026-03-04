@@ -489,7 +489,8 @@ class ZugferdInvoiceService
      */
     private function addBuyerFromBooking(ZugferdDocumentBuilder $builder, Booking $booking): void
     {
-        $buyerName    = $booking->customer_name ?? 'Kunde';
+        // Bei Firmenbuchungen: Firmenname als Buyer-Name (B2B-konform EN 16931)
+        $buyerName    = $booking->billing_company ?? $booking->customer_name ?? 'Kunde';
         $buyerAddress = $booking->billing_address ?? '';
         $buyerPostal  = $booking->billing_postal_code ?? '';
         $buyerCity    = $booking->billing_city ?? '';
@@ -500,6 +501,11 @@ class ZugferdInvoiceService
 
         if ($booking->customer_email) {
             $builder->setDocumentBuyerCommunication('EM', $booking->customer_email);
+        }
+
+        // USt-IdNr. bei B2B-Buchungen eintragen
+        if ($booking->billing_vat_id) {
+            $builder->addDocumentBuyerTaxRegistration('VA', $booking->billing_vat_id);
         }
     }
 

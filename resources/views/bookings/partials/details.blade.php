@@ -309,6 +309,18 @@
                             <dd class="mt-1 text-sm text-gray-900">{{ $booking->customer_phone }}</dd>
                         </div>
                     @endif
+                    @if($booking->billing_company)
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Firma</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $booking->billing_company }}</dd>
+                        </div>
+                    @endif
+                    @if($booking->billing_vat_id)
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">USt-IdNr.</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $booking->billing_vat_id }}</dd>
+                        </div>
+                    @endif
                 </dl>
             </div>
         </div>

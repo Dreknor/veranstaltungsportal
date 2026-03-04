@@ -573,6 +573,8 @@ class InvoiceService
                 'name'    => $booking->customer_name,
                 'email'   => $booking->customer_email,
                 'address' => $this->formatBookingAddress($booking),
+                'company' => $booking->billing_company,
+                'vat_id'  => $booking->billing_vat_id,
             ],
         ];
 

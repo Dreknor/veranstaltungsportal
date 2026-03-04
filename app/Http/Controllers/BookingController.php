@@ -106,6 +106,8 @@ class BookingController extends Controller
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'nullable|string|max:50',
+            'billing_company' => 'nullable|string|max:255',
+            'billing_vat_id' => 'nullable|string|max:50',
             'billing_address' => 'required|string|max:255',
             'billing_postal_code' => 'required|string|max:20',
             'billing_city' => 'required|string|max:255',
@@ -241,6 +243,8 @@ class BookingController extends Controller
                     'customer_name' => $request->customer_name,
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $request->customer_phone,
+                    'billing_company' => $request->billing_company,
+                    'billing_vat_id' => $request->billing_vat_id,
                     'billing_address' => $request->billing_address,
                     'billing_postal_code' => $request->billing_postal_code,
                     'billing_city' => $request->billing_city,
@@ -254,7 +258,7 @@ class BookingController extends Controller
                     'payment_method' => $request->payment_method ?? 'invoice',
                     'confirmed_at' => $confirmedAt,
                     'discount_code_id' => $discountCodeId,
-                    'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code', 'payment_method']),
+                    'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_company', 'billing_vat_id', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code', 'payment_method']),
                 ]);
 
                 // Erstelle Buchungspositionen
