@@ -120,11 +120,28 @@ class ZugferdInvoiceService
 
         $builder->setDocumentSeller($sellerName);
         $builder->setDocumentSellerAddress($sellerAddress, null, null, $sellerPostal, $sellerCity, $sellerCountry);
+
+        // BR-CO-26: Mindestens einer der Seller-Identifier muss vorhanden sein
         if ($sellerVatId) {
             $builder->addDocumentSellerTaxRegistration('VA', $sellerVatId);
         }
         if ($sellerTaxId) {
             $builder->addDocumentSellerTaxRegistration('FC', $sellerTaxId);
+        }
+        // Fallback: Firmenname als ID (BT-29) wenn keine Steuer-ID vorhanden
+        if (!$sellerVatId && !$sellerTaxId) {
+            $builder->addDocumentSellerGlobalID($sellerName, '0088');
+        }
+
+        // BR-DE-2: Seller Contact (BG-6) muss übermittelt werden
+        $sellerContactName  = $seller['contact_name']  ?? $sellerName;
+        $sellerContactEmail = $seller['email']          ?? null;
+        $sellerContactPhone = $seller['phone']          ?? null;
+        $builder->setDocumentSellerContact($sellerContactName, null, $sellerContactPhone, null, $sellerContactEmail);
+
+        // Seller electronic address (BT-34) – empfohlen
+        if ($sellerContactEmail) {
+            $builder->setDocumentSellerCommunication('EM', $sellerContactEmail);
         }
 
         // --- Käufer ---
@@ -148,6 +165,10 @@ class ZugferdInvoiceService
             $builder->addDocumentBuyerTaxRegistration('VA', $buyer['vat_id']);
         }
 
+        // BR-FX-EN-04: Lieferdatum (BT-72) muss angegeben werden
+        $deliveryDate = $this->resolveDate($data['deliveryDate'] ?? null, $invoiceDate);
+        $builder->setDocumentSupplyChainEvent($deliveryDate);
+
         // --- Positionen ---
         $items      = $data['items'] ?? [];
         $taxRate    = (float) ($data['taxRate'] ?? 19);
@@ -156,10 +177,11 @@ class ZugferdInvoiceService
         foreach ($items as $index => $item) {
             $posId        = (string) ($index + 1);
             $quantity     = (float) ($item['quantity'] ?? 1);
-            $unitPrice    = (float) ($item['unit_price'] ?? 0);
-            $itemGross    = (float) ($item['total'] ?? $unitPrice * $quantity);
+            $unitPriceGross = (float) ($item['unit_price'] ?? 0);      // Bruttopreis je Einheit
+            $itemGross    = (float) ($item['total'] ?? $unitPriceGross * $quantity);
             $itemRate     = (float) ($item['tax_rate'] ?? $taxRate);
-            $netUnitPrice = round($unitPrice / (1 + $itemRate / 100), 10);
+            // Nettopreise ableiten (kein separates Allowance → GrossPrice = NetPrice auf Positionsebene)
+            $netUnitPrice = round($unitPriceGross / (1 + $itemRate / 100), 10);
             $itemNet      = round($itemGross / (1 + $itemRate / 100), 10);
             $lineTotals  += $itemNet;
 
@@ -168,10 +190,12 @@ class ZugferdInvoiceService
                 $productName = 'Ticket';
             }
 
+            // PEPPOL-EN16931-R046: NetPrice = GrossPrice - Allowance.
+            // Da kein Allowance auf Positionsebene, setzen wir GrossPrice = NetPrice.
             $builder
                 ->addNewPosition($posId)
                 ->setDocumentPositionProductDetails($productName)
-                ->setDocumentPositionGrossPrice($unitPrice)
+                ->setDocumentPositionGrossPrice($netUnitPrice)
                 ->setDocumentPositionNetPrice($netUnitPrice)
                 ->setDocumentPositionNetPriceTax('S', 'VAT', $itemRate, 0.0)
                 ->setDocumentPositionQuantity($quantity, 'C62')
@@ -180,11 +204,15 @@ class ZugferdInvoiceService
         }
 
         // --- Steuer ---
-        $totalAmount       = (float) ($data['totalAmount'] ?? 0);
-        $netTotal          = round($totalAmount / (1 + $taxRate / 100), 2);
-        $taxAmount         = round($totalAmount - $netTotal, 2);
+        // Arithmetik-Fix: lineTotals ist die Summe der Netto-Positionssummen.
+        // netTotal wird autoritativ aus lineTotals berechnet, um Rundungsfehler zu vermeiden.
         $lineTotalsRounded = round($lineTotals, 2);
-        $netDiscount       = max(0.0, round($lineTotalsRounded - $netTotal, 2));
+        $totalAmount       = (float) ($data['totalAmount'] ?? 0);
+        // Falls totalAmount aus Brutto-Items summiert wurde, leiten wir netTotal neu ab:
+        $netTotal          = $lineTotalsRounded;
+        $taxAmount         = round($netTotal * $taxRate / 100, 2);
+        $totalAmount       = round($netTotal + $taxAmount, 2);
+        $netDiscount       = 0.0;
 
         $builder->addDocumentTaxSimple('S', 'VAT', $netTotal, $taxAmount, $taxRate);
 
@@ -201,13 +229,13 @@ class ZugferdInvoiceService
 
         // --- Summation ---
         $builder->setDocumentSummation(
-            round($totalAmount, 2),
-            round($totalAmount, 2),
-            $lineTotalsRounded,
-            0.0,
-            $netDiscount,
-            round($netTotal, 2),
-            round($taxAmount, 2)
+            $totalAmount,         // BT-112: Gesamtbetrag brutto
+            $totalAmount,         // BT-115: Fälligkeitsbetrag
+            $lineTotalsRounded,   // BT-106: Summe der Netto-Zeilensummen
+            0.0,                  // BT-108: Aufschläge
+            $netDiscount,         // BT-107: Abzüge
+            $netTotal,            // BT-109: Steuerbemessungsgrundlage
+            $taxAmount            // BT-110: Steuerbetrag
         );
 
         return $builder->getContent();
@@ -244,6 +272,12 @@ class ZugferdInvoiceService
         // --- Käufer (Teilnehmer) ---
         $this->addBuyerFromBooking($builder, $booking);
 
+        // BR-FX-EN-04: Lieferdatum (BT-72) – Eventdatum als Liefer-/Leistungsdatum
+        $deliveryDate = $booking->event->start_date
+            ? new DateTime($booking->event->start_date->format('Y-m-d'))
+            : $invoiceDate;
+        $builder->setDocumentSupplyChainEvent($deliveryDate);
+
         // --- Positionen ---
         $items      = $invoiceData['items'] ?? [];
         $taxRate    = (float) ($invoiceData['taxRate'] ?? 19);
@@ -265,10 +299,11 @@ class ZugferdInvoiceService
                 $productName = 'Ticket';
             }
 
+            // PEPPOL-EN16931-R046: GrossPrice = NetPrice wenn kein Allowance auf Positionsebene
             $builder
                 ->addNewPosition($posId)
                 ->setDocumentPositionProductDetails($productName)
-                ->setDocumentPositionGrossPrice($unitPrice)
+                ->setDocumentPositionGrossPrice($netUnitPrice)
                 ->setDocumentPositionNetPrice($netUnitPrice)
                 ->setDocumentPositionNetPriceTax('S', 'VAT', $itemRate, 0.0)
                 ->setDocumentPositionQuantity($quantity, 'C62') // C62 = Stück (UN/CEFACT)
@@ -277,15 +312,12 @@ class ZugferdInvoiceService
         }
 
         // --- Steuer auf Dokumentenebene ---
-        $totalAmount    = (float) ($invoiceData['totalAmount'] ?? 0);
-        $netTotal       = round($totalAmount / (1 + $taxRate / 100), 2);
-        $taxAmount      = round($totalAmount - $netTotal, 2);
-
-        // BT-107 (Abzüge/Rabatte auf Dokumentenebene) als Differenz zwischen
-        // den Netto-Zeilensummen und dem tatsächlichen Netto-Gesamtbetrag.
-        // Damit gilt garantiert: BT-109 = BT-106 - BT-107.
+        // Arithmetik-Fix: netTotal aus lineTotals ableiten (nicht aus Brutto-Gesamt)
         $lineTotalsRounded = round($lineTotals, 2);
-        $netDiscount = max(0.0, round($lineTotalsRounded - $netTotal, 2));
+        $netTotal          = $lineTotalsRounded;
+        $taxAmount         = round($netTotal * $taxRate / 100, 2);
+        $totalAmount       = round($netTotal + $taxAmount, 2);
+        $netDiscount       = 0.0;
 
         $builder->addDocumentTaxSimple('S', 'VAT', $netTotal, $taxAmount, $taxRate);
 
@@ -305,13 +337,13 @@ class ZugferdInvoiceService
 
         // --- Summation ---
         $builder->setDocumentSummation(
-            round($totalAmount, 2),       // BT-112: Gesamtbetrag brutto (inkl. MwSt.)
-            round($totalAmount, 2),       // BT-115: Fälligkeitsbetrag
-            $lineTotalsRounded,           // BT-106: Summe der Netto-Zeilensummen
-            0.0,                          // BT-108: Aufschläge auf Dokumentenebene
-            $netDiscount,                 // BT-107: Abzüge auf Dokumentenebene (Netto-Rabatt)
-            round($netTotal, 2),          // BT-109: Steuerbemessungsgrundlage (= BT-106 - BT-107)
-            round($taxAmount, 2)          // BT-110: Gesamter Steuerbetrag
+            $totalAmount,             // BT-112: Gesamtbetrag brutto (inkl. MwSt.)
+            $totalAmount,             // BT-115: Fälligkeitsbetrag
+            $lineTotalsRounded,       // BT-106: Summe der Netto-Zeilensummen
+            0.0,                      // BT-108: Aufschläge auf Dokumentenebene
+            $netDiscount,             // BT-107: Abzüge auf Dokumentenebene
+            $netTotal,                // BT-109: Steuerbemessungsgrundlage
+            $taxAmount                // BT-110: Gesamter Steuerbetrag
         );
 
         return $builder->getContent();
@@ -356,11 +388,24 @@ class ZugferdInvoiceService
         $builder->setDocumentSeller($sellerName);
         $builder->setDocumentSellerAddress($sellerAddress, null, null, $sellerPostal, $sellerCity, $sellerCountry);
 
+        // BR-CO-26: Mindestens einer der Seller-Identifier muss vorhanden sein
         if ($sellerVatId) {
             $builder->addDocumentSellerTaxRegistration('VA', $sellerVatId);
         }
         if ($sellerTaxId) {
             $builder->addDocumentSellerTaxRegistration('FC', $sellerTaxId);
+        }
+        if (!$sellerVatId && !$sellerTaxId) {
+            $builder->addDocumentSellerGlobalID($sellerName, '0088');
+        }
+
+        // BR-DE-2: Seller Contact (BG-6) muss übermittelt werden
+        $sellerContactName  = $platform['contact_name']  ?? $sellerName;
+        $sellerContactEmail = $platform['email']          ?? null;
+        $sellerContactPhone = $platform['phone']          ?? null;
+        $builder->setDocumentSellerContact($sellerContactName, null, $sellerContactPhone, null, $sellerContactEmail);
+        if ($sellerContactEmail) {
+            $builder->setDocumentSellerCommunication('EM', $sellerContactEmail);
         }
 
         // --- Käufer (Veranstalter) ---
@@ -373,6 +418,13 @@ class ZugferdInvoiceService
 
         $builder->setDocumentBuyer($buyerName);
         $builder->setDocumentBuyerAddress($buyerAddress, null, null, $buyerPostal, $buyerCity, $buyerCountry);
+
+        if (!empty($organizer['email'])) {
+            $builder->setDocumentBuyerCommunication('EM', $organizer['email']);
+        }
+
+        // BR-FX-EN-04: Lieferdatum (BT-72) – Rechnungsdatum als Fallback
+        $builder->setDocumentSupplyChainEvent($invoiceDate);
 
         // --- Positionen ---
         $items      = $billingData['items'] ?? [];
@@ -389,21 +441,20 @@ class ZugferdInvoiceService
         }
 
         // Platform-Fee-Items speichern NETTO-Preise (invoice->amount ist der Nettobetrag).
-        // Daher: netUnitPrice = unit_price, grossUnitPrice = unit_price * (1 + taxRate/100).
         foreach ($items as $index => $item) {
             $posId        = (string) ($index + 1);
             $quantity     = (float) ($item['quantity'] ?? 1);
             $netUnitPrice = (float) ($item['unit_price'] ?? 0);  // Nettopreis je Einheit
             $itemNet      = round((float) ($item['total'] ?? $netUnitPrice * $quantity), 10);
-            $grossUnitPrice = round($netUnitPrice * (1 + $taxRate / 100), 10);
             $lineTotals  += $itemNet;
 
             $name = trim($item['description'] ?? 'Leistung');
 
+            // PEPPOL-EN16931-R046: GrossPrice = NetPrice wenn kein Allowance
             $builder
                 ->addNewPosition($posId)
                 ->setDocumentPositionProductDetails($name)
-                ->setDocumentPositionGrossPrice($grossUnitPrice)
+                ->setDocumentPositionGrossPrice($netUnitPrice)
                 ->setDocumentPositionNetPrice($netUnitPrice)
                 ->setDocumentPositionNetPriceTax('S', 'VAT', $taxRate, 0.0)
                 ->setDocumentPositionQuantity($quantity, 'C62')
@@ -412,18 +463,19 @@ class ZugferdInvoiceService
         }
 
         // --- Steuern ---
-        $netAmount = (float) $invoice->amount;
-        $taxAmount = (float) $invoice->tax_amount;
+        $netAmount = round($lineTotals, 2);
+        $taxAmount = round($netAmount * $taxRate / 100, 2);
 
-        // Sicherheitsprüfung: lineTotals sollte netAmount entsprechen.
-        // Falls Items fehlen oder abweichen, wird netAmount autoritativ gesetzt.
-        if (abs($lineTotals - $netAmount) > 0.02) {
+        // Sicherheitsprüfung: lineTotals sollte invoice->amount entsprechen.
+        $invoiceNetAmount = (float) $invoice->amount;
+        if (abs($netAmount - $invoiceNetAmount) > 0.02) {
             Log::warning('ZUGFeRD (Invoice): Abweichung zwischen lineTotals und invoice->amount', [
                 'invoice_id' => $invoice->id,
-                'lineTotals' => $lineTotals,
-                'netAmount'  => $netAmount,
+                'lineTotals' => $netAmount,
+                'netAmount'  => $invoiceNetAmount,
             ]);
-            $lineTotals = $netAmount;
+            $netAmount = $invoiceNetAmount;
+            $taxAmount = (float) $invoice->tax_amount;
         }
 
         $builder->addDocumentTaxSimple('S', 'VAT', $netAmount, $taxAmount, $taxRate);
@@ -445,12 +497,12 @@ class ZugferdInvoiceService
         }
 
         // --- Summation ---
-        $totalAmount = (float) $invoice->total_amount;
+        $totalAmount = round($netAmount + $taxAmount, 2);
 
         $builder->setDocumentSummation(
-            round($totalAmount, 2),           // BT-112: Gesamtbetrag (brutto)
-            round($totalAmount, 2),           // BT-115: Fälligkeitsbetrag
-            round($lineTotals, 2),            // BT-106: Summe der Netto-Zeilensummen
+            $totalAmount,                     // BT-112: Gesamtbetrag (brutto)
+            $totalAmount,                     // BT-115: Fälligkeitsbetrag
+            round($netAmount, 2),             // BT-106: Summe der Netto-Zeilensummen
             0.0,                              // BT-108: Aufschläge
             0.0,                              // BT-107: Abzüge
             round($netAmount, 2),             // BT-109: Steuerbemessungsgrundlage
@@ -483,11 +535,23 @@ class ZugferdInvoiceService
         $builder->setDocumentSeller($sellerName);
         $builder->setDocumentSellerAddress($sellerAddress, null, null, $sellerPostal, $sellerCity, $sellerCountry);
 
+        // BR-CO-26: Mindestens einer der Seller-Identifier muss vorhanden sein
         if ($sellerVatId) {
             $builder->addDocumentSellerTaxRegistration('VA', $sellerVatId);
         }
         if ($sellerTaxId) {
             $builder->addDocumentSellerTaxRegistration('FC', $sellerTaxId);
+        }
+        if (!$sellerVatId && !$sellerTaxId) {
+            $builder->addDocumentSellerGlobalID($sellerName, '0088');
+        }
+
+        // BR-DE-2: Seller Contact (BG-6) muss übermittelt werden
+        $sellerEmail = $billingData['company_email'] ?? ($organizer ? ($organizer->email ?? null) : null);
+        $sellerPhone = $billingData['company_phone'] ?? ($organizer ? ($organizer->phone ?? null) : null);
+        $builder->setDocumentSellerContact($sellerName, null, $sellerPhone, null, $sellerEmail);
+        if ($sellerEmail) {
+            $builder->setDocumentSellerCommunication('EM', $sellerEmail);
         }
     }
 
