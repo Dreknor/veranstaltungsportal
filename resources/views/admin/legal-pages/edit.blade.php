@@ -122,24 +122,7 @@
                             </button>
                         </div>
 
-                        <!-- Listen -->
-                        <div class="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-500">
-                            <button type="button" @click="toggleBulletList()"
-                                    :class="isActive('bulletList') ? 'toolbar-btn-active' : 'toolbar-btn'"
-                                    title="Aufzählungsliste">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><line x1="9" y1="6" x2="20" y2="6" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="12" x2="20" y2="12" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="18" x2="20" y2="18" stroke-width="2" stroke-linecap="round"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
-                            </button>
-                            <button type="button" @click="toggleOrderedList()"
-                                    :class="isActive('orderedList') ? 'toolbar-btn-active' : 'toolbar-btn'"
-                                    title="Nummerierte Liste">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><line x1="10" y1="6" x2="21" y2="6" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="12" x2="21" y2="12" stroke-width="2" stroke-linecap="round"/><line x1="10" y1="18" x2="21" y2="18" stroke-width="2" stroke-linecap="round"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h1v4"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 10H5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16l2-2a1.5 1.5 0 1 1 2 2l-3 3h4"/></svg>
-                            </button>
-                            <button type="button" @click="toggleBlockquote()"
-                                    :class="isActive('blockquote') ? 'toolbar-btn-active' : 'toolbar-btn'"
-                                    title="Zitat">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1zm12 0c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>
-                            </button>
-                        </div>
+
 
                         <!-- Ausrichtung -->
                         <div class="flex gap-1 pr-2 border-r border-gray-300 dark:border-gray-500">
@@ -270,12 +253,6 @@
         .rich-editor-content .tiptap h3 { @apply text-lg font-bold mt-3 mb-1; }
         .rich-editor-content .tiptap h4 { @apply text-base font-bold mt-3 mb-1; }
         .rich-editor-content .tiptap p  { @apply my-2; }
-        .rich-editor-content .tiptap ul { @apply list-disc list-inside my-2 ml-4; }
-        .rich-editor-content .tiptap ol { @apply list-decimal list-inside my-2 ml-4; }
-        .rich-editor-content .tiptap li { @apply my-0.5; }
-        .rich-editor-content .tiptap blockquote { @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic text-gray-600 dark:text-gray-400 my-4; }
-        .rich-editor-content .tiptap pre  { @apply bg-gray-100 dark:bg-gray-800 rounded p-3 font-mono text-sm my-3 overflow-x-auto; }
-        .rich-editor-content .tiptap code { @apply bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5 font-mono text-sm; }
         .rich-editor-content .tiptap hr  { @apply border-t border-gray-300 dark:border-gray-600 my-4; }
         .rich-editor-content .tiptap a  { @apply text-blue-600 dark:text-blue-400 underline hover:text-blue-800; }
         .rich-editor-content .tiptap mark { @apply bg-yellow-200 dark:bg-yellow-700/50; }
