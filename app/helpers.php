@@ -111,7 +111,7 @@ if (!function_exists('settings')) {
     /**
      * Get setting value by key or all settings
      */
-    function settings(string $key = null, $default = null)
+    function settings(?string $key = null, $default = null)
     {
         if ($key === null) {
             return \App\Models\Setting::getAllAsArray();
