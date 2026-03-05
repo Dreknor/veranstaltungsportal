@@ -10,4 +10,14 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    css: {
+        preprocessorOptions: {},
+    },
+    build: {
+        rollupOptions: {
+            // Absolute Pfade (/fonts/...) werden zur Laufzeit aufgelöst (public-Verzeichnis)
+            // und sollen von Vite nicht beim Build verarbeitet werden
+            external: (id) => id.startsWith('/fonts/'),
+        },
+    },
 });
