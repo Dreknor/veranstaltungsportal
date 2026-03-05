@@ -1,4 +1,9 @@
 <x-layouts.app title="Veranstaltungen">
+    @push('meta')
+        <link rel="alternate" type="application/atom+xml"
+              title="{{ config('app.name') }} – Veranstaltungen Feed"
+              href="{{ route('feed.atom') }}">
+    @endpush
     <div class="min-h-screen bg-gray-50">
         <!-- Header mit Suche und Filter -->
         <div class="bg-white shadow-sm border-b">
