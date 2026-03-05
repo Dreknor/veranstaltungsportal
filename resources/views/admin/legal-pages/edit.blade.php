@@ -201,9 +201,8 @@
 
                     </div>
 
-                    <!-- Editor-Bereich: leer lassen – Tiptap hängt view.dom per JS ein -->
-                    <div x-ref="editorContent"
-                         class="rich-editor-content border border-gray-300 dark:border-gray-600 rounded-b-md bg-white dark:bg-gray-900 min-h-96"></div>
+                    {{-- Editor-Bereich: kein Whitespace darin – Tiptap mountet via mount() --}}
+                    <div x-ref="editorContent" class="rich-editor-content border border-gray-300 dark:border-gray-600 rounded-b-md bg-white dark:bg-gray-900 min-h-96"></div>
                 </div>
 
                 <!-- Meta-Info -->

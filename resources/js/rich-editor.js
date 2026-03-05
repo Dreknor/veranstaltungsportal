@@ -4,31 +4,42 @@ import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
-
 /**
- * Alpine.js-Komponente für den Tiptap Rich-Text-Editor (Tiptap v3).
- * Registrierung: Alpine.data('richEditor', richEditor)
- * Verwendung:    x-data="richEditor({ name: 'content', value: '...' })"
+ * Alpine.js Rich-Text-Editor mit Tiptap v3.
+ *
+ * Kernproblem: Alpine macht alle Properties eines x-data-Objekts reaktiv
+ * (via Vue-Reactivity-Proxies). Ein reaktiver Proxy um den Tiptap-Editor
+ * führt dazu, dass Alpine bei jedem Reaktivitätszyklus auf editor.state
+ * zugreift und dabei ProseMirror's internen State-Sequenz bricht →
+ * "Applying a mismatched transaction".
+ *
+ * Lösung: Den Editor in einer Map außerhalb von Alpine speichern,
+ * die von Alpine nicht reaktiv gemacht wird. Nur primitive Werte
+ * (content, _tick, etc.) bleiben reaktiv.
  */
+// Globaler nicht-reaktiver Speicher für Editor-Instanzen (keyed by instanceId)
+const editorInstances = new Map();
 export function richEditor({ name, value = "" }) {
+    // Eindeutige ID für diese Instanz
+    const instanceId = Math.random().toString(36).slice(2, 9);
     return {
-        editor: null,
+        // Nur primitive/einfache Werte – Alpine macht diese reaktiv
         content: value,
         fieldName: name,
         showLinkInput: false,
         linkUrl: "",
-        // Reaktiver Zähler – wird bei jeder Selektion/Transaction inkrementiert,
-        // damit Alpine :class-Bindings mit isActive() neu auswertet.
         _tick: 0,
-
+        _instanceId: instanceId,
+        // Getter: holt den Editor aus dem nicht-reaktiven Speicher
+        get _editor() {
+            return editorInstances.get(this._instanceId) ?? null;
+        },
         init() {
+            if (editorInstances.has(this._instanceId)) return;
             const self = this;
             const container = this.$refs.editorContent;
-
-            // Tiptap v3: Editor OHNE element-Option erstellen,
-            // dann view.dom manuell in den Container hängen.
-            // Das vermeidet "mismatched transaction" Fehler.
-            this.editor = new Editor({
+            const editor = new Editor({
+                element: container,
                 extensions: [
                     StarterKit.configure({
                         heading: { levels: [1, 2, 3, 4] },
@@ -49,80 +60,66 @@ export function richEditor({ name, value = "" }) {
                     Highlight.configure({ multicolor: false }),
                 ],
                 content: value,
+                autofocus: false,
                 onUpdate({ editor: e }) {
                     self.content = e.getHTML();
                     self._tick++;
                     const field = document.getElementById("hidden-" + self.fieldName);
                     if (field) field.value = self.content;
                 },
-                onSelectionUpdate() { self._tick++; },
-                onTransaction()     { self._tick++; },
+                onSelectionUpdate() {
+                    self._tick++;
+                },
             });
-
-            // Das ProseMirror-DOM-Element in den Container einhängen
-            container.appendChild(this.editor.view.dom);
-
-            // Cleanup via MutationObserver (Alpine v3 hat kein $cleanup)
-            const observer = new MutationObserver(() => {
-                if (!document.contains(container)) {
-                    self.editor?.destroy();
-                    observer.disconnect();
-                }
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
+            // Außerhalb von Alpine's Reaktivitätssystem speichern
+            editorInstances.set(this._instanceId, editor);
         },
-
-        // ── Reaktives isActive ───────────────────────────────────────────────
-
+        destroy() {
+            const editor = editorInstances.get(this._instanceId);
+            if (editor) {
+                editor.destroy();
+                editorInstances.delete(this._instanceId);
+            }
+        },
         isActive(type, attrs = {}) {
-            this._tick; // Abhängigkeit für Alpine-Reaktivität
-            return this.editor?.isActive(type, attrs) ?? false;
+            this._tick; // reaktive Abhängigkeit
+            const editor = editorInstances.get(this._instanceId);
+            return editor?.isActive(type, attrs) ?? false;
         },
-
-        // ── Formatierung ─────────────────────────────────────────────────────
-
-        toggleBold()      { this.editor?.chain().focus().toggleBold().run(); },
-        toggleItalic()    { this.editor?.chain().focus().toggleItalic().run(); },
-        toggleUnderline() { this.editor?.chain().focus().toggleUnderline().run(); },
-        toggleStrike()    { this.editor?.chain().focus().toggleStrike().run(); },
-        toggleHighlight() { this.editor?.chain().focus().toggleHighlight().run(); },
-
-        setHeading(level) { this.editor?.chain().focus().toggleHeading({ level }).run(); },
-        setParagraph()    { this.editor?.chain().focus().setParagraph().run(); },
-
-        toggleBulletList()  { this.editor?.chain().focus().toggleBulletList().run(); },
-        toggleOrderedList() { this.editor?.chain().focus().toggleOrderedList().run(); },
-        toggleBlockquote()  { this.editor?.chain().focus().toggleBlockquote().run(); },
-        toggleCodeBlock()   { this.editor?.chain().focus().toggleCodeBlock().run(); },
-        setHorizontalRule() { this.editor?.chain().focus().setHorizontalRule().run(); },
-        setTextAlign(a)     { this.editor?.chain().focus().setTextAlign(a).run(); },
-
-        // ── Link ─────────────────────────────────────────────────────────────
-
+        toggleBold()        { editorInstances.get(this._instanceId)?.chain().focus().toggleBold().run(); },
+        toggleItalic()      { editorInstances.get(this._instanceId)?.chain().focus().toggleItalic().run(); },
+        toggleUnderline()   { editorInstances.get(this._instanceId)?.chain().focus().toggleUnderline().run(); },
+        toggleStrike()      { editorInstances.get(this._instanceId)?.chain().focus().toggleStrike().run(); },
+        toggleHighlight()   { editorInstances.get(this._instanceId)?.chain().focus().toggleHighlight().run(); },
+        setHeading(level)   { editorInstances.get(this._instanceId)?.chain().focus().toggleHeading({ level }).run(); },
+        setParagraph()      { editorInstances.get(this._instanceId)?.chain().focus().setParagraph().run(); },
+        toggleBulletList()  { editorInstances.get(this._instanceId)?.chain().focus().toggleBulletList().run(); },
+        toggleOrderedList() { editorInstances.get(this._instanceId)?.chain().focus().toggleOrderedList().run(); },
+        toggleBlockquote()  { editorInstances.get(this._instanceId)?.chain().focus().toggleBlockquote().run(); },
+        toggleCodeBlock()   { editorInstances.get(this._instanceId)?.chain().focus().toggleCodeBlock().run(); },
+        setHorizontalRule() { editorInstances.get(this._instanceId)?.chain().focus().setHorizontalRule().run(); },
+        setTextAlign(a)     { editorInstances.get(this._instanceId)?.chain().focus().setTextAlign(a).run(); },
         openLinkDialog() {
-            this.linkUrl = this.editor?.getAttributes("link").href ?? "";
+            const editor = editorInstances.get(this._instanceId);
+            this.linkUrl = editor?.getAttributes("link").href ?? "";
             this.showLinkInput = true;
             this.$nextTick(() => this.$refs.linkInput?.focus());
         },
-
         confirmLink() {
+            const editor = editorInstances.get(this._instanceId);
             if (this.linkUrl) {
-                this.editor?.chain().focus().extendMarkRange("link").setLink({ href: this.linkUrl }).run();
+                editor?.chain().focus().extendMarkRange("link").setLink({ href: this.linkUrl }).run();
             } else {
-                this.editor?.chain().focus().unsetLink().run();
+                editor?.chain().focus().unsetLink().run();
             }
             this.showLinkInput = false;
             this.linkUrl = "";
         },
-
         removeLink() {
-            this.editor?.chain().focus().unsetLink().run();
+            editorInstances.get(this._instanceId)?.chain().focus().unsetLink().run();
             this.showLinkInput = false;
         },
-
-        // ── History ──────────────────────────────────────────────────────────
-
-        undo() { this.editor?.chain().focus().undo().run(); },
-        redo() { this.editor?.chain().focus().redo().run(); },
+        undo() { editorInstances.get(this._instanceId)?.chain().focus().undo().run(); },
+        redo() { editorInstances.get(this._instanceId)?.chain().focus().redo().run(); },
     };
 }
