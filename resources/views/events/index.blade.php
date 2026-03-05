@@ -19,6 +19,9 @@
         @if($isFilteredPage)
             <meta name="robots" content="noindex, follow">
         @endif
+        <link rel="alternate" type="application/atom+xml"
+              title="{{ config('app.name') }} – Veranstaltungen Feed"
+              href="{{ route('feed.atom') }}">
     @endpush
 
     <div class="min-h-screen bg-gray-50">

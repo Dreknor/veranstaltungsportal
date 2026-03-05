@@ -35,6 +35,8 @@ Disallow: /*?*page=
 # Allow public areas explicitly
 Allow: /events
 Allow: /events/*
+Allow: /feed/
+Allow: /feed/*
 Allow: /help
 Allow: /help/*
 Allow: /badges
@@ -52,4 +54,7 @@ Sitemap: {{ url('/sitemap-static.xml') }}
 Sitemap: {{ url('/sitemap-events.xml') }}
 Sitemap: {{ url('/sitemap-categories.xml') }}
 Sitemap: {{ url('/sitemap-organizers.xml') }}
+
+# ATOM Feed
+Sitemap: {{ url('/feed/atom.xml') }}
 

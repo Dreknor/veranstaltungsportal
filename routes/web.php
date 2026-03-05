@@ -8,6 +8,7 @@ use App\Http\Controllers\Organizer;
 use App\Http\Controllers\Settings;
 use App\Http\Controllers\FeaturedEventController;
 use App\Http\Controllers\UserRegistrationCancellationController;
+use App\Http\Controllers\AtomFeedController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +22,21 @@ Route::get('/sitemap-events.xml', [\App\Http\Controllers\SitemapController::clas
 Route::get('/sitemap-categories.xml', [\App\Http\Controllers\SitemapController::class, 'categories'])->name('sitemap.categories');
 Route::get('/sitemap-organizers.xml', [\App\Http\Controllers\SitemapController::class, 'organizers'])->name('sitemap.organizers');
 Route::get('/robots.txt', [\App\Http\Controllers\SitemapController::class, 'robots'])->name('robots');
+
+// ── ATOM-Feed Routen ──────────────────────────────────────────────────────
+Route::middleware(['throttle:atom-feed'])->group(function () {
+    Route::get('/feed/atom.xml', [AtomFeedController::class, 'index'])
+        ->name('feed.atom');
+    Route::get('/feed/atom/category/{slug}', [AtomFeedController::class, 'byCategory'])
+        ->name('feed.atom.category');
+    Route::get('/feed/atom/city/{city}', [AtomFeedController::class, 'byCity'])
+        ->name('feed.atom.city');
+    Route::get('/feed/atom/organization/{slug}', [AtomFeedController::class, 'byOrganization'])
+        ->name('feed.atom.organization');
+    Route::get('/feed/atom/type/{type}', [AtomFeedController::class, 'byType'])
+        ->name('feed.atom.type')
+        ->whereIn('type', ['physical', 'online', 'hybrid']);
+});
 
 // Account Types Info Page
 Route::get('/account-types', function () {

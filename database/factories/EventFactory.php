@@ -134,6 +134,14 @@ class EventFactory extends Factory
         ]);
     }
 
+    public function upcoming(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'start_date' => now()->addDays(rand(1, 60)),
+            'end_date'   => now()->addDays(rand(1, 60))->addHours(3),
+        ]);
+    }
+
     public function featured(): static
     {
         return $this->state(fn (array $attributes) => [
