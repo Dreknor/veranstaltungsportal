@@ -20,6 +20,11 @@ class BookingInvoiceObserver
      */
     public function created(Booking $booking): void
     {
+        // Bei kostenlosen Buchungen keine Rechnungsnummer generieren
+        if ($booking->total == 0) {
+            return;
+        }
+
         // Generate invoice number when booking is created
         if (!$booking->invoice_number && $booking->event) {
             try {
@@ -46,6 +51,11 @@ class BookingInvoiceObserver
      */
     public function updated(Booking $booking): void
     {
+        // Bei kostenlosen Buchungen keine Rechnungsnummer generieren
+        if ($booking->total == 0) {
+            return;
+        }
+
         // Generate invoice number when payment status changes to paid (if not already set)
         if ($booking->wasChanged('payment_status') &&
             $booking->payment_status === 'paid' &&

@@ -30,39 +30,50 @@ class BookingConfirmation extends Mailable
     }
     public function attachments(): array
     {
-        // Sicherstellen, dass eine veranstalterspezifische Rechnungsnummer existiert (einmalig je Buchung)
-        if (empty($this->booking->invoice_number)) {
-            $invoiceNumberService = app(InvoiceNumberService::class);
-            $organizer = $this->booking->event->getUser(); // Veranstalter (über Organisation)
+        $isFreeBooking = $this->booking->total == 0;
 
-            if ($organizer) {
-                $newInvoiceNumber = $invoiceNumberService->generateBookingInvoiceNumber($organizer);
+        $attachments = [];
+
+        // Rechnung nur bei kostenpflichtigen Buchungen anhängen
+        if (!$isFreeBooking) {
+            // Sicherstellen, dass eine veranstalterspezifische Rechnungsnummer existiert (einmalig je Buchung)
+            if (empty($this->booking->invoice_number)) {
+                $invoiceNumberService = app(InvoiceNumberService::class);
+                $organizer = $this->booking->event->getUser();
+
+                if ($organizer) {
+                    $newInvoiceNumber = $invoiceNumberService->generateBookingInvoiceNumber($organizer);
+                    $this->booking->forceFill([
+                        'invoice_number' => $newInvoiceNumber,
+                        'invoice_date' => now(),
+                    ])->save();
+                }
+            }
+
+            $invoiceNumber = $this->booking->invoice_number;
+            $invoiceService = app(InvoiceService::class);
+
+            $attachments[] = Attachment::fromData(
+                fn () => $invoiceService->getInvoiceOutput($this->booking),
+                "Rechnung_{$invoiceNumber}.pdf"
+            )->withMime('application/pdf');
+        } else {
+            // Kostenfreie Buchung: sicherstellen, dass keine Rechnungsnummer gesetzt ist
+            if (!empty($this->booking->invoice_number)) {
                 $this->booking->forceFill([
-                    'invoice_number' => $newInvoiceNumber,
-                    'invoice_date' => now(),
+                    'invoice_number' => null,
+                    'invoice_date'   => null,
                 ])->save();
             }
         }
 
-        $invoiceNumber = $this->booking->invoice_number;
-
-        $invoiceService = app(InvoiceService::class);
-
-        $attachments = [
-            // Rechnung anhängen (immer)
-            Attachment::fromData(
-                fn () => $invoiceService->getInvoiceOutput($this->booking),
-                "Rechnung_{$invoiceNumber}.pdf"
-            )->withMime('application/pdf'),
-        ];
-
         // Ticket-PDF nur anhängen, wenn:
         // - Event Tickets erfordert (requires_ticket)
-        // - Buchung bezahlt ist
+        // - Buchung bezahlt ist ODER kostenlose Buchung
         // - Event NICHT rein online ist
         // - Personalisierung abgeschlossen ist
         if ($this->booking->event->requires_ticket
-            && $this->booking->payment_status === 'paid'
+            && ($this->booking->payment_status === 'paid' || $isFreeBooking)
             && !$this->booking->event->isOnline()
             && $this->booking->canSendTickets()) {
             $ticketPdfService = app(TicketPdfService::class);

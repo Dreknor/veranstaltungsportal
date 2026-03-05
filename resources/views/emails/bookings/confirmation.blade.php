@@ -19,6 +19,7 @@
     </div>
 
     <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+        @php $isFreBooking = $booking->total == 0; @endphp
         <p style="font-size: 16px; margin-bottom: 20px;">
             Liebe/r {{ $booking->customer_name }},
         </p>
@@ -68,10 +69,7 @@
                         </td>
                     </tr>
                     @php
-                        $isFreeOnlineNoTicket = $booking->event->isOnline()
-                            && !$booking->event->requires_ticket
-                            && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
-                        $showOnlineAccess = $booking->payment_status === 'paid' || $isFreeOnlineNoTicket;
+                        $showOnlineAccess = $booking->payment_status === 'paid' || $isFreBooking;
                     @endphp
                     @if($showOnlineAccess && $booking->event->online_url)
                     <tr>
@@ -130,9 +128,7 @@
                         </td>
                     </tr>
                     @php
-                        $isFreeHybrid = !$booking->event->requires_ticket
-                            && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
-                        $showHybridOnlineAccess = $booking->payment_status === 'paid' || $isFreeHybrid;
+                        $showHybridOnlineAccess = $booking->payment_status === 'paid' || $isFreBooking;
                     @endphp
                     @if($showHybridOnlineAccess && $booking->event->online_url)
                     <tr>
@@ -185,6 +181,7 @@
                         <strong>{{ $booking->booking_number }}</strong>
                     </td>
                 </tr>
+                @if(!$isFreBooking)
                 <tr>
                     <td style="padding: 8px 0; color: #666;">
                         <strong>🧾 Rechnungsnr.:</strong>
@@ -193,6 +190,7 @@
                         <strong>{{ $booking->invoice_number ?? 'wird erstellt' }}</strong>
                     </td>
                 </tr>
+                @endif
             </table>
         </div>
 
@@ -205,10 +203,13 @@
                 <tr style="border-bottom: 1px solid #eee;">
                     <td style="padding: 10px 0;">{{ $item->ticketType?->name ?? 'Ticket' }}</td>
                     <td style="padding: 10px 0; text-align: center;">{{ $item->quantity }}x</td>
+                    @if(!$isFreBooking)
                     <td style="padding: 10px 0; text-align: right;">{{ number_format($item->price, 2, ',', '.') }} €</td>
+                    @endif
                 </tr>
                 @endforeach
 
+                @if(!$isFreBooking)
                 @if($booking->discount > 0)
                 <tr>
                     <td colspan="2" style="padding: 10px 0; color: #28a745;">Rabatt</td>
@@ -220,9 +221,17 @@
                     <td colspan="2" style="padding: 10px 0;"><strong>Gesamt</strong></td>
                     <td style="padding: 10px 0; text-align: right;"><strong>{{ number_format($booking->total, 2, ',', '.') }} €</strong></td>
                 </tr>
+                @else
+                <tr style="border-top: 2px solid #667eea;">
+                    <td colspan="2" style="padding: 10px 0;"><strong>Kostenfreie Veranstaltung</strong></td>
+                    <td style="padding: 10px 0; text-align: right;"><strong style="color: #28a745;">Kostenlos</strong></td>
+                </tr>
+                @endif
             </table>
         </div>
 
+        {{-- Zahlungsstatus nur bei kostenpflichtigen Buchungen anzeigen --}}
+        @if(!$isFreBooking)
         <!-- Payment Status -->
         <div style="background: {{ $booking->payment_status === 'paid' ? '#d4edda' : '#fff3cd' }};
                     padding: 15px; border-radius: 8px; margin-bottom: 20px;
@@ -236,6 +245,7 @@
                 <span style="color: #666;">{{ ucfirst($booking->payment_status) }}</span>
             @endif
         </div>
+        @endif
 
         <!-- Organizer Information -->
         @php
@@ -268,7 +278,7 @@
             </p>
         </div>
 
-        @if($booking->payment_status !== 'paid')
+        @if($booking->payment_status !== 'paid' && !$isFreBooking)
         <!-- Payment Instructions -->
         <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
             <h3 style="color: #0066cc; margin: 0 0 10px 0; font-size: 16px;">💳 Zahlungshinweise</h3>
@@ -306,7 +316,9 @@
                 Nach Zahlungseingang erhalten Sie Ihre Tickets per E-Mail.
             </p>
         </div>
-        @elseif($booking->needsPersonalization())
+        @endif
+
+        @if($booking->needsPersonalization())
         <!-- Personalization Required -->
         <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
             <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">👥 Ticket-Personalisierung erforderlich</h3>
@@ -327,10 +339,12 @@
         <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📎 Anlagen</h3>
             <ul style="margin: 0; padding-left: 20px;">
+                @if(!$isFreBooking)
                 <li style="margin-bottom: 8px;">
                     <strong>Rechnung</strong> - Rechnung_{{ $booking->invoice_number ?? $booking->booking_number }}.pdf
                 </li>
-                @if($booking->event->requires_ticket && $booking->payment_status === 'paid' && !$booking->event->isOnline())
+                @endif
+                @if($booking->event->requires_ticket && ($booking->payment_status === 'paid' || $isFreBooking) && !$booking->event->isOnline())
                 <li style="margin-bottom: 8px;">
                     <strong>Tickets</strong> - Ticket_{{ $booking->booking_number }}.pdf
                     <span style="color: #28a745; font-size: 12px;">(QR-Code für Check-In)</span>
@@ -347,12 +361,7 @@
         <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📋 Nächste Schritte</h3>
             <ol style="margin: 0; padding-left: 20px; color: #666;">
-                @php
-                    $isFreeOnlineNoTicketSteps = $booking->event->isOnline()
-                        && !$booking->event->requires_ticket
-                        && (is_null($booking->event->price_from) || $booking->event->price_from == 0);
-                @endphp
-                @if($booking->payment_status !== 'paid' && !$isFreeOnlineNoTicketSteps)
+                @if($booking->payment_status !== 'paid' && !$isFreBooking)
                 <li style="margin-bottom: 10px;">Überweisung des Betrags mit Angabe der Buchungsnummer</li>
                 <li style="margin-bottom: 10px;">
                     Nach Zahlungseingang erhalten Sie

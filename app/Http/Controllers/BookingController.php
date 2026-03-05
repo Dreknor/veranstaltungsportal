@@ -335,9 +335,9 @@ class BookingController extends Controller
 
                 // Sende entsprechende E-Mail
                 if ($isFree) {
-                    // Bei kostenlosen Tickets: Direkt Tickets versenden
-                    Mail::to($booking->customer_email)->send(new \App\Mail\PaymentConfirmed($booking));
-                    $successMessage = 'Buchung erfolgreich! Ihre Tickets wurden per E-Mail versendet.';
+                    // Bei kostenlosen Tickets: Buchungsbestätigung ohne Zahlungshinweise versenden
+                    Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+                    $successMessage = 'Buchung erfolgreich! Eine Buchungsbestätigung wurde per E-Mail versendet.';
                 } else {
                     // Bei kostenpflichtigen Tickets: Zahlungsaufforderung mit Rechnung
                     Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));

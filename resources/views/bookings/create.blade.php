@@ -121,20 +121,6 @@
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
                                 </div>
-
-                                <div>
-                                    <label for="billing_vat_id" class="block text-sm font-medium text-gray-700 mb-1">
-                                        USt-IdNr.
-                                        <span class="text-gray-400 font-normal">(optional)</span>
-                                    </label>
-                                    <input type="text" id="billing_vat_id" name="billing_vat_id"
-                                           value="{{ old('billing_vat_id') }}"
-                                           placeholder="z.B. DE123456789"
-                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    @error('billing_vat_id')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
-                                </div>
                             </div>
                         </div>
 
