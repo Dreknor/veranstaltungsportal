@@ -592,8 +592,121 @@
                                         Wenn aktiviert, wird auf jedem Ticket ein QR-Code für den Check-In angezeigt.
                                     </p>
                                 </div>
+
+                                <!-- Stornierungsrichtlinie -->
+                                <div class="border-t border-gray-200 pt-4">
+                                    <h3 class="text-sm font-semibold text-gray-800 mb-3">Stornierungsrichtlinie</h3>
+                                    <div>
+                                        <label class="flex items-center">
+                                            <input type="hidden" name="cancellation_allowed" value="0">
+                                            <input type="checkbox" name="cancellation_allowed" value="1"
+                                                   id="cancellation_allowed_edit"
+                                                   {{ old('cancellation_allowed', $event->cancellation_allowed) ? 'checked' : '' }}
+                                                   class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                            <span class="ml-2 text-sm font-medium text-gray-700">Stornierung durch Teilnehmer erlauben</span>
+                                        </label>
+                                        <p class="mt-1 ml-6 text-xs text-gray-500">
+                                            Wenn aktiviert, können Teilnehmer ihre Buchung selbst stornieren.
+                                        </p>
+                                    </div>
+
+                                    <div id="cancellation_days_field_edit" class="{{ old('cancellation_allowed', $event->cancellation_allowed) ? '' : 'hidden' }} mt-3 ml-6">
+                                        <label for="cancellation_days_before_edit" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Stornierungsfrist (Tage vor Veranstaltungsbeginn)
+                                        </label>
+                                        <input type="number" id="cancellation_days_before_edit" name="cancellation_days_before"
+                                               value="{{ old('cancellation_days_before', $event->cancellation_days_before) }}"
+                                               min="0" placeholder="z.B. 3"
+                                               class="w-32 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            Stornierung muss mindestens diese Anzahl an Tagen vor Beginn erfolgen. Leer lassen = bis Veranstaltungsbeginn.
+                                        </p>
+                                        @error('cancellation_days_before')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <!-- Organisationsfeld -->
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Organisationsfeld bei Buchung &amp; Personalisierung
+                                        </label>
+                                        <select name="organization_field_mode"
+                                                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                            <option value="none" {{ old('organization_field_mode', $event->organization_field_mode ?? 'none') === 'none' ? 'selected' : '' }}>
+                                                Nicht anzeigen
+                                            </option>
+                                            <option value="optional" {{ old('organization_field_mode', $event->organization_field_mode ?? 'none') === 'optional' ? 'selected' : '' }}>
+                                                Optional anzeigen
+                                            </option>
+                                            <option value="required" {{ old('organization_field_mode', $event->organization_field_mode ?? 'none') === 'required' ? 'selected' : '' }}>
+                                                Pflichtfeld
+                                            </option>
+                                        </select>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            Legt fest, ob Teilnehmer bei der Buchung und Personalisierung ihre Organisation/Einrichtung angeben müssen.
+                                        </p>
+                                    </div>
+
+                                    <!-- Bestätigungsmodus für kostenfreie Anmeldungen -->
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            Bestätigungsmodus für kostenfreie Anmeldungen
+                                        </label>
+                                        <div class="space-y-2">
+                                            <label class="flex items-start gap-3 cursor-pointer">
+                                                <input type="radio" name="free_ticket_auto_confirm" value="1"
+                                                       {{ old('free_ticket_auto_confirm', $event->free_ticket_auto_confirm ?? true) ? 'checked' : '' }}
+                                                       class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-900">Automatisch bestätigen</span>
+                                                    <p class="text-xs text-gray-500">Anmeldungen werden sofort bestätigt. Zugangsdaten und Tickets werden automatisch versendet.</p>
+                                                </div>
+                                            </label>
+                                            <label class="flex items-start gap-3 cursor-pointer">
+                                                <input type="radio" name="free_ticket_auto_confirm" value="0"
+                                                       {{ !old('free_ticket_auto_confirm', $event->free_ticket_auto_confirm ?? true) ? 'checked' : '' }}
+                                                       class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-900">Manuelle Bestätigung erforderlich</span>
+                                                    <p class="text-xs text-gray-500">Anmeldungen müssen erst durch den Veranstalter freigegeben werden. Zugangsdaten werden erst nach Bestätigung versendet.</p>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
+                        @php
+                            $pendingApprovalCount = $event->bookings()->where('status', 'pending_approval')->count();
+                        @endphp
+                        @if($pendingApprovalCount > 0)
+                            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber-500 text-white font-bold text-sm">
+                                            {{ $pendingApprovalCount }}
+                                        </span>
+                                        <span class="font-medium text-amber-900">Anmeldung(en) warten auf Bestätigung</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="{{ route('organizer.bookings.index', ['event_id' => $event->id, 'status' => 'pending_approval']) }}"
+                                           class="text-amber-700 hover:text-amber-900 text-sm font-medium underline">
+                                            Anzeigen
+                                        </a>
+                                        <form method="POST" action="{{ route('organizer.events.approve-all-pending', $event) }}">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="text-green-700 hover:text-green-900 text-sm font-medium underline"
+                                                    onclick="return confirm('Alle {{ $pendingApprovalCount }} Anmeldung(en) bestätigen?')">
+                                                Alle bestätigen
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
 
                         <div class="flex justify-end space-x-4">
@@ -1034,5 +1147,16 @@
             <x-featured-booking-modal :event="$event" />
         </div>
     </div>
+
+    <script>
+        // Toggle cancellation days field
+        const cancellationCheckboxEdit = document.getElementById('cancellation_allowed_edit');
+        const cancellationDaysFieldEdit = document.getElementById('cancellation_days_field_edit');
+        if (cancellationCheckboxEdit && cancellationDaysFieldEdit) {
+            cancellationCheckboxEdit.addEventListener('change', function () {
+                cancellationDaysFieldEdit.classList.toggle('hidden', !this.checked);
+            });
+        }
+    </script>
 </x-layouts.app>
 

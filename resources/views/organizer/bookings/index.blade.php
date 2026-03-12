@@ -26,7 +26,7 @@
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
             <form action="{{ route('organizer.bookings.index') }}" method="GET" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
                         <input type="text" name="search" id="search" value="{{ request('search') }}"
@@ -54,6 +54,18 @@
                             <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Bezahlt</option>
                             <option value="failed" {{ request('payment_status') === 'failed' ? 'selected' : '' }}>Fehlgeschlagen</option>
                             <option value="refunded" {{ request('payment_status') === 'refunded' ? 'selected' : '' }}>Erstattet</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buchungsstatus</label>
+                        <select name="status" id="status"
+                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="">Alle</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Ausstehend</option>
+                            <option value="pending_approval" {{ request('status') === 'pending_approval' ? 'selected' : '' }}>Wartet auf Bestätigung</option>
+                            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Bestätigt</option>
+                            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Abgeschlossen</option>
+                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Storniert</option>
                         </select>
                     </div>
                     <div class="flex items-end">
@@ -150,6 +162,10 @@
                                 @if($booking->status === 'confirmed')
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                         Bestätigt
+                                    </span>
+                                @elseif($booking->status === 'pending_approval')
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                                        ⏳ Wartet auf Bestätigung
                                     </span>
                                 @elseif($booking->status === 'cancelled')
                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">

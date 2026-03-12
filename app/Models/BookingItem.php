@@ -15,6 +15,7 @@ class BookingItem extends Model
         'ticket_number',
         'attendee_name',
         'attendee_email',
+        'attendee_organization',
         'price',
         'quantity',
         'custom_fields',

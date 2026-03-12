@@ -21,6 +21,7 @@ class Booking extends Model
         'customer_name',
         'customer_email',
         'customer_phone',
+        'customer_organization',
         'billing_company',
         'billing_vat_id',
         'billing_address',
@@ -197,16 +198,31 @@ class Booking extends Model
         return $query->where('status', 'pending');
     }
 
+    public function scopePendingApproval($query)
+    {
+        return $query->where('status', 'pending_approval');
+    }
+
+    /**
+     * Prüft ob die Buchung auf manuelle Bestätigung wartet
+     */
+    public function isPendingApproval(): bool
+    {
+        return $this->status === 'pending_approval';
+    }
+
     /**
      * Check if this booking needs ticket personalization
      */
     public function needsPersonalization(): bool
     {
         // Only needs personalization if:
-        // 1. Payment is confirmed (paid)
-        // 2. Has more than one ticket item
-        // 3. Not yet personalized
-        return $this->payment_status === 'paid'
+        // 1. Booking is confirmed (not pending_approval!)
+        // 2. Payment is confirmed (paid)
+        // 3. Has more than one ticket item
+        // 4. Not yet personalized
+        return $this->status === 'confirmed'
+            && $this->payment_status === 'paid'
             && $this->items()->count() > 1
             && !$this->tickets_personalized;
     }
@@ -230,11 +246,12 @@ class Booking extends Model
     }
 
     /**
-     * Check if tickets can be sent (paid and personalized if needed)
+     * Check if tickets can be sent (confirmed, paid and personalized if needed)
      */
     public function canSendTickets(): bool
     {
-        return $this->payment_status === 'paid'
+        return $this->status === 'confirmed'
+            && $this->payment_status === 'paid'
             && (!$this->needsPersonalization() || $this->tickets_personalized);
     }
 }

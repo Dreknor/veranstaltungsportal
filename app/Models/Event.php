@@ -61,6 +61,10 @@ class Event extends Model implements HasMedia
         'ticket_notes',
         'show_qr_code_on_ticket',
         'requires_ticket',
+        'cancellation_allowed',
+        'cancellation_days_before',
+        'organization_field_mode',
+        'free_ticket_auto_confirm',
     ];
 
     protected function casts(): array
@@ -82,6 +86,9 @@ class Event extends Model implements HasMedia
             'cancelled_at' => 'datetime',
             'show_qr_code_on_ticket' => 'boolean',
             'requires_ticket' => 'boolean',
+            'cancellation_allowed' => 'boolean',
+            'cancellation_days_before' => 'integer',
+            'free_ticket_auto_confirm' => 'boolean',
         ];
     }
 
@@ -257,9 +264,9 @@ class Event extends Model implements HasMedia
         }
 
         // Calculate sold tickets through booking items
-        // Include pending, confirmed and completed bookings
+        // Include pending, pending_approval, confirmed and completed bookings
         $sold = $this->bookings()
-            ->whereIn('status', ['pending', 'confirmed', 'completed'])
+            ->whereIn('status', ['pending', 'pending_approval', 'confirmed', 'completed'])
             ->with('items')
             ->get()
             ->flatMap(function ($booking) {
@@ -268,6 +275,30 @@ class Event extends Model implements HasMedia
             ->sum('quantity');
 
         return max(0, $this->max_attendees - $sold);
+    }
+
+    /**
+     * Prüft, ob das Organisationsfeld angezeigt werden soll
+     */
+    public function showsOrganizationField(): bool
+    {
+        return in_array($this->organization_field_mode, ['optional', 'required']);
+    }
+
+    /**
+     * Prüft, ob das Organisationsfeld ein Pflichtfeld ist
+     */
+    public function requiresOrganizationField(): bool
+    {
+        return $this->organization_field_mode === 'required';
+    }
+
+    /**
+     * Prüft, ob kostenfreie Tickets manuell bestätigt werden müssen
+     */
+    public function requiresManualApprovalForFreeTickets(): bool
+    {
+        return !$this->free_ticket_auto_confirm;
     }
 
     /**
@@ -500,6 +531,24 @@ class Event extends Model implements HasMedia
         } else {
             return "{$minutes} " . ($minutes === 1 ? 'Minute' : 'Minuten');
         }
+    }
+
+    /**
+     * Check if a booking can be cancelled by the user according to the event's cancellation policy.
+     */
+    public function canCancelBooking(): bool
+    {
+        if (!$this->cancellation_allowed) {
+            return false;
+        }
+
+        if ($this->cancellation_days_before === null) {
+            // No deadline set – allowed any time before event start
+            return $this->start_date->isFuture();
+        }
+
+        $deadline = $this->start_date->copy()->subDays($this->cancellation_days_before);
+        return now()->lt($deadline);
     }
 
     /**

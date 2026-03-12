@@ -108,6 +108,27 @@
                                     @enderror
                                 </div>
 
+                                @if($event->showsOrganizationField())
+                                <div>
+                                    <label for="customer_organization" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Organisation / Einrichtung
+                                        @if($event->requiresOrganizationField())
+                                            <span class="text-red-500">*</span>
+                                        @else
+                                            <span class="text-gray-400 font-normal">(optional)</span>
+                                        @endif
+                                    </label>
+                                    <input type="text" id="customer_organization" name="customer_organization"
+                                           value="{{ old('customer_organization') }}"
+                                           placeholder="z.B. Evangelische Grundschule Dresden"
+                                           @if($event->requiresOrganizationField()) required @endif
+                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    @error('customer_organization')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                @endif
+
                                 <div>
                                     <label for="billing_company" class="block text-sm font-medium text-gray-700 mb-1">
                                         Firma

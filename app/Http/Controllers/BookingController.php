@@ -102,10 +102,18 @@ class BookingController extends Controller
         // Eingeloggte User haben bei der Registrierung bereits zugestimmt.
         $privacyRule = auth()->check() ? 'nullable' : 'required|accepted';
 
+        // Dynamische Validierung für Organisationsfeld
+        $organizationRule = match ($event->organization_field_mode) {
+            'required' => 'required|string|max:255',
+            'optional' => 'nullable|string|max:255',
+            default    => 'nullable|string|max:255',
+        };
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'nullable|string|max:50',
+            'customer_organization' => $organizationRule,
             'billing_company' => 'nullable|string|max:255',
             'billing_vat_id' => 'nullable|string|max:50',
             'billing_address' => 'required|string|max:255',
@@ -121,6 +129,7 @@ class BookingController extends Controller
         ], [
             'privacy_accepted.required' => 'Bitte stimmen Sie der Datenschutzerklärung zu.',
             'privacy_accepted.accepted' => 'Bitte stimmen Sie der Datenschutzerklärung zu.',
+            'customer_organization.required' => 'Bitte geben Sie Ihre Organisation/Einrichtung an.',
         ]);
 
         // Validate PayPal selection
@@ -230,11 +239,26 @@ class BookingController extends Controller
                     $emailVerificationToken = \Illuminate\Support\Str::random(60);
                 }
 
-                // Bei kostenlosen Tickets direkt bestätigen
+                // Bei kostenlosen Tickets direkt bestätigen oder auf manuelle Freigabe warten
                 $isFree = $total == 0;
-                $initialStatus = $isFree ? 'confirmed' : 'pending';
-                $initialPaymentStatus = $isFree ? 'paid' : 'pending';
-                $confirmedAt = $isFree ? now() : null;
+
+                if ($isFree) {
+                    if ($event->free_ticket_auto_confirm) {
+                        // Automatische Bestätigung (bisheriges Verhalten)
+                        $initialStatus = 'confirmed';
+                        $initialPaymentStatus = 'paid';
+                        $confirmedAt = now();
+                    } else {
+                        // Manuelle Bestätigung erforderlich
+                        $initialStatus = 'pending_approval';
+                        $initialPaymentStatus = 'paid'; // Kostenlos = keine Zahlung nötig
+                        $confirmedAt = null;
+                    }
+                } else {
+                    $initialStatus = 'pending';
+                    $initialPaymentStatus = 'pending';
+                    $confirmedAt = null;
+                }
 
                 // Erstelle Buchung
                 $booking = Booking::create([
@@ -243,6 +267,7 @@ class BookingController extends Controller
                     'customer_name' => $request->customer_name,
                     'customer_email' => $request->customer_email,
                     'customer_phone' => $request->customer_phone,
+                    'customer_organization' => $request->customer_organization,
                     'billing_company' => $request->billing_company,
                     'billing_vat_id' => $request->billing_vat_id,
                     'billing_address' => $request->billing_address,
@@ -272,6 +297,7 @@ class BookingController extends Controller
                             // Bei nur einem Ticket automatisch den Käufer als Teilnehmer eintragen
                             'attendee_name' => $totalQuantity === 1 ? $request->customer_name : null,
                             'attendee_email' => $totalQuantity === 1 ? $request->customer_email : null,
+                            'attendee_organization' => $totalQuantity === 1 ? $request->customer_organization : null,
                         ]);
                     }
 
@@ -334,10 +360,14 @@ class BookingController extends Controller
                 }
 
                 // Sende entsprechende E-Mail
-                if ($isFree) {
-                    // Bei kostenlosen Tickets: Buchungsbestätigung ohne Zahlungshinweise versenden
+                if ($isFree && $event->free_ticket_auto_confirm) {
+                    // Sofortige Bestätigung mit Zugangsdaten/Tickets
                     Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
                     $successMessage = 'Buchung erfolgreich! Eine Buchungsbestätigung wurde per E-Mail versendet.';
+                } elseif ($isFree && !$event->free_ticket_auto_confirm) {
+                    // Eingangsbestätigung ohne Zugangsdaten
+                    Mail::to($booking->customer_email)->send(new \App\Mail\BookingPendingApproval($booking));
+                    $successMessage = 'Ihre Anmeldung wurde erfolgreich eingereicht und wartet auf Bestätigung durch den Veranstalter. Sie werden per E-Mail benachrichtigt.';
                 } else {
                     // Bei kostenpflichtigen Tickets: Zahlungsaufforderung mit Rechnung
                     Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
@@ -348,7 +378,13 @@ class BookingController extends Controller
                 if ($event->user) {
                     $notificationPreferences = $event->user->notification_preferences ?? [];
                     if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
-                        $event->user->notify(new \App\Notifications\NewBookingNotification($booking));
+                        if ($booking->status === 'pending_approval') {
+                            // Spezielle Benachrichtigung mit Approve/Reject-Link
+                            $event->user->notify(new \App\Notifications\BookingApprovalRequiredNotification($booking));
+                        } else {
+                            // Normale Buchungs-Benachrichtigung
+                            $event->user->notify(new \App\Notifications\NewBookingNotification($booking));
+                        }
                     }
                 }
 
@@ -460,9 +496,12 @@ class BookingController extends Controller
             abort(403, 'Sie sind nicht berechtigt, diese Buchung zu stornieren.');
         }
 
-        // Prüfe ob Stornierung möglich ist (z.B. 24h vor Event)
-        if ($booking->event->start_date->subHours(24)->isPast()) {
-            return back()->with('error', 'Stornierung nicht mehr möglich.');
+        // Prüfe ob Stornierung gemäß Veranstaltungsrichtlinie erlaubt ist
+        if (!$booking->event->canCancelBooking()) {
+            if (!$booking->event->cancellation_allowed) {
+                return back()->with('error', 'Eine Stornierung durch den Teilnehmer ist für diese Veranstaltung nicht möglich.');
+            }
+            return back()->with('error', 'Die Stornierungsfrist ist abgelaufen. Eine Stornierung war bis ' . $booking->event->cancellation_days_before . ' Tag(e) vor Veranstaltungsbeginn möglich.');
         }
 
         $booking->update([
@@ -555,9 +594,9 @@ class BookingController extends Controller
         $this->authorize('download', $booking);
 
         // Prüfe, ob Ticket heruntergeladen werden darf
-        // Nur für bestätigte Buchungen ODER wenn die Buchung kostenlos ist (Gesamtpreis = 0)
-        if ($booking->status !== 'confirmed' && $booking->total > 0) {
-            abort(403, 'Tickets können nur für bestätigte und bezahlte Buchungen heruntergeladen werden.');
+        // Nur für bestätigte oder abgeschlossene Buchungen
+        if (!in_array($booking->status, ['confirmed', 'completed'])) {
+            abort(403, 'Tickets können nur für bestätigte Buchungen heruntergeladen werden.');
         }
 
         $pdfService = app(TicketPdfService::class);
@@ -753,14 +792,20 @@ class BookingController extends Controller
         }
 
         // Validate
+        $orgRule = $booking->event->requiresOrganizationField()
+            ? 'required|string|max:255'
+            : 'nullable|string|max:255';
+
         $request->validate([
             'attendees' => 'required|array',
             'attendees.*.attendee_name' => 'required|string|max:255',
             'attendees.*.attendee_email' => 'required|email|max:255',
+            'attendees.*.attendee_organization' => $orgRule,
         ], [
             'attendees.*.attendee_name.required' => 'Name ist erforderlich.',
             'attendees.*.attendee_email.required' => 'E-Mail ist erforderlich.',
             'attendees.*.attendee_email.email' => 'Bitte eine gültige E-Mail-Adresse eingeben.',
+            'attendees.*.attendee_organization.required' => 'Organisation/Einrichtung ist erforderlich.',
         ]);
 
         try {
@@ -771,6 +816,7 @@ class BookingController extends Controller
                         $item->update([
                             'attendee_name' => $attendeeData['attendee_name'],
                             'attendee_email' => $attendeeData['attendee_email'],
+                            'attendee_organization' => $attendeeData['attendee_organization'] ?? null,
                         ]);
                     }
                 }
@@ -781,8 +827,8 @@ class BookingController extends Controller
                     'tickets_personalized_at' => now(),
                 ]);
 
-                // Send tickets if payment is already confirmed
-                if ($booking->payment_status === 'paid' && !$booking->event->isOnline()) {
+                // Send tickets if payment is already confirmed and booking is confirmed
+                if ($booking->status === 'confirmed' && $booking->payment_status === 'paid' && !$booking->event->isOnline()) {
                     Mail::to($booking->customer_email)
                         ->send(new \App\Mail\PaymentConfirmed($booking));
                 }

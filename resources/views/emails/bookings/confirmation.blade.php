@@ -401,6 +401,30 @@
             </ol>
         </div>
 
+        <!-- Stornierungsrichtlinie -->
+        @if($booking->event->cancellation_allowed)
+        <div style="background: #f0fff4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
+            <h3 style="color: #155724; margin: 0 0 10px 0; font-size: 16px;">🔄 Stornierungsrichtlinie</h3>
+            @if($booking->event->cancellation_days_before !== null)
+                <p style="margin: 0; color: #333;">
+                    Sie können Ihre Buchung bis
+                    <strong>{{ $booking->event->start_date->copy()->subDays($booking->event->cancellation_days_before)->format('d.m.Y') }}</strong>
+                    ({{ $booking->event->cancellation_days_before }} Tag(e) vor Veranstaltungsbeginn)
+                    selbst stornieren.
+                </p>
+            @else
+                <p style="margin: 0; color: #333;">
+                    Sie können Ihre Buchung jederzeit bis zum Beginn der Veranstaltung selbst stornieren.
+                </p>
+            @endif
+            <p style="margin: 10px 0 0 0; font-size: 13px; color: #555;">
+                Zur Stornierung rufen Sie bitte Ihre
+                <a href="{{ route('bookings.show', $booking->booking_number) }}" style="color: #0066cc;">Buchungsdetails</a>
+                auf.
+            </p>
+        </div>
+        @endif
+
         <!-- Contact Info -->
         <div style="text-align: center; padding: 20px 0; border-top: 2px solid #eee; margin-top: 30px;">
             <p style="margin: 0 0 10px 0; color: #666;">

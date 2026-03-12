@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class BookingManagementController extends Controller
 {
@@ -63,7 +64,7 @@ class BookingManagementController extends Controller
     {
         $this->authorize('update', $booking);
         $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled,completed',
+            'status' => 'required|in:pending,pending_approval,confirmed,cancelled,completed',
         ]);
         $booking->update([
             'status' => $request->status,
@@ -155,6 +156,7 @@ class BookingManagementController extends Controller
                 'Nachname',
                 'Email',
                 'Telefon',
+                'Organisation',
                 'Ticket-Typ',
                 'Anzahl',
                 'Preis',
@@ -184,6 +186,7 @@ class BookingManagementController extends Controller
                         $lastName,
                         $booking->customer_email,
                         $booking->customer_phone ?? '',
+                        $item->attendee_organization ?? $booking->customer_organization ?? '',
                         $item->ticketType->name ?? 'Standard',
                         $item->quantity,
                         number_format($item->price, 2, ',', '.'),
@@ -231,6 +234,7 @@ class BookingManagementController extends Controller
         $content .= '<th>Nachname</th>';
         $content .= '<th>Email</th>';
         $content .= '<th>Telefon</th>';
+        $content .= '<th>Organisation</th>';
         $content .= '<th>Ticket-Typ</th>';
         $content .= '<th>Anzahl</th>';
         $content .= '<th>Preis</th>';
@@ -260,6 +264,7 @@ class BookingManagementController extends Controller
                 $content .= '<td>' . htmlspecialchars($lastName) . '</td>';
                 $content .= '<td>' . htmlspecialchars($booking->customer_email) . '</td>';
                 $content .= '<td>' . htmlspecialchars($booking->customer_phone ?? '') . '</td>';
+                $content .= '<td>' . htmlspecialchars($item->attendee_organization ?? $booking->customer_organization ?? '') . '</td>';
                 $content .= '<td>' . htmlspecialchars($item->ticketType->name ?? 'Standard') . '</td>';
                 $content .= '<td>' . $item->quantity . '</td>';
                 $content .= '<td>' . number_format($item->price, 2, ',', '.') . ' €</td>';
@@ -281,8 +286,87 @@ class BookingManagementController extends Controller
         return response($content, 200, $headers);
     }
 
-    public function checkIn(Request $request, Booking $booking)
+    /**
+     * Kostenfreie Buchung manuell bestätigen (Veranstalter-Freigabe)
+     */
+    public function approveBooking(Booking $booking)
     {
+        $this->authorize('update', $booking);
+
+        if ($booking->status !== 'pending_approval') {
+            return back()->with('error', 'Diese Buchung kann nicht bestätigt werden (Status: ' . $booking->status . ').');
+        }
+
+        $booking->update([
+            'status' => 'confirmed',
+            'confirmed_at' => now(),
+        ]);
+
+        // Buchungsbestätigung MIT Zugangsdaten/Tickets versenden
+        Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+
+        return back()->with('success', 'Buchung bestätigt! Die Bestätigung mit Zugangsdaten wurde per E-Mail versendet.');
+    }
+
+    /**
+     * Kostenfreie Buchung ablehnen
+     */
+    public function rejectBooking(Request $request, Booking $booking)
+    {
+        $this->authorize('update', $booking);
+
+        if ($booking->status !== 'pending_approval') {
+            return back()->with('error', 'Diese Buchung kann nicht abgelehnt werden.');
+        }
+
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:500',
+        ]);
+
+        $booking->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+        ]);
+
+        // Ticket-Kontingent zurückgeben
+        foreach ($booking->items as $item) {
+            if ($item->ticketType) {
+                $item->ticketType->decrement('quantity_sold', $item->quantity);
+            }
+        }
+
+        // Teilnehmer über Ablehnung informieren
+        Mail::to($booking->customer_email)->send(
+            new \App\Mail\BookingRejected($booking, $request->rejection_reason)
+        );
+
+        return back()->with('success', 'Buchung abgelehnt. Der Teilnehmer wurde benachrichtigt.');
+    }
+
+    /**
+     * Alle ausstehenden Buchungen eines Events bestätigen (Bulk-Aktion)
+     */
+    public function approveAllPending(Event $event)
+    {
+        $this->authorize('update', $event);
+
+        $pendingBookings = $event->bookings()
+            ->where('status', 'pending_approval')
+            ->get();
+
+        foreach ($pendingBookings as $booking) {
+            $booking->update([
+                'status' => 'confirmed',
+                'confirmed_at' => now(),
+            ]);
+            $booking->load(['items.ticketType', 'event.organization.users', 'event.category']);
+            Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+        }
+
+        return back()->with('success', $pendingBookings->count() . ' Buchung(en) bestätigt und Bestätigungen versendet.');
+    }
+
+    public function checkIn(Request $request, Booking $booking)    {
         $this->authorize('update', $booking);
 
         $request->validate([

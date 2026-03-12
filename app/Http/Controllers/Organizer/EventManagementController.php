@@ -81,6 +81,10 @@ class EventManagementController extends Controller
             'ticket_notes' => 'nullable|string|max:1000',
             'show_qr_code_on_ticket' => 'boolean',
             'requires_ticket' => 'boolean',
+            'cancellation_allowed' => 'boolean',
+            'cancellation_days_before' => 'nullable|integer|min:0|required_if:cancellation_allowed,true',
+            'organization_field_mode' => 'nullable|in:none,optional,required',
+            'free_ticket_auto_confirm' => 'boolean',
         ]);
 
         if ($request->boolean('is_published')) {
@@ -215,6 +219,10 @@ class EventManagementController extends Controller
             'ticket_notes' => 'nullable|string|max:1000',
             'show_qr_code_on_ticket' => 'boolean',
             'requires_ticket' => 'boolean',
+            'cancellation_allowed' => 'boolean',
+            'cancellation_days_before' => 'nullable|integer|min:0|required_if:cancellation_allowed,true',
+            'organization_field_mode' => 'nullable|in:none,optional,required',
+            'free_ticket_auto_confirm' => 'boolean',
         ]);
 
         unset($validated['has_multiple_dates']);

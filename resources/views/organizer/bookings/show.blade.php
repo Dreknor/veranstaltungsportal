@@ -14,6 +14,51 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            <!-- Pending Approval Banner für Veranstalter -->
+            @if($booking->status === 'pending_approval')
+                <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-6 h-6 text-amber-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="flex-1">
+                            <p class="font-medium text-amber-900">Diese Anmeldung wartet auf Ihre Bestätigung</p>
+                            <p class="text-sm text-amber-700 mt-1">
+                                Zugangsdaten und Tickets werden erst nach Bestätigung an den Teilnehmer versendet.
+                            </p>
+                            <div class="flex gap-3 mt-4">
+                                <form method="POST" action="{{ route('organizer.bookings.approve', $booking) }}">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium">
+                                        ✓ Anmeldung bestätigen
+                                    </button>
+                                </form>
+                                <div x-data="{ showReason: false }">
+                                    <button type="button" @click="showReason = !showReason"
+                                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium">
+                                        ✗ Ablehnen
+                                    </button>
+                                    <form x-show="showReason" method="POST" action="{{ route('organizer.bookings.reject', $booking) }}" class="mt-2">
+                                        @csrf
+                                        <textarea name="rejection_reason" rows="2" placeholder="Ablehnungsgrund (optional)"
+                                                  class="w-full rounded-lg border-gray-300 shadow-sm text-sm"></textarea>
+                                        <button type="submit" class="mt-2 px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700">
+                                            Ablehnung bestätigen
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Buchungsinformationen -->
             <div class="bg-white rounded-lg shadow-md p-6 mb-6">
                 <div class="flex justify-between items-start mb-6">
@@ -22,15 +67,17 @@
                         <p class="text-gray-600">Gebucht am {{ $booking->created_at->format('d.m.Y H:i') }} Uhr</p>
                     </div>
                     <div class="text-right">
-                        @if($booking->status === 'pending')
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Ausstehend</span>
-                        @elseif($booking->status === 'confirmed')
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">Bestätigt</span>
-                        @elseif($booking->status === 'cancelled')
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">Storniert</span>
-                        @else
-                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ ucfirst($booking->status) }}</span>
-                        @endif
+                    @if($booking->status === 'pending')
+                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Ausstehend</span>
+                    @elseif($booking->status === 'pending_approval')
+                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">Wartet auf Bestätigung</span>
+                    @elseif($booking->status === 'confirmed')
+                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">Bestätigt</span>
+                    @elseif($booking->status === 'cancelled')
+                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">Storniert</span>
+                    @else
+                        <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">{{ ucfirst($booking->status) }}</span>
+                    @endif
                     </div>
                 </div>
 
@@ -48,6 +95,9 @@
                         <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Kunde</h3>
                         @if($booking->billing_company)
                             <p class="text-sm font-semibold text-blue-700">{{ $booking->billing_company }}</p>
+                        @endif
+                        @if($booking->customer_organization)
+                            <p class="text-sm font-semibold text-indigo-700">🏫 {{ $booking->customer_organization }}</p>
                         @endif
                         <p class="text-lg font-semibold text-gray-900">{{ $booking->customer_name }}</p>
                         <p class="text-sm text-gray-600">{{ $booking->customer_email }}</p>
@@ -107,6 +157,9 @@
                                             </p>
                                             @if($item->attendee_email)
                                                 <p class="text-xs text-gray-500">{{ $item->attendee_email }}</p>
+                                            @endif
+                                            @if($item->attendee_organization)
+                                                <p class="text-xs text-indigo-600">🏫 {{ $item->attendee_organization }}</p>
                                             @endif
                                         </div>
                                     @endif
@@ -208,6 +261,7 @@
                             <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 shadow-sm">
                                 <option value="">Status ändern...</option>
                                 <option value="pending" {{ $booking->status === 'pending' ? 'disabled' : '' }}>Ausstehend</option>
+                                <option value="pending_approval" {{ $booking->status === 'pending_approval' ? 'disabled' : '' }}>Wartet auf Bestätigung</option>
                                 <option value="confirmed" {{ $booking->status === 'confirmed' ? 'disabled' : '' }}>Bestätigen</option>
                                 <option value="completed" {{ $booking->status === 'completed' ? 'disabled' : '' }}>Abschließen</option>
                                 <option value="cancelled" {{ $booking->status === 'cancelled' ? 'disabled' : '' }}>Stornieren</option>

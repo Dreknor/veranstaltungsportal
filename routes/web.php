@@ -276,6 +276,9 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
         Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
         Route::post('/bookings/{booking}/check-in', [Organizer\CheckInController::class, 'checkInByBooking'])->name('bookings.check-in');
+        Route::post('/bookings/{booking}/approve', [Organizer\BookingManagementController::class, 'approveBooking'])->name('bookings.approve');
+        Route::post('/bookings/{booking}/reject', [Organizer\BookingManagementController::class, 'rejectBooking'])->name('bookings.reject');
+        Route::post('/events/{event}/approve-all-pending', [Organizer\BookingManagementController::class, 'approveAllPending'])->name('events.approve-all-pending');
 
         // Check-In
         Route::get('/events/{event}/check-in', [Organizer\CheckInController::class, 'index'])->name('check-in.index');

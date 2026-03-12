@@ -12,6 +12,24 @@
         </div>
     @endif
 
+    <!-- Pending Approval Banner -->
+    @if($booking->status === 'pending_approval')
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+                <svg class="w-6 h-6 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                    <h3 class="font-semibold text-amber-900">Anmeldung in Bearbeitung</h3>
+                    <p class="text-sm text-amber-700 mt-1">
+                        Ihre Anmeldung wurde entgegengenommen und wird vom Veranstalter geprüft.
+                        Sie erhalten eine E-Mail, sobald Ihre Teilnahme bestätigt wurde.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
 
 
     <!-- Account Creation/Linking Prompt for Guest Bookings -->
@@ -419,10 +437,20 @@
                     <button onclick="window.print()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">🖨️ Diese Seite drucken</button>
 
                     @if($booking->status !== 'cancelled' && $booking->event->start_date->isFuture())
-                        <form method="POST" action="{{ route('bookings.cancel', $booking->booking_number) }}" onsubmit="return confirm('Möchten Sie diese Buchung wirklich stornieren?')">
-                            @csrf
-                            <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Buchung stornieren</button>
-                        </form>
+                        @if($booking->event->canCancelBooking())
+                            <form method="POST" action="{{ route('bookings.cancel', $booking->booking_number) }}" onsubmit="return confirm('Möchten Sie diese Buchung wirklich stornieren?')">
+                                @csrf
+                                <button type="submit" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Buchung stornieren</button>
+                            </form>
+                        @elseif($booking->event->cancellation_allowed && $booking->event->cancellation_days_before !== null)
+                            <div class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
+                                🚫 Stornierungsfrist abgelaufen (war bis {{ $booking->event->cancellation_days_before }} Tag(e) vor Veranstaltungsbeginn möglich)
+                            </div>
+                        @elseif(!$booking->event->cancellation_allowed)
+                            <div class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
+                                ℹ️ Eine Stornierung durch den Teilnehmer ist für diese Veranstaltung nicht möglich.
+                            </div>
+                        @endif
                     @endif
                 </div>
             </div>

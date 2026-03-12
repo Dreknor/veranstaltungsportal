@@ -78,6 +78,31 @@
                                         @enderror
                                     </div>
                                 </div>
+
+                                @if($booking->event->showsOrganizationField())
+                                <div class="mt-4">
+                                    <label for="attendee_organization_{{ $item->id }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Organisation / Einrichtung
+                                        @if($booking->event->requiresOrganizationField())
+                                            <span class="text-red-500">*</span>
+                                        @else
+                                            <span class="text-gray-400 font-normal">(optional)</span>
+                                        @endif
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="attendee_organization_{{ $item->id }}"
+                                        name="attendees[{{ $item->id }}][attendee_organization]"
+                                        value="{{ old('attendees.' . $item->id . '.attendee_organization', $item->attendee_organization ?? ($index === 0 ? $booking->customer_organization : '')) }}"
+                                        @if($booking->event->requiresOrganizationField()) required @endif
+                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        placeholder="z.B. Evangelische Grundschule Dresden"
+                                    >
+                                    @error('attendees.' . $item->id . '.attendee_organization')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                @endif
                             </div>
                         @endforeach
                     </div>

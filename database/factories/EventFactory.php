@@ -91,6 +91,10 @@ class EventFactory extends Factory
             'cancellation_reason' => null,
             'registration_required' => true,
             'views' => 0,
+            'cancellation_allowed' => true,
+            'cancellation_days_before' => null,
+            'organization_field_mode' => 'none',
+            'free_ticket_auto_confirm' => true,
         ];
     }
 
