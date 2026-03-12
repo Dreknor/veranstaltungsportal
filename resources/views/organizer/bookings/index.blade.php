@@ -93,7 +93,7 @@
         @endif
 
         <!-- Bookings Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -121,6 +121,9 @@
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900 dark:text-gray-100">{{ $booking->customer_name }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ $booking->customer_email }}</div>
+                                @if($booking->customer_organization && $booking->event->requiresOrganizationField())
+                                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-0.5 font-medium">{{ $booking->customer_organization }}</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
                                 {{ $booking->items->sum('quantity') }}
@@ -181,10 +184,30 @@
                                 {{ $booking->created_at->format('d.m.Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('organizer.bookings.show', $booking) }}"
-                                   class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-                                    Details
-                                </a>
+                                <div class="flex items-center justify-end gap-2 flex-wrap">
+                                    @if($booking->status === 'pending_approval')
+                                        <form method="POST" action="{{ route('organizer.bookings.approve', $booking) }}"
+                                              onsubmit="return confirm('Buchung von {{ addslashes($booking->customer_name) }} wirklich bestätigen?')">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="inline-flex items-center px-2.5 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition">
+                                                ✓ Bestätigen
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('organizer.bookings.reject', $booking) }}"
+                                              onsubmit="return confirm('Buchung von {{ addslashes($booking->customer_name) }} wirklich ablehnen?')">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="inline-flex items-center px-2.5 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition">
+                                                ✕ Ablehnen
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <a href="{{ route('organizer.bookings.show', $booking) }}"
+                                       class="inline-flex items-center px-2.5 py-1.5 bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-xs font-medium rounded hover:bg-blue-100 dark:hover:bg-blue-800 transition border border-blue-200 dark:border-blue-700">
+                                        Details
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
