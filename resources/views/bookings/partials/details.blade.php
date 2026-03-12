@@ -176,7 +176,7 @@
                                     </svg>
                                     Online-Veranstaltung
                                 </div>
-                                @if($booking->payment_status === 'paid' && $booking->event->online_url)
+                                @if(in_array($booking->status, ['confirmed', 'completed']) && $booking->payment_status === 'paid' && $booking->event->online_url)
                                     <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                         <div class="flex items-start gap-2">
                                             <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,6 +195,10 @@
                                                 @endif
                                             </div>
                                         </div>
+                                    </div>
+                                @elseif($booking->status === 'pending_approval')
+                                    <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                                        ⏳ Die Zugangsdaten werden nach Bestätigung durch den Veranstalter freigeschaltet.
                                     </div>
                                 @elseif($booking->payment_status !== 'paid')
                                     <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
@@ -220,7 +224,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if($booking->payment_status === 'paid' && $booking->event->online_url)
+                                @if(in_array($booking->status, ['confirmed', 'completed']) && $booking->payment_status === 'paid' && $booking->event->online_url)
                                     <div class="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                                         <div class="flex items-start gap-2">
                                             <svg class="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,6 +243,10 @@
                                                 @endif
                                             </div>
                                         </div>
+                                    </div>
+                                @elseif($booking->status === 'pending_approval')
+                                    <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
+                                        ⏳ Die Online-Zugangsdaten werden nach Bestätigung durch den Veranstalter freigeschaltet.
                                     </div>
                                 @elseif($booking->payment_status !== 'paid')
                                     <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
