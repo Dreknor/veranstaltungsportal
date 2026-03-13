@@ -10,21 +10,34 @@ use Carbon\Carbon;
 
 class SitemapController extends Controller
 {
+    private function xmlResponse(string $xml): Response
+    {
+        return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
+    }
+
     /**
      * Generate the main sitemap index
      */
     public function index(): Response
     {
         $sitemaps = [
-            ['loc' => route('sitemap.static'), 'lastmod' => now()->toW3cString()],
-            ['loc' => route('sitemap.events'), 'lastmod' => Carbon::parse(Event::where('is_published', true)->max('updated_at') ?? now())->toW3cString()],
+            ['loc' => route('sitemap.static'),     'lastmod' => now()->toW3cString()],
+            ['loc' => route('sitemap.events'),     'lastmod' => Carbon::parse(Event::where('is_published', true)->max('updated_at') ?? now())->toW3cString()],
             ['loc' => route('sitemap.categories'), 'lastmod' => Carbon::parse(EventCategory::max('updated_at') ?? now())->toW3cString()],
             ['loc' => route('sitemap.organizers'), 'lastmod' => Carbon::parse(User::where('is_organizer', true)->max('updated_at') ?? now())->toW3cString()],
         ];
 
-        return response()
-            ->view('sitemap.index', ['sitemaps' => $sitemaps])
-            ->header('Content-Type', 'application/xml');
+        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($sitemaps as $sitemap) {
+            $xml .= "  <sitemap>\n";
+            $xml .= '    <loc>' . e($sitemap['loc']) . "</loc>\n";
+            $xml .= '    <lastmod>' . e($sitemap['lastmod']) . "</lastmod>\n";
+            $xml .= "  </sitemap>\n";
+        }
+        $xml .= '</sitemapindex>';
+
+        return $this->xmlResponse($xml);
     }
 
     /**
@@ -33,17 +46,15 @@ class SitemapController extends Controller
     public function static(): Response
     {
         $urls = [
-            ['loc' => route('home'), 'priority' => '1.0', 'changefreq' => 'daily'],
-            ['loc' => route('events.index'), 'priority' => '0.9', 'changefreq' => 'daily'],
-            ['loc' => route('events.calendar'), 'priority' => '0.8', 'changefreq' => 'daily'],
-            ['loc' => route('help.index'), 'priority' => '0.7', 'changefreq' => 'weekly'],
-            ['loc' => route('badges.index'), 'priority' => '0.6', 'changefreq' => 'weekly'],
-            ['loc' => route('badges.leaderboard'), 'priority' => '0.6', 'changefreq' => 'daily'],
+            ['loc' => route('home'),               'priority' => '1.0', 'changefreq' => 'daily'],
+            ['loc' => route('events.index'),        'priority' => '0.9', 'changefreq' => 'daily'],
+            ['loc' => route('events.calendar'),     'priority' => '0.8', 'changefreq' => 'daily'],
+            ['loc' => route('help.index'),          'priority' => '0.7', 'changefreq' => 'weekly'],
+            ['loc' => route('badges.index'),        'priority' => '0.6', 'changefreq' => 'weekly'],
+            ['loc' => route('badges.leaderboard'),  'priority' => '0.6', 'changefreq' => 'daily'],
         ];
 
-        return response()
-            ->view('sitemap.urlset', ['urls' => $urls])
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($this->buildUrlset($urls));
     }
 
     /**
@@ -51,28 +62,25 @@ class SitemapController extends Controller
      */
     public function events(): Response
     {
-        // Include upcoming events and recent past events (last 3 months)
         $events = Event::where('is_published', true)
             ->where('start_date', '>=', now()->subMonths(3))
             ->orderBy('start_date', 'desc')
-            ->limit(5000) // Google sitemap limit
+            ->limit(5000)
             ->get();
 
         $urls = $events->map(function ($event) {
-            $isFuture = $event->start_date->isFuture();
+            $isFuture   = $event->start_date->isFuture();
             $isFeatured = $event->is_featured ?? false;
 
             return [
-                'loc' => route('events.show', $event->slug),
-                'lastmod' => $event->updated_at->toW3cString(),
-                'priority' => $isFeatured ? '0.9' : ($isFuture ? '0.8' : '0.7'),
-                'changefreq' => 'daily' ,
+                'loc'        => route('events.show', $event->slug),
+                'lastmod'    => $event->updated_at->toW3cString(),
+                'priority'   => $isFeatured ? '0.9' : ($isFuture ? '0.8' : '0.7'),
+                'changefreq' => 'daily',
             ];
         })->toArray();
 
-        return response()
-            ->view('sitemap.urlset', ['urls' => $urls])
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($this->buildUrlset($urls));
     }
 
     /**
@@ -84,16 +92,14 @@ class SitemapController extends Controller
 
         $urls = $categories->map(function ($category) {
             return [
-                'loc' => route('events.index', ['category' => $category->slug]),
-                'lastmod' => $category->updated_at->toW3cString(),
-                'priority' => '0.7',
+                'loc'        => route('events.index', ['category' => $category->slug]),
+                'lastmod'    => $category->updated_at->toW3cString(),
+                'priority'   => '0.7',
                 'changefreq' => 'weekly',
             ];
         })->toArray();
 
-        return response()
-            ->view('sitemap.urlset', ['urls' => $urls])
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($this->buildUrlset($urls));
     }
 
     /**
@@ -111,16 +117,14 @@ class SitemapController extends Controller
 
         $urls = $organizers->map(function ($organizer) {
             return [
-                'loc' => route('users.show', $organizer->id),
-                'lastmod' => $organizer->updated_at->toW3cString(),
-                'priority' => '0.6',
+                'loc'        => route('users.show', $organizer->id),
+                'lastmod'    => $organizer->updated_at->toW3cString(),
+                'priority'   => '0.6',
                 'changefreq' => 'weekly',
             ];
         })->toArray();
 
-        return response()
-            ->view('sitemap.urlset', ['urls' => $urls])
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($this->buildUrlset($urls));
     }
 
     /**
@@ -130,8 +134,26 @@ class SitemapController extends Controller
     {
         $content = view('sitemap.robots')->render();
 
-        return response($content, 200)
-            ->header('Content-Type', 'text/plain');
+        return response($content, 200)->header('Content-Type', 'text/plain');
+    }
+
+    /**
+     * Build a <urlset> XML string from an array of URL entries.
+     */
+    private function buildUrlset(array $urls): string
+    {
+        $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($urls as $url) {
+            $xml .= "  <url>\n";
+            $xml .= '    <loc>' . e($url['loc']) . "</loc>\n";
+            if (!empty($url['lastmod']))    $xml .= '    <lastmod>'   . e($url['lastmod'])    . "</lastmod>\n";
+            if (!empty($url['changefreq'])) $xml .= '    <changefreq>'. e($url['changefreq']) . "</changefreq>\n";
+            if (!empty($url['priority']))   $xml .= '    <priority>'  . e($url['priority'])   . "</priority>\n";
+            $xml .= "  </url>\n";
+        }
+        $xml .= '</urlset>';
+
+        return $xml;
     }
 }
-
