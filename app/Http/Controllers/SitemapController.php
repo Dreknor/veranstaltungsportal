@@ -17,9 +17,9 @@ class SitemapController extends Controller
     {
         $sitemaps = [
             ['loc' => route('sitemap.static'), 'lastmod' => now()->toW3cString()],
-            ['loc' => route('sitemap.events'), 'lastmod' => Event::where('is_published', true)->max('updated_at')?->toW3cString() ?? now()->toW3cString()],
-            ['loc' => route('sitemap.categories'), 'lastmod' => EventCategory::max('updated_at')?->toW3cString() ?? now()->toW3cString()],
-            ['loc' => route('sitemap.organizers'), 'lastmod' => User::where('is_organizer', true)->max('updated_at')?->toW3cString() ?? now()->toW3cString()],
+            ['loc' => route('sitemap.events'), 'lastmod' => Carbon::parse(Event::where('is_published', true)->max('updated_at') ?? now())->toW3cString()],
+            ['loc' => route('sitemap.categories'), 'lastmod' => Carbon::parse(EventCategory::max('updated_at') ?? now())->toW3cString()],
+            ['loc' => route('sitemap.organizers'), 'lastmod' => Carbon::parse(User::where('is_organizer', true)->max('updated_at') ?? now())->toW3cString()],
         ];
 
         return response()
