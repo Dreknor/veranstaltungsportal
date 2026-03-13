@@ -17,7 +17,7 @@ class SitemapController extends Controller
     {
         $sitemaps = [
             ['loc' => route('sitemap.static'), 'lastmod' => now()->toW3cString()],
-            ['loc' => route('sitemap.events'), 'lastmod' => Event::where('published', true)->max('updated_at')?->toW3cString() ?? now()->toW3cString()],
+            ['loc' => route('sitemap.events'), 'lastmod' => Event::where('is_published', true)->max('updated_at')?->toW3cString() ?? now()->toW3cString()],
             ['loc' => route('sitemap.categories'), 'lastmod' => EventCategory::max('updated_at')?->toW3cString() ?? now()->toW3cString()],
             ['loc' => route('sitemap.organizers'), 'lastmod' => User::where('is_organizer', true)->max('updated_at')?->toW3cString() ?? now()->toW3cString()],
         ];
@@ -52,7 +52,7 @@ class SitemapController extends Controller
     public function events(): Response
     {
         // Include upcoming events and recent past events (last 3 months)
-        $events = Event::where('published', true)
+        $events = Event::where('is_published', true)
             ->where('start_date', '>=', now()->subMonths(3))
             ->orderBy('start_date', 'desc')
             ->limit(5000) // Google sitemap limit
@@ -103,7 +103,7 @@ class SitemapController extends Controller
     {
         $organizers = User::where('is_organizer', true)
             ->whereHas('organizedEvents', function ($query) {
-                $query->where('published', true);
+                $query->where('is_published', true);
             })
             ->get();
 
