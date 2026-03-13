@@ -102,14 +102,16 @@ class SitemapController extends Controller
     public function organizers(): Response
     {
         $organizers = User::where('is_organizer', true)
-            ->whereHas('organizedEvents', function ($query) {
-                $query->where('is_published', true);
+            ->whereHas('organizations', function ($query) {
+                $query->whereHas('events', function ($q) {
+                    $q->where('is_published', true);
+                });
             })
             ->get();
 
         $urls = $organizers->map(function ($organizer) {
             return [
-                'loc' => route('user.profile', $organizer->id),
+                'loc' => route('users.show', $organizer->id),
                 'lastmod' => $organizer->updated_at->toW3cString(),
                 'priority' => '0.6',
                 'changefreq' => 'weekly',
