@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            $table->boolean('cancellation_allowed')->default(false)->after('requires_ticket');
+            $table->boolean('cancellation_allowed')->default(false)->after('registration_required');
             $table->unsignedSmallInteger('cancellation_days_before')->nullable()->after('cancellation_allowed');
         });
     }

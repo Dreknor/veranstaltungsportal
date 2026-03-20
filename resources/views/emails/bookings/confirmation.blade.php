@@ -19,7 +19,10 @@
     </div>
 
     <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-        @php $isFreBooking = $booking->total == 0; @endphp
+        @php
+            $isFreBooking = $booking->total == 0;
+            $isExternalInvoicing = $booking->event->organization?->hasExternalInvoicing() ?? false;
+        @endphp
         <p style="font-size: 16px; margin-bottom: 20px;">
             Liebe/r {{ $booking->customer_name }},
         </p>
@@ -181,7 +184,7 @@
                         <strong>{{ $booking->booking_number }}</strong>
                     </td>
                 </tr>
-                @if(!$isFreBooking)
+                @if(!$isFreBooking && !$isExternalInvoicing)
                 <tr>
                     <td style="padding: 8px 0; color: #666;">
                         <strong>🧾 Rechnungsnr.:</strong>
@@ -280,6 +283,22 @@
 
         @if($booking->payment_status !== 'paid' && !$isFreBooking)
         <!-- Payment Instructions -->
+        @if($isExternalInvoicing)
+        <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
+            <h3 style="color: #0066cc; margin: 0 0 10px 0; font-size: 16px;">💳 Zahlungshinweise</h3>
+            <p style="margin: 0; color: #333;">
+                Zur Begleichung Ihrer Buchung erhalten Sie in Kürze eine Rechnung mit allen Zahlungsinformationen direkt vom Veranstalter.
+            </p>
+            <p style="margin: 10px 0 0 0; color: #333;">
+                Bitte überweisen Sie den Betrag von
+                <strong>{{ number_format($booking->total, 2, ',', '.') }} €</strong>
+                erst nach Rechnungserhalt. Bankverbindung und Zahlungsfrist entnehmen Sie bitte der Rechnung.
+            </p>
+            <p style="margin: 10px 0 0 0; font-size: 14px; color: #555;">
+                Ihre Buchungsnummer für Rückfragen: <strong>{{ $booking->booking_number }}</strong>
+            </p>
+        </div>
+        @else
         <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
             <h3 style="color: #0066cc; margin: 0 0 10px 0; font-size: 16px;">💳 Zahlungshinweise</h3>
             <p style="margin: 0; color: #333;">
@@ -317,6 +336,7 @@
             </p>
         </div>
         @endif
+        @endif
 
         @if($booking->needsPersonalization())
         <!-- Personalization Required -->
@@ -339,9 +359,13 @@
         <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📎 Anlagen</h3>
             <ul style="margin: 0; padding-left: 20px;">
-                @if(!$isFreBooking)
+                @if(!$isFreBooking && !$isExternalInvoicing)
                 <li style="margin-bottom: 8px;">
                     <strong>Rechnung</strong> - Rechnung_{{ $booking->invoice_number ?? $booking->booking_number }}.pdf
+                </li>
+                @elseif(!$isFreBooking && $isExternalInvoicing)
+                <li style="margin-bottom: 8px; color: #666;">
+                    <em>Die Rechnung wird Ihnen separat vom Veranstalter zugestellt.</em>
                 </li>
                 @endif
                 @if($booking->event->requires_ticket && ($booking->payment_status === 'paid' || $isFreBooking) && !$booking->event->isOnline())
@@ -362,6 +386,10 @@
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📋 Nächste Schritte</h3>
             <ol style="margin: 0; padding-left: 20px; color: #666;">
                 @if($booking->payment_status !== 'paid' && !$isFreBooking)
+                @if($isExternalInvoicing)
+                <li style="margin-bottom: 10px;">Warten Sie auf die Rechnung vom Veranstalter</li>
+                <li style="margin-bottom: 10px;">Überweisen Sie den Betrag nach Rechnungserhalt</li>
+                @else
                 <li style="margin-bottom: 10px;">Überweisung des Betrags mit Angabe der Buchungsnummer</li>
                 <li style="margin-bottom: 10px;">
                     Nach Zahlungseingang erhalten Sie
@@ -373,6 +401,7 @@
                         eine Zahlungsbestätigung
                     @endif
                 </li>
+                @endif
                 @else
                     @if($booking->event->isOnline())
                     <li style="margin-bottom: 10px;">Notieren Sie sich die Zugangsdaten zur Online-Veranstaltung</li>

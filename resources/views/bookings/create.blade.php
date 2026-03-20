@@ -205,28 +205,47 @@
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Zahlungsmethode</h2>
 
-                            <div class="space-y-3">
-                                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition">
-                                    <input type="radio" name="payment_method" value="invoice" checked
-                                           class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <div class="ml-3 flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-medium text-gray-900">Rechnung</span>
-                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                            </svg>
+                            @if($event->organization && $event->organization->hasExternalInvoicing())
+                                {{-- Externer Rechnungsmodus: Keine Zahlungsmethoden-Auswahl --}}
+                                <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <div>
+                                            <p class="font-medium text-gray-900">Zahlung per Überweisung</p>
+                                            <p class="text-sm text-gray-600 mt-1">
+                                                Sie erhalten die Rechnung separat vom Veranstalter.
+                                                Bitte überweisen Sie den Betrag nach Rechnungserhalt.
+                                            </p>
                                         </div>
-                                        <p class="text-sm text-gray-600 mt-1">Sie erhalten eine Rechnung per E-Mail mit den Zahlungsinformationen.</p>
                                     </div>
-                                </label>
+                                </div>
+                                <input type="hidden" name="payment_method" value="invoice">
+                            @else
+                                {{-- Automatischer Modus: Rechnung + ggf. PayPal --}}
+                                <div class="space-y-3">
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                        <input type="radio" name="payment_method" value="invoice" checked
+                                               class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                        <div class="ml-3 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-medium text-gray-900">Rechnung</span>
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mt-1">Sie erhalten eine Rechnung per E-Mail mit den Zahlungsinformationen.</p>
+                                        </div>
+                                    </label>
 
-                                @if($event->organization && $event->organization->hasPayPalConfigured())
-                                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition">
-                                    <input type="radio" name="payment_method" value="paypal"
-                                           class="w-4 h-4 text-blue-600 focus:ring-blue-500">
-                                    <div class="ml-3 flex-1">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-medium text-gray-900">PayPal</span>
+                                    @if($event->organization && $event->organization->hasPayPalConfigured())
+                                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-500 transition">
+                                        <input type="radio" name="payment_method" value="paypal"
+                                               class="w-4 h-4 text-blue-600 focus:ring-blue-500">
+                                        <div class="ml-3 flex-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-medium text-gray-900">PayPal</span>
                                             <svg class="w-20 h-5" viewBox="0 0 124 33" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M46.211 6.749h-6.839a.95.95 0 0 0-.939.802l-2.766 17.537a.57.57 0 0 0 .564.658h3.265a.95.95 0 0 0 .939-.803l.746-4.73a.95.95 0 0 1 .938-.803h2.165c4.505 0 7.105-2.18 7.784-6.5.306-1.89.013-3.375-.872-4.415-.972-1.142-2.696-1.746-4.985-1.746zM47 13.154c-.374 2.454-2.249 2.454-4.062 2.454h-1.032l.724-4.583a.57.57 0 0 1 .563-.481h.473c1.235 0 2.4 0 3.002.704.359.42.469 1.044.332 1.906zM66.654 13.075h-3.275a.57.57 0 0 0-.563.481l-.145.916-.229-.332c-.709-1.029-2.29-1.373-3.868-1.373-3.619 0-6.71 2.741-7.312 6.586-.313 1.918.132 3.752 1.22 5.031.998 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .562.66h2.95a.95.95 0 0 0 .939-.803l1.77-11.209a.568.568 0 0 0-.561-.658zm-4.565 6.374c-.316 1.871-1.801 3.127-3.695 3.127-.951 0-1.711-.305-2.199-.883-.484-.574-.668-1.391-.514-2.301.295-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.499.589.697 1.411.554 2.317zM84.096 13.075h-3.291a.954.954 0 0 0-.787.417l-4.539 6.686-1.924-6.425a.953.953 0 0 0-.912-.678h-3.234a.57.57 0 0 0-.541.754l3.625 10.638-3.408 4.811a.57.57 0 0 0 .465.9h3.287a.949.949 0 0 0 .781-.408l10.946-15.8a.57.57 0 0 0-.468-.895z" fill="#253B80"/>
                                                 <path d="M94.992 6.749h-6.84a.95.95 0 0 0-.938.802l-2.766 17.537a.569.569 0 0 0 .562.658h3.51a.665.665 0 0 0 .656-.562l.785-4.971a.95.95 0 0 1 .938-.803h2.164c4.506 0 7.105-2.18 7.785-6.5.307-1.89.012-3.375-.873-4.415-.971-1.142-2.694-1.746-4.983-1.746zm.789 6.405c-.373 2.454-2.248 2.454-4.062 2.454h-1.031l.725-4.583a.568.568 0 0 1 .562-.481h.473c1.234 0 2.4 0 3.002.704.359.42.468 1.044.331 1.906zM115.434 13.075h-3.273a.567.567 0 0 0-.562.481l-.145.916-.23-.332c-.709-1.029-2.289-1.373-3.867-1.373-3.619 0-6.709 2.741-7.311 6.586-.312 1.918.131 3.752 1.219 5.031 1 1.176 2.426 1.666 4.125 1.666 2.916 0 4.533-1.875 4.533-1.875l-.146.91a.57.57 0 0 0 .564.66h2.949a.95.95 0 0 0 .938-.803l1.771-11.209a.571.571 0 0 0-.565-.658zm-4.565 6.374c-.314 1.871-1.801 3.127-3.695 3.127-.949 0-1.711-.305-2.199-.883-.484-.574-.666-1.391-.514-2.301.297-1.855 1.805-3.152 3.67-3.152.93 0 1.686.309 2.184.892.501.589.699 1.411.554 2.317zM119.295 7.23l-2.807 17.858a.569.569 0 0 0 .562.658h2.822c.469 0 .867-.34.939-.803l2.768-17.536a.57.57 0 0 0-.562-.659h-3.16a.571.571 0 0 0-.562.482z" fill="#179BD7"/>
@@ -241,6 +260,7 @@
                                 </label>
                                 @endif
                             </div>
+                            @endif
                         </div>
 
                         <!-- Rabattcode -->

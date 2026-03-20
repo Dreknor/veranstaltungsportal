@@ -58,6 +58,59 @@
         </nav>
     </div>
 
+    {{-- Rechnungsmodus --}}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">Rechnungsmodus</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Wählen Sie, ob Rechnungen automatisch über die Plattform oder extern in Ihrer eigenen Buchhaltungssoftware erstellt werden.
+        </p>
+
+        <form method="POST" action="{{ route('organizer.settings.invoice-mode.update') }}">
+            @csrf
+            @method('PUT')
+
+            <div class="space-y-3" x-data="{ mode: '{{ $organization->invoice_mode ?? 'automatic' }}' }">
+                <label class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition"
+                       :class="mode === 'automatic' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600'">
+                    <input type="radio" name="invoice_mode" value="automatic" x-model="mode"
+                           class="mt-1 text-blue-600">
+                    <div class="ml-3">
+                        <span class="font-medium text-gray-900 dark:text-gray-100">Automatische Rechnungsstellung</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Rechnungen werden automatisch als ZUGFeRD-PDF generiert und per E-Mail an die Teilnehmer versendet. PayPal-Zahlung ist möglich.
+                        </p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-4 border-2 rounded-lg cursor-pointer transition"
+                       :class="mode === 'external' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-600'">
+                    <input type="radio" name="invoice_mode" value="external" x-model="mode"
+                           class="mt-1 text-blue-600">
+                    <div class="ml-3">
+                        <span class="font-medium text-gray-900 dark:text-gray-100">Externe Rechnungsstellung</span>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            Sie erstellen Rechnungen in Ihrer eigenen Buchhaltungssoftware. Die Plattform generiert keine Rechnungen und bietet kein PayPal an. Rechnungsdaten können als Excel exportiert werden.
+                        </p>
+                    </div>
+                </label>
+
+                {{-- Warnhinweis --}}
+                <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
+                     x-show="mode !== '{{ $organization->invoice_mode ?? 'automatic' }}'" x-cloak>
+                    <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                        ⚠️ <strong>Achtung:</strong> Beim Wechsel des Rechnungsmodus werden bestehende Buchungen nicht verändert. Der neue Modus gilt nur für zukünftige Buchungen.
+                        <span x-show="mode === 'external'">Bei Wechsel auf "Extern" wird PayPal automatisch für neue Buchungen deaktiviert.</span>
+                    </p>
+                </div>
+            </div>
+
+            <button type="submit" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Rechnungsmodus speichern
+            </button>
+        </form>
+    </div>
+
+    @if($organization->hasAutomaticInvoicing())
     <!-- Form -->
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Rechnungsnummern-Format</h2>
@@ -225,5 +278,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+@else
+    <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+        <div class="flex items-center gap-3 text-gray-500 dark:text-gray-400">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p>Die Rechnungsnummern-Einstellungen sind bei externer Rechnungsstellung nicht verfügbar, da keine Rechnungsnummern generiert werden.</p>
+        </div>
+    </div>
+@endif
 </x-layouts.app>
 

@@ -169,6 +169,10 @@ class BookingManagementController extends Controller
                 'PLZ',
                 'Stadt',
                 'Land',
+                'Firma (Rechnung)',
+                'USt-IdNr.',
+                'Extern fakturiert',
+                'Externe Rechnungsnr.',
             ], ';');
 
             // Daten - für jedes Ticket eine Zeile
@@ -199,6 +203,10 @@ class BookingManagementController extends Controller
                         $booking->billing_postal_code ?? '',
                         $booking->billing_city ?? '',
                         $booking->billing_country ?? '',
+                        $booking->billing_company ?? '',
+                        $booking->billing_vat_id ?? '',
+                        $booking->externally_invoiced ? 'Ja' : 'Nein',
+                        $booking->external_invoice_number ?? '',
                     ], ';');
                 }
             }
@@ -247,6 +255,10 @@ class BookingManagementController extends Controller
         $content .= '<th>PLZ</th>';
         $content .= '<th>Stadt</th>';
         $content .= '<th>Land</th>';
+        $content .= '<th>Firma (Rechnung)</th>';
+        $content .= '<th>USt-IdNr.</th>';
+        $content .= '<th>Extern fakturiert</th>';
+        $content .= '<th>Externe Rechnungsnr.</th>';
         $content .= '</tr>';
 
         // Daten
@@ -277,6 +289,10 @@ class BookingManagementController extends Controller
                 $content .= '<td>' . htmlspecialchars($booking->billing_postal_code ?? '') . '</td>';
                 $content .= '<td>' . htmlspecialchars($booking->billing_city ?? '') . '</td>';
                 $content .= '<td>' . htmlspecialchars($booking->billing_country ?? '') . '</td>';
+                $content .= '<td>' . htmlspecialchars($booking->billing_company ?? '') . '</td>';
+                $content .= '<td>' . htmlspecialchars($booking->billing_vat_id ?? '') . '</td>';
+                $content .= '<td>' . ($booking->externally_invoiced ? 'Ja' : 'Nein') . '</td>';
+                $content .= '<td>' . htmlspecialchars($booking->external_invoice_number ?? '') . '</td>';
                 $content .= '</tr>';
             }
         }

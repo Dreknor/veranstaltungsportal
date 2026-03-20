@@ -25,6 +25,12 @@ class BookingInvoiceObserver
             return;
         }
 
+        // Keine Rechnungsnummer bei externer Rechnungsstellung
+        $organization = $booking->event?->organization;
+        if ($organization && $organization->hasExternalInvoicing()) {
+            return;
+        }
+
         // Generate invoice number when booking is created
         if (!$booking->invoice_number && $booking->event) {
             try {
@@ -53,6 +59,12 @@ class BookingInvoiceObserver
     {
         // Bei kostenlosen Buchungen keine Rechnungsnummer generieren
         if ($booking->total == 0) {
+            return;
+        }
+
+        // Keine Rechnungsnummer bei externer Rechnungsstellung
+        $organization = $booking->event?->organization;
+        if ($organization && $organization->hasExternalInvoicing()) {
             return;
         }
 

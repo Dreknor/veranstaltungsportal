@@ -44,6 +44,7 @@ class Organization extends Model
         'paypal_client_secret',
         'paypal_mode',
         'paypal_webhook_id',
+        'invoice_mode',
     ];
 
     protected function casts(): array
@@ -83,6 +84,22 @@ class Organization extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    /**
+     * Prüft ob die Organisation automatische Rechnungsstellung nutzt
+     */
+    public function hasAutomaticInvoicing(): bool
+    {
+        return ($this->invoice_mode ?? 'automatic') === 'automatic';
+    }
+
+    /**
+     * Prüft ob die Organisation externe Rechnungsstellung nutzt
+     */
+    public function hasExternalInvoicing(): bool
+    {
+        return $this->invoice_mode === 'external';
     }
 
     /**

@@ -246,6 +246,20 @@
                             <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-red-100 text-red-800">Fehlgeschlagen</span>
                         @endif
                     </div>
+                    @if($booking->event->organization?->hasExternalInvoicing() && $booking->total > 0)
+                    <div class="flex justify-between items-center mt-3 pt-3 border-t">
+                        <span class="text-gray-600">Extern fakturiert</span>
+                        @if($booking->externally_invoiced)
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                ✓ Fakturiert @if($booking->external_invoice_number)({{ $booking->external_invoice_number }})@endif
+                            </span>
+                        @else
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                ⏳ Noch nicht fakturiert
+                            </span>
+                        @endif
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -288,6 +302,29 @@
                         Kundenansicht öffnen
                     </a>
                 </div>
+
+                @if($booking->event->organization?->hasExternalInvoicing() && $booking->total > 0 && !$booking->externally_invoiced)
+                <div class="mt-4 pt-4 border-t">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Externe Fakturierung</p>
+                    <form action="{{ route('organizer.billing-data.mark-invoiced', $booking) }}" method="POST">
+                        @csrf @method('PUT')
+                        <div class="flex gap-2">
+                            <input type="text" name="external_invoice_number"
+                                   placeholder="Externe Rechnungsnr. (optional)"
+                                   class="rounded-lg border-gray-300 shadow-sm text-sm flex-1">
+                            <button type="submit"
+                                    class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm whitespace-nowrap">
+                                Als fakturiert markieren
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                @elseif($booking->event->organization?->hasExternalInvoicing() && $booking->total > 0 && $booking->externally_invoiced)
+                <div class="mt-4 pt-4 border-t">
+                    <a href="{{ route('organizer.billing-data.index') }}"
+                       class="text-sm text-blue-600 hover:underline">→ Alle Rechnungsdaten anzeigen</a>
+                </div>
+                @endif
             </div>
         </div>
     </div>

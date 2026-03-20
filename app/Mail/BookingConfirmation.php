@@ -31,11 +31,13 @@ class BookingConfirmation extends Mailable
     public function attachments(): array
     {
         $isFreeBooking = $this->booking->total == 0;
+        $organization = $this->booking->event?->organization;
+        $isExternalInvoicing = $organization?->hasExternalInvoicing() ?? false;
 
         $attachments = [];
 
-        // Rechnung nur bei kostenpflichtigen Buchungen anhängen
-        if (!$isFreeBooking) {
+        // Rechnung nur bei kostenpflichtigen Buchungen UND automatischer Rechnungsstellung anhängen
+        if (!$isFreeBooking && !$isExternalInvoicing) {
             // Sicherstellen, dass eine veranstalterspezifische Rechnungsnummer existiert (einmalig je Buchung)
             if (empty($this->booking->invoice_number)) {
                 $invoiceNumberService = app(InvoiceNumberService::class);
@@ -57,7 +59,7 @@ class BookingConfirmation extends Mailable
                 fn () => $invoiceService->getInvoiceOutput($this->booking),
                 "Rechnung_{$invoiceNumber}.pdf"
             )->withMime('application/pdf');
-        } else {
+        } elseif ($isFreeBooking) {
             // Kostenfreie Buchung: sicherstellen, dass keine Rechnungsnummer gesetzt ist
             if (!empty($this->booking->invoice_number)) {
                 $this->booking->forceFill([
@@ -66,13 +68,16 @@ class BookingConfirmation extends Mailable
                 ])->save();
             }
         }
+        // Bei externer Rechnungsstellung: kein Rechnungs-PDF, keine Rechnungsnummer generieren
 
         // Ticket-PDF nur anhängen, wenn:
+        // - KEINE externe Rechnungsstellung (Zahlung noch ausstehend)
         // - Event Tickets erfordert (requires_ticket)
         // - Buchung bezahlt ist ODER kostenlose Buchung
         // - Event NICHT rein online ist
         // - Personalisierung abgeschlossen ist
-        if ($this->booking->event->requires_ticket
+        if (!$isExternalInvoicing
+            && $this->booking->event->requires_ticket
             && ($this->booking->payment_status === 'paid' || $isFreeBooking)
             && !$this->booking->event->isOnline()
             && $this->booking->canSendTickets()) {

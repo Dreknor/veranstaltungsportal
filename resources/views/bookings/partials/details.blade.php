@@ -426,13 +426,10 @@
                                 ℹ️ Für diese Veranstaltung ist kein separates Ticket erforderlich. Ihre Buchungsnummer dient als Zugangsnachweis.
                             </div>
                         @endif
-                        @if($booking->total > 0)
-                        <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition block text-center">📄 Rechnung herunterladen (PDF)</a>
-                        @endif
                         @if($booking->event->end_date->isPast())
                             <a href="{{ route('bookings.certificate', $booking->booking_number) }}" class="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition block text-center">🏆 Teilnahmezertifikat herunterladen</a>
                         @endif
-                    @else
+                    @elseif($booking->status !== 'confirmed')
                         <div class="w-full px-4 py-3 bg-gray-100 text-gray-600 rounded-lg text-center text-sm">
                             @if($booking->event->requires_ticket)
                                 Tickets sind verfügbar, sobald die Buchung bestätigt wurde.
@@ -440,6 +437,18 @@
                                 Dokumente sind verfügbar, sobald die Buchung bestätigt wurde.
                             @endif
                         </div>
+                    @endif
+
+                    {{-- Rechnungsbereich: unabhängig vom Zahlungsstatus für bestätigte, kostenpflichtige Buchungen --}}
+                    @if($booking->status === 'confirmed' && $booking->total > 0)
+                        @php $isExternalInvoicing = $booking->event->organization?->hasExternalInvoicing() ?? false; @endphp
+                        @if($isExternalInvoicing)
+                        <div class="w-full px-4 py-3 bg-blue-50 border border-blue-200 text-blue-800 rounded-lg text-center text-sm">
+                            ℹ️ Die Rechnung wird Ihnen separat vom Veranstalter zugestellt.
+                        </div>
+                        @elseif($booking->invoice_number)
+                        <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition block text-center">📄 Rechnung herunterladen (PDF)</a>
+                        @endif
                     @endif
 
                     <button onclick="window.print()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">🖨️ Diese Seite drucken</button>

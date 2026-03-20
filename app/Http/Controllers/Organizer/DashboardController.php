@@ -37,6 +37,13 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'cancelled')
                 ->join('booking_items', 'bookings.id', '=', 'booking_items.booking_id')
                 ->sum('booking_items.quantity'),
+            'pending_invoice_count' => $organization->hasExternalInvoicing()
+                ? $organization->bookings()
+                    ->where('total', '>', 0)
+                    ->where('externally_invoiced', false)
+                    ->where('status', '!=', 'cancelled')
+                    ->count()
+                : 0,
         ];
 
         // Organization Info

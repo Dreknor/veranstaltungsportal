@@ -318,6 +318,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         // Invoice Settings & Invoices
         Route::get('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'index'])->name('settings.invoice.index');
         Route::put('/settings/invoice', [Organizer\InvoiceSettingsController::class, 'update'])->name('settings.invoice.update');
+        Route::put('/settings/invoice-mode', [Organizer\InvoiceSettingsController::class, 'updateInvoiceMode'])->name('settings.invoice-mode.update');
         Route::post('/settings/invoice/preview', [Organizer\InvoiceSettingsController::class, 'preview'])->name('settings.invoice.preview');
         Route::get('/settings/invoice/sample', [Organizer\InvoiceSettingsController::class, 'sampleInvoice'])->name('settings.invoice.sample');
         Route::get('/invoices', [Organizer\InvoiceController::class, 'index'])->name('invoices.index');
@@ -325,6 +326,13 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::get('/platform-fees', [Organizer\InvoiceController::class, 'platformFees'])->name('invoices.platform-fees');
         Route::get('/invoices/{invoice}', [Organizer\InvoiceController::class, 'show'])->name('invoices.show');
         Route::get('/invoices/{invoice}/download', [Organizer\InvoiceController::class, 'download'])->name('invoices.download');
+
+        // Rechnungsdaten-Export (externe Fakturierung)
+        Route::get('/billing-data', [Organizer\BillingDataExportController::class, 'index'])->name('billing-data.index');
+        Route::get('/billing-data/export', [Organizer\BillingDataExportController::class, 'export'])->name('billing-data.export');
+        Route::get('/billing-data/export-datev', [Organizer\BillingDataExportController::class, 'exportDatev'])->name('billing-data.export-datev');
+        Route::put('/billing-data/bulk-mark-invoiced', [Organizer\BillingDataExportController::class, 'bulkMarkAsInvoiced'])->name('billing-data.bulk-mark-invoiced');
+        Route::put('/billing-data/{booking}/mark-invoiced', [Organizer\BillingDataExportController::class, 'markAsInvoiced'])->name('billing-data.mark-invoiced');
 
         // Reviews
         Route::get('/reviews', [Organizer\ReviewController::class, 'index'])->name('reviews.index');

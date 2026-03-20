@@ -133,9 +133,15 @@ class BookingController extends Controller
         ]);
 
         // Validate PayPal selection
-        if ($request->payment_method === 'paypal' && !$event->organization->hasPayPalConfigured()) {
-            return back()->withInput()
-                ->with('error', 'PayPal ist für diesen Veranstalter nicht verfügbar.');
+        if ($request->payment_method === 'paypal') {
+            if ($event->organization?->hasExternalInvoicing()) {
+                return back()->withInput()
+                    ->with('error', 'PayPal ist bei externer Rechnungsstellung nicht verfügbar.');
+            }
+            if (!$event->organization?->hasPayPalConfigured()) {
+                return back()->withInput()
+                    ->with('error', 'PayPal ist für diesen Veranstalter nicht verfügbar.');
+            }
         }
 
         try {
@@ -280,7 +286,9 @@ class BookingController extends Controller
                     'total' => $total,
                     'status' => $initialStatus,
                     'payment_status' => $initialPaymentStatus,
-                    'payment_method' => $request->payment_method ?? 'invoice',
+                    'payment_method' => ($event->organization?->hasExternalInvoicing())
+                        ? 'invoice'
+                        : ($request->payment_method ?? 'invoice'),
                     'confirmed_at' => $confirmedAt,
                     'discount_code_id' => $discountCodeId,
                     'additional_data' => $request->except(['_token', 'tickets', 'customer_name', 'customer_email', 'customer_phone', 'billing_company', 'billing_vat_id', 'billing_address', 'billing_postal_code', 'billing_city', 'billing_country', 'discount_code', 'payment_method']),
@@ -371,7 +379,11 @@ class BookingController extends Controller
                 } else {
                     // Bei kostenpflichtigen Tickets: Zahlungsaufforderung mit Rechnung
                     Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
-                    $successMessage = 'Buchung erfolgreich erstellt! Eine Rechnung mit Zahlungsinformationen wurde per E-Mail versendet.';
+                    if ($event->organization?->hasExternalInvoicing()) {
+                        $successMessage = 'Buchung erfolgreich erstellt! Sie erhalten eine Buchungsbestätigung per E-Mail. Die Rechnung wird Ihnen separat vom Veranstalter zugestellt.';
+                    } else {
+                        $successMessage = 'Buchung erfolgreich erstellt! Eine Rechnung mit Zahlungsinformationen wurde per E-Mail versendet.';
+                    }
                 }
 
                 // Benachrichtige Organizer über neue Buchung
@@ -577,6 +589,11 @@ class BookingController extends Controller
             ->where('booking_number', $bookingNumber)
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
+
+        // Kein Download bei externer Rechnungsstellung
+        if ($booking->event->organization?->hasExternalInvoicing()) {
+            abort(403, 'Rechnungen werden bei diesem Veranstalter extern erstellt.');
+        }
 
         $this->authorize('download', $booking);
 

@@ -194,6 +194,13 @@
                         Rechnungen
                     </x-layouts.sidebar-link>
 
+                    @if(auth()->user()->currentOrganization()?->hasExternalInvoicing())
+                    <x-layouts.sidebar-link href="{{ route('organizer.billing-data.index') }}" icon='fas-file-export'
+                        :active="request()->routeIs('organizer.billing-data.*')">
+                        Rechnungsdaten
+                    </x-layouts.sidebar-link>
+                    @endif
+
                     <x-layouts.sidebar-link href="{{ route('organizer.bank-account.index') }}" icon='fas-building-columns'
                         :active="request()->routeIs('organizer.bank-account.*')">
                         Kontoverbindung

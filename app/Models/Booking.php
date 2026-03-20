@@ -16,6 +16,9 @@ class Booking extends Model
         'booking_number',
         'invoice_number',
         'invoice_date',
+        'externally_invoiced',
+        'externally_invoiced_at',
+        'external_invoice_number',
         'event_id',
         'user_id',
         'customer_name',
@@ -68,6 +71,8 @@ class Booking extends Model
             'checked_in' => 'boolean',
             'checked_in_at' => 'datetime',
             'invoice_date' => 'datetime',
+            'externally_invoiced' => 'boolean',
+            'externally_invoiced_at' => 'datetime',
         ];
     }
 

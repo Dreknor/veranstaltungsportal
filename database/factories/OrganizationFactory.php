@@ -42,6 +42,7 @@ class OrganizationFactory extends Factory
             'is_active' => true,
             'is_verified' => $this->faker->boolean(30),
             'verified_at' => $this->faker->optional(0.3)->dateTimeBetween('-1 year', 'now'),
+            'invoice_mode' => 'automatic',
         ];
     }
 
@@ -84,6 +85,16 @@ class OrganizationFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Organisation mit externer Rechnungsstellung
+     */
+    public function withExternalInvoicing(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'invoice_mode' => 'external',
         ]);
     }
 }

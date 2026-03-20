@@ -58,6 +58,25 @@
                 </div>
             </div>
 
+            {{-- Kachel: Nicht-fakturierte Buchungen (nur bei externer Rechnungsstellung) --}}
+            @if($organization->hasExternalInvoicing() && $stats['pending_invoice_count'] > 0)
+            <div class="mt-4 bg-white rounded-lg shadow border-l-4 border-yellow-400 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Noch nicht fakturiert</p>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['pending_invoice_count'] }}</p>
+                        <p class="text-xs text-gray-500 mt-1">kostenpflichtige Buchungen warten auf externe Rechnung</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('organizer.billing-data.index', ['filter' => 'pending']) }}"
+                           class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition text-sm whitespace-nowrap">
+                            Exportieren
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <!-- Kommende Events -->
                 <div class="bg-white rounded-lg shadow">

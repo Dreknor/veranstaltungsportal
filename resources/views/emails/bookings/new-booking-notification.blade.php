@@ -106,6 +106,57 @@
                                 </tr>
                             </table>
 
+                            @if($booking->event->organization?->hasExternalInvoicing() && $booking->total > 0)
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="margin-top: 16px; border: 1px solid #fcd34d; border-radius: 6px; overflow: hidden;">
+                                <tr>
+                                    <td colspan="2" style="background-color: #fffbeb; padding: 12px 20px; border-bottom: 1px solid #fde68a;">
+                                        <strong style="font-size: 14px; color: #92400e;">📋 Rechnungsdaten (für externe Fakturierung)</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 20px; color: #6b7280; font-size: 13px; width: 40%; border-bottom: 1px solid #f3f4f6;">Firma</td>
+                                    <td style="padding: 8px 20px; color: #374151; font-size: 13px; border-bottom: 1px solid #f3f4f6;">{{ $booking->billing_company ?: '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 20px; color: #6b7280; font-size: 13px; border-bottom: 1px solid #f3f4f6;">USt-IdNr.</td>
+                                    <td style="padding: 8px 20px; color: #374151; font-size: 13px; border-bottom: 1px solid #f3f4f6;">{{ $booking->billing_vat_id ?: '-' }}</td>
+                                </tr>
+                                @if($booking->billing_address)
+                                <tr>
+                                    <td style="padding: 8px 20px; color: #6b7280; font-size: 13px; border-bottom: 1px solid #f3f4f6;">Adresse</td>
+                                    <td style="padding: 8px 20px; color: #374151; font-size: 13px; border-bottom: 1px solid #f3f4f6;">
+                                        {{ $booking->billing_address }}<br>
+                                        {{ $booking->billing_postal_code }} {{ $booking->billing_city }}{{ $booking->billing_country ? ', ' . $booking->billing_country : '' }}
+                                    </td>
+                                </tr>
+                                @endif
+                                <tr>
+                                    <td style="padding: 8px 20px; color: #6b7280; font-size: 13px; border-bottom: 1px solid #f3f4f6;">E-Mail</td>
+                                    <td style="padding: 8px 20px; color: #374151; font-size: 13px; border-bottom: 1px solid #f3f4f6;">{{ $booking->customer_email }}</td>
+                                </tr>
+                                @if($booking->customer_phone)
+                                <tr>
+                                    <td style="padding: 8px 20px; color: #6b7280; font-size: 13px; border-bottom: 1px solid #f3f4f6;">Telefon</td>
+                                    <td style="padding: 8px 20px; color: #374151; font-size: 13px; border-bottom: 1px solid #f3f4f6;">{{ $booking->customer_phone }}</td>
+                                </tr>
+                                @endif
+                                <tr>
+                                    <td style="padding: 8px 20px; color: #6b7280; font-size: 13px;">Betrag</td>
+                                    <td style="padding: 8px 20px; color: #374151; font-size: 13px; font-weight: 700;">{{ number_format($booking->total, 2, ',', '.') }} €</td>
+                                </tr>
+                            </table>
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0;">
+                                        <a href="{{ route('organizer.billing-data.index') }}"
+                                           style="display: inline-block; padding: 10px 24px; background: #f59e0b; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px;">
+                                            Rechnungsdaten exportieren
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            @endif
+
                             <!-- CTA Button -->
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>

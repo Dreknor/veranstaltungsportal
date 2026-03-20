@@ -84,6 +84,27 @@ class InvoiceSettingsController extends Controller
     }
 
     /**
+     * Update invoice mode (automatic/external)
+     */
+    public function updateInvoiceMode(Request $request)
+    {
+        $organization = auth()->user()->currentOrganization();
+        if (!$organization) {
+            return redirect()->route('organizer.organizations.select');
+        }
+
+        $request->validate([
+            'invoice_mode' => 'required|in:automatic,external',
+        ]);
+
+        $organization->update([
+            'invoice_mode' => $request->invoice_mode,
+        ]);
+
+        return back()->with('status', 'Rechnungsmodus wurde erfolgreich aktualisiert.');
+    }
+
+    /**
      * Preview invoice number format
      */
     public function preview(Request $request)

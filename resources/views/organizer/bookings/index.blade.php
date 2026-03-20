@@ -105,6 +105,9 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Zahlung</th>
                         <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-28">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Datum</th>
+                        @if($organization->hasExternalInvoicing())
+                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
+                        @endif
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktionen</th>
                     </tr>
                 </thead>
@@ -166,6 +169,17 @@
                             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ $booking->created_at->format('d.m.Y') }}
                             </td>
+                            @if($organization->hasExternalInvoicing())
+                            <td class="px-3 py-4 text-center">
+                                @if($booking->total > 0)
+                                    @if($booking->externally_invoiced)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" title="Fakturiert">✓</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" title="Noch nicht fakturiert">⏳</span>
+                                    @endif
+                                @endif
+                            </td>
+                            @endif
                             <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2 flex-wrap">
                                     @if($booking->status === 'pending_approval')
