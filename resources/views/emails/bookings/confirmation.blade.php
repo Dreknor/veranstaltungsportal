@@ -5,20 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buchungsbestätigung</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        @if($booking->event->organization?->logo)
-            <div style="text-align: center; margin-bottom: 15px;">
-                <img src="{{ asset('storage/' . $booking->event->organization->logo) }}"
-                     alt="{{ $booking->event->organization->name }} Logo"
-                     style="max-height: 40px; max-width: 150px; object-fit: contain; filter: brightness(0) invert(1);">
-            </div>
-        @endif
-        <h1 style="color: white; margin: 0; font-size: 28px;">Buchungsbestätigung</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">{{ config('app.name') }}</p>
-    </div>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f3f4f6; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
 
-    <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                            @if($booking->event->organization?->logo)
+                                <div style="margin-bottom: 16px;">
+                                    <img src="{{ asset('storage/' . $booking->event->organization->logo) }}"
+                                         alt="{{ $booking->event->organization->name }} Logo"
+                                         style="max-height: 50px; max-width: 160px; object-fit: contain; filter: brightness(0) invert(1);">
+                                </div>
+                            @endif
+                            <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">🎟️ Buchungsbestätigung</h1>
+                            <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.85); font-size: 16px;">{{ config('app.name') }}</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px; background-color: #ffffff;">
         @php
             $isFreBooking = $booking->total == 0;
             $isExternalInvoicing = $booking->event->organization?->hasExternalInvoicing() ?? false;
@@ -472,16 +482,28 @@
             @endif
         </div>
 
-        <!-- Footer -->
-        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-            <p style="margin: 0;">
-                © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.
-            </p>
-            <p style="margin: 10px 0 0 0;">
-                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
-            </p>
-        </div>
-    </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #374151; line-height: 1.6;">
+                                Viele Grüße<br>
+                                <strong>Ihr {{ config('app.name') }}-Team</strong>
+                            </p>
+                            <p style="margin: 20px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
+                                © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.
+                            </p>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
+                                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
 

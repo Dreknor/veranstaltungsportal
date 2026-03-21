@@ -358,6 +358,14 @@ class Event extends Model implements HasMedia
         return !$this->hasAvailableTickets();
     }
 
+    /**
+     * Alias for isSoldOut()
+     */
+    public function isFullyBooked(): bool
+    {
+        return $this->isSoldOut();
+    }
+
     public function averageRating(): float
     {
         return $this->reviews()->where('is_approved', true)->avg('rating') ?? 0;

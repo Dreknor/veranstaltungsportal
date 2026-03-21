@@ -5,188 +5,258 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zahlung bestätigt</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        @if($booking->event->organization?->logo)
-            <div style="text-align: center; margin-bottom: 15px;">
-                <img src="{{ asset('storage/' . $booking->event->organization->logo) }}"
-                     alt="{{ $booking->event->organization->name }} Logo"
-                     style="max-height: 40px; max-width: 150px; object-fit: contain; filter: brightness(0) invert(1);">
-            </div>
-        @endif
-        <h1 style="color: white; margin: 0; font-size: 28px;">✓ Zahlung bestätigt!</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0;">Ihre Tickets sind bereit</p>
-    </div>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color: #f3f4f6; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
 
-    <div style="background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            Liebe/r {{ $booking->customer_name }},
-        </p>
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 40px 30px; text-align: center;">
+                            @if($booking->event->organization?->logo)
+                                <div style="margin-bottom: 16px;">
+                                    <img src="{{ asset('storage/' . $booking->event->organization->logo) }}"
+                                         alt="{{ $booking->event->organization->name }} Logo"
+                                         style="max-height: 50px; max-width: 160px; object-fit: contain; filter: brightness(0) invert(1);">
+                                </div>
+                            @endif
+                            <h1 style="margin: 0; color: #ffffff; font-size: 26px; font-weight: 700; letter-spacing: -0.5px;">
+                                ✅ Zahlung bestätigt
+                            </h1>
+                            <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.85); font-size: 16px;">
+                                {{ config('app.name') }}
+                            </p>
+                        </td>
+                    </tr>
 
-        <p style="font-size: 16px; margin-bottom: 20px;">
-            großartig! Wir haben Ihre Zahlung erhalten und bestätigt. Ihre Tickets für die folgende Veranstaltung sind nun verfügbar:
-        </p>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="margin: 0 0 20px 0; font-size: 16px; color: #374151; line-height: 1.6;">
+                                Liebe/r {{ $booking->customer_name }},
+                            </p>
+                            <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151; line-height: 1.6;">
+                                Ihre Zahlung wurde erfolgreich verarbeitet. Vielen Dank!
+                            </p>
 
-        <!-- Event Information -->
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
-            <h2 style="color: #28a745; margin: 0 0 15px 0; font-size: 20px;">{{ $booking->event->title }}</h2>
+                            <!-- Event Info -->
+                            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px 20px; margin: 0 0 24px 0; border-radius: 4px;">
+                                <p style="margin: 0; font-size: 17px; font-weight: 700; color: #374151; line-height: 1.4;">
+                                    {{ $booking->event->title }}
+                                </p>
+                                <p style="margin: 6px 0 0 0; font-size: 14px; color: #6b7280;">
+                                    📅 {{ $booking->event->start_date->format('d.m.Y') }} um {{ $booking->event->start_date->format('H:i') }} Uhr
+                                </p>
+                                @if(!$booking->event->isOnline() && $booking->event->venue_city)
+                                <p style="margin: 4px 0 0 0; font-size: 14px; color: #6b7280;">
+                                    📍 {{ $booking->event->venue_name }}, {{ $booking->event->venue_postal_code }} {{ $booking->event->venue_city }}
+                                </p>
+                                @endif
+                            </div>
 
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 8px 0; color: #666; width: 140px;">
-                        <strong>📅 Datum:</strong>
-                    </td>
-                    <td style="padding: 8px 0;">
-                        {{ $booking->event->start_date->format('d.m.Y, H:i') }} Uhr
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px 0; color: #666;">
-                        <strong>📍 Ort:</strong>
-                    </td>
-                    <td style="padding: 8px 0;">
-                        {{ $booking->event->venue_name }}<br>
-                        {{ $booking->event->venue_address }}<br>
-                        {{ $booking->event->venue_postal_code }} {{ $booking->event->venue_city }}
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px 0; color: #666;">
-                        <strong>🎫 Buchungsnr.:</strong>
-                    </td>
-                    <td style="padding: 8px 0;">
-                        <strong>{{ $booking->booking_number }}</strong>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                            <!-- Buchungsdetails -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                   style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+                                <tr>
+                                    <td colspan="2" style="background-color: #f9fafb; padding: 12px 20px; border-bottom: 1px solid #e5e7eb;">
+                                        <strong style="font-size: 14px; color: #374151;">📋 Buchungsdetails</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px; width: 160px;">
+                                        Buchungsnummer
+                                    </td>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #374151; font-size: 14px; font-weight: 600;">
+                                        {{ $booking->booking_number }}
+                                    </td>
+                                </tr>
+                                @php
+                                    $groupedItems = $booking->items->load('ticketType')->groupBy('ticket_type_id');
+                                @endphp
+                                @foreach($groupedItems as $ticketTypeId => $items)
+                                @php
+                                    $firstItem = $items->first();
+                                    $qty       = $items->sum('quantity');
+                                    $unitPrice = (float) $firstItem->price;
+                                    $subtotal  = $unitPrice * $qty;
+                                @endphp
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px; vertical-align: top;">
+                                        {{ $firstItem->ticketType?->name ?? 'Ticket' }}
+                                    </td>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #374151; font-size: 14px;">
+                                        {{ $qty }}&times;&nbsp;{{ number_format($unitPrice, 2, ',', '.') }}&nbsp;€@if($qty > 1) = <strong>{{ number_format($subtotal, 2, ',', '.') }}&nbsp;€</strong>@endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @if($booking->discount > 0)
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Rabatt</td>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #16a34a; font-size: 14px;">&minus;&nbsp;{{ number_format($booking->discount, 2, ',', '.') }}&nbsp;€</td>
+                                </tr>
+                                @endif
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Gesamtbetrag</td>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #374151; font-size: 14px; font-weight: 700;">{{ number_format($booking->total, 2, ',', '.') }}&nbsp;€</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 20px; color: #6b7280; font-size: 14px;">Zahlungsstatus</td>
+                                    <td style="padding: 12px 20px; color: #16a34a; font-size: 14px; font-weight: 700;">✓ Bezahlt</td>
+                                </tr>
+                            </table>
 
-        <!-- Payment Confirmation -->
-        <div style="background: #d4edda; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
-            <h3 style="color: #28a745; margin: 0 0 10px 0; font-size: 18px;">💚 Zahlung erfolgreich</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr>
-                    <td style="padding: 5px 0; color: #666; width: 140px;">Betrag:</td>
-                    <td style="padding: 5px 0;"><strong>{{ number_format($booking->total, 2, ',', '.') }} €</strong></td>
-                </tr>
-                <tr>
-                    <td style="padding: 5px 0; color: #666;">Status:</td>
-                    <td style="padding: 5px 0;"><strong style="color: #28a745;">✓ Bezahlt</strong></td>
-                </tr>
-            </table>
-        </div>
+                            {{-- Tickets / Zugangsdaten --}}
+                            @if($booking->event->isOnline())
+                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                       style="border: 1px solid #bfdbfe; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+                                    <tr>
+                                        <td style="background-color: #eff6ff; padding: 12px 20px; border-bottom: 1px solid #bfdbfe;">
+                                            <strong style="font-size: 14px; color: #1d4ed8;">🌐 Online-Zugangsdaten</strong>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 16px 20px; font-size: 14px; color: #374151; line-height: 1.8;">
+                                            @if($booking->event->online_url)
+                                                <strong>Zugangslink:</strong><br>
+                                                <a href="{{ $booking->event->online_url }}" style="color: #1d4ed8; word-break: break-all;">{{ $booking->event->online_url }}</a>
+                                            @endif
+                                            @if($booking->event->online_access_code)
+                                                <br><br><strong>Zugangscode:</strong>&nbsp;
+                                                <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-family: monospace;">{{ $booking->event->online_access_code }}</code>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                </table>
 
-        <!-- Tickets Info -->
-        <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
-            <h3 style="color: #0066cc; margin: 0 0 15px 0; font-size: 18px;">🎫 Ihre Tickets</h3>
-            <p style="margin: 0 0 15px 0; color: #333;">
-                Ihre Tickets sind dieser E-Mail als PDF-Datei beigefügt. Bitte beachten Sie:
-            </p>
-            <ul style="margin: 0; padding-left: 20px; color: #666;">
-                <li style="margin-bottom: 8px;">
-                    Drucken Sie die Tickets aus <strong>ODER</strong> zeigen Sie sie auf Ihrem Smartphone vor
-                </li>
-                <li style="margin-bottom: 8px;">
-                    Jedes Ticket enthält einen eindeutigen <strong>QR-Code</strong> für den Check-In
-                </li>
-                <li style="margin-bottom: 8px;">
-                    Bewahren Sie Ihre Tickets sicher auf
-                </li>
-                <li style="margin-bottom: 8px;">
-                    Bei Verlust wenden Sie sich bitte an uns unter Angabe Ihrer Buchungsnummer
-                </li>
-            </ul>
-        </div>
+                            @elseif($booking->event->requires_ticket)
+                                @if($booking->canSendTickets())
+                                    {{-- Tickets sind tatsächlich als Anhang beigefügt --}}
+                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                           style="border: 1px solid #bbf7d0; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+                                        <tr>
+                                            <td style="background-color: #f0fdf4; padding: 12px 20px; border-bottom: 1px solid #bbf7d0;">
+                                                <strong style="font-size: 14px; color: #15803d;">🎫 Ihre Tickets</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 16px 20px; font-size: 14px; color: #374151; line-height: 1.8;">
+                                                Ihre Tickets sind dieser E-Mail als <strong>PDF-Anhang</strong> beigefügt.<br>
+                                                Bitte drucken Sie diese aus <strong>oder</strong> zeigen Sie sie auf Ihrem Smartphone vor.<br>
+                                                Jedes Ticket enthält einen <strong>QR-Code</strong> für den Check-In.
+                                            </td>
+                                        </tr>
+                                    </table>
+                                @elseif($booking->needsPersonalization())
+                                    {{-- Personalisierung steht noch aus –– keine Tickets angehängt! --}}
+                                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                           style="border: 1px solid #fde68a; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+                                        <tr>
+                                            <td style="background-color: #fffbeb; padding: 12px 20px; border-bottom: 1px solid #fde68a;">
+                                                <strong style="font-size: 14px; color: #92400e;">👥 Personalisierung erforderlich</strong>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 16px 20px; font-size: 14px; color: #374151; line-height: 1.8;">
+                                                Sie haben mehrere Tickets gebucht. Bitte geben Sie für jedes Ticket die Daten des jeweiligen Teilnehmers an.<br>
+                                                Die Tickets werden Ihnen <strong>nach der Personalisierung</strong> per E-Mail zugesandt.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 0 20px 20px 20px;">
+                                                <a href="{{ route('bookings.personalize', $booking->booking_number) }}"
+                                                   style="display: inline-block; padding: 10px 24px; background-color: #f59e0b; color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600;">
+                                                    Jetzt personalisieren
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                @endif
+                            @endif
 
-        <!-- Tickets Overview -->
-        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-            <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📋 Ticket-Übersicht</h3>
+                            {{-- Hinweise des Veranstalters --}}
+                            @if($booking->event->ticket_notes)
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                   style="border: 1px solid #fde68a; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+                                <tr>
+                                    <td style="background-color: #fffbeb; padding: 12px 20px; border-bottom: 1px solid #fde68a;">
+                                        <strong style="font-size: 14px; color: #92400e;">⚠️ Hinweise des Veranstalters</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px 20px; font-size: 14px; color: #374151; line-height: 1.7;">
+                                        {!! nl2br(e($booking->event->ticket_notes)) !!}
+                                    </td>
+                                </tr>
+                            </table>
+                            @endif
 
-            <table style="width: 100%; border-collapse: collapse;">
-                @foreach($booking->items as $item)
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 10px 0;">{{ $item->ticketType?->name ?? 'Ticket' }}</td>
-                    <td style="padding: 10px 0; text-align: center;"><strong>{{ $item->quantity }}x</strong></td>
-                </tr>
-                @endforeach
-            </table>
+                            {{-- Stornierungsrichtlinie --}}
+                            @if($booking->event->cancellation_allowed)
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
+                                   style="border: 1px solid #bbf7d0; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
+                                <tr>
+                                    <td style="background-color: #f0fdf4; padding: 12px 20px; border-bottom: 1px solid #bbf7d0;">
+                                        <strong style="font-size: 14px; color: #15803d;">🔄 Stornierung</strong>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 16px 20px; font-size: 14px; color: #374151; line-height: 1.7;">
+                                        @if($booking->event->cancellation_days_before !== null)
+                                            Sie können Ihre Buchung bis zum
+                                            <strong>{{ $booking->event->start_date->copy()->subDays($booking->event->cancellation_days_before)->format('d.m.Y') }}</strong>
+                                            ({{ $booking->event->cancellation_days_before }} Tag(e) vor Veranstaltungsbeginn) stornieren.
+                                        @else
+                                            Sie können Ihre Buchung jederzeit bis zum Beginn der Veranstaltung stornieren.
+                                        @endif
+                                        <a href="{{ route('bookings.show', $booking->booking_number) }}" style="color: #16a34a; display: block; margin-top: 8px;">
+                                            Buchungsdetails aufrufen →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            @endif
 
-            <p style="margin: 15px 0 0 0; padding-top: 15px; border-top: 2px solid #eee; color: #666; font-size: 14px;">
-                <strong>Gesamt:</strong> {{ array_sum(array_column($booking->items->toArray(), 'quantity')) }} Ticket(s)
-            </p>
-        </div>
+                            <!-- CTA Button -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center" style="padding: 10px 0 30px 0;">
+                                        <a href="{{ route('bookings.show', $booking->booking_number) }}"
+                                           style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);">
+                                            Buchungsdetails ansehen
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
 
-        <!-- Important Notes -->
-        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
-            <h3 style="color: #856404; margin: 0 0 10px 0; font-size: 16px;">⚠️ Wichtige Hinweise</h3>
-            @if($booking->event->ticket_notes)
-                <div style="color: #856404; font-size: 14px;">{!! nl2br(e($booking->event->ticket_notes)) !!}</div>
-            @else
-                <ul style="margin: 0; padding-left: 20px; color: #856404; font-size: 14px;">
-                    <li style="margin-bottom: 8px;">
-                        Erscheinen Sie bitte ca. 15 Minuten vor Veranstaltungsbeginn
-                    </li>
-                    @if($booking->event->show_qr_code_on_ticket)
-                    <li style="margin-bottom: 8px;">
-                        Der QR-Code wird beim Einlass gescannt
-                    </li>
-                    @endif
-                    @if($booking->event->directions)
-                    <li style="margin-bottom: 8px;">
-                        Anfahrtshinweise: {{ $booking->event->directions }}
-                    </li>
-                    @endif
-                </ul>
-            @endif
-        </div>
+                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 10px 0 30px 0;">
 
-        <!-- Stornierungsrichtlinie -->
-        @if($booking->event->cancellation_allowed)
-        <div style="background: #f0fff4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #28a745;">
-            <h3 style="color: #155724; margin: 0 0 10px 0; font-size: 16px;">🔄 Stornierungsrichtlinie</h3>
-            @if($booking->event->cancellation_days_before !== null)
-                <p style="margin: 0; color: #333;">
-                    Sie können Ihre Buchung bis
-                    <strong>{{ $booking->event->start_date->copy()->subDays($booking->event->cancellation_days_before)->format('d.m.Y') }}</strong>
-                    ({{ $booking->event->cancellation_days_before }} Tag(e) vor Veranstaltungsbeginn)
-                    selbst stornieren.
-                </p>
-            @else
-                <p style="margin: 0; color: #333;">
-                    Sie können Ihre Buchung jederzeit bis zum Beginn der Veranstaltung selbst stornieren.
-                </p>
-            @endif
-            <p style="margin: 10px 0 0 0; font-size: 13px; color: #555;">
-                Zur Stornierung rufen Sie bitte Ihre
-                <a href="{{ route('bookings.show', $booking->booking_number) }}" style="color: #0066cc;">Buchungsdetails</a>
-                auf.
-            </p>
-        </div>
-        @endif
+                            <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+                                Bei Fragen wenden Sie sich bitte an den Veranstalter:<br>
+                                <strong>{{ $booking->event->organization?->email ?? $booking->event->getOrganizerEmail() ?? config('mail.from.address') }}</strong>
+                            </p>
+                        </td>
+                    </tr>
 
-        <!-- Contact Info -->
-        <div style="text-align: center; padding: 20px 0; border-top: 2px solid #eee; margin-top: 30px;">
-            <p style="margin: 0 0 15px 0; font-size: 16px; color: #333;">
-                <strong>Wir freuen uns auf Sie!</strong>
-            </p>
-            <p style="margin: 0 0 10px 0; color: #666;">
-                Bei Fragen erreichen Sie uns unter:
-            </p>
-            <p style="margin: 0; font-size: 14px;">
-                <strong>{{ $booking->event->organization?->email ?? config('mail.from.address') }}</strong>
-            </p>
-        </div>
-
-        <!-- Footer -->
-        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
-            <p style="margin: 0;">
-                © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.
-            </p>
-            <p style="margin: 10px 0 0 0;">
-                Buchungsnummer: <strong>{{ $booking->booking_number }}</strong>
-            </p>
-        </div>
-    </div>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #374151; line-height: 1.6;">
+                                Viele Grüße<br>
+                                <strong>Ihr {{ config('app.name') }}-Team</strong>
+                            </p>
+                            <p style="margin: 20px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
+                                © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.
+                            </p>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
+                                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
 
