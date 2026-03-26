@@ -284,6 +284,36 @@
                                 @endif
                             </div>
                         @else
+                            @if($event->isExternal())
+                                {{-- External event: show link to external booking page --}}
+                                <div class="text-center mb-4">
+                                    <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 mb-3">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        Externe Veranstaltung
+                                    </div>
+                                    <p class="text-sm text-gray-600 mb-4">
+                                        Die Anmeldung zu dieser Veranstaltung erfolgt über eine externe Plattform.
+                                    </p>
+                                </div>
+
+                                @if($event->external_booking_url)
+                                    <a href="{{ $event->external_booking_url }}" target="_blank" rel="noopener noreferrer"
+                                       class="block w-full text-center px-6 py-4 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-bold text-lg shadow-md hover:shadow-lg">
+                                        <svg class="w-6 h-6 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        {{ $event->external_booking_button_text ?? 'Zur Anmeldung' }}
+                                    </a>
+                                    <p class="text-xs text-gray-500 text-center mt-2">
+                                        <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Öffnet eine externe Webseite
+                                    </p>
+                                @endif
+                            @else
                             <div class="text-center mb-4">
                                 @php
                                     $minPrice = $event->getMinimumPrice();
@@ -352,6 +382,7 @@
                                     <p class="text-sm text-red-700 mt-1">Keine Tickets mehr verfügbar</p>
                                 </div>
                             @endif
+                            @endif {{-- end isExternal else --}}
                         @endif
 
                         @auth

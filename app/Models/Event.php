@@ -47,6 +47,8 @@ class Event extends Model implements HasMedia
         'gallery_images',
         'online_url',
         'online_access_code',
+        'external_booking_url',
+        'external_booking_button_text',
         'price_from',
         'max_attendees',
         'is_published',
@@ -306,6 +308,11 @@ class Event extends Model implements HasMedia
      */
     public function hasAvailableTickets(): bool
     {
+        // External events don't have internal tickets
+        if ($this->isExternal()) {
+            return false;
+        }
+
         // First, check if event has reached max_attendees limit
         if ($this->max_attendees && $this->availableTickets() <= 0) {
             return false;
@@ -355,6 +362,11 @@ class Event extends Model implements HasMedia
      */
     public function isSoldOut(): bool
     {
+        // External events are never "sold out" in our system
+        if ($this->isExternal()) {
+            return false;
+        }
+
         return !$this->hasAvailableTickets();
     }
 
@@ -455,6 +467,14 @@ class Event extends Model implements HasMedia
     public function isHybrid(): bool
     {
         return $this->event_type === 'hybrid';
+    }
+
+    /**
+     * Check if event is an external event (booking handled externally)
+     */
+    public function isExternal(): bool
+    {
+        return $this->event_type === 'external';
     }
 
     /**
@@ -564,6 +584,11 @@ class Event extends Model implements HasMedia
      */
     public function canBeBooked(): bool
     {
+        // External events cannot be booked internally
+        if ($this->isExternal()) {
+            return false;
+        }
+
         return !$this->is_cancelled
             && $this->is_published
             && $this->start_date->isFuture()
