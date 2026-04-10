@@ -1,5 +1,5 @@
 @component('mail::message')
-# Willkommen - Ihr Konto wurde erstellt
+# Willkommen – Ihr Konto wurde erstellt
 
 Hallo {{ $user->first_name ?? $user->name }},
 
@@ -10,14 +10,17 @@ Hallo {{ $user->first_name ?? $user->name }},
 **E-Mail:** {{ $user->email }}
 **Temporäres Passwort:** `{{ $temporaryPassword }}`
 
-**Ihre Rolle:** {{ ucfirst($role) }}
+@php
+$roleLabels = ['owner' => 'Eigentümer', 'admin' => 'Administrator', 'member' => 'Mitglied'];
+@endphp
+**Ihre Rolle:** {{ $roleLabels[$role] ?? ucfirst($role) }}
 
 @if($role === 'owner')
-Als **Owner** haben Sie volle Kontrolle über die Organisation, einschließlich Team-Verwaltung und Einstellungen.
+Als **Eigentümer** haben Sie volle Kontrolle über die Organisation, einschließlich Team-Verwaltung und Einstellungen.
 @elseif($role === 'admin')
-Als **Admin** können Sie Events, Buchungen und die meisten Einstellungen verwalten.
+Als **Administrator** können Sie Veranstaltungen, Buchungen und die meisten Einstellungen verwalten.
 @else
-Als **Member** können Sie Events ansehen und Check-Ins durchführen.
+Als **Mitglied** können Sie Veranstaltungen ansehen und Check-Ins durchführen.
 @endif
 
 @component('mail::button', ['url' => route('login')])
@@ -45,6 +48,6 @@ Registrierung rückgängig machen
 
 <small>Dieser Link ist 7 Tage gültig.</small>
 
-Vielen Dank,
-{{ config('app.name') }}
+Mit freundlichen Grüßen,
+Ihr {{ config('app.name') }}-Team
 @endcomponent

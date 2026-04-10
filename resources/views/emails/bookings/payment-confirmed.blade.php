@@ -185,6 +185,9 @@
             <p style="margin: 10px 0 0 0;">
                 Buchungsnummer: <strong>{{ $booking->booking_number }}</strong>
             </p>
+            <p style="margin: 10px 0 0 0;">
+                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
+            </p>
         </div>
     </div>
 </body>

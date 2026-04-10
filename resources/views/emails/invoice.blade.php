@@ -7,14 +7,14 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-        <h1 style="margin: 0;">Platform-Gebühren Rechnung</h1>
+        <h1 style="margin: 0;">Plattformgebühren-Rechnung</h1>
         <p style="margin: 10px 0 0 0; font-size: 18px;">{{ $invoice->invoice_number }}</p>
     </div>
 
     <div style="background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-top: none;">
         <p>Sehr geehrte/r {{ $invoice->recipient_name }},</p>
 
-        <p>vielen Dank für die Nutzung unserer Event-Plattform. Anbei erhalten Sie die Rechnung für die angefallenen Platform-Fees.</p>
+        <p>vielen Dank für die Nutzung unserer Veranstaltungsplattform. Anbei erhalten Sie die Rechnung für die angefallenen Plattformgebühren.</p>
 
         <h2 style="color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Rechnungsdetails</h2>
 
@@ -37,7 +37,7 @@
                 <td style="padding: 8px 0;">{{ $invoice->event->title }}</td>
             </tr>
             <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Event-Datum:</td>
+                <td style="padding: 8px 0; font-weight: bold;">Veranstaltungsdatum:</td>
                 <td style="padding: 8px 0;">{{ $invoice->event->start_date->format('d.m.Y') }}</td>
             </tr>
             @endif

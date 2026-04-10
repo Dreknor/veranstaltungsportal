@@ -93,8 +93,9 @@
             @endif
         </p>
 
-        <p style="font-size: 12px; color: #999; text-align: center; margin-top: 30px;">
-            {{ config('app.name') }} &bull; Diese E-Mail wurde automatisch generiert.
+        <p style="font-size: 12px; color: #999; text-align: center; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px;">
+            © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.<br>
+            Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
         </p>
     </div>
 </body>

@@ -24,13 +24,13 @@ class FeaturedEventPaymentReminderNotification extends Notification implements S
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Zahlungserinnerung: Featured Event "' . $this->fee->event->title . '"')
+            ->subject('Zahlungserinnerung: Hervorgehobene Veranstaltung „' . $this->fee->event->title . '"')
             ->greeting('Hallo ' . $notifiable->first_name . ',')
-            ->line('Dies ist eine Erinnerung für Ihre ausstehende Featured Event Gebühr.')
-            ->line('**Event:** ' . $this->fee->event->title)
+            ->line('Dies ist eine Erinnerung für Ihre ausstehende Hervorhebungsgebühr.')
+            ->line('**Veranstaltung:** ' . $this->fee->event->title)
             ->line('**Betrag:** ' . number_format($this->fee->fee_amount, 2, ',', '.') . ' €')
             ->line('**Zeitraum:** Von ' . \Carbon\Carbon::parse($this->fee->featured_start_date)->format('d.m.Y') . ' bis ' . \Carbon\Carbon::parse($this->fee->featured_end_date)->format('d.m.Y'))
-            ->line('Bitte begleichen Sie die Gebühr, damit Ihr Event als Featured Event angezeigt wird.')
+            ->line('Bitte begleichen Sie die Gebühr, damit Ihre Veranstaltung als hervorgehobene Veranstaltung angezeigt wird.')
             ->action('Jetzt bezahlen', route('organizer.featured-events.payment', $this->fee))
             ->line('Bei Fragen stehen wir Ihnen gerne zur Verfügung.');
     }
@@ -38,8 +38,8 @@ class FeaturedEventPaymentReminderNotification extends Notification implements S
     public function toDatabase($notifiable): array
     {
         return [
-            'title' => 'Zahlungserinnerung: Featured Event',
-            'message' => 'Ausstehende Zahlung für Featured Event "' . $this->fee->event->title . '" über ' . number_format($this->fee->fee_amount, 2, ',', '.') . ' €',
+            'title' => 'Zahlungserinnerung: Hervorgehobene Veranstaltung',
+            'message' => 'Ausstehende Zahlung für hervorgehobene Veranstaltung „' . $this->fee->event->title . '" über ' . number_format($this->fee->fee_amount, 2, ',', '.') . ' €',
             'action_url' => route('organizer.featured-events.payment', $this->fee),
             'type' => 'featured_payment_reminder',
             'fee_id' => $this->fee->id,

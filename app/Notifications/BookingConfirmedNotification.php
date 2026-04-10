@@ -30,7 +30,7 @@ class BookingConfirmedNotification extends Notification implements ShouldQueue
             ->subject('Buchungsbestätigung - ' . $this->booking->event->title)
             ->greeting('Hallo ' . $this->booking->customer_name . ',')
             ->line('Ihre Buchung wurde erfolgreich bestätigt.')
-            ->line('Event: ' . $this->booking->event->title)
+            ->line('Veranstaltung: ' . $this->booking->event->title)
             ->line('Buchungsnummer: ' . $this->booking->booking_number)
             ->line('Datum: ' . $this->booking->event->start_date->format('d.m.Y H:i'))
             ->action('Buchung ansehen', route('bookings.show', $this->booking->booking_number))

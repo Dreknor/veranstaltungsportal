@@ -34,7 +34,7 @@ Danach werden die Tickets an die nächsten Personen auf der Warteliste weitergeg
 Jetzt buchen
 @endcomponent
 
-Beeilen Sie sich - die Tickets sind heiß begehrt!
+Bitte handeln Sie zeitnah, um Ihre Buchung zu sichern.
 
 Mit freundlichen Grüßen,<br>
 {{ config('app.name') }}
