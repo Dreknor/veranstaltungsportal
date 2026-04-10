@@ -336,7 +336,52 @@
                     </div>
 
                     <!-- Tickets -->
-                    @if($event->ticketTypes->count() > 0)
+                    @if($event->isExternal())
+                        {{-- External event: show link to external booking page --}}
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <h3 class="font-bold text-gray-900 mb-4">Anmeldung</h3>
+                            <div class="text-center">
+                                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 mb-3">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                    Externe Veranstaltung
+                                </div>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    Die Anmeldung zu dieser Veranstaltung erfolgt über eine externe Plattform.
+                                </p>
+
+                                @if($event->external_booking_url)
+                                    <a href="{{ $event->external_booking_url }}" target="_blank" rel="noopener noreferrer"
+                                       class="block w-full text-center px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold">
+                                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                        </svg>
+                                        {{ $event->external_booking_button_text ?? 'Zur Anmeldung' }}
+                                    </a>
+                                    <p class="text-xs text-gray-500 mt-2">
+                                        <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Öffnet eine externe Webseite
+                                    </p>
+                                @endif
+                            </div>
+
+                            @auth
+                                <button onclick="toggleFavorite({{ $event->id }})"
+                                        id="favorite-btn-{{ $event->id }}"
+                                        class="block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-4
+                                               {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
+                                    <x-icon.heart class="w-5 h-5 inline-block mr-2"
+                                                  fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
+                                    <span id="favorite-text-{{ $event->id }}">
+                                        {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
+                                    </span>
+                                </button>
+                            @endauth
+                        </div>
+                    @elseif($event->ticketTypes->count() > 0)
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Tickets</h3>
                             <div class="space-y-3">

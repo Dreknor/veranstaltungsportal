@@ -34,6 +34,8 @@ class NewBookingNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        $this->booking->loadMissing(['event', 'items.ticketType']);
+
         return (new MailMessage)
             ->subject('Neue Buchung für ' . $this->booking->event->title)
             ->view('emails.bookings.new-booking-notification', [

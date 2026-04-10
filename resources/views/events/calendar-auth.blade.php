@@ -102,5 +102,5 @@
             </div>
         </div>
     </div>
-</x-layouts.public>
+</x-layouts.app>
 

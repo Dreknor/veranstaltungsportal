@@ -32,6 +32,13 @@
             'textClass' => 'text-purple-800 dark:text-purple-200',
             'borderClass' => 'border-purple-300 dark:border-purple-700',
         ],
+        'external' => [
+            'label' => 'Extern',
+            'icon' => 'external-link',
+            'bgClass' => 'bg-orange-100 dark:bg-orange-900',
+            'textClass' => 'text-orange-800 dark:text-orange-200',
+            'borderClass' => 'border-orange-300 dark:border-orange-700',
+        ],
     ];
 
     $config = $typeConfig[$event->event_type] ?? $typeConfig['physical'];
@@ -50,6 +57,10 @@
     @elseif($config['icon'] === 'mix')
         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+        </svg>
+    @elseif($config['icon'] === 'external-link')
+        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
         </svg>
     @endif
     {{ $config['label'] }}

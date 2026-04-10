@@ -20,6 +20,15 @@ class BookingController extends Controller
 {
     public function create(Event $event)
     {
+        // Redirect to external booking page for external events
+        if ($event->isExternal()) {
+            if ($event->external_booking_url) {
+                return redirect()->away($event->external_booking_url);
+            }
+            return redirect()->route('events.show', $event->slug)
+                ->with('error', 'Diese Veranstaltung wird extern verwaltet.');
+        }
+
         // Check if event is cancelled
         if ($event->is_cancelled) {
             return redirect()->route('events.show', $event->slug)
@@ -89,6 +98,12 @@ class BookingController extends Controller
 
     public function store(Request $request, Event $event)
     {
+        // External events cannot be booked internally
+        if ($event->isExternal()) {
+            return redirect()->route('events.show', $event->slug)
+                ->with('error', 'Diese Veranstaltung wird extern verwaltet und kann hier nicht gebucht werden.');
+        }
+
         // Check if event is cancelled
         if ($event->is_cancelled) {
             return redirect()->route('events.show', $event->slug)

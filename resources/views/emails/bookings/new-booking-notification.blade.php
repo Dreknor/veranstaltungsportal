@@ -88,20 +88,46 @@
                                         </a>
                                     </td>
                                 </tr>
+                                @php
+                                    $groupedItems = $booking->items->load('ticketType')->groupBy('ticket_type_id');
+                                @endphp
+                                @foreach($groupedItems as $ticketTypeId => $items)
+                                @php
+                                    $firstItem = $items->first();
+                                    $qty       = $items->sum('quantity');
+                                    $unitPrice = (float) $firstItem->price;
+                                    $subtotal  = $unitPrice * $qty;
+                                    $ticketName = $firstItem->ticketType?->name ?? 'Ticket';
+                                @endphp
                                 <tr>
-                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">
-                                        Anzahl Tickets
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px; vertical-align: top;">
+                                        {{ $ticketName }}
                                     </td>
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #374151; font-size: 14px;">
-                                        {{ $booking->items->sum('quantity') }} Ticket(s)
+                                        {{ $qty }}&times;&nbsp;{{ number_format($unitPrice, 2, ',', '.') }}&nbsp;€
+                                        @if($qty > 1)
+                                            <span style="color: #6b7280;">=</span>
+                                            <strong>{{ number_format($subtotal, 2, ',', '.') }}&nbsp;€</strong>
+                                        @endif
                                     </td>
                                 </tr>
+                                @endforeach
+                                @if($booking->discount > 0)
+                                <tr>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">
+                                        Rabatt
+                                    </td>
+                                    <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #16a34a; font-size: 14px;">
+                                        &minus;&nbsp;{{ number_format($booking->discount, 2, ',', '.') }}&nbsp;€
+                                    </td>
+                                </tr>
+                                @endif
                                 <tr>
                                     <td style="padding: 12px 20px; color: #6b7280; font-size: 14px;">
                                         Gesamtbetrag
                                     </td>
                                     <td style="padding: 12px 20px; color: #374151; font-size: 14px; font-weight: 700;">
-                                        {{ number_format($booking->total, 2, ',', '.') }} €
+                                        {{ number_format($booking->total, 2, ',', '.') }}&nbsp;€
                                     </td>
                                 </tr>
                             </table>

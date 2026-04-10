@@ -183,6 +183,7 @@
                                         <option value="physical" {{ old('event_type', $event->event_type ?? 'physical') == 'physical' ? 'selected' : '' }}>Präsenzveranstaltung</option>
                                         <option value="online" {{ old('event_type', $event->event_type) == 'online' ? 'selected' : '' }}>Online-Veranstaltung</option>
                                         <option value="hybrid" {{ old('event_type', $event->event_type) == 'hybrid' ? 'selected' : '' }}>Hybrid (Präsenz & Online)</option>
+                                        <option value="external" {{ old('event_type', $event->event_type) == 'external' ? 'selected' : '' }}>Externe Veranstaltung</option>
                                     </select>
                                     @error('event_type')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -299,7 +300,7 @@
 
 
                         <!-- Zusatzinformationen -->
-                        <div class="bg-white rounded-lg shadow-md p-6">
+                        <div id="pricing-section" class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Zusatzinformationen</h2>
 
                             <div class="space-y-4">
@@ -433,6 +434,49 @@
                             </div>
                         </div>
 
+                        <!-- Externe Buchung (Nur für externe Veranstaltungen) -->
+                        <div id="external-section" class="bg-white rounded-lg shadow-md p-6" style="display: {{ old('event_type', $event->event_type) === 'external' ? 'block' : 'none' }};">
+                            <h2 class="text-xl font-bold text-gray-900 mb-4">
+                                <svg class="w-5 h-5 inline-block mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                Externe Buchungsseite
+                            </h2>
+
+                            <div class="mb-4 p-3 bg-orange-50 border-l-4 border-orange-400 rounded">
+                                <p class="text-sm text-orange-800">
+                                    <strong>Hinweis:</strong> Bei externen Veranstaltungen werden keine Tickets über diese Plattform verkauft.
+                                    Besucher werden stattdessen zur angegebenen externen Buchungsseite weitergeleitet.
+                                </p>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="external_booking_url" class="block text-sm font-medium text-gray-700 mb-1">Externe Buchungs-URL *</label>
+                                    <input type="url" id="external_booking_url" name="external_booking_url"
+                                           value="{{ old('external_booking_url', $event->external_booking_url) }}"
+                                           placeholder="https://www.beispiel.de/anmeldung"
+                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <p class="mt-1 text-xs text-gray-500">Die URL, zu der Besucher für die Buchung/Anmeldung weitergeleitet werden.</p>
+                                    @error('external_booking_url')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="external_booking_button_text" class="block text-sm font-medium text-gray-700 mb-1">Button-Text (optional)</label>
+                                    <input type="text" id="external_booking_button_text" name="external_booking_button_text"
+                                           value="{{ old('external_booking_button_text', $event->external_booking_button_text) }}"
+                                           placeholder="Zur Anmeldung"
+                                           class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <p class="mt-1 text-xs text-gray-500">Text, der auf dem Weiterleitungs-Button angezeigt wird. Standard: „Zur Anmeldung"</p>
+                                    @error('external_booking_button_text')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Einstellungen -->
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Einstellungen</h2>
@@ -545,7 +589,7 @@
                         </div>
 
                         <!-- Ticket-Einstellungen -->
-                        <div class="bg-white rounded-lg shadow-md p-6">
+                        <div id="ticket-settings-section" class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Einstellungen</h2>
 
                             <div class="space-y-4">
@@ -723,7 +767,7 @@
                 <!-- Rechte Spalte: Ticket-Typen und Termine-Verwaltung -->
                 <div class="space-y-6">
                     <!-- Ticket-Typen Block (bereits außerhalb des Formulars) -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
+                    <div id="ticket-types-section" class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Typen</h2>
 
                         @if($ticketTypes->isEmpty())
@@ -939,30 +983,50 @@
                     });
                 }
 
-                // Toggle Venue/Online sections based on event type
+                // Toggle Venue/Online/External sections based on event type
                 const eventTypeSelect = document.getElementById('event_type');
                 const venueSection = document.getElementById('venue-section');
                 const onlineSection = document.getElementById('online-section');
+                const externalSection = document.getElementById('external-section');
+                const pricingSection = document.getElementById('pricing-section');
+                const ticketSettingsSection = document.getElementById('ticket-settings-section');
+                const ticketTypesSection = document.getElementById('ticket-types-section');
 
                 function updateSections() {
                     const eventType = eventTypeSelect.value;
+                    const isExternal = eventType === 'external';
 
-                    if (eventType === 'physical') {
+                    // Venue section
+                    if (eventType === 'physical' || eventType === 'hybrid') {
                         venueSection.style.display = 'block';
-                        onlineSection.style.display = 'none';
                         setVenueFieldsRequired(true);
-                        setOnlineFieldsRequired(false);
-                    } else if (eventType === 'online') {
+                    } else {
                         venueSection.style.display = 'none';
-                        onlineSection.style.display = 'block';
                         setVenueFieldsRequired(false);
-                        setOnlineFieldsRequired(true);
-                    } else if (eventType === 'hybrid') {
-                        venueSection.style.display = 'block';
-                        onlineSection.style.display = 'block';
-                        setVenueFieldsRequired(true);
-                        setOnlineFieldsRequired(true);
                     }
+
+                    // Online section
+                    if (eventType === 'online' || eventType === 'hybrid') {
+                        onlineSection.style.display = 'block';
+                        setOnlineFieldsRequired(true);
+                    } else {
+                        onlineSection.style.display = 'none';
+                        setOnlineFieldsRequired(false);
+                    }
+
+                    // External section
+                    if (externalSection) {
+                        externalSection.style.display = isExternal ? 'block' : 'none';
+                        const externalUrl = document.getElementById('external_booking_url');
+                        if (externalUrl) {
+                            externalUrl.required = isExternal;
+                        }
+                    }
+
+                    // Hide pricing, ticket settings and ticket types for external events
+                    if (pricingSection) pricingSection.style.display = isExternal ? 'none' : '';
+                    if (ticketSettingsSection) ticketSettingsSection.style.display = isExternal ? 'none' : '';
+                    if (ticketTypesSection) ticketTypesSection.style.display = isExternal ? 'none' : '';
                 }
 
                 function setVenueFieldsRequired(required) {
