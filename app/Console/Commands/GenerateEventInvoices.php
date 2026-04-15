@@ -34,7 +34,7 @@ class GenerateEventInvoices extends Command
             ->whereDoesntHave('invoices', function ($q) {
                 $q->where('type', 'platform_fee');
             })
-            ->with('user');
+            ->with('organization');
 
         // Spezifisches Event verarbeiten?
         if ($eventId = $this->option('event')) {
