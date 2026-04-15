@@ -217,6 +217,7 @@
                             </table>
                             @endif
 
+
                             <!-- CTA Button -->
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>
@@ -228,35 +229,32 @@
                                     </td>
                                 </tr>
                             </table>
+        <!-- Contact Info -->
+        <div style="text-align: center; padding: 20px 0; border-top: 2px solid #eee; margin-top: 30px;">
+            <p style="margin: 0 0 15px 0; font-size: 16px; color: #333;">
+                <strong>Wir freuen uns auf Sie!</strong>
+            </p>
+            <p style="margin: 0 0 10px 0; color: #666;">
+                Bei Fragen erreichen Sie uns unter:
+            </p>
+            <p style="margin: 0; font-size: 14px;">
+                <strong>{{ $booking->event->organization?->email ?? config('mail.from.address') }}</strong>
+            </p>
+        </div>
 
-                            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 10px 0 30px 0;">
-
-                            <p style="margin: 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
-                                Bei Fragen wenden Sie sich bitte an den Veranstalter:<br>
-                                <strong>{{ $booking->event->organization?->email ?? $booking->event->getOrganizerEmail() ?? config('mail.from.address') }}</strong>
-                            </p>
-                        </td>
-                    </tr>
-
-                    <!-- Footer -->
-                    <tr>
-                        <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
-                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #374151; line-height: 1.6;">
-                                Viele Grüße<br>
-                                <strong>Ihr {{ config('app.name') }}-Team</strong>
-                            </p>
-                            <p style="margin: 20px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
-                                © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.
-                            </p>
-                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
-                                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+        <!-- Footer -->
+        <div style="text-align: center; padding: 20px; color: #999; font-size: 12px;">
+            <p style="margin: 0;">
+                © {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.
+            </p>
+            <p style="margin: 10px 0 0 0;">
+                Buchungsnummer: <strong>{{ $booking->booking_number }}</strong>
+            </p>
+            <p style="margin: 10px 0 0 0;">
+                Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese E-Mail.
+            </p>
+        </div>
+    </div>
 </body>
 </html>
 

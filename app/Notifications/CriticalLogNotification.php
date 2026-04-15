@@ -51,7 +51,7 @@ class CriticalLogNotification extends Notification implements ShouldQueue
         }
 
         $mail->line("**Level:** {$this->logEntry->level_name}")
-            ->line("**Channel:** " . ($this->logEntry->channel ?? 'Unbekannt'))
+            ->line("**Kanal:** " . ($this->logEntry->channel ?? 'Unbekannt'))
             ->line("**Zeit:** " . $this->formatDateTime($this->logEntry->datetime))
             ->line("**Nachricht:**")
             ->line($this->truncateMessage($this->logEntry->message, 200));

@@ -3,7 +3,13 @@
         <div class="mb-8 flex items-center justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Buchungen für Ihre Events</p>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">
+                    @if($groupByEvent)
+                        Übersicht aller Buchungen, nach Veranstaltung gruppiert
+                    @else
+                        Gefilterte Buchungsliste
+                    @endif
+                </p>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'csv'])) }}"
@@ -85,144 +91,151 @@
                 <span class="block sm:inline">{{ session('success') }}</span>
             </div>
         @endif
-
         @if (session('error'))
             <div class="mb-6 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded relative">
                 <span class="block sm:inline">{{ session('error') }}</span>
             </div>
         @endif
 
-        <!-- Bookings Table -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buchungsnr.</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Event</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Zahlung</th>
-                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-28">Status</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Datum</th>
-                        @if($organization->hasExternalInvoicing())
-                        <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
-                        @endif
-                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktionen</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    @forelse($bookings as $booking)
-                        <tr>
-                            <td class="px-4 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $booking->booking_number }}</div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-sm text-gray-900 dark:text-gray-100">{{ Str::limit($booking->event->title, 30) }}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $booking->event->start_date->format('d.m.Y') }}</div>
-                            </td>
-                            <td class="px-4 py-4">
-                                <div class="text-sm text-gray-900 dark:text-gray-100">{{ $booking->customer_name }}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">{{ $booking->customer_email }}</div>
-                                @if($booking->customer_organization && $booking->event->requiresOrganizationField())
-                                    <div class="text-xs text-blue-600 dark:text-blue-400 mt-0.5 font-medium">{{ $booking->customer_organization }}</div>
+        {{-- ================================================================
+             MODUS 1: Gruppierte Ansicht (kein aktiver Filter)
+             ================================================================ --}}
+        @if($groupByEvent)
+            @forelse($groupedEvents as $groupedEvent)
+                <div class="mb-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden"
+                     x-data="{ open: false }">
+                    {{-- Event-Header --}}
+                    <button type="button"
+                            @click="open = !open"
+                            class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <div class="min-w-0">
+                            <div class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                {{ $groupedEvent->title }}
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ $groupedEvent->start_date->format('d.m.Y') }}
+                                @if($groupedEvent->location)
+                                    &mdash; {{ $groupedEvent->location }}
                                 @endif
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                                {{ $booking->items->sum('quantity') }}
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {{ number_format($booking->total, 2) }} €
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap">
-                                @if($booking->payment_status === 'paid')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Bezahlt</span>
-                                @elseif($booking->payment_status === 'pending')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Ausstehend</span>
-                                @elseif($booking->payment_status === 'failed')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Fehlg.</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">{{ ucfirst($booking->payment_status) }}</span>
-                                @endif
-                                @if($booking->payment_method)
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        @if($booking->payment_method === 'paypal') PayPal
-                                        @elseif($booking->payment_method === 'invoice') Rechnung
-                                        @else {{ $booking->payment_method }}
-                                        @endif
-                                    </div>
-                                @endif
-                            </td>
-                            <td class="px-3 py-4 w-28">
-                                @if($booking->status === 'confirmed')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">✓ Bestätigt</span>
-                                @elseif($booking->status === 'pending_approval')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">⏳ Ausstehend</span>
-                                @elseif($booking->status === 'cancelled')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">✕ Storniert</span>
-                                @elseif($booking->status === 'completed')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Abgeschl.</span>
-                                @else
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">{{ ucfirst($booking->status) }}</span>
-                                @endif
-                            </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {{ $booking->created_at->format('d.m.Y') }}
-                            </td>
-                            @if($organization->hasExternalInvoicing())
-                            <td class="px-3 py-4 text-center">
-                                @if($booking->total > 0)
-                                    @if($booking->externally_invoiced)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" title="Fakturiert">✓</span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" title="Noch nicht fakturiert">⏳</span>
-                                    @endif
-                                @endif
-                            </td>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 ml-4 shrink-0">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                {{ $groupedEvent->bookings_count }} Buchung(en)
+                            </span>
+                            @if($groupedEvent->confirmed_bookings_count > 0)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                    ✓ {{ $groupedEvent->confirmed_bookings_count }}
+                                </span>
                             @endif
-                            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end gap-2 flex-wrap">
-                                    @if($booking->status === 'pending_approval')
-                                        <form method="POST" action="{{ route('organizer.bookings.approve', $booking) }}"
-                                              onsubmit="return confirm('Buchung von {{ addslashes($booking->customer_name) }} wirklich bestätigen?')">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-2.5 py-1.5 bg-green-600 text-white text-xs font-medium rounded hover:bg-green-700 transition">
-                                                ✓ Bestätigen
-                                            </button>
-                                        </form>
-                                        <form method="POST" action="{{ route('organizer.bookings.reject', $booking) }}"
-                                              onsubmit="return confirm('Buchung von {{ addslashes($booking->customer_name) }} wirklich ablehnen?')">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-2.5 py-1.5 bg-red-600 text-white text-xs font-medium rounded hover:bg-red-700 transition">
-                                                ✕ Ablehnen
-                                            </button>
-                                        </form>
-                                    @endif
-                                    <a href="{{ route('organizer.bookings.show', $booking) }}"
-                                       class="inline-flex items-center px-2.5 py-1.5 bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 text-xs font-medium rounded hover:bg-blue-100 dark:hover:bg-blue-800 transition border border-blue-200 dark:border-blue-700">
-                                        Details
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="9" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                Keine Buchungen gefunden.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            @if($groupedEvent->pending_bookings_count > 0)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                                    ⏳ {{ $groupedEvent->pending_bookings_count }}
+                                </span>
+                            @endif
+                            <a href="{{ route('organizer.bookings.index', ['event_id' => $groupedEvent->id]) }}"
+                               @click.stop
+                               class="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
+                                Nur dieses Event
+                            </a>
+                            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                                 :class="{ 'rotate-180': open }"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </button>
 
-        <!-- Pagination -->
-        @if($bookings->hasPages())
-            <div class="mt-6">
-                {{ $bookings->appends(request()->query())->links() }}
+                    {{-- Buchungstabelle (aufgeklappt) --}}
+                    <div x-show="open" x-cloak class="border-t border-gray-200 dark:border-gray-700">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buchungsnr.</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Zahlung</th>
+                                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-28">Status</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Datum</th>
+                                        @if($organization->hasExternalInvoicing())
+                                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
+                                        @endif
+                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktionen</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    @forelse($groupedEvent->bookings as $booking)
+                                        @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization])
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
+                                                Keine Buchungen vorhanden.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    <p class="text-gray-500 dark:text-gray-400">Noch keine Buchungen vorhanden.</p>
+                </div>
+            @endforelse
+
+            @if(isset($groupedEvents) && $groupedEvents->hasPages())
+                <div class="mt-6">
+                    {{ $groupedEvents->appends(request()->query())->links() }}
+                </div>
+            @endif
+
+        {{-- ================================================================
+             MODUS 2: Gefilterte Flachliste
+             ================================================================ --}}
+        @else
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buchungsnr.</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Event</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Zahlung</th>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-28">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Datum</th>
+                            @if($organization->hasExternalInvoicing())
+                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
+                            @endif
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                        @forelse($bookings as $booking)
+                            @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
+                        @empty
+                            <tr>
+                                <td colspan="10" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    Keine Buchungen gefunden.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+
+            @if(isset($bookings) && $bookings->hasPages())
+                <div class="mt-6">
+                    {{ $bookings->appends(request()->query())->links() }}
+                </div>
+            @endif
         @endif
     </div>
 </x-layouts.app>

@@ -290,6 +290,9 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::get('/events/{event}/check-in/export', [Organizer\CheckInController::class, 'exportCheckInList'])->name('check-in.export');
         Route::post('/events/{event}/check-in/{booking}/store', [Organizer\CheckInController::class, 'checkIn'])->name('check-in.store');
         Route::delete('/events/{event}/check-in/{booking}/undo', [Organizer\CheckInController::class, 'undoCheckIn'])->name('check-in.undo');
+        // Check-In auf Ticket-Ebene (BookingItem)
+        Route::post('/events/{event}/check-in/item/{item}/store', [Organizer\CheckInController::class, 'checkInItem'])->name('check-in.item.store');
+        Route::delete('/events/{event}/check-in/item/{item}/undo', [Organizer\CheckInController::class, 'undoCheckInItem'])->name('check-in.item.undo');
 
         // Statistics
         Route::get('/statistics', [Organizer\StatisticsController::class, 'index'])->name('statistics.index');

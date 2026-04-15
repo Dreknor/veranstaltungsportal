@@ -5,15 +5,18 @@ Hallo,
 
 Ihre Rolle in der Organisation **{{ $organization->name }}** wurde geändert.
 
-**Vorherige Rolle:** {{ ucfirst($oldRole) }}
-**Neue Rolle:** {{ ucfirst($newRole) }}
+@php
+$roleLabels = ['owner' => 'Eigentümer', 'admin' => 'Administrator', 'member' => 'Mitglied'];
+@endphp
+**Vorherige Rolle:** {{ $roleLabels[$oldRole] ?? ucfirst($oldRole) }}
+**Neue Rolle:** {{ $roleLabels[$newRole] ?? ucfirst($newRole) }}
 
 @if($newRole === 'owner')
-Sie haben jetzt volle Kontrolle über die Organisation.
+Sie haben jetzt als **Eigentümer** volle Kontrolle über die Organisation.
 @elseif($newRole === 'admin')
-Sie können jetzt Events, Buchungen und die meisten Einstellungen verwalten.
+Als **Administrator** können Sie jetzt Veranstaltungen, Buchungen und die meisten Einstellungen verwalten.
 @else
-Sie haben jetzt eingeschränkte Berechtigungen (Events ansehen und Check-Ins).
+Als **Mitglied** haben Sie jetzt eingeschränkte Berechtigungen (Veranstaltungen ansehen und Check-Ins).
 @endif
 
 Diese Änderung wurde von **{{ $changedBy->fullName() }}** durchgeführt.
@@ -22,7 +25,7 @@ Diese Änderung wurde von **{{ $changedBy->fullName() }}** durchgeführt.
 Zum Dashboard
 @endcomponent
 
-Vielen Dank,
-{{ config('app.name') }}
+Mit freundlichen Grüßen,
+Ihr {{ config('app.name') }}-Team
 @endcomponent
 

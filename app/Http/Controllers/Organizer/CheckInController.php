@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\BookingItem;
 use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,31 +13,85 @@ use Illuminate\Support\Facades\Log;
 class CheckInController extends Controller
 {
     /**
-     * Display check-in interface for an event
+     * Display check-in interface for an event (ticket-level view)
      */
     public function index(Event $event)
     {
         $this->authorize('update', $event);
 
-        $bookings = $event->bookings()
-            ->with(['user', 'items.ticketType'])
-            ->where('payment_status', 'paid')
-            ->where('status', 'confirmed')
+        // Einzelne Tickets (BookingItems) laden – eine Zeile pro Ticket
+        $items = BookingItem::whereHas('booking', function ($q) use ($event) {
+                $q->where('event_id', $event->id)
+                  ->where('payment_status', 'paid')
+                  ->where('status', 'confirmed');
+            })
+            ->with(['booking', 'ticketType'])
             ->orderBy('checked_in', 'asc')
-            ->orderBy('customer_name')
-            ->get();
+            ->orderBy('attendee_name')
+            ->get()
+            // Fallback-Sortierung nach Kundenname wenn kein Teilnehmername gesetzt
+            ->sortBy(fn($item) => $item->attendee_name ?: $item->booking->customer_name);
 
         $stats = [
-            'total' => $bookings->count(),
-            'checked_in' => $bookings->where('checked_in', true)->count(),
-            'pending' => $bookings->where('checked_in', false)->count(),
+            'total'       => $items->count(),
+            'checked_in'  => $items->where('checked_in', true)->count(),
+            'pending'     => $items->where('checked_in', false)->count(),
         ];
 
-        return view('organizer.check-in.index', compact('event', 'bookings', 'stats'));
+        return view('organizer.check-in.index', compact('event', 'items', 'stats'));
     }
 
     /**
-     * Check in a booking (manual)
+     * Check in a single booking item (ticket-level, manual)
+     */
+    public function checkInItem(Request $request, Event $event, BookingItem $item)
+    {
+        $this->authorize('update', $event);
+
+        $booking = $item->booking;
+
+        if ($booking->event_id !== $event->id) {
+            return back()->with('error', 'Dieses Ticket gehört nicht zu diesem Event.');
+        }
+
+        if ($item->checked_in) {
+            return back()->with('error', 'Dieses Ticket ist bereits eingecheckt (' . $item->checked_in_at->format('d.m.Y H:i') . ').');
+        }
+
+        if ($booking->status !== 'confirmed' || $booking->payment_status !== 'paid') {
+            return back()->with('error', 'Buchung nicht bestätigt oder nicht bezahlt (Status: ' . $booking->status . ', Zahlung: ' . $booking->payment_status . ').');
+        }
+
+        $item->update([
+            'checked_in'    => true,
+            'checked_in_at' => now(),
+        ]);
+
+        $name = $item->attendee_name ?: $booking->customer_name;
+        return back()->with('status', 'Ticket erfolgreich eingecheckt: ' . $name);
+    }
+
+    /**
+     * Undo check-in for a single booking item
+     */
+    public function undoCheckInItem(Event $event, BookingItem $item)
+    {
+        $this->authorize('update', $event);
+
+        if ($item->booking->event_id !== $event->id) {
+            return back()->with('error', 'Dieses Ticket gehört nicht zu diesem Event.');
+        }
+
+        $item->update([
+            'checked_in'    => false,
+            'checked_in_at' => null,
+        ]);
+
+        return back()->with('status', 'Check-in rückgängig gemacht.');
+    }
+
+    /**
+     * Check in a booking (manual, whole booking – kept for backward compat / QR fallback)
      */
     public function checkIn(Request $request, Event $event, Booking $booking)
     {
@@ -160,56 +215,67 @@ class CheckInController extends Controller
             notes: 'QR-Code gescannt'
         );
 
+        // Alle Tickets (BookingItems) dieser Buchung ebenfalls einchecken
+        $booking->items()->where('checked_in', false)->update([
+            'checked_in'    => true,
+            'checked_in_at' => now(),
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Erfolgreich eingecheckt!',
             'booking' => [
-                'id' => $booking->id,
+                'id'             => $booking->id,
                 'booking_number' => $booking->booking_number,
-                'customer_name' => $booking->customer_name,
+                'customer_name'  => $booking->customer_name,
                 'customer_email' => $booking->customer_email,
-                'checked_in' => true,
-                'checked_in_at' => $booking->checked_in_at,
-                'tickets_count' => $booking->items->sum('quantity'),
+                'checked_in'     => true,
+                'checked_in_at'  => $booking->checked_in_at,
+                'tickets_count'  => $booking->items->count(),
             ],
         ]);
     }
 
     /**
-     * Bulk check-in
+     * Bulk check-in: prüft item_ids (Ticket-Ebene)
      */
     public function bulkCheckIn(Request $request, Event $event)
     {
         $this->authorize('update', $event);
 
         $request->validate([
-            'booking_ids' => 'required|array',
-            'booking_ids.*' => 'exists:bookings,id',
+            'item_ids'   => 'required|array',
+            'item_ids.*' => 'exists:booking_items,id',
         ]);
 
-        $bookings = Booking::whereIn('id', $request->booking_ids)
-            ->where('event_id', $event->id)
+        $items = BookingItem::whereIn('id', $request->item_ids)
+            ->whereHas('booking', function ($q) use ($event) {
+                $q->where('event_id', $event->id)
+                  ->where('status', 'confirmed')
+                  ->where('payment_status', 'paid');
+            })
+            ->with('booking')
             ->get();
 
         $checkedInCount = 0;
-        $errors = [];
+        $skipped        = [];
 
-        foreach ($bookings as $booking) {
-            if ($booking->canCheckIn()) {
-                $booking->checkIn(
-                    checkedInBy: auth()->user(),
-                    method: 'manual',
-                    notes: 'Bulk-Check-in'
-                );
-                $checkedInCount++;
-            } else {
-                $errors[] = $booking->customer_name . ' (Status: ' . $booking->status . ')';
+        foreach ($items as $item) {
+            if ($item->checked_in) {
+                $name     = $item->attendee_name ?: $item->booking->customer_name;
+                $skipped[] = $name . ' (bereits eingecheckt)';
+                continue;
             }
+            $item->update([
+                'checked_in'    => true,
+                'checked_in_at' => now(),
+            ]);
+            $checkedInCount++;
         }
 
-        $message = $checkedInCount . ' Teilnehmer erfolgreich eingecheckt.';
-        if (count($errors) > 0) {
-            $message .= ' Fehler bei: ' . implode(', ', $errors);
+        $message = $checkedInCount . ' Ticket(s) erfolgreich eingecheckt.';
+        if (count($skipped) > 0) {
+            $message .= ' Übersprungen: ' . implode(', ', $skipped);
         }
 
         return back()->with('status', $message);
@@ -377,27 +443,22 @@ class CheckInController extends Controller
     }
 
     /**
-     * Get check-in statistics for an event
+     * Get check-in statistics for an event (ticket-level)
      */
     public function stats(Event $event)
     {
         $this->authorize('update', $event);
 
+        $base = BookingItem::whereHas('booking', function ($q) use ($event) {
+            $q->where('event_id', $event->id)
+              ->where('payment_status', 'paid')
+              ->where('status', 'confirmed');
+        });
+
         $stats = [
-            'total' => $event->bookings()
-                ->where('payment_status', 'paid')
-                ->where('status', 'confirmed')
-                ->count(),
-            'checked_in' => $event->bookings()
-                ->where('payment_status', 'paid')
-                ->where('status', 'confirmed')
-                ->where('checked_in', true)
-                ->count(),
-            'pending' => $event->bookings()
-                ->where('payment_status', 'paid')
-                ->where('status', 'confirmed')
-                ->where('checked_in', false)
-                ->count(),
+            'total'      => (clone $base)->count(),
+            'checked_in' => (clone $base)->where('checked_in', true)->count(),
+            'pending'    => (clone $base)->where('checked_in', false)->count(),
         ];
 
         return response()->json($stats);

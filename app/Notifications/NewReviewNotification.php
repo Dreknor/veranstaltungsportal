@@ -38,14 +38,14 @@ class NewReviewNotification extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Neue Bewertung wartet auf Freigabe')
             ->greeting("Hallo {$notifiable->name}!")
-            ->line("Eine neue Bewertung für deine Veranstaltung **{$event->title}** wartet auf Freigabe.")
+            ->line("Eine neue Bewertung für Ihre Veranstaltung **{$event->title}** wartet auf Freigabe.")
             ->line("**Bewertung:** {$rating} ({$this->review->rating}/5)")
             ->line("**Von:** {$this->review->user->name}")
             ->when($this->review->comment, function ($mail) {
                 return $mail->line("**Kommentar:** \"{$this->review->comment}\"");
             })
             ->action('Bewertung moderieren', route('organizer.reviews.moderate', $this->review))
-            ->line('Bitte überprüfe die Bewertung und gib sie frei oder lehne sie ab.');
+            ->line('Bitte überprüfen Sie die Bewertung und geben Sie sie frei oder lehnen Sie sie ab.');
     }
 
     /**

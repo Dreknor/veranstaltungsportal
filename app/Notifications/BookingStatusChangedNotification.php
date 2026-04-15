@@ -45,7 +45,7 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
             ->subject($subject)
             ->greeting('Hallo ' . $this->booking->customer_name . ',')
             ->line('Der Status Ihrer Buchung wurde geändert.')
-            ->line('Event: ' . $this->booking->event->title)
+            ->line('Veranstaltung: ' . $this->booking->event->title)
             ->line('Buchungsnummer: ' . $this->booking->booking_number)
             ->line('Alter Status: ' . $oldStatusLabel)
             ->line('Neuer Status: ' . $newStatusLabel);
@@ -53,7 +53,7 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
         // Zusätzliche Informationen basierend auf dem neuen Status
         if ($this->newStatus === 'confirmed') {
             $mail->line('Ihre Buchung wurde erfolgreich bestätigt.')
-                ->line('Event-Datum: ' . $this->booking->event->start_date->format('d.m.Y H:i'));
+                ->line('Veranstaltungsdatum: ' . $this->booking->event->start_date->format('d.m.Y H:i'));
         } elseif ($this->newStatus === 'cancelled') {
             $mail->line('Ihre Buchung wurde storniert.')
                 ->line('Falls Sie dies nicht veranlasst haben, kontaktieren Sie uns bitte.');

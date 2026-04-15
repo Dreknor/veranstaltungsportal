@@ -46,7 +46,7 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
             ->subject($subject)
             ->greeting('Hallo ' . $this->booking->customer_name . ',')
             ->line('Der Zahlungsstatus Ihrer Buchung wurde geändert.')
-            ->line('Event: ' . $this->booking->event->title)
+            ->line('Veranstaltung: ' . $this->booking->event->title)
             ->line('Buchungsnummer: ' . $this->booking->booking_number)
             ->line('Alter Zahlungsstatus: ' . $oldPaymentStatusLabel)
             ->line('Neuer Zahlungsstatus: ' . $newPaymentStatusLabel);

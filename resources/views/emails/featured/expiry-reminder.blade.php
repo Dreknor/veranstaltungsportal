@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured-Status läuft ab</title>
+    <title>Hervorhebungs-Status läuft ab</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -93,30 +93,30 @@
 </head>
 <body>
     <div class="header">
-        <h1>⏰ Featured-Status läuft bald ab</h1>
+        <h1>⏰ Hervorhebungs-Status läuft bald ab</h1>
     </div>
 
     <div class="content">
         <p>Hallo {{ $user->name }},</p>
 
         <div class="warning-box">
-            <strong>⚠️ Wichtiger Hinweis:</strong> Der Featured-Status für Ihr Event läuft in <span class="highlight">3 Tagen</span> ab!
+            <strong>⚠️ Wichtiger Hinweis:</strong> Der Hervorhebungs-Status Ihrer Veranstaltung läuft in <span class="highlight">3 Tagen</span> ab!
         </div>
 
-        <p>Ihr Event wird aktuell als "Featured" prominent auf der Startseite angezeigt. Diese Hervorhebung endet am <strong>{{ $fee->featured_end_date->format('d.m.Y') }}</strong>.</p>
+        <p>Ihre Veranstaltung wird aktuell als „Empfohlen" prominent auf der Startseite angezeigt. Diese Hervorhebung endet am <strong>{{ $fee->featured_end_date->format('d.m.Y') }}</strong>.</p>
 
         <div class="event-details">
-            <h3>📅 Event-Details</h3>
+            <h3>📅 Veranstaltungsdetails</h3>
             <div class="detail-row">
-                <div class="detail-label">Event:</div>
+                <div class="detail-label">Veranstaltung:</div>
                 <div class="detail-value">{{ $event->title }}</div>
             </div>
             <div class="detail-row">
-                <div class="detail-label">Featured seit:</div>
+                <div class="detail-label">Hervorgehoben seit:</div>
                 <div class="detail-value">{{ $fee->featured_start_date->format('d.m.Y') }}</div>
             </div>
             <div class="detail-row">
-                <div class="detail-label">Featured bis:</div>
+                <div class="detail-label">Hervorgehoben bis:</div>
                 <div class="detail-value">{{ $fee->featured_end_date->format('d.m.Y') }}</div>
             </div>
             <div class="detail-row">
@@ -126,24 +126,24 @@
         </div>
 
         <h3>💡 Möchten Sie die Hervorhebung verlängern?</h3>
-        <p>Um die Sichtbarkeit Ihres Events weiterhin zu maximieren, können Sie den Featured-Status jetzt verlängern:</p>
+        <p>Um die Sichtbarkeit Ihrer Veranstaltung weiterhin zu maximieren, können Sie den Hervorhebungs-Status jetzt verlängern:</p>
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="{{ route('organizer.featured-events.extend', $event) }}" class="button button-secondary">
                 ✨ Jetzt verlängern
             </a>
             <a href="{{ route('organizer.featured-events.history') }}" class="button">
-                📊 Featured-Historie ansehen
+                📊 Hervorhebungs-Historie ansehen
             </a>
         </div>
 
         <h3>❓ Was passiert nach Ablauf?</h3>
-        <p>Nach dem Ablaufdatum wird Ihr Event:</p>
+        <p>Nach dem Ablaufdatum wird Ihre Veranstaltung:</p>
         <ul>
             <li>✓ Weiterhin veröffentlicht und buchbar bleiben</li>
             <li>✓ In den normalen Suchergebnissen erscheinen</li>
             <li>✗ Nicht mehr prominent auf der Startseite angezeigt werden</li>
-            <li>✗ Kein "Featured"-Badge mehr haben</li>
+            <li>✗ Kein „Empfohlen"-Badge mehr haben</li>
         </ul>
 
         <p style="margin-top: 30px;">Bei Fragen stehen wir Ihnen gerne zur Verfügung!</p>
@@ -159,6 +159,7 @@
             Diese E-Mail wurde automatisch versendet.<br>
             Sie können Benachrichtigungen in Ihren <a href="{{ route('settings.notifications.edit') }}">Einstellungen</a> verwalten.
         </p>
+        <p>© {{ date('Y') }} {{ config('app.name') }}. Alle Rechte vorbehalten.</p>
     </div>
 </body>
 </html>

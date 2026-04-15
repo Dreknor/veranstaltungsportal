@@ -23,22 +23,23 @@ class BookingManagementController extends Controller
         })->with(['event', 'items']);
 
         // Filter nach Event
-        if ($request->has('event_id')) {
+        $filterByEvent = $request->filled('event_id');
+        if ($filterByEvent) {
             $query->where('event_id', $request->event_id);
         }
 
         // Filter nach Status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         // Filter nach Zahlungsstatus
-        if ($request->has('payment_status')) {
+        if ($request->filled('payment_status')) {
             $query->where('payment_status', $request->payment_status);
         }
 
         // Suche
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('booking_number', 'LIKE', "%{$search}%")
@@ -47,10 +48,32 @@ class BookingManagementController extends Controller
             });
         }
 
-        $bookings = $query->latest()->paginate(20);
-        $events = $organization->events()->get();
+        $events = $organization->events()->orderBy('start_date', 'desc')->get();
 
-        return view('organizer.bookings.index', compact('bookings', 'events', 'organization'));
+        // Gruppierte Ansicht (kein Event-Filter): Events mit Buchungen laden
+        $groupByEvent = !$filterByEvent
+            && !$request->filled('status')
+            && !$request->filled('payment_status')
+            && !$request->filled('search');
+
+        if ($groupByEvent) {
+            $groupedEvents = $organization->events()
+                ->withCount(['bookings', 'bookings as confirmed_bookings_count' => function ($q) {
+                    $q->where('status', 'confirmed');
+                }, 'bookings as pending_bookings_count' => function ($q) {
+                    $q->whereIn('status', ['pending', 'pending_approval']);
+                }])
+                ->has('bookings')
+                ->with(['bookings' => function ($q) {
+                    $q->with('items')->latest();
+                }])
+                ->orderBy('start_date', 'desc')
+                ->paginate(10);
+            return view('organizer.bookings.index', compact('groupedEvents', 'events', 'organization', 'groupByEvent'));
+        }
+
+        $bookings = $query->latest()->paginate(20);
+        return view('organizer.bookings.index', compact('bookings', 'events', 'organization', 'groupByEvent'));
     }
 
     public function show(Booking $booking)
@@ -114,10 +137,10 @@ class BookingManagementController extends Controller
             $q->where('organization_id', $organization->id);
         })->with(['event', 'items.ticketType']);
 
-        if ($request->has('event_id')) {
+        if ($request->filled('event_id')) {
             $query->where('event_id', $request->event_id);
         }
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
         $bookings = $query->get();
