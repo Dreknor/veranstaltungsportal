@@ -72,7 +72,7 @@ class InvoiceService
         $invoice = Invoice::create([
             'invoice_number' => $this->invoiceNumberService->generatePlatformFeeInvoiceNumber(),
             'event_id' => $event->id,
-            'user_id' => $event->user_id,
+            'user_id' => $event->user?->id,
             'type' => 'platform_fee',
             'recipient_name' => $event->user->organization_name ?? $event->user->name,
             'recipient_email' => $event->user->email,
@@ -294,8 +294,9 @@ class InvoiceService
             ];
         }
 
-        // Get organization from user
-        $organization = $user->currentOrganization();
+        // Prefer the event's organization if available (works in CLI/queue context without session).
+        // Fall back to $user->currentOrganization() for web-request context.
+        $organization = $event?->organization ?? $user->currentOrganization();
 
         if ($organization) {
             $billingData = $organization->billing_data ?? [];
@@ -352,8 +353,9 @@ class InvoiceService
             return '';
         }
 
-        // Get organization from user
-        $organization = $user->currentOrganization();
+        // Prefer the event's organization if available (works in CLI/queue context without session).
+        // Fall back to $user->currentOrganization() for web-request context.
+        $organization = $event?->organization ?? $user->currentOrganization();
 
         if ($organization) {
             $billingData = $organization->billing_data ?? [];
