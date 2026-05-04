@@ -15,17 +15,33 @@ use Illuminate\Support\Str;
 class EventManagementController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
         if (!$organization) {
             return redirect()->route('organizer.organizations.select');
         }
-        $events = $organization->events()
-            ->with(['category', 'bookings'])
-            ->latest()
-            ->paginate(15);
-        return view('organizer.events.index', compact('events', 'organization'));
+
+        $isArchive = $request->boolean('archive');
+
+        $query = $organization->events()
+            ->with(['category', 'bookings']);
+
+        if ($isArchive) {
+            // Archiv: Events, die bereits abgeschlossen sind (end_date in der Vergangenheit)
+            $query->where('end_date', '<', now());
+        } else {
+            // Standard: aktuelle und zukünftige Events
+            $query->where('end_date', '>=', now());
+        }
+
+        $events = $query->orderBy('start_date', $isArchive ? 'desc' : 'asc')->paginate(15);
+
+        // Zähler für Tab-Badges
+        $upcomingCount = $organization->events()->where('end_date', '>=', now())->count();
+        $archiveCount  = $organization->events()->where('end_date', '<', now())->count();
+
+        return view('organizer.events.index', compact('events', 'organization', 'isArchive', 'upcomingCount', 'archiveCount'));
     }
 
     public function create()

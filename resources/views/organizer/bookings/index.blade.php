@@ -5,7 +5,7 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2">
                     @if($groupByEvent)
-                        Übersicht aller Buchungen, nach Veranstaltung gruppiert
+                        {{ $isArchive ? 'Archiv – abgeschlossene Veranstaltungen und deren Buchungen' : 'Übersicht aller Buchungen, nach Veranstaltung gruppiert' }}
                     @else
                         Gefilterte Buchungsliste
                     @endif
@@ -29,9 +29,60 @@
             </div>
         </div>
 
+        {{-- ── Archiv-Tabs ──────────────────────────────────────────────────── --}}
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav class="-mb-px flex space-x-8">
+                <a href="{{ route('organizer.bookings.index') }}"
+                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
+                          {{ !$isArchive
+                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
+                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                    Aktuelle Buchungen
+                    @if($upcomingBookingsCount > 0)
+                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
+                                     {{ !$isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
+                            {{ $upcomingBookingsCount }}
+                        </span>
+                    @endif
+                </a>
+                <a href="{{ route('organizer.bookings.index', ['archive' => 1]) }}"
+                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
+                          {{ $isArchive
+                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
+                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                    </svg>
+                    Buchungsarchiv
+                    @if($archiveBookingsCount > 0)
+                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
+                                     {{ $isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
+                            {{ $archiveBookingsCount }}
+                        </span>
+                    @endif
+                </a>
+            </nav>
+        </div>
+
+        @if($isArchive)
+            <div class="mb-4 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg px-4 py-3">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                </svg>
+                <span>Sie sehen das <strong>Buchungsarchiv</strong> – Buchungen zu abgeschlossenen Veranstaltungen der Vergangenheit.</span>
+            </div>
+        @endif
+
         <!-- Filters -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
             <form action="{{ route('organizer.bookings.index') }}" method="GET" class="space-y-4">
+                {{-- Archiv-Status im Filter erhalten --}}
+                @if($isArchive)
+                    <input type="hidden" name="archive" value="1">
+                @endif
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
@@ -78,7 +129,8 @@
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             Filtern
                         </button>
-                        <a href="{{ route('organizer.bookings.index') }}" class="ml-2 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
+                        <a href="{{ route('organizer.bookings.index', $isArchive ? ['archive' => 1] : []) }}"
+                           class="ml-2 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
                             Zurücksetzen
                         </a>
                     </div>
@@ -133,7 +185,7 @@
                                     ⏳ {{ $groupedEvent->pending_bookings_count }}
                                 </span>
                             @endif
-                            <a href="{{ route('organizer.bookings.index', ['event_id' => $groupedEvent->id]) }}"
+                            <a href="{{ route('organizer.bookings.index', array_filter(['event_id' => $groupedEvent->id, 'archive' => $isArchive ? 1 : null])) }}"
                                @click.stop
                                class="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
                                 Nur dieses Event

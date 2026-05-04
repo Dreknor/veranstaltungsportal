@@ -18,8 +18,15 @@ class BookingManagementController extends Controller
             return redirect()->route('organizer.organizations.select');
         }
 
-        $query = Booking::whereHas('event', function ($q) use ($organization) {
+        $isArchive = $request->boolean('archive');
+
+        $query = Booking::whereHas('event', function ($q) use ($organization, $isArchive) {
             $q->where('organization_id', $organization->id);
+            if ($isArchive) {
+                $q->where('end_date', '<', now());
+            } else {
+                $q->where('end_date', '>=', now());
+            }
         })->with(['event', 'items']);
 
         // Filter nach Event
@@ -48,7 +55,20 @@ class BookingManagementController extends Controller
             });
         }
 
-        $events = $organization->events()->orderBy('start_date', 'desc')->get();
+        // Events für Dropdown (gefiltert nach Archiv-Status)
+        $events = $organization->events()
+            ->when($isArchive, fn($q) => $q->where('end_date', '<', now()))
+            ->when(!$isArchive, fn($q) => $q->where('end_date', '>=', now()))
+            ->orderBy('start_date', 'desc')
+            ->get();
+
+        // Zähler für Tab-Badges
+        $upcomingBookingsCount = Booking::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id)->where('end_date', '>=', now());
+        })->count();
+        $archiveBookingsCount = Booking::whereHas('event', function ($q) use ($organization) {
+            $q->where('organization_id', $organization->id)->where('end_date', '<', now());
+        })->count();
 
         // Gruppierte Ansicht (kein Event-Filter): Events mit Buchungen laden
         $groupByEvent = !$filterByEvent
@@ -57,7 +77,7 @@ class BookingManagementController extends Controller
             && !$request->filled('search');
 
         if ($groupByEvent) {
-            $groupedEvents = $organization->events()
+            $groupedEventsQuery = $organization->events()
                 ->withCount(['bookings', 'bookings as confirmed_bookings_count' => function ($q) {
                     $q->where('status', 'confirmed');
                 }, 'bookings as pending_bookings_count' => function ($q) {
@@ -66,14 +86,29 @@ class BookingManagementController extends Controller
                 ->has('bookings')
                 ->with(['bookings' => function ($q) {
                     $q->with('items')->latest();
-                }])
-                ->orderBy('start_date', 'desc')
+                }]);
+
+            if ($isArchive) {
+                $groupedEventsQuery->where('end_date', '<', now());
+            } else {
+                $groupedEventsQuery->where('end_date', '>=', now());
+            }
+
+            $groupedEvents = $groupedEventsQuery
+                ->orderBy('start_date', $isArchive ? 'desc' : 'asc')
                 ->paginate(10);
-            return view('organizer.bookings.index', compact('groupedEvents', 'events', 'organization', 'groupByEvent'));
+
+            return view('organizer.bookings.index', compact(
+                'groupedEvents', 'events', 'organization', 'groupByEvent',
+                'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount'
+            ));
         }
 
         $bookings = $query->latest()->paginate(20);
-        return view('organizer.bookings.index', compact('bookings', 'events', 'organization', 'groupByEvent'));
+        return view('organizer.bookings.index', compact(
+            'bookings', 'events', 'organization', 'groupByEvent',
+            'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount'
+        ));
     }
 
     public function show(Booking $booking)

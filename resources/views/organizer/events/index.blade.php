@@ -20,11 +20,48 @@
         <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
             <nav class="-mb-px flex space-x-8">
                 <a href="{{ route('organizer.events.index') }}"
-                   class="border-b-2 border-blue-500 py-4 px-1 text-sm font-medium text-blue-600 dark:text-blue-400">
-                    Alle Events
+                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
+                          {{ !$isArchive
+                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
+                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Aktuelle &amp; zukünftige Events
+                    @if($upcomingCount > 0)
+                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
+                                     {{ !$isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
+                            {{ $upcomingCount }}
+                        </span>
+                    @endif
+                </a>
+                <a href="{{ route('organizer.events.index', ['archive' => 1]) }}"
+                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
+                          {{ $isArchive
+                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
+                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                    </svg>
+                    Archiv
+                    @if($archiveCount > 0)
+                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
+                                     {{ $isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
+                            {{ $archiveCount }}
+                        </span>
+                    @endif
                 </a>
             </nav>
         </div>
+
+        @if($isArchive)
+            <div class="mb-4 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg px-4 py-3">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                </svg>
+                <span>Sie sehen das <strong>Event-Archiv</strong> – abgeschlossene Veranstaltungen der Vergangenheit.</span>
+            </div>
+        @endif
 
         @if (session('success'))
             <div class="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded relative">
@@ -208,7 +245,7 @@
             <!-- Pagination -->
             @if($events->hasPages())
                 <div class="mt-8">
-                    {{ $events->links() }}
+                    {{ $events->appends(request()->query())->links() }}
                 </div>
             @endif
         @else
@@ -217,19 +254,32 @@
                 <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
-                <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine Events vorhanden</h3>
-                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    Erstellen Sie Ihr erstes Event, um loszulegen.
-                </p>
-                <div class="mt-6">
-                    <a href="{{ route('organizer.events.create') }}"
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Neues Event erstellen
-                    </a>
-                </div>
+                @if($isArchive)
+                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine archivierten Events vorhanden</h3>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Abgeschlossene Veranstaltungen erscheinen hier im Archiv.
+                    </p>
+                    <div class="mt-6">
+                        <a href="{{ route('organizer.events.index') }}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            Zu aktuellen Events
+                        </a>
+                    </div>
+                @else
+                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine Events vorhanden</h3>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Erstellen Sie Ihr erstes Event, um loszulegen.
+                    </p>
+                    <div class="mt-6">
+                        <a href="{{ route('organizer.events.create') }}"
+                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Neues Event erstellen
+                        </a>
+                    </div>
+                @endif
             </div>
         @endif
     </div>
