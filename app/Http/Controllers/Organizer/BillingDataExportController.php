@@ -272,7 +272,21 @@ class BillingDataExportController extends Controller
             'externally_invoiced' => true,
             'externally_invoiced_at' => now(),
             'external_invoice_number' => $request->external_invoice_number,
+            'payment_status' => 'extern',
         ]);
+
+        // Tickets versenden, wenn die Buchung bestätigt ist und keine Personalisierung aussteht
+        if ($booking->status === 'confirmed' && $booking->canSendTickets()) {
+            try {
+                \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                    ->send(new \App\Mail\PaymentConfirmed($booking));
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Fehler beim Ticket-Versand nach externer Fakturierung', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
 
         return back()->with('status', "Buchung {$booking->booking_number} wurde als fakturiert markiert.");
     }
@@ -297,6 +311,7 @@ class BillingDataExportController extends Controller
             ->update([
                 'externally_invoiced' => true,
                 'externally_invoiced_at' => now(),
+                'payment_status' => 'extern',
             ]);
 
         return back()->with('status', "{$updated} Buchung(en) wurden als fakturiert markiert.");

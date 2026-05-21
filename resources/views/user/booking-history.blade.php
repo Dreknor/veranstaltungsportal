@@ -71,11 +71,13 @@
                                             Gebucht am {{ $booking->created_at->format('d.m.Y') }}
                                         </div>
                                         <div class="mt-1">
+                                            @if($booking->payment_status !== 'extern')
                                             <span class="px-2 py-1 text-xs font-medium rounded
                                                 {{ $booking->payment_status === 'paid' ? 'bg-green-100 text-green-800' :
                                                    ($booking->payment_status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                                                 {{ ucfirst($booking->payment_status) }}
                                             </span>
+                                            @endif
                                         </div>
                                     </div>
 

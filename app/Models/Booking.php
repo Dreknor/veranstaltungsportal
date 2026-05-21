@@ -122,6 +122,15 @@ class Booking extends Model
     }
 
     /**
+     * Prüft ob der Zahlungsstatus als "bezahlt" gilt.
+     * 'extern' wird intern wie 'paid' behandelt (externe Rechnungsstellung).
+     */
+    public function isPaymentComplete(): bool
+    {
+        return in_array($this->payment_status, ['paid', 'extern']);
+    }
+
+    /**
      * Check in this booking
      */
     public function checkIn(?User $checkedInBy = null, string $method = 'manual', ?string $notes = null): void
@@ -154,8 +163,8 @@ class Booking extends Model
      */
     public function canCheckIn(): bool
     {
-        // Must be confirmed and paid
-        if ($this->status !== 'confirmed' || $this->payment_status !== 'paid') {
+        // Must be confirmed and paid (or extern = externally invoiced)
+        if ($this->status !== 'confirmed' || !$this->isPaymentComplete()) {
             return false;
         }
 
@@ -227,7 +236,7 @@ class Booking extends Model
         // 3. Has more than one ticket item
         // 4. Not yet personalized
         return $this->status === 'confirmed'
-            && $this->payment_status === 'paid'
+            && $this->isPaymentComplete()
             && $this->items()->count() > 1
             && !$this->tickets_personalized;
     }
@@ -256,7 +265,7 @@ class Booking extends Model
     public function canSendTickets(): bool
     {
         return $this->status === 'confirmed'
-            && $this->payment_status === 'paid'
+            && $this->isPaymentComplete()
             && (!$this->needsPersonalization() || $this->tickets_personalized);
     }
 }

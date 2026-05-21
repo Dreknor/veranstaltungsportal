@@ -82,7 +82,7 @@
                         </td>
                     </tr>
                     @php
-                        $showOnlineAccess = $booking->payment_status === 'paid' || $isFreBooking;
+                        $showOnlineAccess = $booking->payment_status === 'paid' || $booking->payment_status === 'extern' || $isFreBooking;
                     @endphp
                     @if($showOnlineAccess && $booking->event->online_url)
                     <tr>
@@ -141,7 +141,7 @@
                         </td>
                     </tr>
                     @php
-                        $showHybridOnlineAccess = $booking->payment_status === 'paid' || $isFreBooking;
+                        $showHybridOnlineAccess = $booking->payment_status === 'paid' || $booking->payment_status === 'extern' || $isFreBooking;
                     @endphp
                     @if($showHybridOnlineAccess && $booking->event->online_url)
                     <tr>
@@ -243,8 +243,8 @@
             </table>
         </div>
 
-        {{-- Zahlungsstatus nur bei kostenpflichtigen Buchungen anzeigen --}}
-        @if(!$isFreBooking)
+        {{-- Zahlungsstatus nur bei kostenpflichtigen Buchungen anzeigen, aber nicht bei externer Rechnungsstellung --}}
+        @if(!$isFreBooking && $booking->payment_status !== 'extern')
         <!-- Payment Status -->
         <div style="background: {{ $booking->payment_status === 'paid' ? '#d4edda' : '#fff3cd' }};
                     padding: 15px; border-radius: 8px; margin-bottom: 20px;
@@ -291,8 +291,7 @@
             </p>
         </div>
 
-        @if($booking->payment_status !== 'paid' && !$isFreBooking)
-        <!-- Payment Instructions -->
+        @if($booking->payment_status !== 'paid' && $booking->payment_status !== 'extern' && !$isFreBooking)
         @if($isExternalInvoicing)
         <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
             <h3 style="color: #0066cc; margin: 0 0 10px 0; font-size: 16px;">💳 Zahlungshinweise</h3>
@@ -378,7 +377,7 @@
                     <em>Die Rechnung wird Ihnen separat vom Veranstalter zugestellt.</em>
                 </li>
                 @endif
-                @if($booking->event->requires_ticket && ($booking->payment_status === 'paid' || $isFreBooking) && !$booking->event->isOnline())
+                @if($booking->event->requires_ticket && ($booking->payment_status === 'paid' || $booking->payment_status === 'extern' || $isFreBooking) && !$booking->event->isOnline())
                 <li style="margin-bottom: 8px;">
                     <strong>Tickets</strong> - Ticket_{{ $booking->booking_number }}.pdf
                     <span style="color: #28a745; font-size: 12px;">(QR-Code für Check-In)</span>
@@ -395,7 +394,7 @@
         <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📋 Nächste Schritte</h3>
             <ol style="margin: 0; padding-left: 20px; color: #666;">
-                @if($booking->payment_status !== 'paid' && !$isFreBooking)
+                @if($booking->payment_status !== 'paid' && $booking->payment_status !== 'extern' && !$isFreBooking)
                 @if($isExternalInvoicing)
                 <li style="margin-bottom: 10px;">Warten Sie auf die Rechnung vom Veranstalter</li>
                 <li style="margin-bottom: 10px;">Überweisen Sie den Betrag nach Rechnungserhalt</li>

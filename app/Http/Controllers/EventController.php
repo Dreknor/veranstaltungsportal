@@ -13,6 +13,7 @@ class EventController extends Controller
         // All published events
         $eventsQuery = Event::query()
             ->with(['category', 'organization.users', 'dates'])
+            ->upcoming()
             ->published();
 
         // Filter nach Kategorie
@@ -84,6 +85,7 @@ class EventController extends Controller
 
         $events = Event::query()
             ->published()
+            ->upcoming()
             ->whereYear('start_date', $year)
             ->whereMonth('start_date', $month)
             ->with(['category', 'organization.users'])

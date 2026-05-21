@@ -546,7 +546,8 @@
 
                             <div class="space-y-4">
                                 <div class="flex items-center">
-                                    <input type="checkbox" id="is_published" name="is_published" value="1"
+                                     <input type="hidden" name="is_published" value="0">
+                                     <input type="checkbox" id="is_published" name="is_published" value="1"
                                            {{ old('is_published', $event->is_published) ? 'checked' : '' }}
                                            {{ !auth()->user()->canPublishEvents() && !$event->is_published ? 'disabled' : '' }}
                                            class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 {{ !auth()->user()->canPublishEvents() && !$event->is_published ? 'opacity-50 cursor-not-allowed' : '' }}">
@@ -776,7 +777,7 @@
                             <div class="space-y-4 mb-4">
                                 @foreach($ticketTypes as $ticketType)
                                     <div class="border border-gray-200 rounded-lg p-4">
-                                        <div class="flex justify-between items-start">
+                                            <div class="flex justify-between items-start">
                                             <div>
                                                 <h3 class="font-semibold text-gray-900">{{ $ticketType->name }}</h3>
                                                 <p class="text-sm text-gray-600">{{ $ticketType->description }}</p>
@@ -786,11 +787,15 @@
                                                     Verkauft: {{ $ticketType->quantity_sold }}
                                                 </div>
                                             </div>
-                                            <form action="{{ route('organizer.events.ticket-types.destroy', [$event, $ticketType]) }}" method="POST" onsubmit="return confirm('Wirklich löschen?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
-                                            </form>
+                                            <div class="flex items-center gap-2">
+                                                <a href="{{ route('organizer.events.ticket-types.edit', [$event, $ticketType]) }}"
+                                                   class="text-blue-600 hover:text-blue-900 text-sm font-medium">Bearbeiten</a>
+                                                <form action="{{ route('organizer.events.ticket-types.destroy', [$event, $ticketType]) }}" method="POST" onsubmit="return confirm('Wirklich löschen?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900 text-sm font-medium">Löschen</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach

@@ -238,6 +238,8 @@
                         <span class="text-gray-600">Zahlungsstatus</span>
                         @if($booking->payment_status === 'paid')
                             <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-green-100 text-green-800">Bezahlt</span>
+                        @elseif($booking->payment_status === 'extern')
+                            <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Extern fakturiert</span>
                         @elseif($booking->payment_status === 'pending')
                             <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Ausstehend</span>
                         @elseif($booking->payment_status === 'refunded')
@@ -290,6 +292,7 @@
                                 <option value="">Zahlungsstatus ändern...</option>
                                 <option value="pending" {{ $booking->payment_status === 'pending' ? 'disabled' : '' }}>Ausstehend</option>
                                 <option value="paid" {{ $booking->payment_status === 'paid' ? 'disabled' : '' }}>Bezahlt</option>
+                                <option value="extern" {{ $booking->payment_status === 'extern' ? 'disabled' : '' }}>Extern fakturiert</option>
                                 <option value="refunded" {{ $booking->payment_status === 'refunded' ? 'disabled' : '' }}>Erstattet</option>
                                 <option value="failed" {{ $booking->payment_status === 'failed' ? 'disabled' : '' }}>Fehlgeschlagen</option>
                             </select>

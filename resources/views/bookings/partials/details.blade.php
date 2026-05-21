@@ -176,7 +176,7 @@
                                     </svg>
                                     Online-Veranstaltung
                                 </div>
-                                @if(in_array($booking->status, ['confirmed', 'completed']) && $booking->payment_status === 'paid' && $booking->event->online_url)
+                                @if(in_array($booking->status, ['confirmed', 'completed']) && $booking->isPaymentComplete() && $booking->event->online_url)
                                     <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                         <div class="flex items-start gap-2">
                                             <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,7 +200,7 @@
                                     <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800">
                                         ⏳ Die Zugangsdaten werden nach Bestätigung durch den Veranstalter freigeschaltet.
                                     </div>
-                                @elseif($booking->payment_status !== 'paid')
+                                @elseif(!$booking->isPaymentComplete())
                                     <div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs text-yellow-800">
                                         ℹ️ Die Zugangsdaten werden nach Zahlungseingang freigeschaltet.
                                     </div>
@@ -224,7 +224,7 @@
                                         @endif
                                     </div>
                                 @endif
-                                @if(in_array($booking->status, ['confirmed', 'completed']) && $booking->payment_status === 'paid' && $booking->event->online_url)
+                                @if(in_array($booking->status, ['confirmed', 'completed']) && $booking->isPaymentComplete() && $booking->event->online_url)
                                     <div class="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
                                         <div class="flex items-start gap-2">
                                             <svg class="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,6 +409,7 @@
                         @elseif($booking->payment_status === 'pending')
                             <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Ausstehend</span>
                         @endif
+                        {{-- payment_status 'extern' wird nicht angezeigt (externe Rechnungsstellung) --}}
                     </div>
                     <div class="text-xs text-gray-500 mt-2">Gebucht am {{ $booking->created_at->format('d.m.Y H:i') }} Uhr</div>
                 </div>
@@ -418,7 +419,7 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Aktionen</h2>
                 <div class="space-y-3">
-                    @if($booking->status === 'confirmed' && ($booking->payment_status === 'paid' || $booking->total == 0))
+                    @if($booking->status === 'confirmed' && ($booking->isPaymentComplete() || $booking->total == 0))
                         @if($booking->event->requires_ticket)
                             <a href="{{ route('bookings.ticket', $booking->booking_number) }}" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition block text-center">🎫 Ticket herunterladen (PDF)</a>
                         @else
