@@ -373,13 +373,21 @@
                                         </div>
                                     </div>
                                 @endif
-                            @else
+                            @elseif($event->max_attendees && $event->availableTickets() <= 0)
                                 <div class="text-center p-4 bg-red-50 border border-red-200 rounded-lg">
                                     <svg class="w-12 h-12 mx-auto text-red-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <p class="font-medium text-red-900">Ausgebucht</p>
                                     <p class="text-sm text-red-700 mt-1">Keine Tickets mehr verfügbar</p>
+                                </div>
+                            @else
+                                <div class="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                    <svg class="w-12 h-12 mx-auto text-yellow-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-medium text-yellow-900">Derzeit keine Tickets verfügbar</p>
+                                    <p class="text-sm text-yellow-700 mt-1">Der Ticketverkauf ist aktuell nicht geöffnet.</p>
                                 </div>
                             @endif
                             @endif {{-- end isExternal else --}}
@@ -572,6 +580,11 @@
                                    class="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold mt-4">
                                     Jetzt Tickets buchen
                                 </a>
+                            @elseif(!($event->max_attendees && $event->availableTickets() <= 0))
+                                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+                                    <p class="text-sm font-medium text-yellow-800">Derzeit keine Tickets verfügbar</p>
+                                    <p class="text-xs text-yellow-700 mt-1">Der Ticketverkauf ist aktuell nicht geöffnet.</p>
+                                </div>
                             @endif
 
                             @auth

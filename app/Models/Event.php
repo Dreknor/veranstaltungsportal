@@ -340,21 +340,23 @@ class Event extends Model implements HasMedia
                 });
         }
 
-        // Event is bookable if:
-        // 1. At least one ticket type is available OR
-        // 2. Event has a base price (price_from) set
-        // This allows for both ticket types AND price_from to coexist
-        if ($hasAvailableTicketType) {
-            return true;
+        // Wenn Ticket-Typen vorhanden sind, müssen diese buchbar sein
+        if ($this->ticketTypes()->exists()) {
+            if ($hasAvailableTicketType) {
+                return true;
+            }
+            // Ticket-Typen existieren, aber keiner ist gerade buchbar –
+            // price_from gilt nur als Fallback wenn gar keine Ticket-Typen angelegt sind
+            return false;
         }
 
-        // If no ticket types are available, check if price_from is set
+        // Keine Ticket-Typen angelegt → price_from als Default-Ticket prüfen
         if ($this->price_from !== null && $this->price_from >= 0) {
             return true;
         }
 
-        // Otherwise check general availability based on max_attendees
-        return $this->availableTickets() > 0;
+        // Weder Ticket-Typen noch price_from → nicht buchbar
+        return false;
     }
 
     /**
