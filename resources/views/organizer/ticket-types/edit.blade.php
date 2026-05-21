@@ -11,6 +11,22 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    @if ($ticketType->hasActiveSales())
+                    <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+                        <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-semibold text-amber-900">Aktive Buchungen vorhanden</p>
+                            <p class="text-sm text-amber-800 mt-1">
+                                Für diesen Ticket-Typ gibt es noch aktive (nicht-stornierte) Buchungen.
+                                Der <strong>Preis kann nicht geändert</strong> werden, solange aktive Buchungen bestehen.
+                                Alle anderen Felder (Name, Beschreibung, Verfügbarkeit etc.) können weiterhin bearbeitet werden.
+                            </p>
+                        </div>
+                    </div>
+                    @endif
+
                     <form action="{{ route('organizer.events.ticket-types.update', [$event, $ticketType]) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -37,7 +53,11 @@
                             <div>
                                 <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Preis (€) *</label>
                                 <input type="number" name="price" id="price" step="0.01" min="0" value="{{ old('price', $ticketType->price) }}" required
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                       {{ $ticketType->hasActiveSales() ? 'readonly' : '' }}
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 {{ $ticketType->hasActiveSales() ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' }}">
+                                @if ($ticketType->hasActiveSales())
+                                    <p class="mt-1 text-xs text-amber-700">🔒 Preisänderung nicht möglich – aktive Buchungen vorhanden</p>
+                                @endif
                                 @error('price')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror

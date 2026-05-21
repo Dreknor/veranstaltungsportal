@@ -374,6 +374,11 @@ class EventManagementController extends Controller
             'is_available' => 'boolean',
         ]);
 
+        // Preisänderung verhindern, wenn aktive (nicht-stornierte) Buchungen existieren
+        if ($ticketType->hasActiveSales() && (float)$validated['price'] !== (float)$ticketType->price) {
+            return back()->withErrors(['price' => 'Der Preis kann nicht geändert werden, da noch aktive Buchungen für diesen Ticket-Typ vorhanden sind.']);
+        }
+
         $ticketType->update($validated);
 
         return back()->with('success', 'Ticket-Typ erfolgreich aktualisiert!');

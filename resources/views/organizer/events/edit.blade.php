@@ -790,11 +790,15 @@
                                             <div class="flex items-center gap-2">
                                                 <a href="{{ route('organizer.events.ticket-types.edit', [$event, $ticketType]) }}"
                                                    class="text-blue-600 hover:text-blue-900 text-sm font-medium">Bearbeiten</a>
+                                                @if (!$ticketType->hasActiveSales())
                                                 <form action="{{ route('organizer.events.ticket-types.destroy', [$event, $ticketType]) }}" method="POST" onsubmit="return confirm('Wirklich löschen?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900 text-sm font-medium">Löschen</button>
                                                 </form>
+                                                @else
+                                                <span class="text-gray-400 text-xs" title="Löschen nicht möglich: Es gibt noch aktive Buchungen.">🔒</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

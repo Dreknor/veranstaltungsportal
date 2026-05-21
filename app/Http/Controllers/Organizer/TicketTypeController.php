@@ -90,6 +90,13 @@ class TicketTypeController extends Controller
             'is_available' => 'boolean',
         ]);
 
+        // Preisänderung verhindern, wenn aktive (nicht-stornierte) Buchungen existieren
+        if ($ticketType->hasActiveSales() && (float)$validated['price'] !== (float)$ticketType->price) {
+            return back()
+                ->withInput()
+                ->withErrors(['price' => 'Der Preis kann nicht geändert werden, da noch aktive Buchungen für diesen Ticket-Typ vorhanden sind. Bitte stornieren Sie zuerst alle Buchungen dieses Typs.']);
+        }
+
         $ticketType->update($validated);
 
         return redirect()
@@ -105,11 +112,11 @@ class TicketTypeController extends Controller
             abort(404);
         }
 
-        // Check if ticket type has bookings
-        if ($ticketType->bookingItems()->count() > 0) {
+        // Löschen nur wenn keine aktiven (nicht-stornierten) Buchungen vorhanden
+        if ($ticketType->hasActiveSales()) {
             return redirect()
                 ->route('organizer.events.ticket-types.index', $event)
-                ->with('error', 'Ticket-Typ kann nicht gelöscht werden, da bereits Buchungen vorhanden sind.');
+                ->with('error', 'Dieser Ticket-Typ kann nicht gelöscht werden, da noch aktive Buchungen vorhanden sind. Bitte stornieren Sie zuerst alle Buchungen dieses Typs.');
         }
 
         $ticketType->delete();

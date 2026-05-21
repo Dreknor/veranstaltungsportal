@@ -81,20 +81,24 @@
                                                     </span>
                                                 @endif
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('organizer.events.ticket-types.edit', [$event, $ticketType]) }}"
-                                                   class="text-blue-600 hover:text-blue-900 mr-3">Bearbeiten</a>
+                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                 <a href="{{ route('organizer.events.ticket-types.edit', [$event, $ticketType]) }}"
+                                                    class="text-blue-600 hover:text-blue-900 mr-3">Bearbeiten</a>
 
-                                                @if ($ticketType->quantity_sold == 0)
-                                                    <form action="{{ route('organizer.events.ticket-types.destroy', [$event, $ticketType]) }}"
-                                                          method="POST" class="inline"
-                                                          onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Ticket-Typ löschen möchten?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
-                                                    </form>
-                                                @endif
-                                            </td>
+                                                 @if (!$ticketType->hasActiveSales())
+                                                     <form action="{{ route('organizer.events.ticket-types.destroy', [$event, $ticketType]) }}"
+                                                           method="POST" class="inline"
+                                                           onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Ticket-Typ löschen möchten?');">
+                                                         @csrf
+                                                         @method('DELETE')
+                                                         <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
+                                                     </form>
+                                                 @else
+                                                     <span class="text-gray-400 text-xs" title="Löschen nicht möglich: Es gibt noch aktive Buchungen für diesen Ticket-Typ.">
+                                                         🔒 Aktive Buchungen
+                                                     </span>
+                                                 @endif
+                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

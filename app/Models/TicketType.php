@@ -63,6 +63,17 @@ class TicketType extends Model
         return $ticketTypeAvailable;
     }
 
+    /**
+     * Prüft ob es aktive (nicht-stornierte) Buchungen für diesen Ticket-Typ gibt.
+     * Löschen und Preisänderungen sind nur erlaubt, wenn diese Methode false zurückgibt.
+     */
+    public function hasActiveSales(): bool
+    {
+        return $this->bookingItems()->whereHas('booking', function ($q) {
+            $q->where('status', '!=', 'cancelled');
+        })->exists();
+    }
+
     public function scopeAvailable($query)
     {
         return $query->where(function($q) {

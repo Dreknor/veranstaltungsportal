@@ -195,6 +195,11 @@ class BookingController extends Controller
                         throw new \Exception("Ungültiger Ticket-Typ ausgewählt.");
                     }
 
+                    // Prüfe ob Ticket aktiv und im Verkaufszeitraum ist
+                    if (!$ticketType->isOnSale()) {
+                        throw new \Exception("Das Ticket \"{$ticketType->name}\" ist nicht verfügbar oder außerhalb des Verkaufszeitraums.");
+                    }
+
                     // Prüfe Verfügbarkeit
                     if ($ticketType->availableQuantity() < $ticketInput['quantity']) {
                         throw new \Exception("Nicht genügend Tickets für {$ticketType->name} verfügbar.");
