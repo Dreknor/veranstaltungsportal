@@ -504,11 +504,14 @@
                     </div>
 
                     <!-- Tickets -->
-                    @if($event->ticketTypes->count() > 0 || $event->price_from !== null)
+                    @php
+                        $visibleTickets = $event->ticketTypes->where('is_available', true);
+                    @endphp
+                    @if($visibleTickets->count() > 0 || $event->price_from !== null)
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Tickets</h3>
                             <div class="space-y-3">
-                                @foreach($event->ticketTypes as $ticket)
+                                @foreach($visibleTickets as $ticket)
                                     <div class="border-b pb-3 last:border-b-0">
                                         <div class="flex justify-between items-start mb-1">
                                             <span class="font-medium text-gray-900">{{ $ticket->name }}</span>
@@ -518,9 +521,7 @@
                                             <p class="text-sm text-gray-600">{{ $ticket->description }}</p>
                                         @endif
 
-                                        @if(!$ticket->is_available)
-                                            <p class="text-xs text-red-600 mt-1">Nicht verfügbar</p>
-                                        @elseif(!$ticket->isOnSale())
+                                        @if(!$ticket->isOnSale())
                                             @if($ticket->sale_start && now()->lt($ticket->sale_start))
                                                 <p class="text-xs text-orange-600 mt-1">
                                                     Verkauf ab {{ $ticket->sale_start->format('d.m.Y') }}
@@ -543,7 +544,7 @@
                                     </div>
                                 @endforeach
 
-                                @if($event->price_from !== null && $event->ticketTypes->isEmpty())
+                                @if($event->price_from !== null && $visibleTickets->isEmpty())
                                     <div class="border-b pb-3 last:border-b-0">
                                         <div class="flex justify-between items-start mb-1">
                                             <span class="font-medium text-gray-900">
