@@ -43,8 +43,8 @@ class BookingController extends Controller
                 return $ticket->isOnSale() && $ticket->availableQuantity() > 0;
             });
 
-        // If price_from is set and there are no ticket types, create a default one
-        if ($ticketTypes->isEmpty() && $event->price_from !== null) {
+
+        if ($ticketTypes->isEmpty() && $event->ticketTypes()->count() === 0 && $event->price_from !== null) {
             $price = $event->price_from;
 
             $defaultTicket = TicketType::create([

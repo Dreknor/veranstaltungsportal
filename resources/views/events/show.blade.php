@@ -505,7 +505,12 @@
 
                     <!-- Tickets -->
                     @php
-                        $visibleTickets = $event->ticketTypes->where('is_available', true);
+                        // Nur Tickets anzeigen, deren Verkauf aktuell aktiv ist.
+                        // Noch nicht gestartete oder bereits beendete Tickets werden ausgeblendet,
+                        // da sie ohnehin nicht buchbar sind.
+                        $visibleTickets = $event->ticketTypes
+                            ->where('is_available', true)
+                            ->filter(fn($t) => $t->isOnSale());
                     @endphp
                     @if($visibleTickets->count() > 0 || $event->price_from !== null)
                         <div class="bg-white rounded-lg shadow-md p-6">

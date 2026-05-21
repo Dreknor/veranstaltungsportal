@@ -381,11 +381,12 @@
                                 </button>
                             @endauth
                         </div>
-                    @elseif($event->ticketTypes->count() > 0)
+                    @elseif($event->ticketTypes->where('is_available', true)->count() > 0)
+                        @php $visibleTickets = $event->ticketTypes->where('is_available', true); @endphp
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Tickets</h3>
                             <div class="space-y-3">
-                                @foreach($event->ticketTypes as $ticket)
+                                @foreach($visibleTickets as $ticket)
                                     <div class="border-b pb-3 last:border-b-0">
                                         <div class="flex justify-between items-start mb-1">
                                             <span class="font-medium text-gray-900">{{ $ticket->name }}</span>
@@ -394,10 +395,20 @@
                                         @if($ticket->description)
                                             <p class="text-sm text-gray-600">{{ $ticket->description }}</p>
                                         @endif
-                                        @if($ticket->quantity)
+                                        @if(!$ticket->isOnSale())
+                                            @if($ticket->sale_start && now()->lt($ticket->sale_start))
+                                                <p class="text-xs text-orange-600 mt-1">Verkauf ab {{ $ticket->sale_start->format('d.m.Y') }}</p>
+                                            @elseif($ticket->sale_end && now()->gt($ticket->sale_end))
+                                                <p class="text-xs text-gray-500 mt-1">Verkauf beendet</p>
+                                            @endif
+                                        @elseif($ticket->availableQuantity() === 0)
+                                            <p class="text-xs text-red-600 mt-1">Ausverkauft</p>
+                                        @elseif($ticket->quantity)
                                             <p class="text-xs text-gray-500 mt-1">
                                                 Noch {{ $ticket->availableQuantity() }} verfügbar
                                             </p>
+                                        @else
+                                            <p class="text-xs text-green-600 mt-1">Verfügbar</p>
                                         @endif
                                     </div>
                                 @endforeach
@@ -407,7 +418,7 @@
                             <x-waitlist-join :event="$event" />
 
                             @php
-                                $hasAvailableTickets = $event->ticketTypes->some(fn($ticket) => $ticket->availableQuantity() > 0);
+                                $hasAvailableTickets = $visibleTickets->some(fn($ticket) => $ticket->isOnSale() && $ticket->availableQuantity() > 0);
                             @endphp
 
                             @if($hasAvailableTickets)
