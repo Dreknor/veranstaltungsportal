@@ -39,9 +39,9 @@ class TicketTypeController extends Controller
             'min_per_order' => 'nullable|integer|min:1',
             'sale_start' => 'nullable|date',
             'sale_end' => 'nullable|date|after:sale_start',
-            'is_available' => 'boolean',
         ]);
 
+        $validated['is_available'] = $request->boolean('is_available');
         $validated['event_id'] = $event->id;
         $validated['quantity_sold'] = 0;
 
@@ -87,8 +87,9 @@ class TicketTypeController extends Controller
             'min_per_order' => 'nullable|integer|min:1',
             'sale_start' => 'nullable|date',
             'sale_end' => 'nullable|date|after:sale_start',
-            'is_available' => 'boolean',
         ]);
+
+        $validated['is_available'] = $request->boolean('is_available');
 
         // Preisänderung verhindern, wenn aktive (nicht-stornierte) Buchungen existieren
         if ($ticketType->hasActiveSales() && (float)$validated['price'] !== (float)$ticketType->price) {

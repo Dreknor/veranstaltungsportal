@@ -84,7 +84,7 @@
 
                         <div class="mb-6">
                             <label class="flex items-center">
-                                <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}
+                                <input type="checkbox" name="is_available" value="1" {{ old('is_available', true) ? 'checked' : '' }}
                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <span class="ml-2 text-sm text-gray-700">Aktiv</span>
                             </label>

@@ -505,9 +505,6 @@
 
                     <!-- Tickets -->
                     @php
-                        // Nur Tickets anzeigen, deren Verkauf aktuell aktiv ist.
-                        // Noch nicht gestartete oder bereits beendete Tickets werden ausgeblendet,
-                        // da sie ohnehin nicht buchbar sind.
                         $visibleTickets = $event->ticketTypes
                             ->where('is_available', true)
                             ->filter(fn($t) => $t->isOnSale());
