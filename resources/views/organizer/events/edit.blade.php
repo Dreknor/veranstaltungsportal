@@ -200,15 +200,55 @@
                                 </div>
 
                                 <div>
-                                    <label for="featured_image" class="block text-sm font-medium text-gray-700 mb-1">Titelbild</label>
+                                    <label for="featured_image" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Header-Bild / Titelbild
+                                    </label>
+
                                     @if($event->featured_image)
-                                        <div class="mb-2">
-                                            <img src="{{ Storage::url($event->featured_image) }}" alt="Aktuelles Titelbild" class="h-32 w-auto rounded-lg border">
-                                            <p class="text-xs text-gray-500 mt-1">Aktuelles Titelbild (wird ersetzt, wenn Sie ein neues hochladen)</p>
+                                        <div class="mb-3 p-3 bg-gray-50 border border-gray-200 rounded-lg" id="current-image-section">
+                                            <p class="text-xs font-medium text-gray-500 mb-2">Aktuelles Bild:</p>
+                                            <div class="flex items-start gap-4">
+                                                <img src="{{ Storage::url($event->featured_image) }}"
+                                                     alt="Aktuelles Titelbild"
+                                                     class="h-40 w-auto rounded-lg border border-gray-300 shadow-sm object-cover">
+                                                <div class="flex-1">
+                                                    <p class="text-xs text-gray-500 mb-3">
+                                                        Laden Sie ein neues Bild hoch, um das vorhandene zu ersetzen.
+                                                        Oder entfernen Sie das Bild ohne ein neues hochzuladen.
+                                                    </p>
+                                                    <label class="flex items-center gap-2 cursor-pointer group">
+                                                        <input type="checkbox"
+                                                               name="delete_featured_image"
+                                                               value="1"
+                                                               id="delete_featured_image"
+                                                               class="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                                                               onchange="document.getElementById('current-image-section').classList.toggle('opacity-50', this.checked);">
+                                                        <span class="text-sm text-red-600 group-hover:text-red-800">
+                                                            Bild entfernen
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
+                                    @else
+                                        <p class="text-xs text-gray-500 mb-2">Noch kein Titelbild vorhanden.</p>
                                     @endif
-                                    <input type="file" id="featured_image" name="featured_image" accept="image/*"
-                                           class="w-full border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
+
+                                    <div class="mt-2">
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">
+                                            {{ $event->featured_image ? 'Neues Bild hochladen (ersetzt das vorhandene):' : 'Bild hochladen:' }}
+                                        </label>
+                                        <input type="file"
+                                               id="featured_image"
+                                               name="featured_image"
+                                               accept="image/*"
+                                               class="w-full text-sm text-gray-500 border border-gray-300 rounded-lg cursor-pointer bg-white focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-l-lg file:border-0 file:text-sm file:font-medium file:bg-blue-600 file:text-white hover:file:bg-blue-700 p-0">
+                                        <p class="mt-1 text-xs text-gray-400">Erlaubte Formate: JPG, PNG, GIF, WEBP – Max. 2 MB</p>
+                                        <div id="image-preview-wrapper" class="hidden mt-2">
+                                            <p class="text-xs text-gray-500 mb-1">Vorschau:</p>
+                                            <img id="image-preview" src="#" alt="Vorschau" class="h-32 w-auto rounded-lg border border-gray-300">
+                                        </div>
+                                    </div>
                                     @error('featured_image')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -895,6 +935,33 @@
                 document.getElementById('is_private').addEventListener('change', function() {
                     document.getElementById('access-code-field').classList.toggle('hidden', !this.checked);
                 });
+
+                // Live-Vorschau für neues Titelbild
+                const featuredImageInput = document.getElementById('featured_image');
+                const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
+                const imagePreview = document.getElementById('image-preview');
+                if (featuredImageInput && imagePreview) {
+                    featuredImageInput.addEventListener('change', function() {
+                        const file = this.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                imagePreview.src = e.target.result;
+                                imagePreviewWrapper.classList.remove('hidden');
+                            };
+                            reader.readAsDataURL(file);
+                            // Deactivate delete checkbox if a new file is selected
+                            const deleteCheckbox = document.getElementById('delete_featured_image');
+                            if (deleteCheckbox) {
+                                deleteCheckbox.checked = false;
+                                const section = document.getElementById('current-image-section');
+                                if (section) section.classList.remove('opacity-50');
+                            }
+                        } else {
+                            imagePreviewWrapper.classList.add('hidden');
+                        }
+                    });
+                }
 
                 // Toggle QR Code option based on requires_ticket
                 const requiresTicketCheckbox = document.getElementById('requires_ticket');
