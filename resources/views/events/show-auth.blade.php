@@ -35,6 +35,14 @@
                                 Featured
                             </span>
                         @endif
+                        @if($event->end_date->isPast())
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-500 text-white">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Abgelaufen
+                            </span>
+                        @endif
                     </div>
                     <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">{{ $event->title }}</h1>
                     <div class="flex items-center text-white text-lg">
@@ -49,6 +57,26 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <!-- Hauptinhalt -->
                 <div class="lg:col-span-2 space-y-6">
+                    @if($event->end_date->isPast())
+                        <!-- Abgelaufen-Hinweis -->
+                        <div class="bg-gray-50 border-2 border-gray-400 rounded-lg p-6">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-2">Diese Veranstaltung hat bereits stattgefunden</h3>
+                                    <p class="text-gray-600">
+                                        Die Veranstaltung endete am <strong>{{ $event->end_date->format('d.m.Y') }} um {{ $event->end_date->format('H:i') }} Uhr</strong>.
+                                        Eine Buchung ist nicht mehr möglich.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Event Details -->
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-2xl font-bold text-gray-900 mb-4">Über die Veranstaltung</h2>
@@ -336,7 +364,30 @@
                     </div>
 
                     <!-- Tickets -->
-                    @if($event->isExternal())
+                    @if($event->end_date->isPast())
+                        <!-- Abgelaufen: kein Buchungs-Bereich -->
+                        <div class="bg-white rounded-lg shadow-md p-6">
+                            <div class="text-center p-4 bg-gray-50 border border-gray-300 rounded-lg">
+                                <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="font-medium text-gray-700">Veranstaltung abgelaufen</p>
+                                <p class="text-sm text-gray-500 mt-1">Eine Buchung ist nicht mehr möglich.</p>
+                            </div>
+                            @auth
+                                <button onclick="toggleFavorite({{ $event->id }})"
+                                        id="favorite-btn-{{ $event->id }}"
+                                        class="block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-4
+                                               {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
+                                    <x-icon.heart class="w-5 h-5 inline-block mr-2"
+                                                  fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
+                                    <span id="favorite-text-{{ $event->id }}">
+                                        {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
+                                    </span>
+                                </button>
+                            @endauth
+                        </div>
+                    @elseif($event->isExternal())
                         {{-- External event: show link to external booking page --}}
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Anmeldung</h3>

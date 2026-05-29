@@ -272,10 +272,23 @@ class EventManagementController extends Controller
         }
 
 
-        // Handle Image Upload
+        // Handle Image Upload / Deletion
         if ($request->hasFile('featured_image')) {
+            // Altes Bild löschen wenn vorhanden
+            if ($event->featured_image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($event->featured_image);
+            }
             $path = $request->file('featured_image')->store('events', 'public');
             $validated['featured_image'] = $path;
+        } elseif ($request->boolean('delete_featured_image')) {
+            // Vorhandenes Bild entfernen
+            if ($event->featured_image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($event->featured_image);
+            }
+            $validated['featured_image'] = null;
+        } else {
+            // Kein neues Bild – vorhandenes Bild NICHT überschreiben
+            unset($validated['featured_image']);
         }
 
         $event->update($validated);

@@ -37,6 +37,13 @@
                                 </svg>
                                 Abgesagt
                             </span>
+                        @elseif($event->end_date->isPast())
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-500 text-white">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Abgelaufen
+                            </span>
                         @elseif($event->is_featured)
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-500 text-white">
                                 Featured
@@ -78,6 +85,24 @@
                                             Abgesagt am: {{ $event->cancelled_at->format('d.m.Y H:i') }} Uhr
                                         </p>
                                     @endif
+                                </div>
+                            </div>
+                        </div>
+                    @elseif($event->end_date->isPast())
+                        <!-- Abgelaufen-Hinweis -->
+                        <div class="bg-gray-50 border-2 border-gray-400 rounded-lg p-6">
+                            <div class="flex items-start gap-4">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="text-xl font-bold text-gray-800 mb-2">Diese Veranstaltung hat bereits stattgefunden</h3>
+                                    <p class="text-gray-600">
+                                        Die Veranstaltung endete am <strong>{{ $event->end_date->format('d.m.Y') }} um {{ $event->end_date->format('H:i') }} Uhr</strong>.
+                                        Eine Buchung ist nicht mehr möglich.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -282,6 +307,15 @@
                                         <p class="text-sm text-red-600">{{ $event->cancellation_reason }}</p>
                                     </div>
                                 @endif
+                            </div>
+                        @elseif($event->end_date->isPast())
+                            <!-- Abgelaufen-Meldung -->
+                            <div class="text-center p-6 bg-gray-50 border border-gray-300 rounded-lg">
+                                <svg class="w-16 h-16 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="font-bold text-gray-700 text-lg mb-2">Veranstaltung abgelaufen</p>
+                                <p class="text-sm text-gray-600">Diese Veranstaltung hat bereits stattgefunden. Eine Buchung ist nicht mehr möglich.</p>
                             </div>
                         @else
                             @if($event->isExternal())
@@ -516,8 +550,9 @@
                         $visibleTickets = $event->ticketTypes
                             ->where('is_available', true)
                             ->filter(fn($t) => $t->isOnSale());
+                        $eventIsPast = $event->end_date->isPast();
                     @endphp
-                    @if($visibleTickets->count() > 0 || $event->price_from !== null)
+                    @if(!$eventIsPast && ($visibleTickets->count() > 0 || $event->price_from !== null))
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h3 class="font-bold text-gray-900 mb-4">Tickets</h3>
                             <div class="space-y-3">

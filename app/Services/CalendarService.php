@@ -179,7 +179,7 @@ class CalendarService
      */
     protected function formatDateTime($datetime): string
     {
-        return $datetime->format('Ymd\THis\Z');
+        return $datetime->copy()->utc()->format('Ymd\THis\Z');
     }
 
     /**
@@ -227,7 +227,7 @@ class CalendarService
         $params = [
             'action' => 'TEMPLATE',
             'text' => $event->title,
-            'dates' => $event->start_date->format('Ymd\THis\Z') . '/' . $event->end_date->format('Ymd\THis\Z'),
+            'dates' => $event->start_date->copy()->utc()->format('Ymd\THis\Z') . '/' . $event->end_date->copy()->utc()->format('Ymd\THis\Z'),
             'details' => strip_tags($event->description),
             'location' => $this->formatLocation($event),
             'ctz' => 'Europe/Berlin',

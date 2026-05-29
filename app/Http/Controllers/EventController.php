@@ -123,6 +123,8 @@ class EventController extends Controller
         $relatedEvents = Event::published()
             ->where('event_category_id', $event->event_category_id)
             ->where('id', '!=', $event->id)
+            ->where('end_date', '>=', now())  // Nur zukünftige / laufende Events
+            ->orderBy('start_date', 'asc')
             ->limit(3)
             ->get();
 
