@@ -145,7 +145,12 @@
                             </div>
                         </div>
 
+                        @php
+                            $onlyFreeTickets = $ticketTypes->isNotEmpty() && $ticketTypes->every(fn($t) => $t->price == 0);
+                        @endphp
+
                         <!-- Rechnungsadresse -->
+                        @if(!$onlyFreeTickets)
                         <div class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Rechnungsadresse</h2>
 
@@ -200,6 +205,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
 
                         <!-- Zahlungsmethode -->
                         <div class="bg-white rounded-lg shadow-md p-6">

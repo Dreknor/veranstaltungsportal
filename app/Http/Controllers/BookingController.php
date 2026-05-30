@@ -124,6 +124,16 @@ class BookingController extends Controller
             default    => 'nullable|string|max:255',
         };
 
+        // Rechnungsadresse nur erforderlich, wenn kostenpflichtige Tickets gewählt wurden
+        $selectedTicketIds = collect($request->input('tickets', []))
+            ->pluck('ticket_type_id')
+            ->filter()
+            ->unique()
+            ->toArray();
+        $hasPaidTickets = !empty($selectedTicketIds)
+            && TicketType::whereIn('id', $selectedTicketIds)->where('price', '>', 0)->exists();
+        $billingRule = $hasPaidTickets ? 'required' : 'nullable';
+
         $request->validate([
             'customer_name' => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
@@ -131,10 +141,10 @@ class BookingController extends Controller
             'customer_organization' => $organizationRule,
             'billing_company' => 'nullable|string|max:255',
             'billing_vat_id' => 'nullable|string|max:50',
-            'billing_address' => 'required|string|max:255',
-            'billing_postal_code' => 'required|string|max:20',
-            'billing_city' => 'required|string|max:255',
-            'billing_country' => 'required|string|max:100',
+            'billing_address' => $billingRule . '|string|max:255',
+            'billing_postal_code' => $billingRule . '|string|max:20',
+            'billing_city' => $billingRule . '|string|max:255',
+            'billing_country' => $billingRule . '|string|max:100',
             'tickets' => 'required|array|min:1',
             'tickets.*.ticket_type_id' => 'required|exists:ticket_types,id',
             'tickets.*.quantity' => 'required|integer|min:0',
