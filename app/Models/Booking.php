@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+/**
+ * @property 'pending'|'confirmed'|'cancelled'|'completed'|'pending_approval' $status
+ * @property 'pending'|'paid'|'refunded'|'failed'|'extern' $payment_status
+ */
 class Booking extends Model
 {
     use HasFactory, SoftDeletes;

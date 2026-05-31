@@ -164,7 +164,10 @@ class NotificationExamples
     {
         $booking = Booking::findOrFail($bookingId);
 
-        $booking->payment_status = 'partially_refunded';
+        // Hinweis: Der payment_status kennt aktuell nur die Werte
+        // pending|paid|refunded|failed. Eine teilweise Rückerstattung wird
+        // als 'refunded' abgebildet (Details ggf. in additional_data).
+        $booking->payment_status = 'refunded';
         $booking->save();
 
         // Kunde wird über die teilweise Rückerstattung informiert

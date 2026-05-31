@@ -174,8 +174,8 @@
                                            required
                                            class="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     <span class="ml-2 text-sm text-gray-700">
-                                        Ich akzeptiere die <a href="#" class="text-blue-600 hover:text-blue-800">Nutzungsbedingungen</a>
-                                        und <a href="#" class="text-blue-600 hover:text-blue-800">Datenschutzerklärung</a>
+                                        Ich akzeptiere die <a href="{{ route('agb') }}" target="_blank" class="text-blue-600 hover:text-blue-800">Nutzungsbedingungen</a>
+                                        und <a href="{{ route('datenschutz') }}" target="_blank" class="text-blue-600 hover:text-blue-800">Datenschutzerklärung</a>
                                     </span>
                                 </label>
                                 @error('terms')

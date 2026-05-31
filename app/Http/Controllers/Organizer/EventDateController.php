@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Organizer;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventDate;
+use App\Notifications\EventDateCancelledNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
 class EventDateController extends Controller
 {
@@ -118,10 +120,24 @@ class EventDateController extends Controller
             'cancellation_reason' => $validated['cancellation_reason'],
         ]);
 
-        // TODO: Notify participants about the cancellation
+        // Notify all attendees about the cancelled date
+        $attendees = $event->getAttendees();
+
+        foreach ($attendees as $booking) {
+            if ($booking->user) {
+                // Registered user: in-app notification + email
+                $booking->user->notify(
+                    new EventDateCancelledNotification($event, $eventDate, $booking)
+                );
+            } elseif ($booking->customer_email) {
+                // Guest booking: email only
+                Notification::route('mail', $booking->customer_email)
+                    ->notify(new EventDateCancelledNotification($event, $eventDate, $booking));
+            }
+        }
 
         return redirect()->route('organizer.events.edit', $event)
-            ->with('success', 'Termin erfolgreich abgesagt!');
+            ->with('success', 'Termin erfolgreich abgesagt! ' . $attendees->count() . ' Teilnehmer wurden benachrichtigt.');
     }
 
     /**

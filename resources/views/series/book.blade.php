@@ -170,7 +170,7 @@
                                 </label>
                                 <p class="text-gray-500">
                                     Ich bestätige, dass ich an allen {{ $series->events->count() }} Terminen teilnehmen werde und die
-                                    <a href="#" class="text-blue-600 hover:text-blue-800">Teilnahmebedingungen</a> akzeptiere.
+                                    <a href="{{ route('agb') }}" target="_blank" class="text-blue-600 hover:text-blue-800">Teilnahmebedingungen</a> akzeptiere.
                                 </p>
                             </div>
                         </div>
@@ -213,5 +213,5 @@
 
         </div>
     </div>
-</x-layouts.app>
+</x-dynamic-component>
 
