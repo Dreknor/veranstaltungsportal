@@ -87,7 +87,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>
                                     <td align="center" style="padding: 10px 0 30px 0;">
-                                        <a href="{{ route('bookings.show', $booking->booking_number) }}"
+                                        <a href="{{ $booking->manageUrl() }}"
                                            style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);">
                                             Anmeldung ansehen
                                         </a>

@@ -67,6 +67,7 @@ class Event extends Model implements HasMedia
         'cancellation_days_before',
         'organization_field_mode',
         'free_ticket_auto_confirm',
+        'tickets_before_invoice',
     ];
 
     protected function casts(): array
@@ -91,6 +92,7 @@ class Event extends Model implements HasMedia
             'cancellation_allowed' => 'boolean',
             'cancellation_days_before' => 'integer',
             'free_ticket_auto_confirm' => 'boolean',
+            'tickets_before_invoice' => 'boolean',
         ];
     }
 
@@ -267,7 +269,7 @@ class Event extends Model implements HasMedia
 
         // Calculate sold tickets through booking items
         // Include pending, pending_approval, confirmed and completed bookings
-        $sold = $this->bookings()
+        $sold = $this->reservedWaitlistSeats() + $this->bookings()
             ->whereIn('status', ['pending', 'pending_approval', 'confirmed', 'completed'])
             ->with('items')
             ->get()
@@ -277,6 +279,21 @@ class Event extends Model implements HasMedia
             ->sum('quantity');
 
         return max(0, $this->max_attendees - $sold);
+    }
+
+    /**
+     * Für Wartelisten-Nachrücker reservierte Plätze. Die Reservierung der Person, die gerade
+     * über ihren persönlichen Link bucht, zählt dabei nicht (siehe BookingController).
+     */
+    public function reservedWaitlistSeats(?int $ticketTypeId = null): int
+    {
+        $claim = app()->bound('waitlist.claim') ? app('waitlist.claim') : null;
+
+        return (int) EventWaitlist::where('event_id', $this->id)
+            ->activeReservation()
+            ->when($claim, fn ($q) => $q->where('id', '!=', $claim->id))
+            ->when($ticketTypeId, fn ($q) => $q->where('ticket_type_id', $ticketTypeId))
+            ->sum('quantity');
     }
 
     /**
@@ -293,6 +310,15 @@ class Event extends Model implements HasMedia
     public function requiresOrganizationField(): bool
     {
         return $this->organization_field_mode === 'required';
+    }
+
+    /**
+     * Tickets/Zugangsdaten werden sofort versendet, die Rechnung stellt der Veranstalter
+     * extern – ggf. erst nach der Veranstaltung.
+     */
+    public function releasesTicketsBeforeInvoice(): bool
+    {
+        return $this->tickets_before_invoice && ($this->organization?->hasExternalInvoicing() ?? false);
     }
 
     /**

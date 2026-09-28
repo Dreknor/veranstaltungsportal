@@ -144,7 +144,7 @@
                                 @foreach($event->reviews->where('is_approved', true)->take(5) as $review)
                                     <div class="border-b pb-4 last:border-b-0">
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span class="font-medium">{{ $review->user->name }}</span>
+                                            <span class="font-medium">{{ $review->reviewerName() }}</span>
                                             <div class="flex text-yellow-400">
                                                 @for($i = 1; $i <= 5; $i++)
                                                     @if($i <= $review->rating)

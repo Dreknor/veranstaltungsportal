@@ -1,8 +1,8 @@
 <x-layouts.app>
-    <div class="px-4 py-8">
-        <div class="mb-8 flex items-center justify-between">
+    <div class="px-4 py-4 sm:py-8">
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-2">
                     @if($groupByEvent)
                         {{ $isArchive ? 'Archiv – abgeschlossene Veranstaltungen und deren Buchungen' : 'Übersicht aller Buchungen, nach Veranstaltung gruppiert' }}
@@ -11,16 +11,16 @@
                     @endif
                 </p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 shrink-0">
                 <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'csv'])) }}"
-                   class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2">
+                   class="px-3 sm:px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     CSV Export
                 </a>
                 <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'excel'])) }}"
-                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2">
+                   class="px-3 sm:px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
@@ -76,8 +76,26 @@
             </div>
         @endif
 
+        {{-- Handlungsbedarf --}}
+        @if(!$isArchive && ($pendingApprovalCount > 0 || $unpaidCount > 0))
+            <div class="mb-4 flex flex-wrap gap-2" aria-label="Handlungsbedarf">
+                @if($pendingApprovalCount > 0)
+                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending_approval']) }}"
+                       class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-100">
+                        ⏳ {{ $pendingApprovalCount }} Anmeldung(en) warten auf Freigabe
+                    </a>
+                @endif
+                @if($unpaidCount > 0)
+                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending']) }}"
+                       class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-900 hover:bg-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-100">
+                        💶 {{ $unpaidCount }} Buchung(en) mit offener Zahlung
+                    </a>
+                @endif
+            </div>
+        @endif
+
         <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4 sm:p-6">
             <form action="{{ route('organizer.bookings.index') }}" method="GET" class="space-y-4">
                 {{-- Archiv-Status im Filter erhalten --}}
                 @if($isArchive)
@@ -109,6 +127,9 @@
                             <option value="">Alle</option>
                             <option value="pending" {{ request('payment_status') === 'pending' ? 'selected' : '' }}>Ausstehend</option>
                             <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Bezahlt</option>
+                            @if($organization->hasExternalInvoicing())
+                                <option value="extern" {{ request('payment_status') === 'extern' ? 'selected' : '' }}>Extern fakturiert</option>
+                            @endif
                             <option value="failed" {{ request('payment_status') === 'failed' ? 'selected' : '' }}>Fehlgeschlagen</option>
                             <option value="refunded" {{ request('payment_status') === 'refunded' ? 'selected' : '' }}>Erstattet</option>
                         </select>
@@ -118,19 +139,19 @@
                         <select name="status" id="status"
                                 class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             <option value="">Alle</option>
-                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Ausstehend</option>
-                            <option value="pending_approval" {{ request('status') === 'pending_approval' ? 'selected' : '' }}>Wartet auf Bestätigung</option>
+                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Zahlung ausstehend</option>
+                            <option value="pending_approval" {{ request('status') === 'pending_approval' ? 'selected' : '' }}>Wartet auf Freigabe</option>
                             <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Bestätigt</option>
                             <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Abgeschlossen</option>
                             <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Storniert</option>
                         </select>
                     </div>
-                    <div class="flex items-end">
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="flex items-end gap-2">
+                        <button type="submit" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             Filtern
                         </button>
                         <a href="{{ route('organizer.bookings.index', $isArchive ? ['archive' => 1] : []) }}"
-                           class="ml-2 px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
+                           class="flex-1 md:flex-none text-center px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
                             Zurücksetzen
                         </a>
                     </div>
@@ -159,7 +180,7 @@
                     {{-- Event-Header --}}
                     <button type="button"
                             @click="open = !open"
-                            class="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            class="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 sm:px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                         <div class="min-w-0">
                             <div class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
                                 {{ $groupedEvent->title }}
@@ -171,7 +192,7 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 ml-4 shrink-0">
+                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 sm:ml-4 shrink-0">
                             <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
                                 {{ $groupedEvent->bookings_count }} Buchung(en)
                             </span>
@@ -200,7 +221,12 @@
 
                     {{-- Buchungstabelle (aufgeklappt) --}}
                     <div x-show="open" x-cloak class="border-t border-gray-200 dark:border-gray-700">
-                        <div class="overflow-x-auto">
+                        <ul class="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
+                            @foreach($groupedEvent->bookings as $booking)
+                                @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization])
+                            @endforeach
+                        </ul>
+                        <div class="hidden md:block overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-700">
                                     <tr>
@@ -208,9 +234,7 @@
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
                                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Zahlung</th>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-28">Status</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Datum</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                                         @if($organization->hasExternalInvoicing())
                                             <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
                                         @endif
@@ -251,7 +275,14 @@
              MODUS 2: Gefilterte Flachliste
              ================================================================ --}}
         @else
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
+            <ul class="md:hidden bg-white dark:bg-gray-800 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-700">
+                @forelse($bookings as $booking)
+                    @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
+                @empty
+                    <li class="p-6 text-center text-gray-500 dark:text-gray-400">Keine Buchungen gefunden.</li>
+                @endforelse
+            </ul>
+            <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
@@ -260,9 +291,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Zahlung</th>
-                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-28">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Datum</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                             @if($organization->hasExternalInvoicing())
                                 <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
                             @endif

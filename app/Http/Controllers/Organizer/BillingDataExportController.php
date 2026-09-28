@@ -268,24 +268,10 @@ class BillingDataExportController extends Controller
             'external_invoice_number' => 'nullable|string|max:100',
         ]);
 
-        $booking->update([
-            'externally_invoiced' => true,
-            'externally_invoiced_at' => now(),
-            'external_invoice_number' => $request->external_invoice_number,
-            'payment_status' => 'extern',
-        ]);
+        $sent = $this->markInvoiced($booking, $request->external_invoice_number);
 
-        // Tickets versenden, wenn die Buchung bestätigt ist und keine Personalisierung aussteht
-        if ($booking->status === 'confirmed' && $booking->canSendTickets()) {
-            try {
-                \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                    ->send(new \App\Mail\PaymentConfirmed($booking));
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::error('Fehler beim Ticket-Versand nach externer Fakturierung', [
-                    'booking_id' => $booking->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
+        if ($sent) {
+            return back()->with('status', "Buchung {$booking->booking_number} wurde als fakturiert markiert. Tickets bzw. Zugangsdaten wurden versendet.");
         }
 
         return back()->with('status', "Buchung {$booking->booking_number} wurde als fakturiert markiert.");
@@ -306,15 +292,48 @@ class BillingDataExportController extends Controller
             'booking_ids.*' => 'integer|exists:bookings,id',
         ]);
 
-        $updated = Booking::whereIn('id', $request->booking_ids)
+        $bookings = Booking::whereIn('id', $request->booking_ids)
             ->whereHas('event', fn ($q) => $q->where('organization_id', $organization->id))
-            ->update([
-                'externally_invoiced' => true,
-                'externally_invoiced_at' => now(),
-                'payment_status' => 'extern',
-            ]);
+            ->where('status', '!=', 'cancelled')
+            ->get();
+
+        $sentCount = 0;
+        foreach ($bookings as $booking) {
+            if ($this->markInvoiced($booking, null, queue: true)) {
+                $sentCount++;
+            }
+        }
+        $updated = $bookings->count();
+
+        if ($sentCount > 0) {
+            return back()->with('status', "{$updated} Buchung(en) wurden als fakturiert markiert, {$sentCount}× wurden Tickets bzw. Zugangsdaten versendet.");
+        }
 
         return back()->with('status', "{$updated} Buchung(en) wurden als fakturiert markiert.");
     }
-}
 
+    /**
+     * Buchung als extern fakturiert markieren. Extern fakturiert gilt wie "bezahlt":
+     * die Buchung wird bestätigt und Tickets/Zugangsdaten werden versendet.
+     *
+     * @return bool true, wenn Tickets/Zugangsdaten versendet wurden
+     */
+    protected function markInvoiced(Booking $booking, ?string $externalInvoiceNumber = null, bool $queue = false): bool
+    {
+        $invoiceData = [
+            'externally_invoiced' => true,
+            'externally_invoiced_at' => $booking->externally_invoiced_at ?? now(),
+        ];
+        if ($externalInvoiceNumber !== null) {
+            $invoiceData['external_invoice_number'] = $externalInvoiceNumber;
+        }
+
+        // Bereits bezahlte Buchungen behalten ihren Zahlungsstatus
+        if ($booking->isPaymentComplete()) {
+            $booking->update($invoiceData);
+            return false;
+        }
+
+        return app(\App\Services\BookingWorkflowService::class)->confirmPayment($booking, 'extern', $invoiceData, $queue);
+    }
+}

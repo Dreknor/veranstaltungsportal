@@ -103,7 +103,10 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $todo = $this->todo($organization);
+
         return view('organizer.dashboard', compact(
+            'todo',
             'stats',
             'organizationInfo',
             'revenueTrend',
@@ -114,5 +117,76 @@ class DashboardController extends Controller
             'organization'
         ));
     }
-}
 
+    /**
+     * "Heute zu tun": offene Aufgaben über alle kommenden Veranstaltungen der Organisation.
+     */
+    protected function todo(\App\Models\Organization $organization): array
+    {
+        $upcoming = fn ($q) => $q->where('organization_id', $organization->id)->where('end_date', '>=', now());
+        $bookings = fn () => \App\Models\Booking::whereHas('event', $upcoming);
+
+        $tasks = [];
+
+        $pendingApproval = $bookings()->where('status', 'pending_approval')->count();
+        if ($pendingApproval) {
+            $tasks[] = ['count' => $pendingApproval, 'label' => 'Anmeldung(en) warten auf Ihre Freigabe', 'tone' => 'amber',
+                'url' => route('organizer.bookings.index', ['status' => 'pending_approval'])];
+        }
+
+        $unpaid = $bookings()->where('status', 'pending')->where('payment_status', 'pending')->where('total', '>', 0)->count();
+        if ($unpaid) {
+            $tasks[] = ['count' => $unpaid, 'label' => 'Buchung(en) mit offener Zahlung', 'tone' => 'yellow',
+                'url' => route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending'])];
+        }
+
+        if ($organization->hasExternalInvoicing()) {
+            $toInvoice = \App\Models\Booking::whereHas('event', fn ($q) => $q->where('organization_id', $organization->id))
+                ->whereIn('status', ['pending', 'confirmed', 'completed'])
+                ->where('total', '>', 0)
+                ->where('externally_invoiced', false)
+                ->count();
+            if ($toInvoice) {
+                $tasks[] = ['count' => $toInvoice, 'label' => 'Buchung(en) noch nicht fakturiert', 'tone' => 'blue',
+                    'url' => route('organizer.billing-data.index', ['filter' => 'pending'])];
+            }
+        }
+
+        $pendingReviews = \App\Models\EventReview::whereHas('event', fn ($q) => $q->where('organization_id', $organization->id))
+            ->where('is_approved', false)->count();
+        if ($pendingReviews) {
+            $tasks[] = ['count' => $pendingReviews, 'label' => 'Bewertung(en) warten auf Moderation', 'tone' => 'purple',
+                'url' => route('organizer.reviews.index', ['status' => 'pending'])];
+        }
+
+        $waiting = \App\Models\EventWaitlist::whereHas('event', $upcoming)->where('status', 'waiting')->sum('quantity');
+
+        // Veranstaltungen der nächsten 7 Tage mit Auslastung und direktem Check-in
+        $soon = $organization->events()
+            ->where('is_cancelled', false)
+            ->whereBetween('start_date', [now()->startOfDay(), now()->addDays(7)->endOfDay()])
+            ->orderBy('start_date')
+            ->get()
+            ->map(function (\App\Models\Event $event) {
+                $booked = \App\Models\BookingItem::whereHas('booking', fn ($q) => $q->where('event_id', $event->id)->readyForParticipation())->count();
+
+                return [
+                    'event' => $event,
+                    'booked' => $booked,
+                    'capacity' => $event->max_attendees,
+                    'open' => $event->bookings()->whereIn('status', ['pending', 'pending_approval'])->count(),
+                ];
+            });
+
+        // Fast ausgebucht (≥ 90 %) – Warteliste im Blick behalten
+        $almostFull = $organization->events()
+            ->where('is_cancelled', false)
+            ->where('start_date', '>', now())
+            ->whereNotNull('max_attendees')
+            ->get()
+            ->filter(fn ($e) => $e->max_attendees > 0 && ($e->max_attendees - $e->availableTickets()) / $e->max_attendees >= 0.9)
+            ->values();
+
+        return compact('tasks', 'soon', 'almostFull', 'waiting');
+    }
+}

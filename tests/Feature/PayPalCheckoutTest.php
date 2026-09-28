@@ -116,6 +116,7 @@ class PayPalCheckoutTest extends TestCase
                 'billing_postal_code' => '54321',
                 'billing_city' => 'Another City',
                 'billing_country' => 'Germany',
+                'privacy_accepted' => '1',
                 'tickets' => [
                     [
                         'ticket_type_id' => $ticketType->id,
@@ -152,6 +153,7 @@ class PayPalCheckoutTest extends TestCase
 
         // Mock PayPal service
         $mockPayPalService = Mockery::mock(PayPalService::class);
+        $mockPayPalService->shouldReceive('isAvailable')->andReturn(true);
         $mockPayPalService->shouldReceive('captureOrder')
             ->once()
             ->with('PAYPAL_ORDER_TOKEN')
@@ -228,6 +230,7 @@ class PayPalCheckoutTest extends TestCase
         $booking = Booking::factory()->create([
             'event_id' => $event->id,
             'booking_number' => 'BK-WEBHOOK123',
+            'additional_data' => ['paypal_order_id' => 'PAYPAL_ORDER_789'],
             'payment_method' => 'paypal',
             'payment_status' => 'pending',
             'status' => 'pending',
@@ -292,6 +295,7 @@ class PayPalCheckoutTest extends TestCase
     {
         $mockPayPalService = Mockery::mock(PayPalService::class);
 
+        $mockPayPalService->shouldReceive('isAvailable')->andReturn(true);
         $mockPayPalService->shouldReceive('createOrder')
             ->andReturn([
                 'id' => 'MOCK_PAYPAL_ORDER_ID',
@@ -309,7 +313,9 @@ class PayPalCheckoutTest extends TestCase
 
     protected function tearDown(): void
     {
-        Mockery::close();
+        // parent::tearDown() zuerst: rollt die DB-Transaktion zurück und schließt Mockery.
+        // (Umgekehrt bliebe bei einer fehlgeschlagenen Mock-Erwartung die Transaktion offen
+        // und alle folgenden Tests würden mit "cannot start a transaction" scheitern.)
         parent::tearDown();
     }
 }

@@ -103,6 +103,7 @@ class EventManagementController extends Controller
             'cancellation_days_before' => 'nullable|integer|min:0|required_if:cancellation_allowed,true',
             'organization_field_mode' => 'nullable|in:none,optional,required',
             'free_ticket_auto_confirm' => 'boolean',
+            'tickets_before_invoice' => 'boolean',
         ]);
 
         if ($request->boolean('is_published')) {
@@ -243,6 +244,7 @@ class EventManagementController extends Controller
             'cancellation_days_before' => 'nullable|integer|min:0|required_if:cancellation_allowed,true',
             'organization_field_mode' => 'nullable|in:none,optional,required',
             'free_ticket_auto_confirm' => 'boolean',
+            'tickets_before_invoice' => 'boolean',
         ]);
 
         unset($validated['has_multiple_dates']);
@@ -421,34 +423,23 @@ class EventManagementController extends Controller
             'cancellation_reason' => 'nullable|string|max:1000',
         ]);
 
+        if ($event->is_cancelled) {
+            return back()->with('error', 'Diese Veranstaltung wurde bereits abgesagt.');
+        }
+
         $event->update([
             'is_cancelled' => true,
             'cancelled_at' => now(),
             'cancellation_reason' => $validated['cancellation_reason'] ?? null,
         ]);
 
-        // Notify all attendees about the cancellation
-        $attendees = $event->getAttendees();
-
-        foreach ($attendees as $booking) {
-            // Send dedicated email as queued job
-            \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                ->queue(new \App\Mail\EventCancelledMail($event, $booking));
-
-            // Also send notification for in-app notifications
-            if ($booking->user) {
-                $booking->user->notify(new \App\Notifications\EventCancelledNotification($event, $booking));
-            }
-
-            // Update booking status to cancelled
-            $booking->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-            ]);
-        }
+        // Alle aktiven Buchungen (auch unbezahlte und nicht freigegebene) stornieren
+        // und jeden Kunden genau einmal per E-Mail informieren.
+        $count = app(\App\Services\BookingWorkflowService::class)->cancelAllForEvent($event);
 
         return redirect()->route('organizer.events.index')
-            ->with('success', 'Event wurde abgesagt und alle ' . $attendees->count() . ' Teilnehmer wurden per E-Mail benachrichtigt.');
+            ->with('success', "Die Veranstaltung wurde abgesagt. {$count} Buchung(en) wurden storniert und per E-Mail informiert. "
+                . 'Bitte veranlassen Sie ggf. Erstattungen bereits bezahlter Buchungen.');
     }
 
     /**
@@ -506,43 +497,87 @@ class EventManagementController extends Controller
     }
 
     /**
+     * Zielgruppen für Nachrichten an Teilnehmende.
+     */
+    public const MESSAGE_SEGMENTS = [
+        'all' => 'Alle aktiven Buchungen',
+        'ready' => 'Bestätigte Teilnehmende (Tickets/Zugang freigegeben)',
+        'unpaid' => 'Buchungen mit offener Zahlung/Rechnung',
+        'pending_approval' => 'Anmeldungen, die auf Freigabe warten',
+        'checked_in' => 'Eingecheckte Teilnehmende',
+        'not_checked_in' => 'Bestätigt, aber nicht eingecheckt',
+    ];
+
+    protected function segmentQuery(Event $event, string $segment)
+    {
+        $query = \App\Models\Booking::where('event_id', $event->id);
+
+        return match ($segment) {
+            'ready' => $query->readyForParticipation(),
+            'unpaid' => $query->whereIn('status', ['pending', 'confirmed'])
+                ->where('total', '>', 0)
+                ->whereNotIn('payment_status', ['paid', 'extern']),
+            'pending_approval' => $query->where('status', 'pending_approval'),
+            'checked_in' => $query->readyForParticipation()->whereHas('items', fn ($q) => $q->where('checked_in', true)),
+            'not_checked_in' => $query->readyForParticipation()->whereHas('items', fn ($q) => $q->where('checked_in', false)),
+            default => $query->whereIn('status', ['pending', 'pending_approval', 'confirmed', 'completed']),
+        };
+    }
+
+    /**
      * Show form to contact attendees
      */
     public function contactAttendeesForm(Event $event)
     {
         $this->authorize('view', $event);
 
-        $attendeesCount = $event->getAttendeesCount();
+        $segments = collect(self::MESSAGE_SEGMENTS)
+            ->map(fn ($label, $key) => ['label' => $label, 'count' => $this->segmentQuery($event, $key)->count()]);
+        $attendeesCount = $segments['all']['count'];
 
-        return view('organizer.events.contact-attendees', compact('event', 'attendeesCount'));
+        return view('organizer.events.contact-attendees', compact('event', 'attendeesCount', 'segments'));
     }
 
     /**
-     * Send message to all attendees
+     * Nachricht an eine Zielgruppe senden (über die Queue, protokolliert im E-Mail-Verlauf jeder Buchung).
      */
     public function contactAttendees(Request $request, Event $event)
     {
         $this->authorize('view', $event);
 
         $validated = $request->validate([
+            'segment' => 'nullable|in:' . implode(',', array_keys(self::MESSAGE_SEGMENTS)),
+            'include_attendees' => 'nullable|boolean',
             'subject' => 'required|string|max:255',
             'message' => 'required|string|max:5000',
         ]);
 
-        $attendees = $event->getAttendees();
+        $segment = $validated['segment'] ?? 'all';
+        $bookings = $this->segmentQuery($event, $segment)->with(['items', 'event.organization'])->get();
 
-        foreach ($attendees as $booking) {
-            $email = $booking->customer_email;
+        $recipients = 0;
+        foreach ($bookings as $booking) {
+            \Illuminate\Support\Facades\Mail::to($booking->customer_email)->queue(
+                new \App\Mail\AttendeeMessageMail($booking, $validated['subject'], $validated['message'])
+            );
+            $recipients++;
 
-            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($email, $validated, $event) {
-                $message->to($email)
-                    ->subject($validated['subject'])
-                    ->html(nl2br(e($validated['message'])) . '<br><br>---<br>Diese Nachricht bezieht sich auf die Veranstaltung: ' . $event->title . '<br>Datum: ' . $event->start_date->format('d.m.Y H:i') . ' Uhr');
-            });
+            if ($request->boolean('include_attendees')) {
+                $booking->items
+                    ->filter(fn ($item) => $item->separateAttendeeEmail())
+                    ->unique(fn ($item) => mb_strtolower($item->separateAttendeeEmail()))
+                    ->each(function ($item) use ($booking, $validated, &$recipients) {
+                        \Illuminate\Support\Facades\Mail::to($item->separateAttendeeEmail())->queue(
+                            new \App\Mail\AttendeeMessageMail($booking, $validated['subject'], $validated['message'], $item->participantName())
+                        );
+                        $recipients++;
+                    });
+            }
         }
 
-        return redirect()->route('organizer.events.edit', $event)
-            ->with('success', 'Nachricht wurde an ' . $attendees->count() . ' Teilnehmer gesendet.');
+        return redirect()->route('organizer.events.attendees.contact', $event)
+            ->with('success', "Die Nachricht wird an {$recipients} Empfänger:innen versendet ({$bookings->count()} Buchungen). "
+                . 'Sie erscheint im E-Mail-Verlauf der jeweiligen Buchung.');
     }
 
     /**

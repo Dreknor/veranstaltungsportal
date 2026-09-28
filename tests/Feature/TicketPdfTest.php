@@ -16,6 +16,7 @@ beforeEach(function () {
         'event_id' => $this->event->id,
         'user_id' => $this->user->id,
         'status' => 'confirmed',
+        'payment_status' => 'paid',
     ]);
 
     // Lade die Event-Beziehung, damit booking_number garantiert existiert

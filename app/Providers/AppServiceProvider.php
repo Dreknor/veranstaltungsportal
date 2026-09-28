@@ -46,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
         \App\Models\PlatformFee::observe(\App\Observers\PlatformFeeInvoiceObserver::class);
         \App\Models\Organization::observe(\App\Observers\OrganizationObserver::class);
 
+        // Hinweis: App\Listeners\LogBookingEmail (E-Mail-Verlauf je Buchung) wird per Event-Discovery registriert.
+
         // Listen for Socialite SSO events
         EventFacade::listen(SocialiteWasCalled::class, function (SocialiteWasCalled $event) {
             $event->extendSocialite('keycloak', \SocialiteProviders\Keycloak\Provider::class);

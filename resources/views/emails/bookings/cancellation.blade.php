@@ -55,21 +55,43 @@
     </div>
 
     <div class="content">
+        @php
+            $cancelledByOrganizer = in_array($booking->cancelled_by, ['organizer', 'event']);
+            $contactEmail = $booking->event->getOrganizerEmail() ?? config('mail.from.address');
+        @endphp
         <p>Hallo {{ $booking->customer_name }},</p>
 
-        <p>Ihre Buchung wurde erfolgreich storniert.</p>
+        @if($booking->cancelled_by === 'system')
+            <p>Ihre Buchung wurde automatisch storniert.</p>
+        @elseif($cancelledByOrganizer)
+            <p>Ihre Buchung wurde vom Veranstalter storniert.</p>
+        @else
+            <p>Ihre Buchung wurde wie gewünscht storniert.</p>
+        @endif
 
         <div class="info-box">
             <h2>{{ $booking->event->title }}</h2>
             <p>
+                <strong>Termin:</strong> {{ $booking->event->start_date->format('d.m.Y H:i') }} Uhr<br>
                 <strong>Buchungsnummer:</strong> {{ $booking->booking_number }}<br>
-                <strong>Storniert am:</strong> {{ $booking->cancelled_at->format('d.m.Y H:i') }} Uhr
+                <strong>Storniert am:</strong> {{ ($booking->cancelled_at ?? now())->format('d.m.Y H:i') }} Uhr
             </p>
+            @if($booking->cancellation_reason)
+                <p><strong>Grund:</strong> {{ $booking->cancellation_reason }}</p>
+            @endif
         </div>
 
-        <p>Falls Sie eine Rückerstattung erwarten, wird diese in den nächsten 5-7 Werktagen bearbeitet.</p>
+        <p>Ihre Tickets bzw. Zugangsdaten sind damit nicht mehr gültig.</p>
 
-        <p>Bei Fragen wenden Sie sich bitte an {{ $booking->event->organizer_email ?? config('mail.from.address') }}</p>
+        @if((float) $booking->total > 0)
+            @if($booking->payment_status === 'paid')
+                <p>Bereits gezahlte Beträge werden vom Veranstalter gemäß den Stornobedingungen erstattet.</p>
+            @elseif($booking->payment_status === 'pending')
+                <p>Eine noch offene Rechnung zu dieser Buchung müssen Sie nicht mehr bezahlen.</p>
+            @endif
+        @endif
+
+        <p>Bei Fragen wenden Sie sich bitte an <a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a>.</p>
 
         <p>Wir hoffen, Sie bald wieder bei einer unserer Veranstaltungen begrüßen zu dürfen!</p>
     </div>

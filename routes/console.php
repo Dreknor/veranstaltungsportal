@@ -8,18 +8,34 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// Schedule event reminders
-Schedule::command('events:send-reminders --hours=24')
-    ->dailyAt('09:00')
-    ->timezone('Europe/Berlin')
-    ->description('Send event reminders 24 hours before events');
-
-// Optional: Additional reminder 3 hours before event
-Schedule::command('events:send-reminders --hours=3')
+// Erinnerungen vor Veranstaltungsbeginn (24 h und 3 h vorher, inkl. Online-Zugangsdaten).
+// Läuft stündlich; jede Buchung erhält jede Erinnerung höchstens einmal.
+Schedule::command('events:send-reminders')
     ->hourly()
     ->timezone('Europe/Berlin')
-    ->description('Send last-minute event reminders');
+    ->withoutOverlapping()
+    ->description('Send event reminders 24h and 3h before events');
 
+// Nachbereitung nach Veranstaltungsende: Teilnahmebescheinigungen + Bitte um Feedback
+Schedule::command('events:send-follow-ups')
+    ->hourly()
+    ->timezone('Europe/Berlin')
+    ->withoutOverlapping()
+    ->description('Send certificates and feedback requests after events');
+
+// Nicht abgeschlossene PayPal-Zahlungen nach 48 h freigeben
+Schedule::command('bookings:release-abandoned')
+    ->hourly()
+    ->timezone('Europe/Berlin')
+    ->description('Cancel abandoned PayPal bookings and release their tickets');
+
+// DSGVO: personenbezogene Buchungsdaten nach Ablauf der Fristen anonymisieren (config/privacy.php)
+Schedule::command('privacy:anonymize-bookings')
+    ->dailyAt('04:00')
+    ->timezone('Europe/Berlin')
+    ->description('Anonymize personal booking data after retention periods');
+
+// Abgelaufene Wartelisten-Reservierungen beenden und Nächste nachrücken lassen
 // Clean expired waitlist entries every hour
 Schedule::command('waitlist:clean-expired')
     ->hourly()

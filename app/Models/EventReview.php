@@ -40,6 +40,19 @@ class EventReview extends Model
         return $this->belongsTo(Booking::class);
     }
 
+    /**
+     * Anzeigename der bewertenden Person (auch für Gastbuchungen ohne Benutzerkonto).
+     */
+    public function reviewerName(): string
+    {
+        return $this->user?->name ?? $this->booking?->customer_name ?? 'Teilnehmer:in';
+    }
+
+    public function reviewerEmail(): ?string
+    {
+        return $this->user?->email ?? $this->booking?->customer_email;
+    }
+
     public function scopeApproved($query)
     {
         return $query->where('is_approved', true);

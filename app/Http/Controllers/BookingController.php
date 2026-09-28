@@ -8,7 +8,9 @@ use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\TicketType;
 use App\Models\User;
+use App\Services\BookingWorkflowService;
 use App\Services\InvoiceService;
+use App\Services\PayPalService;
 use App\Services\TicketPdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +20,7 @@ use Illuminate\Support\Facades\Mail;
 
 class BookingController extends Controller
 {
-    public function create(Event $event)
+    public function create(Request $request, Event $event)
     {
         // Redirect to external booking page for external events
         if ($event->isExternal()) {
@@ -33,6 +35,15 @@ class BookingController extends Controller
         if ($event->is_cancelled) {
             return redirect()->route('events.show', $event->slug)
                 ->with('error', 'Diese Veranstaltung wurde abgesagt und kann nicht mehr gebucht werden.');
+        }
+
+        // Wartelisten-Nachrücker: persönlicher Link mit reservierten Plätzen
+        $waitlistClaim = app(\App\Services\WaitlistService::class)->findClaim($event, $request->query('waitlist'));
+        if ($request->filled('waitlist') && !$waitlistClaim) {
+            session()->flash('warning', 'Ihre Reservierung von der Warteliste ist abgelaufen oder bereits eingelöst.');
+        }
+        if ($waitlistClaim) {
+            app()->instance('waitlist.claim', $waitlistClaim);
         }
 
         // Get available ticket types
@@ -93,7 +104,7 @@ class BookingController extends Controller
                 ->with('error', $message);
         }
 
-        return view('bookings.create', compact('event', 'ticketTypes'));
+        return view('bookings.create', compact('event', 'ticketTypes', 'waitlistClaim'));
     }
 
     public function store(Request $request, Event $event)
@@ -112,6 +123,12 @@ class BookingController extends Controller
 
         // Load organization to check PayPal availability
         $event->load('organization');
+
+        // Reservierte Wartelisten-Plätze der buchenden Person freigeben
+        $waitlistClaim = app(\App\Services\WaitlistService::class)->findClaim($event, $request->input('waitlist_token'));
+        if ($waitlistClaim) {
+            app()->instance('waitlist.claim', $waitlistClaim);
+        }
 
         // Gäste müssen aktiv der Datenschutzerklärung zustimmen.
         // Eingeloggte User haben bei der Registrierung bereits zugestimmt.
@@ -170,7 +187,7 @@ class BookingController extends Controller
         }
 
         try {
-            return DB::transaction(function () use ($request, $event) {
+            $result = DB::transaction(function () use ($request, $event) {
                 $subtotal = 0;
                 $ticketData = [];
 
@@ -196,7 +213,11 @@ class BookingController extends Controller
                     }
 
                     try {
-                        $ticketType = TicketType::findOrFail($ticketInput['ticket_type_id']);
+                        // Sperre verhindert Überbuchung bei gleichzeitigen Buchungen
+                        $ticketType = TicketType::whereKey($ticketInput['ticket_type_id'])
+                            ->where('event_id', $event->id)
+                            ->lockForUpdate()
+                            ->firstOrFail();
                     } catch (\Exception $e) {
                         Log::error('Ticket type not found', [
                             'ticket_type_id' => $ticketInput['ticket_type_id'],
@@ -290,6 +311,12 @@ class BookingController extends Controller
                         $initialPaymentStatus = 'paid'; // Kostenlos = keine Zahlung nötig
                         $confirmedAt = null;
                     }
+                } elseif ($event->releasesTicketsBeforeInvoice() && $request->payment_method !== 'paypal') {
+                    // Externe Fakturierung mit Ticketversand vor Rechnungsstellung:
+                    // Buchung sofort bestätigen, Rechnung stellt der Veranstalter später (ggf. nach der Veranstaltung)
+                    $initialStatus = 'confirmed';
+                    $initialPaymentStatus = 'pending';
+                    $confirmedAt = now();
                 } else {
                     $initialStatus = 'pending';
                     $initialPaymentStatus = 'pending';
@@ -358,98 +385,12 @@ class BookingController extends Controller
                     'event.category'
                 ]);
 
-                // PayPal-Zahlung: Redirect zu PayPal
+                // PayPal-Zahlung: Weiterleitung zu PayPal (E-Mails erst nach erfolgreicher Zahlung)
                 if (!$isFree && $request->payment_method === 'paypal') {
-                    // Initialize PayPal service with organization credentials
-                    $paypalService = new \App\Services\PayPalService($event->organization);
-
-                    if (!$paypalService->isAvailable()) {
-                        throw new \Exception('PayPal ist für diesen Veranstalter nicht konfiguriert.');
-                    }
-
-                    $paypalOrder = $paypalService->createOrder($booking);
-
-                    if (!$paypalOrder || !isset($paypalOrder['id'])) {
-                        throw new \Exception('PayPal-Bestellung konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder wählen Sie eine andere Zahlungsmethode.');
-                    }
-
-                    // Find approval URL
-                    $approvalUrl = null;
-                    foreach ($paypalOrder['links'] ?? [] as $link) {
-                        if ($link['rel'] === 'approve') {
-                            $approvalUrl = $link['href'];
-                            break;
-                        }
-                    }
-
-                    if (!$approvalUrl) {
-                        throw new \Exception('PayPal-Zahlungs-URL konnte nicht gefunden werden.');
-                    }
-
-                    // Store PayPal order ID temporarily
-                    $booking->update([
-                        'additional_data' => array_merge($booking->additional_data ?? [], [
-                            'paypal_order_id' => $paypalOrder['id'],
-                        ]),
-                    ]);
-
-                    // Redirect to PayPal
-                    return redirect()->away($approvalUrl);
+                    return ['paypal', $booking];
                 }
 
-                // Sende entsprechende E-Mail
-                if ($isFree && $event->free_ticket_auto_confirm) {
-                    // Sofortige Bestätigung mit Zugangsdaten/Tickets
-                    Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
-                    $successMessage = 'Buchung erfolgreich! Eine Buchungsbestätigung wurde per E-Mail versendet.';
-                } elseif ($isFree && !$event->free_ticket_auto_confirm) {
-                    // Eingangsbestätigung ohne Zugangsdaten
-                    Mail::to($booking->customer_email)->send(new \App\Mail\BookingPendingApproval($booking));
-                    $successMessage = 'Ihre Anmeldung wurde erfolgreich eingereicht und wartet auf Bestätigung durch den Veranstalter. Sie werden per E-Mail benachrichtigt.';
-                } else {
-                    // Bei kostenpflichtigen Tickets: Zahlungsaufforderung mit Rechnung
-                    Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
-                    if ($event->organization?->hasExternalInvoicing()) {
-                        $successMessage = 'Buchung erfolgreich erstellt! Sie erhalten eine Buchungsbestätigung per E-Mail. Die Rechnung wird Ihnen separat vom Veranstalter zugestellt.';
-                    } else {
-                        $successMessage = 'Buchung erfolgreich erstellt! Eine Rechnung mit Zahlungsinformationen wurde per E-Mail versendet.';
-                    }
-                }
-
-                // Benachrichtige Organizer über neue Buchung
-                if ($event->user) {
-                    $notificationPreferences = $event->user->notification_preferences ?? [];
-                    if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
-                        if ($booking->status === 'pending_approval') {
-                            // Spezielle Benachrichtigung mit Approve/Reject-Link
-                            $event->user->notify(new \App\Notifications\BookingApprovalRequiredNotification($booking));
-                        } else {
-                            // Normale Buchungs-Benachrichtigung
-                            $event->user->notify(new \App\Notifications\NewBookingNotification($booking));
-                        }
-                    }
-                }
-
-                // Mark waitlist entry as converted if user came from waitlist
-                if (auth()->check() || $booking->customer_email) {
-                    $waitlistEntry = \App\Models\EventWaitlist::where('event_id', $event->id)
-                        ->where('email', $booking->customer_email)
-                        ->where('status', 'notified')
-                        ->first();
-
-                    if ($waitlistEntry) {
-                        $waitlistEntry->markAsConverted();
-                    }
-                }
-
-
-                // Zusätzliche Info für Gäste
-                if (!auth()->check()) {
-                    $successMessage .= ' Bitte verifizieren Sie Ihre E-Mail-Adresse über den Link in der E-Mail.';
-                }
-
-                return redirect()->route('bookings.show', $booking->booking_number)
-                    ->with('success', $successMessage);
+                return ['created', $booking];
             });
         } catch (\Exception $e) {
             Log::error('Booking store error', [
@@ -457,12 +398,238 @@ class BookingController extends Controller
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
                 'request_data' => $request->except(['_token']),
             ]);
             return back()->withInput()
                 ->with('error', 'Fehler beim Erstellen der Buchung: ' . $e->getMessage());
         }
+
+        [$outcome, $booking] = $result;
+
+        // Wer gerade gebucht hat, darf die Buchung in dieser Sitzung ohne erneute Verifizierung sehen
+        session()->put('booking_access_' . $booking->id, true);
+
+        if ($outcome === 'paypal') {
+            $waitlistClaim?->markAsConverted();
+            $approvalUrl = $this->startPayPalCheckout($booking);
+            if ($approvalUrl) {
+                return redirect()->away($approvalUrl);
+            }
+
+            return redirect()->route('bookings.show', $booking->booking_number)
+                ->with('warning', 'Die Verbindung zu PayPal konnte nicht hergestellt werden. Ihre Plätze sind reserviert – '
+                    . 'bitte versuchen Sie die Zahlung erneut oder wählen Sie die Zahlung per Rechnung.');
+        }
+
+        // Genau eine E-Mail an den Kunden – abhängig vom Buchungsweg (nach dem Speichern, damit ein
+        // Mailfehler die Buchung nicht verhindert)
+        try {
+            if ($booking->status === 'pending_approval') {
+                // Eingangsbestätigung ohne Zugangsdaten
+                Mail::to($booking->customer_email)->send(new \App\Mail\BookingPendingApproval($booking));
+            } else {
+                // Kostenfrei: Bestätigung inkl. Tickets/Zugangsdaten; kostenpflichtig: Bestätigung mit Rechnung & Zahlungsinfos
+                Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+            }
+        } catch (\Throwable $e) {
+            Log::error('Buchungsbestätigung konnte nicht versendet werden', [
+                'booking_number' => $booking->booking_number,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        if ($booking->status === 'pending_approval') {
+            $successMessage = 'Ihre Anmeldung ist eingegangen und wartet auf die Bestätigung durch den Veranstalter. Sie erhalten eine E-Mail, sobald sie bestätigt ist.';
+        } elseif ($booking->isFree()) {
+            $successMessage = 'Ihre Anmeldung ist bestätigt! Die Bestätigung mit allen Details haben wir Ihnen per E-Mail geschickt.';
+        } elseif ($booking->ticketsReleasedBeforePayment()) {
+            $successMessage = 'Ihre Buchung ist bestätigt! Tickets bzw. Zugangsdaten haben wir Ihnen per E-Mail geschickt. Die Rechnung erhalten Sie separat vom Veranstalter.';
+        } elseif ($event->organization?->hasExternalInvoicing()) {
+            $successMessage = 'Buchung erfolgreich! Sie erhalten eine Buchungsbestätigung per E-Mail. Die Rechnung stellt Ihnen der Veranstalter separat zu.';
+        } else {
+            $successMessage = 'Buchung erfolgreich! Die Rechnung mit den Zahlungsinformationen haben wir Ihnen per E-Mail geschickt.';
+        }
+
+        // Veranstalter informieren
+        app(BookingWorkflowService::class)->notifyOrganizers(
+            $booking,
+            $booking->status === 'pending_approval'
+                ? new \App\Notifications\BookingApprovalRequiredNotification($booking)
+                : new \App\Notifications\NewBookingNotification($booking)
+        );
+
+        $waitlistClaim ? $waitlistClaim->markAsConverted() : $this->markWaitlistConverted($booking);
+
+        return redirect()->route('bookings.show', $booking->booking_number)
+            ->with('success', $successMessage);
+    }
+
+    /**
+     * Markiert einen Wartelisten-Eintrag als umgewandelt, wenn der Kunde über die Warteliste kam.
+     */
+    protected function markWaitlistConverted(Booking $booking): void
+    {
+        $waitlistEntry = \App\Models\EventWaitlist::where('event_id', $booking->event_id)
+            ->where('email', $booking->customer_email)
+            ->where('status', 'notified')
+            ->first();
+
+        $waitlistEntry?->markAsConverted();
+    }
+
+    /**
+     * PayPal-Instanz für die veranstaltende Organisation (im Test über den Container austauschbar).
+     */
+    protected function paypalFor(?\App\Models\Organization $organization): PayPalService
+    {
+        return app()->bound(PayPalService::class)
+            ? app(PayPalService::class)
+            : new PayPalService($organization);
+    }
+
+    /**
+     * Legt eine PayPal-Bestellung an und liefert die Freigabe-URL (oder null bei Fehlern).
+     */
+    protected function startPayPalCheckout(Booking $booking): ?string
+    {
+        try {
+            $booking->loadMissing(['event.organization', 'items.ticketType']);
+            $paypalService = $this->paypalFor($booking->event->organization);
+
+            if (!$paypalService->isAvailable()) {
+                throw new \Exception('PayPal ist für diesen Veranstalter nicht konfiguriert.');
+            }
+
+            $paypalOrder = $paypalService->createOrder($booking);
+            $approvalUrl = collect($paypalOrder['links'] ?? [])->firstWhere('rel', 'approve')['href'] ?? null;
+
+            if (!$paypalOrder || !isset($paypalOrder['id']) || !$approvalUrl) {
+                throw new \Exception('PayPal-Bestellung konnte nicht erstellt werden.');
+            }
+
+            $booking->update([
+                'additional_data' => array_merge($booking->additional_data ?? [], [
+                    'paypal_order_id' => $paypalOrder['id'],
+                ]),
+            ]);
+
+            return $approvalUrl;
+        } catch (\Throwable $e) {
+            Log::error('PayPal-Checkout konnte nicht gestartet werden', [
+                'booking_number' => $booking->booking_number,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
+
+    /**
+     * Abgebrochene PayPal-Zahlung erneut starten.
+     */
+    public function retryPayment($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event.organization', 'items.ticketType'])
+            ->firstOrFail();
+
+        if (!$this->hasBookingAccess($booking)) {
+            abort(403, 'Nicht berechtigt.');
+        }
+
+        if (!$booking->canRetryOnlinePayment()) {
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('error', 'Für diese Buchung ist keine Online-Zahlung (mehr) möglich.');
+        }
+
+        $approvalUrl = $this->startPayPalCheckout($booking);
+        if ($approvalUrl) {
+            return redirect()->away($approvalUrl);
+        }
+
+        return redirect()->route('bookings.show', $bookingNumber)
+            ->with('error', 'Die Verbindung zu PayPal ist fehlgeschlagen. Bitte versuchen Sie es später erneut oder wählen Sie die Zahlung per Rechnung.');
+    }
+
+    /**
+     * Feedback zur Veranstaltung – auch für Gastbuchungen ohne Benutzerkonto (über den persönlichen Buchungslink).
+     */
+    public function storeFeedback(Request $request, $bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event', 'review'])
+            ->firstOrFail();
+
+        if (!$this->hasBookingAccess($booking)) {
+            abort(403, 'Nicht berechtigt.');
+        }
+
+        if (!$booking->isReadyForParticipation() || !$booking->event->end_date?->isPast()) {
+            return back()->with('error', 'Feedback ist nach der Veranstaltung möglich.');
+        }
+
+        $alreadyReviewed = $booking->review
+            || ($booking->user_id && $booking->event->reviews()->where('user_id', $booking->user_id)->exists());
+        if ($alreadyReviewed) {
+            return back()->with('info', 'Vielen Dank – Sie haben bereits ein Feedback abgegeben.');
+        }
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ], [
+            'rating.required' => 'Bitte wählen Sie eine Bewertung von 1 bis 5 Sternen.',
+        ]);
+
+        $review = \App\Models\EventReview::create([
+            'event_id' => $booking->event_id,
+            'booking_id' => $booking->id,
+            'user_id' => $booking->user_id,
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'] ?? null,
+            'is_approved' => false,
+        ]);
+
+        app(BookingWorkflowService::class)->notifyOrganizers($booking, new \App\Notifications\NewReviewNotification($review));
+
+        return redirect()->to(route('bookings.show', $bookingNumber) . '#feedback')
+            ->with('success', 'Vielen Dank für Ihr Feedback! Es wird nach kurzer Prüfung veröffentlicht.');
+    }
+
+    /**
+     * Von PayPal auf Zahlung per Rechnung wechseln.
+     */
+    public function switchToInvoice($bookingNumber)
+    {
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event.organization', 'items.ticketType'])
+            ->firstOrFail();
+
+        if (!$this->hasBookingAccess($booking)) {
+            abort(403, 'Nicht berechtigt.');
+        }
+
+        if (!$booking->canRetryOnlinePayment()) {
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('error', 'Die Zahlungsart dieser Buchung kann nicht mehr geändert werden.');
+        }
+
+        $booking->update(['payment_method' => 'invoice']);
+        $booking->refresh()->load(['event.organization', 'items.ticketType']);
+
+        try {
+            Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+        } catch (\Throwable $e) {
+            Log::error('Rechnungsmail nach Zahlartwechsel fehlgeschlagen', [
+                'booking_number' => $bookingNumber,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        app(BookingWorkflowService::class)->notifyOrganizers($booking, new \App\Notifications\NewBookingNotification($booking));
+
+        return redirect()->route('bookings.show', $bookingNumber)
+            ->with('success', 'Zahlungsart geändert. Die Rechnung mit den Zahlungsinformationen haben wir Ihnen per E-Mail geschickt.');
     }
 
     public function show($bookingNumber)
@@ -531,11 +698,18 @@ class BookingController extends Controller
 
     public function cancel(Request $request, $bookingNumber)
     {
-        $booking = Booking::where('booking_number', $bookingNumber)->firstOrFail();
+        $booking = Booking::where('booking_number', $bookingNumber)
+            ->with(['event.organization', 'items.ticketType'])
+            ->firstOrFail();
 
-        // Check if user is authorized to cancel this booking
-        if ($booking->user_id && $booking->user_id !== auth()->id()) {
+        // Nur der Bucher (Konto oder verifizierte Sitzung) darf stornieren –
+        // die Buchungsnummer allein reicht nicht aus.
+        if (!$this->hasBookingAccess($booking)) {
             abort(403, 'Sie sind nicht berechtigt, diese Buchung zu stornieren.');
+        }
+
+        if (!$booking->isActive() || $booking->status === 'completed') {
+            return back()->with('error', 'Diese Buchung kann nicht mehr storniert werden.');
         }
 
         // Prüfe ob Stornierung gemäß Veranstaltungsrichtlinie erlaubt ist
@@ -546,31 +720,11 @@ class BookingController extends Controller
             return back()->with('error', 'Die Stornierungsfrist ist abgelaufen. Eine Stornierung war bis ' . $booking->event->cancellation_days_before . ' Tag(e) vor Veranstaltungsbeginn möglich.');
         }
 
-        $booking->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-        ]);
+        // Storno inkl. Kontingent-Freigabe, Stornobestätigung und Veranstalter-Info.
+        // Die Warteliste wird zentral im BookingObserver benachrichtigt.
+        app(BookingWorkflowService::class)->cancel($booking, 'customer');
 
-        // Gebe Tickets zurück
-        foreach ($booking->items as $item) {
-            $item->ticketType->decrement('quantity_sold', $item->quantity);
-        }
-
-        // Sende Stornierungsbestätigung per Email
-        Mail::to($booking->customer_email)->send(new \App\Mail\BookingCancellation($booking));
-
-        // Benachrichtige Organizer über Stornierung
-        if ($booking->event->user) {
-            $notificationPreferences = $booking->event->user->notification_preferences ?? [];
-            if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
-                $booking->event->user->notify(new \App\Notifications\BookingCancelledNotification($booking));
-            }
-        }
-
-        // Notify waitlist - Fallback if observer doesn't trigger
-        $this->notifyWaitlist($booking);
-
-        return back()->with('success', 'Buchung erfolgreich storniert.');
+        return back()->with('success', 'Buchung erfolgreich storniert. Eine Bestätigung wurde per E-Mail versendet.');
     }
 
     public function validateDiscountCode(Request $request)
@@ -640,10 +794,15 @@ class BookingController extends Controller
 
         $this->authorize('download', $booking);
 
-        // Prüfe, ob Ticket heruntergeladen werden darf
-        // Nur für bestätigte oder abgeschlossene Buchungen
-        if (!in_array($booking->status, ['confirmed', 'completed'])) {
-            abort(403, 'Tickets können nur für bestätigte Buchungen heruntergeladen werden.');
+        // Tickets gibt es erst, wenn die Buchung bestätigt UND bezahlt ist (kostenfrei/extern zählt als bezahlt) –
+        // dieselbe Regel wie beim E-Mail-Versand. Veranstalter dürfen bestätigte Buchungen auch vor Zahlungseingang laden.
+        $isOrganizer = auth()->check() && app(\App\Policies\BookingPolicy::class)->update(auth()->user(), $booking);
+        $allowed = $isOrganizer
+            ? in_array($booking->status, ['confirmed', 'completed'])
+            : $booking->isReadyForParticipation();
+
+        if (!$allowed) {
+            abort(403, 'Tickets stehen zur Verfügung, sobald Ihre Buchung bestätigt und bezahlt ist.');
         }
 
         $pdfService = app(TicketPdfService::class);
@@ -725,79 +884,17 @@ class BookingController extends Controller
             ->where('email_verification_token', $token)
             ->firstOrFail();
 
-        // Check if already verified
-        if ($booking->email_verified_at) {
-            return redirect()->route('bookings.show', $booking->booking_number)
-                ->with('info', 'E-Mail-Adresse wurde bereits verifiziert.');
-        }
-
-        // Verify email
-        $booking->update([
-            'email_verified_at' => now(),
-            'email_verification_token' => null,
-        ]);
-
-        // Allow access to booking details via session
+        // Der Link bleibt als persönlicher Zugang zur Buchung gültig (wird in allen Buchungs-E-Mails verwendet)
         session()->put('booking_access_' . $booking->id, true);
 
-        return redirect()->route('bookings.show', $booking->booking_number)
-            ->with('success', 'E-Mail-Adresse erfolgreich verifiziert! Sie können nun auf Ihre Buchungsdetails zugreifen.');
-    }
-
-    /**
-     * Notify waitlist when booking is cancelled
-     */
-    protected function notifyWaitlist(Booking $booking)
-    {
-        $event = $booking->event;
-
-        // Calculate freed tickets
-        $freedTickets = $booking->items->sum('quantity');
-
-        if ($freedTickets > 0) {
-            // Find waiting entries that could fit
-            $waitingEntries = \App\Models\EventWaitlist::where('event_id', $event->id)
-                ->waiting()
-                ->notExpired()
-                ->where('quantity', '<=', $freedTickets)
-                ->orderBy('created_at')
-                ->limit(5)
-                ->get();
-
-            $remainingTickets = $freedTickets;
-            $notifiedCount = 0;
-
-            foreach ($waitingEntries as $entry) {
-                if ($remainingTickets >= $entry->quantity) {
-                    $entry->markAsNotified();
-
-                    // Send notification
-                    try {
-                        Mail::to($entry->email)->send(new \App\Mail\WaitlistTicketAvailable($entry));
-                        $remainingTickets -= $entry->quantity;
-                        $notifiedCount++;
-                    } catch (\Exception $e) {
-                        Log::error('Failed to send waitlist notification', [
-                            'waitlist_id' => $entry->id,
-                            'error' => $e->getMessage()
-                        ]);
-                    }
-                }
-
-                if ($remainingTickets <= 0) {
-                    break;
-                }
-            }
-
-            if ($notifiedCount > 0) {
-                Log::info("Waitlist notifications sent from BookingController", [
-                    'event_id' => $event->id,
-                    'booking_id' => $booking->id,
-                    'freed_tickets' => $freedTickets,
-                    'notified' => $notifiedCount
-                ]);
-            }
+        if ($booking->email_verified_at) {
+            return redirect()->route('bookings.show', $booking->booking_number);
         }
+
+        $booking->update(['email_verified_at' => now()]);
+
+        return redirect()->route('bookings.show', $booking->booking_number)
+            ->with('success', 'E-Mail-Adresse bestätigt. Über den Link in Ihren E-Mails gelangen Sie jederzeit direkt zu Ihrer Buchung.');
     }
 
     /**
@@ -815,10 +912,10 @@ class BookingController extends Controller
                 ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
         }
 
-        // Check if personalization is needed
-        if (!$booking->needsPersonalization()) {
+        // Personalisierung ist ab Buchung bis Veranstaltungsbeginn möglich (auch nachträgliche Korrekturen)
+        if (!$booking->canBePersonalized()) {
             return redirect()->route('bookings.show', $bookingNumber)
-                ->with('info', 'Diese Tickets sind bereits personalisiert oder benötigen keine Personalisierung.');
+                ->with('info', 'Für diese Buchung ist keine Personalisierung (mehr) möglich.');
         }
 
         return view('bookings.personalize', compact('booking'));
@@ -836,6 +933,11 @@ class BookingController extends Controller
         // Check access
         if (!$this->hasBookingAccess($booking)) {
             abort(403, 'Nicht berechtigt.');
+        }
+
+        if (!$booking->canBePersonalized()) {
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('error', 'Für diese Buchung ist keine Personalisierung (mehr) möglich.');
         }
 
         // Validate
@@ -873,16 +975,26 @@ class BookingController extends Controller
                     'tickets_personalized' => true,
                     'tickets_personalized_at' => now(),
                 ]);
-
-                // Send tickets if payment is already confirmed and booking is confirmed
-                if ($booking->status === 'confirmed' && $booking->payment_status === 'paid' && !$booking->event->isOnline()) {
-                    Mail::to($booking->customer_email)
-                        ->send(new \App\Mail\PaymentConfirmed($booking));
-                }
             });
 
+            $booking->refresh()->load(['event.organization', 'items.ticketType']);
+
+            // Ist die Buchung bereits bestätigt und bezahlt, gehen die (personalisierten) Tickets
+            // bzw. Zugangsdaten sofort raus – sonst automatisch nach Zahlungseingang.
+            if ($booking->isReadyForParticipation()) {
+                // Bucher erhält alle Tickets, eingetragene Personen mit eigener Adresse ihr eigenes
+                app(BookingWorkflowService::class)->deliverTickets($booking);
+
+                $message = ($booking->hasTicketDocument()
+                    ? 'Teilnehmende gespeichert! Die personalisierten Tickets wurden per E-Mail versendet.'
+                    : 'Teilnehmende gespeichert! Die Bestätigung mit allen Details wurde per E-Mail versendet.')
+                    . ' Eingetragene Personen mit eigener E-Mail-Adresse erhalten ihr Ticket bzw. ihre Zugangsdaten direkt.';
+            } else {
+                $message = 'Teilnehmende gespeichert! Tickets bzw. Zugangsdaten erhalten Sie automatisch, sobald Ihre Buchung bestätigt und bezahlt ist.';
+            }
+
             return redirect()->route('bookings.show', $bookingNumber)
-                ->with('success', 'Tickets erfolgreich personalisiert! Die Tickets wurden per E-Mail versendet.');
+                ->with('success', $message);
         } catch (\Exception $e) {
             Log::error('Fehler bei Ticket-Personalisierung', [
                 'booking_number' => $bookingNumber,

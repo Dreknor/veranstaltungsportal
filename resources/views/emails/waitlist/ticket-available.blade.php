@@ -17,9 +17,9 @@ gute Nachrichten! Für die Veranstaltung, auf deren Warteliste Sie stehen, sind 
 
 ## ⏰ Wichtig: Zeitlich begrenzt!
 
-Sie haben **48 Stunden** Zeit, um Ihre Tickets zu buchen. Diese Reservierung läuft am **{{ $waitlistEntry->expires_at->format('d.m.Y H:i') }} Uhr** ab.
+Wir haben **{{ $waitlistEntry->quantity }} {{ $waitlistEntry->quantity === 1 ? 'Platz' : 'Plätze' }} für Sie reserviert** – bis **{{ $waitlistEntry->expires_at->format('d.m.Y H:i') }} Uhr**. In dieser Zeit kann niemand sonst diese Plätze buchen.
 
-Danach werden die Tickets an die nächsten Personen auf der Warteliste weitergegeben.
+Bitte nutzen Sie dafür ausschließlich den Button unten – er enthält Ihre persönliche Reservierung. Danach rückt automatisch die nächste Person auf der Warteliste nach.
 
 @component('mail::panel')
 **Ihre Anfrage:**
@@ -30,8 +30,8 @@ Danach werden die Tickets an die nächsten Personen auf der Warteliste weitergeg
 @endif
 @endcomponent
 
-@component('mail::button', ['url' => route('bookings.create', $waitlistEntry->event)])
-Jetzt buchen
+@component('mail::button', ['url' => $waitlistEntry->claimUrl()])
+Reservierte Plätze jetzt buchen
 @endcomponent
 
 Bitte handeln Sie zeitnah, um Ihre Buchung zu sichern.

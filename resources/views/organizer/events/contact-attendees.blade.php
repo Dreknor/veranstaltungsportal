@@ -1,80 +1,75 @@
-<x-layouts.app title="Teilnehmer kontaktieren">
-    <div class="min-h-screen bg-gray-50 py-8">
+<x-layouts.app title="Teilnehmende kontaktieren">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-8">
-                <a href="{{ route('organizer.events.edit', $event) }}" class="text-blue-600 hover:text-blue-800 mb-4 inline-flex items-center">
-                    ← Zurück zum Event
-                </a>
-                <h1 class="text-3xl font-bold text-gray-900 mt-4">Teilnehmer kontaktieren</h1>
-                <p class="text-gray-600 mt-2">{{ $event->title }}</p>
-            </div>
-
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div>
-                        <p class="text-sm font-medium text-blue-900">Diese Nachricht wird an {{ $attendeesCount }} Teilnehmer gesendet</p>
-                        <p class="text-sm text-blue-700 mt-1">Alle Teilnehmer mit bestätigten Buchungen erhalten Ihre Nachricht per E-Mail.</p>
-                    </div>
-                </div>
+            <div class="mb-6">
+                <a href="{{ route('organizer.events.edit', $event) }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">← Zurück zum Event</a>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mt-3">Teilnehmende kontaktieren</h1>
+                <p class="text-gray-600 dark:text-gray-400 mt-1">{{ $event->title }} · {{ $event->start_date->format('d.m.Y H:i') }} Uhr</p>
             </div>
 
             @if(session('success'))
-                <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6">
-                    {{ session('success') }}
-                </div>
+                <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg mb-6 text-sm" role="status">{{ session('success') }}</div>
             @endif
 
-            <form method="POST" action="{{ route('organizer.events.attendees.contact.send', $event) }}" class="bg-white rounded-lg shadow-md p-6">
+            <form method="POST" action="{{ route('organizer.events.attendees.contact.send', $event) }}"
+                  class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 space-y-6"
+                  x-data="{ segment: '{{ old('segment', 'all') }}', counts: @js($segments->map(fn ($s) => $s['count'])) }">
                 @csrf
 
-                <div class="space-y-6">
-                    <div>
-                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">Betreff *</label>
-                        <input type="text" id="subject" name="subject" required value="{{ old('subject') }}"
-                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                               placeholder="z.B. Wichtige Information zu Ihrer Buchung">
-                        @error('subject')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
+                <fieldset>
+                    <legend class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Empfänger</legend>
+                    <div class="space-y-2">
+                        @foreach($segments as $key => $segment)
+                            <label class="flex items-center justify-between gap-3 p-3 border-2 rounded-lg cursor-pointer transition
+                                          border-gray-200 dark:border-gray-700 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20
+                                          {{ $segment['count'] === 0 ? 'opacity-60' : '' }}">
+                                <span class="flex items-center gap-3">
+                                    <input type="radio" name="segment" value="{{ $key }}" x-model="segment" class="text-blue-600" @checked(old('segment', 'all') === $key)>
+                                    <span class="text-sm text-gray-900 dark:text-gray-100">{{ $segment['label'] }}</span>
+                                </span>
+                                <span class="text-sm font-semibold text-gray-600 dark:text-gray-300 shrink-0">{{ $segment['count'] }}</span>
+                            </label>
+                        @endforeach
                     </div>
+                    <label class="mt-3 flex items-start gap-3 text-sm text-gray-700 dark:text-gray-300">
+                        <input type="hidden" name="include_attendees" value="0">
+                        <input type="checkbox" name="include_attendees" value="1" class="mt-0.5 rounded border-gray-300" @checked(old('include_attendees', true))>
+                        Auch eingetragene Teilnehmende mit eigener E-Mail-Adresse anschreiben (z. B. Kolleg:innen, für die gebucht wurde)
+                    </label>
+                </fieldset>
 
-                    <div>
-                        <label for="message" class="block text-sm font-medium text-gray-700 mb-2">Nachricht *</label>
-                        <textarea id="message" name="message" required rows="10"
-                                  class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                  placeholder="Ihre Nachricht an die Teilnehmer...">{{ old('message') }}</textarea>
-                        @error('message')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                        <p class="mt-1 text-sm text-gray-500">Die Nachricht wird als Text-E-Mail versendet. HTML-Formatierung ist nicht möglich.</p>
-                    </div>
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Betreff *</label>
+                    <input type="text" id="subject" name="subject" required value="{{ old('subject') }}" maxlength="255"
+                           class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm"
+                           placeholder="z.B. Raumänderung für morgen">
+                    @error('subject')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                </div>
 
-                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                        <h3 class="font-medium text-gray-900 mb-2">Vorschau</h3>
-                        <p class="text-sm text-gray-600">Die E-Mail wird automatisch folgende Informationen enthalten:</p>
-                        <ul class="mt-2 text-sm text-gray-600 list-disc list-inside space-y-1">
-                            <li>Event-Titel: {{ $event->title }}</li>
-                            <li>Event-Datum: {{ $event->start_date->format('d.m.Y H:i') }} Uhr</li>
-                        </ul>
-                    </div>
+                <div>
+                    <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nachricht *</label>
+                    <textarea id="message" name="message" required rows="10" maxlength="5000"
+                              class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm"
+                              placeholder="Ihre Nachricht …">{{ old('message') }}</textarea>
+                    @error('message')<p class="mt-1 text-sm text-red-600">{{ $message }}</p>@enderror
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        Die Anrede („Hallo …“), Veranstaltungsdaten und ein Link zur Buchung werden automatisch ergänzt.
+                        Antworten gehen direkt an die E-Mail-Adresse Ihrer Organisation.
+                        Für Änderungen an Termin, Ort oder Online-Link ist keine Nachricht nötig – darüber informiert das Portal automatisch.
+                    </p>
+                </div>
 
-                    <div class="flex justify-end space-x-4">
-                        <a href="{{ route('organizer.events.edit', $event) }}"
-                           class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition">
-                            Abbrechen
-                        </a>
-                        <button type="submit"
-                                class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
-                                onclick="return confirm('Möchten Sie die Nachricht wirklich an {{ $attendeesCount }} Teilnehmer senden?')">
-                            Nachricht senden
-                        </button>
-                    </div>
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                    <a href="{{ route('organizer.events.edit', $event) }}"
+                       class="text-center px-6 py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">Abbrechen</a>
+                    <button type="submit"
+                            class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-semibold disabled:bg-gray-300"
+                            :disabled="counts[segment] === 0"
+                            @click="if (!confirm('Nachricht an ' + counts[segment] + ' Buchung(en) senden?')) $event.preventDefault()">
+                        Nachricht senden (<span x-text="counts[segment]">{{ $attendeesCount }}</span> Buchungen)
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </x-layouts.app>
-

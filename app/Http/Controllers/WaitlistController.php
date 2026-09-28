@@ -124,51 +124,8 @@ class WaitlistController extends Controller
             'requested_quantity' => $quantity
         ]);
 
-        $nextEntries = EventWaitlist::where('event_id', $event->id)
-            ->waiting()
-            ->notExpired()
-            ->where('quantity', '<=', $quantity)
-            ->orderBy('created_at')
-            ->limit(5)
-            ->get();
-
-        Log::info('Found waitlist entries', [
-            'count' => $nextEntries->count(),
-            'entries' => $nextEntries->map(fn($e) => [
-                'id' => $e->id,
-                'email' => $e->email,
-                'quantity' => $e->quantity,
-                'status' => $e->status
-            ])
-        ]);
-
-        $notifiedCount = 0;
-
-        foreach ($nextEntries as $entry) {
-            if ($quantity >= $entry->quantity) {
-                $entry->markAsNotified();
-
-                // Send notification email
-                try {
-                    Mail::to($entry->email)->send(new \App\Mail\WaitlistTicketAvailable($entry));
-                    Log::info('Waitlist notification sent', [
-                        'waitlist_id' => $entry->id,
-                        'email' => $entry->email,
-                        'event_id' => $event->id
-                    ]);
-                } catch (\Exception $e) {
-                    Log::error('Failed to send waitlist notification', [
-                        'waitlist_id' => $entry->id,
-                        'email' => $entry->email,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
-                }
-
-                $quantity -= $entry->quantity;
-                $notifiedCount++;
-            }
-        }
+        // Gleiche Logik wie beim automatischen Nachrücken: Reservierung + persönlicher Buchungslink
+        $notifiedCount = app(\App\Services\WaitlistService::class)->offerSeats($event, (int) $quantity);
 
         if ($notifiedCount > 0) {
             return back()->with('success', "{$notifiedCount} Person(en) wurden benachrichtigt.");

@@ -1,11 +1,13 @@
 <x-layouts.app title="Veranstalter Dashboard">
-    <div class="min-h-screen bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Veranstalter Dashboard</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Veranstalter Dashboard</h1>
                 <p class="text-gray-600 mt-2">Willkommen zurück, {{ auth()->user()->name }}!</p>
             </div>
+
+            @include('organizer.partials.todo')
 
             <!-- Statistiken -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

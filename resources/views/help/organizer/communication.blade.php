@@ -1,27 +1,19 @@
 <x-layouts.app>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 <a href="{{ route('help.index') }}" class="hover:text-blue-600">Hilfe</a> ·
                 <a href="{{ route('help.category','organizer') }}" class="hover:text-blue-600">Veranstalter</a> ·
                 <span>Kommunikation mit Teilnehmern</span>
             </nav>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">Kommunikation mit Teilnehmern</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">Kommunikation mit Teilnehmern</h1>
             <p class="text-gray-700 dark:text-gray-300 mb-6">Halten Sie Ihre Teilnehmer informiert und engagiert.</p>
 
             <div class="space-y-6">
                 <section>
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">1. Automatische E-Mail-Benachrichtigungen</h2>
-                    <p class="text-gray-700 dark:text-gray-300">Das System versendet automatisch:</p>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mt-2">
-                        <li><strong>Buchungsbestätigung:</strong> Sofort nach Buchung</li>
-                        <li><strong>Zahlungsbestätigung:</strong> Nach Eingang der Zahlung (inkl. Tickets/Zugangsdaten)</li>
-                        <li><strong>Event-Erinnerung:</strong> 24 Stunden vor Event-Start</li>
-                        <li><strong>Event-Erinnerung:</strong> 3 Stunden vor Event-Start</li>
-                        <li><strong>Stornierungsbestätigung:</strong> Bei Absage durch Teilnehmer</li>
-                        <li><strong>Event-Absage:</strong> Bei Absage durch Veranstalter</li>
-                    </ul>
-                    <p class="text-gray-700 dark:text-gray-300 mt-2">Teilnehmer können Erinnerungen in ihren Einstellungen deaktivieren.</p>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">1. Automatische E-Mails – wann geht was raus?</h2>
+                    <p class="text-gray-700 dark:text-gray-300 mb-3">Jede Buchung erhält zu jedem Schritt genau eine passende E-Mail. Sie müssen nichts manuell versenden.</p>
+                    @include('organizer.partials.communication-plan')
                 </section>
 
                 <section>
@@ -37,12 +29,12 @@
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">3. Event-Update-Benachrichtigungen</h2>
-                    <p class="text-gray-700 dark:text-gray-300">Bei wesentlichen Änderungen am Event werden Teilnehmer automatisch informiert:</p>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">3. Änderungen an der Veranstaltung</h2>
+                    <p class="text-gray-700 dark:text-gray-300">Beim Speichern einer veröffentlichten Veranstaltung werden alle bestätigten Buchungen automatisch informiert, wenn sich</p>
                     <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mt-2">
-                        <li>Datum/Uhrzeit geändert</li>
-                        <li>Ort geändert</li>
-                        <li>Online-Zugangsdaten aktualisiert</li>
+                        <li>Titel, Beginn oder Ende,</li>
+                        <li>Veranstaltungsort oder Adresse ändern,</li>
+                        <li>oder der Online-Link bzw. Zugangscode geändert wird (nur an Buchungen mit freigeschaltetem Zugang).</li>
                     </ul>
                     <p class="text-gray-700 dark:text-gray-300 mt-2">Kleinere Änderungen (z.B. Beschreibungstext) lösen keine Benachrichtigung aus.</p>
                 </section>

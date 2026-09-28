@@ -16,7 +16,11 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
     protected $oldStatus;
     protected $newStatus;
 
-    public function __construct(Booking $booking, string $oldStatus, string $newStatus)
+    /**
+     * @param  array|null  $channels  Standard: nur In-App-Hinweis. Die E-Mail-Kommunikation zu
+     *                                Statuswechseln übernimmt der BookingWorkflowService mit eigenen Mails.
+     */
+    public function __construct(Booking $booking, string $oldStatus, string $newStatus, protected ?array $channels = null)
     {
         $this->booking = $booking;
         $this->oldStatus = $oldStatus;
@@ -25,13 +29,19 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        if ($this->channels !== null) {
+            return $this->channels;
+        }
+
+        // Gäste (On-Demand) haben keinen In-App-Bereich
+        return $notifiable instanceof \App\Models\User ? ['database'] : [];
     }
 
     public function toMail($notifiable)
     {
         $statusLabels = [
             'pending' => 'Ausstehend',
+            'pending_approval' => 'Wartet auf Freigabe',
             'confirmed' => 'Bestätigt',
             'cancelled' => 'Storniert',
             'completed' => 'Abgeschlossen',
@@ -41,7 +51,9 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
         $oldStatusLabel = $statusLabels[$this->oldStatus] ?? $this->oldStatus;
         $newStatusLabel = $statusLabels[$this->newStatus] ?? $this->newStatus;
 
+        $bookingId = $this->booking->id;
         $mail = (new MailMessage)
+            ->withSymfonyMessage(fn ($message) => $message->getHeaders()->addTextHeader('X-Booking-Id', (string) $bookingId))
             ->subject($subject)
             ->greeting('Hallo ' . $this->booking->customer_name . ',')
             ->line('Der Status Ihrer Buchung wurde geändert.')
@@ -62,7 +74,7 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
                 ->line('Vielen Dank für Ihre Teilnahme!');
         }
 
-        $mail->action('Buchung ansehen', route('bookings.show', $this->booking->booking_number))
+        $mail->action('Buchung ansehen', $this->booking->manageUrl())
             ->line('Bei Fragen stehen wir Ihnen gerne zur Verfügung.');
 
         return $mail;
@@ -72,6 +84,7 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
     {
         $statusLabels = [
             'pending' => 'Ausstehend',
+            'pending_approval' => 'Wartet auf Freigabe',
             'confirmed' => 'Bestätigt',
             'cancelled' => 'Storniert',
             'completed' => 'Abgeschlossen',

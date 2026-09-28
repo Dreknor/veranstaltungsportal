@@ -454,7 +454,7 @@
                                            value="{{ old('online_url', $event->online_url) }}"
                                            placeholder="https://zoom.us/j/123456789 oder https://meet.google.com/..."
                                            class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <p class="mt-1 text-xs text-gray-500">Diese URL wird erst nach der Zahlung an die Teilnehmer weitergegeben.</p>
+                                    <p class="mt-1 text-xs text-gray-500">Sichtbar nur für bestätigte und bezahlte Buchungen: in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen 24 h und 3 h vor Beginn. Wenn Sie den Link oder Code ändern, erhalten alle Teilnehmenden automatisch die neuen Zugangsdaten.</p>
                                     @error('online_url')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -630,6 +630,19 @@
                         </div>
 
                         <!-- Ticket-Einstellungen -->
+                        <details class="bg-white rounded-lg shadow-md p-6 group">
+                            <summary class="cursor-pointer list-none flex items-center justify-between">
+                                <span>
+                                    <span class="text-xl font-bold text-gray-900">Kommunikation mit Teilnehmenden</span>
+                                    <span class="block text-sm text-gray-600 mt-1">Welche E-Mails werden wann automatisch versendet?</span>
+                                </span>
+                                <span class="text-gray-500 group-open:rotate-180 transition-transform" aria-hidden="true">▼</span>
+                            </summary>
+                            <div class="mt-4">
+                                @include('organizer.partials.communication-plan')
+                            </div>
+                        </details>
+
                         <div id="ticket-settings-section" class="bg-white rounded-lg shadow-md p-6">
                             <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Einstellungen</h2>
 
@@ -759,6 +772,11 @@
                                             </label>
                                         </div>
                                     </div>
+
+                                    @include('organizer.events.partials.invoice-ticket-mode', [
+                                        'organization' => $event->organization,
+                                        'value' => (bool) old('tickets_before_invoice', $event->tickets_before_invoice),
+                                    ])
                                 </div>
                             </div>
                         </div>

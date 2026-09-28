@@ -21,8 +21,13 @@ class PaymentConfirmed extends Mailable
 
     public function envelope(): Envelope
     {
+        $what = $this->booking->hasTicketDocument() ? 'Ihre Tickets' : 'Ihre Zugangsdaten';
+        $prefix = ((float) $this->booking->total > 0 && $this->booking->payment_status === 'paid')
+            ? 'Zahlung bestätigt'
+            : 'Buchung bestätigt';
+
         return new Envelope(
-            subject: 'Zahlung bestätigt - Ihre Tickets für ' . $this->booking->event->title,
+            subject: "{$prefix} - {$what} für " . $this->booking->event->title,
         );
     }
 
@@ -38,7 +43,7 @@ class PaymentConfirmed extends Mailable
         $attachments = [];
 
         // Nur Tickets anhängen, wenn sie personalisiert sind (bei mehreren Tickets) oder nur ein Ticket vorhanden ist
-        if ($this->booking->canSendTickets()) {
+        if ($this->booking->hasTicketDocument() && $this->booking->canSendTickets()) {
             $ticketPdfService = app(TicketPdfService::class);
 
             // Generiere individuelle Tickets für alle BookingItems

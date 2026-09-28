@@ -46,7 +46,7 @@
             <p style="margin: 0 0 10px 0; color: #333; font-size: 14px;">
                 📋 <strong>Ihre Buchungsbestätigung:</strong>
             </p>
-            <a href="{{ route('bookings.show', $booking->booking_number) }}"
+            <a href="{{ $booking->manageUrl() }}"
                style="display: inline-block; padding: 10px 20px; background-color: #0066cc; color: white;
                       text-decoration: none; border-radius: 5px; font-weight: bold;">
                 Buchungsdetails ansehen
@@ -82,7 +82,7 @@
                         </td>
                     </tr>
                     @php
-                        $showOnlineAccess = $booking->payment_status === 'paid' || $booking->payment_status === 'extern' || $isFreBooking;
+                        $showOnlineAccess = $booking->canAccessOnlineContent();
                     @endphp
                     @if($showOnlineAccess && $booking->event->online_url)
                     <tr>
@@ -141,7 +141,7 @@
                         </td>
                     </tr>
                     @php
-                        $showHybridOnlineAccess = $booking->payment_status === 'paid' || $booking->payment_status === 'extern' || $isFreBooking;
+                        $showHybridOnlineAccess = $booking->canAccessOnlineContent();
                     @endphp
                     @if($showHybridOnlineAccess && $booking->event->online_url)
                     <tr>
@@ -252,6 +252,8 @@
             <strong>Zahlungsstatus:</strong>
             @if($booking->payment_status === 'paid')
                 <span style="color: #28a745;">✓ Bezahlt</span>
+            @elseif($booking->payment_status === 'pending' && $booking->ticketsReleasedBeforePayment())
+                <span style="color: #0066cc;">Rechnung folgt separat</span>
             @elseif($booking->payment_status === 'pending')
                 <span style="color: #ffc107;">⏳ Ausstehend</span>
             @else
@@ -296,7 +298,11 @@
         <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
             <h3 style="color: #0066cc; margin: 0 0 10px 0; font-size: 16px;">💳 Zahlungshinweise</h3>
             <p style="margin: 0; color: #333;">
-                Zur Begleichung Ihrer Buchung erhalten Sie in Kürze eine Rechnung mit allen Zahlungsinformationen direkt vom Veranstalter.
+                @if($booking->ticketsReleasedBeforePayment())
+                    Ihre Teilnahme ist bereits bestätigt. Die Rechnung erhalten Sie separat vom Veranstalter – gegebenenfalls auch erst nach der Veranstaltung.
+                @else
+                    Zur Begleichung Ihrer Buchung erhalten Sie in Kürze eine Rechnung mit allen Zahlungsinformationen direkt vom Veranstalter.
+                @endif
             </p>
             <p style="margin: 10px 0 0 0; color: #333;">
                 Bitte überweisen Sie den Betrag von
@@ -377,10 +383,14 @@
                     <em>Die Rechnung wird Ihnen separat vom Veranstalter zugestellt.</em>
                 </li>
                 @endif
-                @if($booking->event->requires_ticket && ($booking->payment_status === 'paid' || $booking->payment_status === 'extern' || $isFreBooking) && !$booking->event->isOnline())
+                @if($booking->hasTicketDocument() && $booking->isReadyForParticipation() && $booking->canSendTickets())
                 <li style="margin-bottom: 8px;">
                     <strong>Tickets</strong> - Ticket_{{ $booking->booking_number }}.pdf
                     <span style="color: #28a745; font-size: 12px;">(QR-Code für Check-In)</span>
+                </li>
+                @elseif($booking->hasTicketDocument())
+                <li style="margin-bottom: 8px; color: #666;">
+                    <em>Ihre Tickets erhalten Sie in einer separaten E-Mail, sobald die Buchung bestätigt, bezahlt und ggf. personalisiert ist.</em>
                 </li>
                 @elseif(!$booking->event->requires_ticket)
                 <li style="margin-bottom: 8px; color: #666;">
@@ -394,7 +404,7 @@
         <div style="background: #f0f0f0; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
             <h3 style="color: #333; margin: 0 0 15px 0; font-size: 18px;">📋 Nächste Schritte</h3>
             <ol style="margin: 0; padding-left: 20px; color: #666;">
-                @if($booking->payment_status !== 'paid' && $booking->payment_status !== 'extern' && !$isFreBooking)
+                @if(!$booking->isReadyForParticipation() && !$isFreBooking)
                 @if($isExternalInvoicing)
                 <li style="margin-bottom: 10px;">Warten Sie auf die Rechnung vom Veranstalter</li>
                 <li style="margin-bottom: 10px;">Überweisen Sie den Betrag nach Rechnungserhalt</li>
@@ -457,7 +467,7 @@
             @endif
             <p style="margin: 10px 0 0 0; font-size: 13px; color: #555;">
                 Zur Stornierung rufen Sie bitte Ihre
-                <a href="{{ route('bookings.show', $booking->booking_number) }}" style="color: #0066cc;">Buchungsdetails</a>
+                <a href="{{ $booking->manageUrl() }}" style="color: #0066cc;">Buchungsdetails</a>
                 auf.
             </p>
         </div>

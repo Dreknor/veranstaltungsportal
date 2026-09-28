@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Services\BookingWorkflowService;
 use App\Services\PayPalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -31,9 +32,20 @@ class PayPalController extends Controller
                 ->with('error', 'Fehler bei der PayPal-Zahlung. Bitte kontaktieren Sie den Support.');
         }
 
+        // Bereits bezahlt (z. B. Webhook war schneller) → nichts erneut abbuchen
+        if ($booking->isPaymentComplete()) {
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('success', 'Ihre Zahlung ist bereits eingegangen. Tickets bzw. Zugangsdaten wurden per E-Mail versendet.');
+        }
+
+        // Stornierte Buchungen (z. B. automatisch freigegeben) dürfen nicht mehr bezahlt werden
+        if ($booking->status === 'cancelled') {
+            return redirect()->route('bookings.show', $bookingNumber)
+                ->with('error', 'Diese Buchung wurde bereits storniert. Es wurde keine Zahlung ausgeführt.');
+        }
+
         try {
-            // Initialize PayPal service with organization credentials
-            $paypalService = new PayPalService($booking->event->organization);
+            $paypalService = $this->paypalFor($booking);
 
             if (!$paypalService->isAvailable()) {
                 throw new \Exception('PayPal ist für diesen Veranstalter nicht konfiguriert.');
@@ -61,32 +73,7 @@ class PayPalController extends Controller
             // Extract transaction ID
             $transactionId = $captureResponse['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
 
-            // Update booking in transaction to prevent race conditions with webhook
-            DB::transaction(function () use ($booking, $transactionId, $captureResponse) {
-                // Check if already processed (by webhook)
-                if ($booking->payment_status === 'paid') {
-                    Log::info('Booking already marked as paid (webhook was faster)', [
-                        'booking_number' => $booking->booking_number,
-                    ]);
-                    return;
-                }
-
-                // Update booking status
-                $booking->update([
-                    'payment_status' => 'paid',
-                    'status' => 'confirmed',
-                    'confirmed_at' => now(),
-                    'payment_transaction_id' => $transactionId,
-                ]);
-
-                Log::info('Booking marked as paid via PayPal redirect', [
-                    'booking_number' => $booking->booking_number,
-                    'transaction_id' => $transactionId,
-                ]);
-
-                // Send confirmation email
-                $this->sendPaymentConfirmation($booking);
-            });
+            $this->markPaid($booking, $transactionId, 'redirect');
 
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('success', 'Zahlung erfolgreich! Ihre Tickets wurden per E-Mail versendet.');
@@ -207,7 +194,7 @@ class PayPalController extends Controller
             // Signature verification is enforced in live mode.
             // In sandbox mode it is also enforced when a webhook ID is configured,
             // so local development without a configured webhook ID is still possible.
-            $paypalService = new PayPalService($booking->event->organization);
+            $paypalService = $this->paypalFor($booking);
             $webhookId = $booking->event->organization->paypal_webhook_id ?? null;
 
             if (!empty($webhookId)) {
@@ -232,32 +219,7 @@ class PayPalController extends Controller
                 ]);
             }
 
-            // Update booking in atomic transaction (prevent race condition with redirect)
-            DB::transaction(function () use ($booking, $captureId) {
-                // Check if already processed (idempotency)
-                if ($booking->payment_status === 'paid') {
-                    Log::info('Booking already marked as paid (idempotent)', [
-                        'booking_number' => $booking->booking_number,
-                    ]);
-                    return;
-                }
-
-                // Update booking status
-                $booking->update([
-                    'payment_status' => 'paid',
-                    'status' => 'confirmed',
-                    'confirmed_at' => now(),
-                    'payment_transaction_id' => $captureId,
-                ]);
-
-                Log::info('Booking marked as paid via PayPal webhook', [
-                    'booking_number' => $booking->booking_number,
-                    'transaction_id' => $captureId,
-                ]);
-
-                // Send confirmation email
-                $this->sendPaymentConfirmation($booking);
-            });
+            $this->markPaid($booking, $captureId, 'webhook');
 
             return response()->json(['status' => 'success']);
 
@@ -296,31 +258,54 @@ class PayPalController extends Controller
     }
 
     /**
-     * Send payment confirmation email
+     * Zahlung idempotent verbuchen (Redirect und Webhook können gleichzeitig eintreffen)
+     * und anschließend genau einmal Tickets/Zugangsdaten versenden.
      */
-    protected function sendPaymentConfirmation(Booking $booking)
+    protected function markPaid(Booking $booking, ?string $transactionId, string $source): void
     {
-        try {
-            $booking->load(['event', 'items.ticketType']);
+        $processed = DB::transaction(function () use ($booking, $transactionId) {
+            $locked = Booking::whereKey($booking->id)->lockForUpdate()->first();
 
-            // Send confirmation email with tickets
-            Mail::to($booking->customer_email)
-                ->send(new \App\Mail\PaymentConfirmed($booking));
-
-            // Notify organizer
-            if ($booking->event->user) {
-                $notificationPreferences = $booking->event->user->notification_preferences ?? [];
-                if (is_array($notificationPreferences) && ($notificationPreferences['booking_notifications'] ?? true)) {
-                    $booking->event->user->notify(new \App\Notifications\BookingConfirmedNotification($booking));
-                }
+            if (!$locked || $locked->isPaymentComplete()) {
+                return false;
             }
 
-        } catch (\Exception $e) {
-            Log::error('Failed to send payment confirmation email', [
-                'booking_number' => $booking->booking_number,
-                'message' => $e->getMessage(),
+            $locked->update([
+                'payment_status' => 'paid',
+                'status' => $locked->status === 'pending' ? 'confirmed' : $locked->status,
+                'confirmed_at' => $locked->confirmed_at ?? now(),
+                'payment_transaction_id' => $transactionId,
             ]);
-            // Don't throw - payment is already confirmed
+
+            return true;
+        });
+
+        if (!$processed) {
+            Log::info('PayPal: Zahlung war bereits verbucht (idempotent)', [
+                'booking_number' => $booking->booking_number,
+                'source' => $source,
+            ]);
+            return;
         }
+
+        Log::info('PayPal: Zahlung verbucht', [
+            'booking_number' => $booking->booking_number,
+            'transaction_id' => $transactionId,
+            'source' => $source,
+        ]);
+
+        $workflow = app(BookingWorkflowService::class);
+        $workflow->deliverTickets($booking);
+        $workflow->notifyOrganizers($booking, new \App\Notifications\NewBookingNotification($booking));
+    }
+
+    /**
+     * PayPal-Instanz (im Test über den Container austauschbar).
+     */
+    protected function paypalFor(Booking $booking): PayPalService
+    {
+        return app()->bound(PayPalService::class)
+            ? app(PayPalService::class)
+            : new PayPalService($booking->event->organization);
     }
 }

@@ -20,7 +20,8 @@ class BookingCancellation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Stornierungsbestätigung - ' . $this->booking->event->title,
+            subject: (in_array($this->booking->cancelled_by, ['organizer', 'event', 'system']) ? 'Buchung storniert - ' : 'Stornierungsbestätigung - ')
+                . $this->booking->event->title,
         );
     }
 

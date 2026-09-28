@@ -15,12 +15,13 @@ class EventCancelledNotification extends Notification implements ShouldQueue
 
     public function __construct(
         public Event $event,
-        public ?Booking $booking = null
+        public ?Booking $booking = null,
+        protected array $channels = ['mail', 'database'],
     ) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -36,8 +37,11 @@ class EventCancelledNotification extends Notification implements ShouldQueue
                     ->line($this->event->cancellation_reason);
             })
             ->when($this->booking, function ($mail) {
-                return $mail->line('Ihre Buchungsnummer: ' . $this->booking->booking_number)
-                    ->line('Ihre Zahlung wird automatisch erstattet.');
+                $mail->line('Ihre Buchungsnummer: ' . $this->booking->booking_number);
+                if ($this->booking->payment_status === 'paid' && (float) $this->booking->total > 0) {
+                    $mail->line('Bereits gezahlte Beträge werden vom Veranstalter erstattet.');
+                }
+                return $mail;
             })
             ->line('Wir entschuldigen uns für die Unannehmlichkeiten.')
             ->action('Weitere Veranstaltungen ansehen', route('events.index'))

@@ -117,8 +117,8 @@
                         </a>
                     </td>
                     <td class="px-6 py-4 text-sm">
-                        <div class="font-medium">{{ $review->user->name }}</div>
-                        <div class="text-gray-500 text-xs">{{ $review->user->email }}</div>
+                        <div class="font-medium">{{ $review->reviewerName() }}</div>
+                        <div class="text-gray-500 text-xs">{{ $review->reviewerEmail() }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-yellow-500">{{ str_repeat('⭐', $review->rating) }}</div>

@@ -299,7 +299,7 @@
                             <input type="url" id="online_url" name="online_url" value="{{ old('online_url') }}"
                                    placeholder="https://zoom.us/j/123456789 oder https://meet.google.com/..."
                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Diese URL wird erst nach der Zahlung an die Teilnehmer weitergegeben.</p>
+                            <p class="mt-1 text-xs text-gray-500">Sichtbar nur für bestätigte und bezahlte Buchungen: in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen 24 h und 3 h vor Beginn.</p>
                             @error('online_url')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
@@ -548,6 +548,11 @@
                                     </label>
                                 </div>
                             </div>
+
+                            @include('organizer.events.partials.invoice-ticket-mode', [
+                                'organization' => $organization,
+                                'value' => old('tickets_before_invoice') === '1',
+                            ])
                         </div>
                     </div>
                 </div>

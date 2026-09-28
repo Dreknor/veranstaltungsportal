@@ -16,7 +16,11 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
     protected $oldPaymentStatus;
     protected $newPaymentStatus;
 
-    public function __construct(Booking $booking, string $oldPaymentStatus, string $newPaymentStatus)
+    /**
+     * @param  array|null  $channels  Standard: nur In-App-Hinweis. E-Mails (z. B. bei Erstattung)
+     *                                werden gezielt vom BookingWorkflowService angefordert.
+     */
+    public function __construct(Booking $booking, string $oldPaymentStatus, string $newPaymentStatus, protected ?array $channels = null)
     {
         $this->booking = $booking;
         $this->oldPaymentStatus = $oldPaymentStatus;
@@ -25,7 +29,15 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        $isUser = $notifiable instanceof \App\Models\User;
+
+        if ($this->channels !== null) {
+            return $isUser
+                ? array_values(array_unique(array_merge($this->channels, ['database'])))
+                : array_values(array_diff($this->channels, ['database']));
+        }
+
+        return $isUser ? ['database'] : [];
     }
 
     public function toMail($notifiable)
@@ -33,6 +45,7 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
         $paymentStatusLabels = [
             'pending' => 'Ausstehend',
             'paid' => 'Bezahlt',
+            'extern' => 'Extern fakturiert',
             'failed' => 'Fehlgeschlagen',
             'refunded' => 'Erstattet',
             'partially_refunded' => 'Teilweise erstattet',
@@ -42,7 +55,9 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
         $oldPaymentStatusLabel = $paymentStatusLabels[$this->oldPaymentStatus] ?? $this->oldPaymentStatus;
         $newPaymentStatusLabel = $paymentStatusLabels[$this->newPaymentStatus] ?? $this->newPaymentStatus;
 
+        $bookingId = $this->booking->id;
         $mail = (new MailMessage)
+            ->withSymfonyMessage(fn ($message) => $message->getHeaders()->addTextHeader('X-Booking-Id', (string) $bookingId))
             ->subject($subject)
             ->greeting('Hallo ' . $this->booking->customer_name . ',')
             ->line('Der Zahlungsstatus Ihrer Buchung wurde geändert.')
@@ -72,13 +87,13 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
         } elseif ($this->newPaymentStatus === 'refunded') {
             $mail->line('Ihre Zahlung wurde vollständig erstattet.')
                 ->line('Erstattungsbetrag: ' . number_format($this->booking->total, 2, ',', '.') . ' €')
-                ->line('Die Rückerstattung erfolgt auf Ihr ursprüngliches Zahlungsmittel.');
+                ->line('Die Rückerstattung erfolgt durch den Veranstalter.');
         } elseif ($this->newPaymentStatus === 'partially_refunded') {
             $mail->line('Ihre Zahlung wurde teilweise erstattet.')
                 ->line('Die Rückerstattung erfolgt auf Ihr ursprüngliches Zahlungsmittel.');
         }
 
-        $mail->action('Buchung ansehen', route('bookings.show', $this->booking->booking_number));
+        $mail->action('Buchung ansehen', $this->booking->manageUrl());
 
         if ($this->newPaymentStatus !== 'paid') {
             $mail->line('Bei Fragen stehen wir Ihnen gerne zur Verfügung.');
@@ -92,6 +107,7 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
         $paymentStatusLabels = [
             'pending' => 'Ausstehend',
             'paid' => 'Bezahlt',
+            'extern' => 'Extern fakturiert',
             'failed' => 'Fehlgeschlagen',
             'refunded' => 'Erstattet',
             'partially_refunded' => 'Teilweise erstattet',

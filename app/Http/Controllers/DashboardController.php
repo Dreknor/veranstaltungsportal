@@ -17,7 +17,7 @@ class DashboardController extends Controller
 
         // Get user's bookings with event and items
         $bookings = $user->bookings()
-            ->with(['event', 'items.ticketType'])
+            ->with(['event.organization', 'items.ticketType'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

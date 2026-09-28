@@ -86,7 +86,7 @@ test('notification contains correct old and new payment status', function () {
     );
 });
 
-test('notification to mail route is sent for guest bookings', function () {
+test('guest bookings receive no generic status notification (dedicated process mails instead)', function () {
     $guestBooking = Booking::factory()->create([
         'user_id' => null,
         'event_id' => $this->event->id,
@@ -97,7 +97,18 @@ test('notification to mail route is sent for guest bookings', function () {
     $guestBooking->status = 'confirmed';
     $guestBooking->save();
 
-    Notification::assertSentOnDemand(BookingStatusChangedNotification::class);
+    Notification::assertNothingSent();
+});
+
+test('status notifications for registered users are in-app only by default', function () {
+    $notification = new BookingStatusChangedNotification($this->booking, 'pending', 'confirmed');
+    expect($notification->via($this->user))->toBe(['database']);
+
+    $payment = new PaymentStatusChangedNotification($this->booking, 'paid', 'refunded');
+    expect($payment->via($this->user))->toBe(['database']);
+
+    $refundMail = new PaymentStatusChangedNotification($this->booking, 'paid', 'refunded', ['mail']);
+    expect($refundMail->via($this->user))->toContain('mail');
 });
 
 test('booking status changed notification has correct mail content', function () {

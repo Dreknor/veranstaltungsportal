@@ -17,6 +17,7 @@ class EventReminderNotification extends Notification implements ShouldQueue
     public function __construct(
         protected Event $event,
         protected Booking $booking,
+        protected ?\App\Models\EventDate $session = null,
     ) {}
 
     public function via($notifiable)
@@ -34,14 +35,15 @@ class EventReminderNotification extends Notification implements ShouldQueue
 
     public function toMail($notifiable)
     {
-        return new EventReminderMail($this->event, $this->booking);
+        return (new EventReminderMail($this->event, $this->booking, null, false, $this->session))
+            ->to($notifiable->email);
     }
 
     public function toArray($notifiable)
     {
         return [
             'title' => 'Event-Erinnerung',
-            'message' => 'Erinnerung: "' . $this->event->title . '" beginnt am ' . $this->event->start_date->format('d.m.Y H:i'),
+            'message' => 'Erinnerung: "' . $this->event->title . '" beginnt am ' . ($this->session?->start_date ?? $this->event->start_date)->format('d.m.Y H:i'),
             'event_id' => $this->event->id,
             'booking_id' => $this->booking->id,
             'url' => route('events.show', $this->event->slug),

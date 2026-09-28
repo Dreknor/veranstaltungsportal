@@ -71,15 +71,11 @@ class BookingConfirmation extends Mailable
         // Bei externer Rechnungsstellung: kein Rechnungs-PDF, keine Rechnungsnummer generieren
 
         // Ticket-PDF nur anhängen, wenn:
-        // - KEINE externe Rechnungsstellung (Zahlung noch ausstehend)
-        // - Event Tickets erfordert (requires_ticket)
-        // - Buchung bezahlt ist ODER kostenlose Buchung
-        // - Event NICHT rein online ist
-        // - Personalisierung abgeschlossen ist
-        if (!$isExternalInvoicing
-            && $this->booking->event->requires_ticket
-            && ($this->booking->payment_status === 'paid' || $isFreeBooking)
-            && !$this->booking->event->isOnline()
+        // - die Veranstaltung ein Ticket vorsieht (Präsenz/Hybrid mit Ticketpflicht)
+        // - die Buchung bestätigt und bezahlt ist (kostenfrei/extern fakturiert zählt als bezahlt)
+        // - die Personalisierung (bei mehreren Tickets) abgeschlossen ist
+        if ($this->booking->hasTicketDocument()
+            && $this->booking->isReadyForParticipation()
             && $this->booking->canSendTickets()) {
             $ticketPdfService = app(TicketPdfService::class);
             $attachments[] = Attachment::fromData(

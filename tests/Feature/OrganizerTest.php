@@ -102,6 +102,7 @@ test('organizer can view bookings for their events', function () {
     $response = $this->get(route('organizer.bookings.index'));
 
     $response->assertStatus(200);
-    $response->assertViewHas('bookings');
+    // Ohne Filter werden Buchungen nach Veranstaltung gruppiert
+    $response->assertViewHas('groupedEvents', fn ($events) => $events->total() === 1);
 });
 

@@ -1,35 +1,35 @@
 <x-layouts.app>
-    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <nav class="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 <a href="{{ route('help.index') }}" class="hover:text-blue-600">Hilfe</a> ·
                 <a href="{{ route('help.category','organizer') }}" class="hover:text-blue-600">Veranstalter</a> ·
                 <span>Buchungen & Teilnehmer verwalten</span>
             </nav>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">Buchungen & Teilnehmer verwalten</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">Buchungen & Teilnehmer verwalten</h1>
             <p class="text-gray-700 dark:text-gray-300 mb-6">So behalten Sie den Überblick über Buchungen, Zahlungen und Check-Ins.</p>
 
             <div class="space-y-6">
                 <section>
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">1. Buchungsstatus verwalten</h2>
-                    <p class="text-gray-700 dark:text-gray-300">Buchungen durchlaufen verschiedene Status:</p>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mt-2">
-                        <li><strong>Pending:</strong> Buchung angelegt, aber noch nicht bestätigt</li>
-                        <li><strong>Confirmed:</strong> Buchung bestätigt, Teilnahme gesichert</li>
-                        <li><strong>Cancelled:</strong> Von Teilnehmer oder Veranstalter storniert</li>
-                    </ul>
-                    <p class="text-gray-700 dark:text-gray-300 mt-2">Sie können den Status manuell ändern unter „Buchungen" → Buchung auswählen → „Status ändern".</p>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">1. Der Ablauf einer Buchung</h2>
+                    <p class="text-gray-700 dark:text-gray-300">Jede Buchung zeigt oben einen Fortschrittsbalken und einen Kasten <strong>„Nächster Schritt“</strong> – dort steht immer, ob und was Sie tun müssen:</p>
+                    <ol class="list-decimal pl-6 text-gray-700 dark:text-gray-300 mt-2 space-y-1">
+                        <li><strong>Wartet auf Freigabe</strong> (nur kostenfreie Veranstaltungen mit manueller Freigabe): Anmeldung bestätigen oder ablehnen.</li>
+                        <li><strong>Zahlung ausstehend</strong>: Sobald das Geld eingegangen ist, klicken Sie auf „Zahlung eingegangen“. Bei externer Rechnungsstellung markieren Sie die Buchung als fakturiert. PayPal-Zahlungen werden automatisch verbucht.</li>
+                        <li><strong>Bestätigt</strong>: Die Person erhält automatisch Tickets bzw. Online-Zugangsdaten. Bei mehreren Plätzen trägt sie vorher die Teilnehmenden ein.</li>
+                        <li><strong>Storniert</strong>: Plätze werden automatisch wieder freigegeben, die Warteliste wird informiert.</li>
+                    </ol>
+                    <p class="text-gray-700 dark:text-gray-300 mt-2">Auf der Übersichtsseite „Buchungen“ zeigen Ihnen Hinweise oben an, wie viele Anmeldungen auf Freigabe warten und wie viele Zahlungen offen sind.</p>
                 </section>
 
                 <section>
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">2. Zahlungen prüfen & aktualisieren</h2>
-                    <p class="text-gray-700 dark:text-gray-300">Der Zahlungsstatus zeigt:</p>
-                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mt-2">
-                        <li><strong>Pending:</strong> Zahlung ausstehend</li>
-                        <li><strong>Paid:</strong> Bezahlt – Teilnehmer erhält Tickets/Zugangsdaten</li>
-                        <li><strong>Refunded:</strong> Rückerstattung erfolgt</li>
+                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">2. Zahlungen, Erstattungen und erneuter Versand</h2>
+                    <ul class="list-disc pl-6 text-gray-700 dark:text-gray-300 mt-2 space-y-1">
+                        <li><strong>Zahlung eingegangen:</strong> bestätigt die Buchung und versendet Tickets bzw. Zugangsdaten – ein separates „Bestätigen“ ist nicht nötig.</li>
+                        <li><strong>Erstattet / Fehlgeschlagen:</strong> Die Person wird automatisch per E-Mail informiert.</li>
+                        <li><strong>Erneut senden:</strong> Ist eine E-Mail nicht angekommen, senden Sie im Kasten „Nächster Schritt“ die aktuelle Bestätigung erneut.</li>
+                        <li><strong>E-Mail-Verlauf:</strong> Auf jeder Buchung sehen Sie, welche E-Mails wann an wen versendet wurden.</li>
                     </ul>
-                    <p class="text-gray-700 dark:text-gray-300 mt-2">Bei manueller Zahlung (z.B. Überweisung) setzen Sie den Status auf „Paid". Das System versendet dann automatisch die Tickets bzw. Online-Zugangsdaten.</p>
                 </section>
 
                 <section>

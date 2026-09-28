@@ -57,54 +57,81 @@ class EventObserver
 
     /**
      * Handle the Event "updated" event.
+     *
+     * Informiert alle bestätigten Buchungen (registrierte Nutzer UND Gäste) über wichtige Änderungen.
+     * Neue Online-Zugangsdaten werden nur an Buchungen mit freigeschaltetem Zugang (bestätigt + bezahlt) versendet.
      */
     public function updated(Event $event): void
     {
-        // Only notify if event is published
-        if (!$event->is_published) {
+        // Nur veröffentlichte, nicht abgesagte Veranstaltungen
+        if (!$event->is_published || $event->is_cancelled) {
             return;
         }
 
-        // Track important changes
         $importantFields = [
             'title' => 'Titel',
-            'start_date' => 'Startdatum',
-            'end_date' => 'Enddatum',
+            'start_date' => 'Beginn',
+            'end_date' => 'Ende',
             'venue_name' => 'Veranstaltungsort',
             'venue_address' => 'Adresse',
+            'venue_postal_code' => 'PLZ',
             'venue_city' => 'Stadt',
         ];
 
         $changes = [];
         foreach ($importantFields as $field => $label) {
-            if ($event->isDirty($field)) {
-                $oldValue = $event->getOriginal($field);
-                $newValue = $event->$field;
-
-                // Format dates
-                if (in_array($field, ['start_date', 'end_date'])) {
-                    $oldValue = \Carbon\Carbon::parse($oldValue)->format('d.m.Y H:i');
-                    $newValue = \Carbon\Carbon::parse($newValue)->format('d.m.Y H:i');
-                }
-
-                $changes[$label] = "{$oldValue} → {$newValue}";
+            if (!$event->wasChanged($field)) {
+                continue;
             }
+
+            $oldValue = $event->getOriginal($field);
+            $newValue = $event->$field;
+
+            if (in_array($field, ['start_date', 'end_date'])) {
+                $oldValue = $oldValue ? \Carbon\Carbon::parse($oldValue)->format('d.m.Y H:i') . ' Uhr' : '–';
+                $newValue = $newValue ? \Carbon\Carbon::parse($newValue)->format('d.m.Y H:i') . ' Uhr' : '–';
+                if ($oldValue === $newValue) {
+                    continue;
+                }
+            }
+
+            $changes[$label] = ($oldValue ?: '–') . ' → ' . ($newValue ?: '–');
         }
 
-        // Only send notifications if there are important changes
-        if (empty($changes)) {
+        $accessChanged = $event->requiresOnlineInfo()
+            && ($event->wasChanged('online_url') || $event->wasChanged('online_access_code'));
+
+        if (empty($changes) && !$accessChanged) {
             return;
         }
 
-        // Notify all users with confirmed bookings
         $bookings = $event->bookings()
-            ->where('status', 'confirmed')
+            ->whereIn('status', ['confirmed'])
             ->with('user')
             ->get();
 
         foreach ($bookings as $booking) {
-            if ($booking->user) {
-                $booking->user->notify(new EventUpdatedNotification($event, $booking, $changes));
+            $hasAccess = $accessChanged && $booking->canAccessOnlineContent();
+
+            // Nur Zugangsdaten geändert, aber Buchung hat (noch) keinen Zugang → nichts senden
+            if (empty($changes) && !$hasAccess) {
+                continue;
+            }
+
+            $notification = new EventUpdatedNotification($event, $booking, $changes, $hasAccess);
+
+            try {
+                if ($booking->user) {
+                    $booking->user->notify($notification);
+                } else {
+                    \Illuminate\Support\Facades\Notification::route('mail', $booking->customer_email)
+                        ->notify($notification);
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Änderungsbenachrichtigung fehlgeschlagen', [
+                    'booking_id' => $booking->id,
+                    'error' => $e->getMessage(),
+                ]);
             }
         }
     }

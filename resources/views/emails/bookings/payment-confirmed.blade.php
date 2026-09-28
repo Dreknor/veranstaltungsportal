@@ -37,7 +37,18 @@
                                 Liebe/r {{ $booking->customer_name }},
                             </p>
                             <p style="margin: 0 0 30px 0; font-size: 16px; color: #374151; line-height: 1.6;">
-                                Ihre Zahlung wurde erfolgreich verarbeitet. Vielen Dank!
+                                @if($booking->payment_status === 'extern' || $booking->ticketsReleasedBeforePayment())
+                                    Ihre Buchung ist verbindlich bestätigt. Die Rechnung erhalten Sie separat vom Veranstalter{{ $booking->ticketsReleasedBeforePayment() ? ' – gegebenenfalls auch erst nach der Veranstaltung' : '' }}.
+                                @elseif((float) $booking->total > 0)
+                                    Ihre Zahlung ist eingegangen – Ihre Buchung ist damit verbindlich bestätigt. Vielen Dank!
+                                @else
+                                    Ihre Anmeldung ist verbindlich bestätigt.
+                                @endif
+                                @if($booking->event->requiresOnlineInfo() && $booking->hasTicketDocument())
+                                    Unten finden Sie Ihre Online-Zugangsdaten; Ihre Tickets für die Teilnahme vor Ort sind angehängt.
+                                @elseif($booking->event->requiresOnlineInfo())
+                                    Unten finden Sie Ihre Zugangsdaten zur Online-Veranstaltung.
+                                @endif
                             </p>
 
                             <!-- Event Info -->
@@ -100,14 +111,18 @@
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #6b7280; font-size: 14px;">Gesamtbetrag</td>
                                     <td style="padding: 12px 20px; border-bottom: 1px solid #f3f4f6; color: #374151; font-size: 14px; font-weight: 700;">{{ number_format($booking->total, 2, ',', '.') }}&nbsp;€</td>
                                 </tr>
+                                @if((float) $booking->total > 0)
                                 <tr>
                                     <td style="padding: 12px 20px; color: #6b7280; font-size: 14px;">Zahlungsstatus</td>
-                                    <td style="padding: 12px 20px; color: #16a34a; font-size: 14px; font-weight: 700;">✓ Bezahlt</td>
+                                    <td style="padding: 12px 20px; color: #16a34a; font-size: 14px; font-weight: 700;">
+                                        @if($booking->payment_status === 'extern' || $booking->ticketsReleasedBeforePayment()) Rechnung folgt separat @else ✓ Bezahlt @endif
+                                    </td>
                                 </tr>
+                                @endif
                             </table>
 
-                            {{-- Tickets / Zugangsdaten --}}
-                            @if($booking->event->isOnline())
+                            {{-- Online-Zugangsdaten (Online und Hybrid) --}}
+                            @if($booking->event->requiresOnlineInfo() && $booking->event->online_url)
                                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
                                        style="border: 1px solid #bfdbfe; border-radius: 8px; overflow: hidden; margin-bottom: 24px;">
                                     <tr>
@@ -125,11 +140,14 @@
                                                 <br><br><strong>Zugangscode:</strong>&nbsp;
                                                 <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px; font-family: monospace;">{{ $booking->event->online_access_code }}</code>
                                             @endif
+                                            <br><br><span style="color: #6b7280; font-size: 13px;">Sie erhalten die Zugangsdaten zusätzlich mit der Erinnerung kurz vor Beginn.</span>
                                         </td>
                                     </tr>
                                 </table>
+                            @endif
 
-                            @elseif($booking->event->requires_ticket)
+                            {{-- Tickets (Präsenz und Hybrid) --}}
+                            @if($booking->hasTicketDocument())
                                 @if($booking->canSendTickets())
                                     {{-- Tickets sind tatsächlich als Anhang beigefügt --}}
                                     <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
@@ -209,7 +227,7 @@
                                         @else
                                             Sie können Ihre Buchung jederzeit bis zum Beginn der Veranstaltung stornieren.
                                         @endif
-                                        <a href="{{ route('bookings.show', $booking->booking_number) }}" style="color: #16a34a; display: block; margin-top: 8px;">
+                                        <a href="{{ $booking->manageUrl() }}" style="color: #16a34a; display: block; margin-top: 8px;">
                                             Buchungsdetails aufrufen →
                                         </a>
                                     </td>
@@ -222,7 +240,7 @@
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>
                                     <td align="center" style="padding: 10px 0 30px 0;">
-                                        <a href="{{ route('bookings.show', $booking->booking_number) }}"
+                                        <a href="{{ $booking->manageUrl() }}"
                                            style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);">
                                             Buchungsdetails ansehen
                                         </a>

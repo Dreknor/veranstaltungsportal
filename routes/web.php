@@ -122,6 +122,15 @@ Route::get('/bookings/{bookingNumber}/verify-email/{token}', [BookingController:
 Route::post('/bookings/{bookingNumber}/cancel', [BookingController::class, 'cancel'])
     ->middleware('throttle:5,1')
     ->name('bookings.cancel');
+Route::post('/bookings/{bookingNumber}/pay', [BookingController::class, 'retryPayment'])
+    ->middleware('throttle:10,1')
+    ->name('bookings.pay');
+Route::post('/bookings/{bookingNumber}/feedback', [BookingController::class, 'storeFeedback'])
+    ->middleware('throttle:5,1')
+    ->name('bookings.feedback');
+Route::post('/bookings/{bookingNumber}/switch-to-invoice', [BookingController::class, 'switchToInvoice'])
+    ->middleware('throttle:5,1')
+    ->name('bookings.switch-to-invoice');
 Route::get('/bookings/{bookingNumber}/create-account', [BookingController::class, 'createAccount'])->name('bookings.create-account');
 Route::post('/bookings/{bookingNumber}/create-account', [BookingController::class, 'storeAccount'])
     ->middleware('throttle:5,1')
@@ -276,6 +285,9 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::put('/bookings/{booking}/status', [Organizer\BookingManagementController::class, 'updateStatus'])->name('bookings.update-status');
         Route::put('/bookings/{booking}/payment', [Organizer\BookingManagementController::class, 'updatePaymentStatus'])->name('bookings.update-payment');
         Route::post('/bookings/{booking}/check-in', [Organizer\CheckInController::class, 'checkInByBooking'])->name('bookings.check-in');
+        Route::post('/bookings/{booking}/resend', [Organizer\BookingManagementController::class, 'resend'])->name('bookings.resend');
+        Route::post('/bookings/{booking}/release-tickets', [Organizer\BookingManagementController::class, 'releaseTickets'])->name('bookings.release-tickets');
+        Route::post('/bookings/{booking}/cancel', [Organizer\BookingManagementController::class, 'cancel'])->name('bookings.cancel');
         Route::post('/bookings/{booking}/approve', [Organizer\BookingManagementController::class, 'approveBooking'])->name('bookings.approve');
         Route::post('/bookings/{booking}/reject', [Organizer\BookingManagementController::class, 'rejectBooking'])->name('bookings.reject');
         Route::post('/events/{event}/approve-all-pending', [Organizer\BookingManagementController::class, 'approveAllPending'])->name('events.approve-all-pending');

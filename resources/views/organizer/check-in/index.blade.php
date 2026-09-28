@@ -1,22 +1,22 @@
 <x-layouts.app>
     <div class="mb-6">
-        <div class="flex justify-between items-center">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
             <div>
                 <a href="{{ route('organizer.events.index') }}" class="text-blue-600 hover:text-blue-800 mb-2 inline-block">
                     <i class="fas fa-arrow-left mr-1"></i> Zurück zu Events
                 </a>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Check-In: {{ $event->title }}</h1>
+                <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">Check-In: {{ $event->title }}</h1>
                 <p class="text-gray-600 dark:text-gray-400 mt-1">
                     {{ $event->start_date->format('d.m.Y H:i') }} Uhr
                 </p>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('organizer.check-in.export', $event) }}"
-                   class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
+                   class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 sm:py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
                     <i class="fas fa-download mr-2"></i> Export
                 </a>
                 <button onclick="openQrScanner()"
-                        class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
+                        class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 sm:py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
                     <i class="fas fa-qrcode mr-2"></i> QR-Scanner
                 </button>
             </div>
@@ -53,6 +53,23 @@
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+        </div>
+    @endif
+
+    @if($dates->isNotEmpty())
+        <!-- Terminauswahl (Veranstaltung mit mehreren Terminen) -->
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Check-in für Termin:</p>
+            <div class="flex gap-2 overflow-x-auto pb-1">
+                @foreach($dates as $date)
+                    <a href="{{ route('organizer.check-in.index', [$event, 'date' => $date->id]) }}"
+                       class="shrink-0 px-3 py-2 rounded-lg text-sm font-medium border transition
+                              {{ $selectedDate?->id === $date->id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50' }}">
+                        {{ $date->start_date->translatedFormat('D d.m.') }} {{ $date->start_date->format('H:i') }}
+                        @if($date->start_date->isToday()) <span class="ml-1 text-xs">(heute)</span> @endif
+                    </a>
+                @endforeach
+            </div>
         </div>
     @endif
 
@@ -122,6 +139,7 @@
                           action="{{ route('organizer.check-in.bulk', $event) }}"
                           method="POST">
                         @csrf
+                        @if($selectedDate)<input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">@endif
                         <div id="bulkItemInputs"></div>
                         <button type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition">
@@ -162,22 +180,22 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Status
                             </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Ticket-Nr.
                             </th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Name / Organisation
                             </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 E-Mail
                             </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Ticket-Typ
                             </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="hidden xl:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Buchungs-Nr.
                             </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Check-In Zeit
                             </th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -188,16 +206,20 @@
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($items as $item)
                             @php
+                                $isChecked = $item->isCheckedInFor($selectedDate);
+                                $checkedAt = $selectedDate
+                                    ? $item->attendances->firstWhere('event_date_id', $selectedDate->id)?->checked_in_at
+                                    : $item->checked_in_at;
                                 $name  = $item->attendee_name  ?: $item->booking->customer_name;
                                 $email = $item->attendee_email ?: $item->booking->customer_email;
                                 $org   = $item->attendee_organization ?: $item->booking->customer_organization;
                             @endphp
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 ticket-row"
-                                data-checked="{{ $item->checked_in ? '1' : '0' }}"
+                                data-checked="{{ $isChecked ? '1' : '0' }}"
                                 data-item-id="{{ $item->id }}">
                                 <!-- Checkbox (nur für noch nicht eingecheckte Tickets) -->
                                 <td class="px-4 py-4">
-                                    @if(!$item->checked_in)
+                                    @if(!$isChecked)
                                         <input type="checkbox"
                                                class="item-checkbox rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500"
                                                value="{{ $item->id }}">
@@ -206,7 +228,7 @@
 
                                 <!-- Status -->
                                 <td class="px-4 py-4 whitespace-nowrap">
-                                    @if($item->checked_in)
+                                    @if($isChecked)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                                             <i class="fas fa-check-circle mr-1"></i> Eingecheckt
                                         </span>
@@ -218,7 +240,7 @@
                                 </td>
 
                                 <!-- Ticket-Nummer -->
-                                <td class="px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-600 dark:text-gray-400">
+                                <td class="hidden lg:table-cell px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-600 dark:text-gray-400">
                                     {{ $item->ticket_number }}
                                 </td>
 
@@ -228,27 +250,29 @@
                                     @if($org)
                                         <div class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{{ $org }}</div>
                                     @endif
+                                    <div class="md:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5 break-all">{{ $email }}</div>
+                                    <div class="lg:hidden text-xs text-gray-500 dark:text-gray-400">{{ $item->ticketType->name ?? '' }}</div>
                                 </td>
 
                                 <!-- E-Mail -->
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                <td class="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                     {{ $email }}
                                 </td>
 
                                 <!-- Ticket-Typ -->
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                <td class="hidden lg:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                     {{ $item->ticketType->name ?? '—' }}
                                 </td>
 
                                 <!-- Buchungs-Nr. -->
-                                <td class="px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-500 dark:text-gray-400">
+                                <td class="hidden xl:table-cell px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-500 dark:text-gray-400">
                                     {{ $item->booking->booking_number }}
                                 </td>
 
                                 <!-- Check-In Zeit -->
-                                <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    @if($item->checked_in && $item->checked_in_at)
-                                        {{ $item->checked_in_at->format('d.m.Y H:i') }}
+                                <td class="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    @if($isChecked && $checkedAt)
+                                        {{ $checkedAt->format('d.m.Y H:i') }}
                                     @else
                                         —
                                     @endif
@@ -256,12 +280,13 @@
 
                                 <!-- Aktionen -->
                                 <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    @if($item->checked_in)
+                                    @if($isChecked)
                                         <form action="{{ route('organizer.check-in.item.undo', [$event, $item]) }}"
                                               method="POST"
                                               class="inline"
                                               onsubmit="return confirm('Check-in für dieses Ticket wirklich rückgängig machen?')">
                                             @csrf
+                                            @if($selectedDate)<input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">@endif
                                             @method('DELETE')
                                             <button type="submit"
                                                     class="text-red-600 hover:text-red-900 dark:text-red-400 text-xs">
@@ -273,8 +298,9 @@
                                               method="POST"
                                               class="inline check-in-form">
                                             @csrf
+                                            @if($selectedDate)<input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">@endif
                                             <button type="submit"
-                                                    class="text-green-600 hover:text-green-900 dark:text-green-400 check-in-btn text-xs">
+                                                    class="check-in-btn inline-flex items-center px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm font-medium">
                                                 <i class="fas fa-check mr-1"></i> Einchecken
                                             </button>
                                         </form>
@@ -444,7 +470,7 @@
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
-                body: JSON.stringify({ booking_number: decodedText })
+                body: JSON.stringify({ booking_number: decodedText, event_date_id: @json($selectedDate?->id) })
             })
             .then(r => r.json())
             .then(data => {

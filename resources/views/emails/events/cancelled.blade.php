@@ -154,9 +154,13 @@
         @if($booking)
         <p><strong>Was passiert jetzt?</strong></p>
         <ul>
-            <li>Ihre Buchung wurde automatisch storniert</li>
-            <li>Falls Sie bereits bezahlt haben, wird der Betrag in den nächsten 5-7 Werktagen erstattet</li>
-            <li>Sie müssen keine weiteren Schritte unternehmen</li>
+            <li>Ihre Buchung wurde automatisch storniert – Ihre Tickets bzw. Zugangsdaten sind nicht mehr gültig.</li>
+            @if($booking->payment_status === 'paid' && (float) $booking->total > 0)
+            <li>Bereits gezahlte Beträge ({{ number_format($booking->total, 2, ',', '.') }} €) werden vom Veranstalter erstattet.</li>
+            @elseif((float) $booking->total > 0)
+            <li>Eine noch offene Rechnung müssen Sie nicht mehr bezahlen.</li>
+            @endif
+            <li>Sie müssen keine weiteren Schritte unternehmen.</li>
         </ul>
         @endif
 

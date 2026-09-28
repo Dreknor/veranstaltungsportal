@@ -294,7 +294,7 @@ class FreeTicketApprovalTest extends TestCase
             $this->assertEquals('confirmed', $booking->status);
         }
 
-        Mail::assertSent(BookingConfirmation::class, 3);
+        Mail::assertQueued(BookingConfirmation::class, 3);
     }
 }
 

@@ -22,6 +22,7 @@ class EventWaitlist extends Model
         'status',
         'notified_at',
         'expires_at',
+        'claim_token',
         'notes',
     ];
 
@@ -82,15 +83,32 @@ class EventWaitlist extends Model
     }
 
     /**
-     * Mark as notified
+     * Aktive Reservierungen (benachrichtigt, Frist läuft noch)
+     */
+    public function scopeActiveReservation($query)
+    {
+        return $query->where('status', 'notified')->where('expires_at', '>', now());
+    }
+
+    /**
+     * Mark as notified – reserviert die Plätze und erzeugt einen persönlichen Buchungslink
      */
     public function markAsNotified()
     {
         $this->update([
             'status' => 'notified',
             'notified_at' => now(),
-            'expires_at' => now()->addHours(48), // 48 Stunden Zeit zum Buchen
+            'expires_at' => now()->addHours(\App\Services\WaitlistService::RESERVATION_HOURS),
+            'claim_token' => \Illuminate\Support\Str::random(40),
         ]);
+    }
+
+    /**
+     * Persönlicher Buchungslink für die Reservierung
+     */
+    public function claimUrl(): string
+    {
+        return route('bookings.create', ['event' => $this->event, 'waitlist' => $this->claim_token]);
     }
 
     /**

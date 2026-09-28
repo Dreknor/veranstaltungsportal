@@ -51,6 +51,12 @@ class WaitlistTest extends TestCase
             'is_published' => true,
             'max_attendees' => 100,
         ]);
+        \App\Models\TicketType::factory()->create([
+            'event_id' => $event->id,
+            'quantity' => 100,
+            'sale_start' => null,
+            'sale_end' => null,
+        ]);
 
         $response = $this->actingAs($user)->post(route('waitlist.join', $event), [
             'name' => $user->name,

@@ -51,7 +51,7 @@ class TicketType extends Model
         // First, calculate the available quantity for this specific ticket type
         $ticketTypeAvailable = ($this->quantity === null)
             ? PHP_INT_MAX
-            : max(0, $this->quantity - $this->quantity_sold);
+            : max(0, $this->quantity - $this->quantity_sold - ($this->event?->reservedWaitlistSeats($this->id) ?? 0));
 
         // If the event has a max_attendees limit, respect that as well
         if ($this->event && $this->event->max_attendees) {

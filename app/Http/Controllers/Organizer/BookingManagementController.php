@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organizer;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Event;
+use App\Services\BookingWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -70,6 +71,15 @@ class BookingManagementController extends Controller
             $q->where('organization_id', $organization->id)->where('end_date', '<', now());
         })->count();
 
+        // Handlungsbedarf (nur kommende Veranstaltungen)
+        $upcomingScope = fn ($q) => $q->where('organization_id', $organization->id)->where('end_date', '>=', now());
+        $pendingApprovalCount = Booking::whereHas('event', $upcomingScope)->where('status', 'pending_approval')->count();
+        $unpaidCount = Booking::whereHas('event', $upcomingScope)
+            ->where('status', 'pending')
+            ->where('payment_status', 'pending')
+            ->where('total', '>', 0)
+            ->count();
+
         // Gruppierte Ansicht (kein Event-Filter): Events mit Buchungen laden
         $groupByEvent = !$filterByEvent
             && !$request->filled('status')
@@ -100,65 +110,159 @@ class BookingManagementController extends Controller
 
             return view('organizer.bookings.index', compact(
                 'groupedEvents', 'events', 'organization', 'groupByEvent',
-                'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount'
+                'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount',
+                'pendingApprovalCount', 'unpaidCount'
             ));
         }
 
         $bookings = $query->latest()->paginate(20);
         return view('organizer.bookings.index', compact(
             'bookings', 'events', 'organization', 'groupByEvent',
-            'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount'
+            'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount',
+            'pendingApprovalCount', 'unpaidCount'
         ));
     }
 
     public function show(Booking $booking)
     {
         $this->authorize('view', $booking);
-        $booking->load(['event', 'items.ticketType', 'user', 'discountCode']);
+        $booking->load(['event.organization', 'items.ticketType', 'user', 'discountCode', 'emailLogs']);
         return view('organizer.bookings.show', compact('booking'));
     }
 
-    public function updateStatus(Request $request, Booking $booking)
+    /**
+     * Buchungsstatus manuell setzen.
+     *
+     * Kommunikationsregeln:
+     *  - Freigabe (pending_approval → confirmed): Bestätigung mit Tickets/Zugangsdaten
+     *  - Bestätigen einer bereits bezahlten Buchung: Tickets/Zugangsdaten
+     *  - Stornieren: Stornobestätigung an den Kunden
+     *  - alle übrigen Wechsel erfolgen ohne E-Mail
+     */
+    public function updateStatus(Request $request, Booking $booking, BookingWorkflowService $workflow)
     {
         $this->authorize('update', $booking);
         $request->validate([
             'status' => 'required|in:pending,pending_approval,confirmed,cancelled,completed',
         ]);
+
+        $newStatus = $request->status;
+
+        if ($newStatus === $booking->status) {
+            return back()->with('info', 'Der Status ist bereits gesetzt.');
+        }
+
+        if ($newStatus === 'cancelled') {
+            $workflow->cancel($booking, 'organizer');
+            return back()->with('success', 'Buchung storniert. Der Kunde hat eine Stornobestätigung erhalten.');
+        }
+
+        if ($booking->status === 'cancelled') {
+            return back()->with('error', 'Stornierte Buchungen können nicht reaktiviert werden. Bitte legen Sie eine neue Buchung an.');
+        }
+
+        if ($newStatus === 'confirmed' && $booking->status === 'pending_approval') {
+            $workflow->approve($booking);
+            return back()->with('success', 'Anmeldung bestätigt. Die Bestätigung mit Tickets bzw. Zugangsdaten wurde per E-Mail versendet.');
+        }
+
         $booking->update([
-            'status' => $request->status,
-            'confirmed_at' => $request->status === 'confirmed' ? now() : $booking->confirmed_at,
-            'cancelled_at' => $request->status === 'cancelled' ? now() : $booking->cancelled_at,
+            'status' => $newStatus,
+            'confirmed_at' => $newStatus === 'confirmed' ? ($booking->confirmed_at ?? now()) : $booking->confirmed_at,
         ]);
-        return back()->with('success', 'Buchungsstatus aktualisiert!');
+
+        if ($newStatus === 'confirmed' && $workflow->deliverTickets($booking)) {
+            return back()->with('success', 'Buchung bestätigt. Tickets bzw. Zugangsdaten wurden per E-Mail versendet.');
+        }
+
+        if ($newStatus === 'confirmed') {
+            return back()->with('success', 'Buchung bestätigt. Tickets bzw. Zugangsdaten werden automatisch versendet, sobald die Zahlung verbucht ist.');
+        }
+
+        return back()->with('success', 'Buchungsstatus aktualisiert (ohne E-Mail an den Kunden).');
     }
 
-    public function updatePaymentStatus(Request $request, Booking $booking)
+    /**
+     * Zahlungsstatus setzen. "Bezahlt" bzw. "Extern fakturiert" bestätigen die Buchung und
+     * versenden automatisch Tickets/Zugangsdaten.
+     */
+    public function updatePaymentStatus(Request $request, Booking $booking, BookingWorkflowService $workflow)
     {
         $this->authorize('update', $booking);
         $request->validate([
-            'payment_status' => 'required|in:pending,paid,refunded,failed',
+            'payment_status' => 'required|in:pending,paid,extern,refunded,failed',
         ]);
-        $oldPaymentStatus = $booking->payment_status;
-        $booking->update(['payment_status' => $request->payment_status]);
-        if ($request->payment_status === 'paid' && $oldPaymentStatus !== 'paid') {
-            try {
-                // Nur Tickets versenden, wenn keine Personalisierung erforderlich ist oder diese abgeschlossen ist
-                if (!$booking->needsPersonalization() || $booking->tickets_personalized) {
-                    \Illuminate\Support\Facades\Mail::to($booking->customer_email)
-                        ->send(new \App\Mail\PaymentConfirmed($booking));
-                    return back()->with('success', 'Zahlungsstatus aktualisiert und Tickets per E-Mail versendet!');
-                } else {
-                    return back()->with('warning', 'Zahlungsstatus aktualisiert. Tickets werden versendet, sobald die Personalisierung durch den Kunden abgeschlossen ist.');
-                }
-            } catch (\Exception $e) {
-                Log::error('Fehler beim Senden der Zahlungsbestätigungs-E-Mail: ',[
-                    'booking_id' => $booking->id,
-                    'error' => $e->getMessage(),
-                ]);
-                return back()->with('warning', 'Zahlungsstatus aktualisiert, aber E-Mail konnte nicht versendet werden: ' . $e->getMessage());
-            }
+
+        if ($booking->status === 'cancelled' && in_array($request->payment_status, ['paid', 'extern'])) {
+            return back()->with('error', 'Für stornierte Buchungen kann keine Zahlung verbucht werden.');
         }
-        return back()->with('success', 'Zahlungsstatus aktualisiert!');
+
+        if ($request->payment_status === $booking->payment_status) {
+            return back()->with('info', 'Der Zahlungsstatus ist bereits gesetzt.');
+        }
+
+        $message = $workflow->changePaymentStatus($booking, $request->payment_status);
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Die zum aktuellen Stand passende E-Mail erneut an den Kunden senden
+     * (z. B. wenn Tickets oder Zugangsdaten nicht angekommen sind).
+     */
+    public function resend(Booking $booking, BookingWorkflowService $workflow)
+    {
+        $this->authorize('update', $booking);
+
+        $sent = $workflow->resendCurrentState($booking);
+
+        if (!$sent) {
+            return back()->with('error', 'Für diese Buchung kann keine E-Mail erneut versendet werden.');
+        }
+
+        return back()->with('success', "„{$sent}“ wurde erneut an {$booking->customer_email} gesendet.");
+    }
+
+    /**
+     * Tickets/Zugangsdaten für eine einzelne Buchung vor Zahlung bzw. Rechnungsstellung freigeben
+     * (z. B. Rechnung an den Schulträger nach der Veranstaltung).
+     */
+    public function releaseTickets(Booking $booking, BookingWorkflowService $workflow)
+    {
+        $this->authorize('update', $booking);
+
+        if ($booking->payment_method === 'paypal') {
+            return back()->with('error', 'PayPal-Buchungen werden erst nach erfolgter Zahlung freigegeben.');
+        }
+
+        if (!$workflow->releaseTicketsBeforePayment($booking)) {
+            return back()->with('error', 'Für diese Buchung ist keine Vorab-Freigabe möglich (bereits freigegeben, storniert oder kostenfrei).');
+        }
+
+        return back()->with('success', 'Buchung bestätigt und Tickets bzw. Zugangsdaten versendet. Die Rechnung ist weiterhin offen.');
+    }
+
+    /**
+     * Buchung durch den Veranstalter stornieren (mit optionalem Grund).
+     */
+    public function cancel(Request $request, Booking $booking, BookingWorkflowService $workflow)
+    {
+        $this->authorize('update', $booking);
+
+        $validated = $request->validate([
+            'cancellation_reason' => 'nullable|string|max:1000',
+            'notify_customer' => 'nullable|boolean',
+        ]);
+
+        $notify = $request->boolean('notify_customer', true);
+
+        if (!$workflow->cancel($booking, 'organizer', $validated['cancellation_reason'] ?? null, $notify)) {
+            return back()->with('error', 'Diese Buchung kann nicht storniert werden.');
+        }
+
+        return back()->with('success', $notify
+            ? 'Buchung storniert. Der Kunde hat eine Stornobestätigung erhalten.'
+            : 'Buchung storniert (ohne E-Mail an den Kunden).');
     }
 
     public function export(Request $request)
@@ -363,29 +467,23 @@ class BookingManagementController extends Controller
     /**
      * Kostenfreie Buchung manuell bestätigen (Veranstalter-Freigabe)
      */
-    public function approveBooking(Booking $booking)
+    public function approveBooking(Booking $booking, BookingWorkflowService $workflow)
     {
         $this->authorize('update', $booking);
 
         if ($booking->status !== 'pending_approval') {
-            return back()->with('error', 'Diese Buchung kann nicht bestätigt werden (Status: ' . $booking->status . ').');
+            return back()->with('error', 'Diese Buchung kann nicht bestätigt werden (Status: ' . $booking->statusLabel() . ').');
         }
 
-        $booking->update([
-            'status' => 'confirmed',
-            'confirmed_at' => now(),
-        ]);
+        $workflow->approve($booking);
 
-        // Buchungsbestätigung MIT Zugangsdaten/Tickets versenden
-        Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
-
-        return back()->with('success', 'Buchung bestätigt! Die Bestätigung mit Zugangsdaten wurde per E-Mail versendet.');
+        return back()->with('success', 'Buchung bestätigt! Die Bestätigung mit Zugangsdaten bzw. Tickets wurde per E-Mail versendet.');
     }
 
     /**
      * Kostenfreie Buchung ablehnen
      */
-    public function rejectBooking(Request $request, Booking $booking)
+    public function rejectBooking(Request $request, Booking $booking, BookingWorkflowService $workflow)
     {
         $this->authorize('update', $booking);
 
@@ -397,22 +495,7 @@ class BookingManagementController extends Controller
             'rejection_reason' => 'nullable|string|max:500',
         ]);
 
-        $booking->update([
-            'status' => 'cancelled',
-            'cancelled_at' => now(),
-        ]);
-
-        // Ticket-Kontingent zurückgeben
-        foreach ($booking->items as $item) {
-            if ($item->ticketType) {
-                $item->ticketType->decrement('quantity_sold', $item->quantity);
-            }
-        }
-
-        // Teilnehmer über Ablehnung informieren
-        Mail::to($booking->customer_email)->send(
-            new \App\Mail\BookingRejected($booking, $request->rejection_reason)
-        );
+        $workflow->reject($booking, $request->rejection_reason);
 
         return back()->with('success', 'Buchung abgelehnt. Der Teilnehmer wurde benachrichtigt.');
     }
@@ -420,7 +503,7 @@ class BookingManagementController extends Controller
     /**
      * Alle ausstehenden Buchungen eines Events bestätigen (Bulk-Aktion)
      */
-    public function approveAllPending(Event $event)
+    public function approveAllPending(Event $event, BookingWorkflowService $workflow)
     {
         $this->authorize('update', $event);
 
@@ -428,13 +511,9 @@ class BookingManagementController extends Controller
             ->where('status', 'pending_approval')
             ->get();
 
+        // Sammelfreigabe: Bestätigungen laufen über die Queue
         foreach ($pendingBookings as $booking) {
-            $booking->update([
-                'status' => 'confirmed',
-                'confirmed_at' => now(),
-            ]);
-            $booking->load(['items.ticketType', 'event.organization.users', 'event.category']);
-            Mail::to($booking->customer_email)->send(new \App\Mail\BookingConfirmation($booking));
+            $workflow->approve($booking, queue: true);
         }
 
         return back()->with('success', $pendingBookings->count() . ' Buchung(en) bestätigt und Bestätigungen versendet.');
