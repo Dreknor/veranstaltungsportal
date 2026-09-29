@@ -1,6 +1,9 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/nesbot/carbon/extension.neon
+    # Bestehende Altlasten (Stand 09/2026) – neuer Code muss fehlerfrei sein.
+    # Beim Aufräumen alter Stellen: vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon
+    - phpstan-baseline.neon
 
 parameters:
 

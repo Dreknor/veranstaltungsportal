@@ -17,6 +17,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Queue Worker Mode
+    |--------------------------------------------------------------------------
+    |
+    | 'cronjob':    Jobs werden jede Minute vom Scheduler abgearbeitet (einfaches Hosting)
+    | 'supervisor': Ein dauerhaft laufender Worker (empfohlen für Produktion)
+    |
+    */
+
+    'worker_mode' => env('QUEUE_WORKER_MODE', 'cronjob'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Queue Connections
     |--------------------------------------------------------------------------
     |

@@ -74,9 +74,15 @@ Schedule::command('featured:notify-pending-payments')
     ->timezone('Europe/Berlin')
     ->description('Notify admins about pending featured event payments older than 7 days');
 
-// Queue Worker Mode Configuration (set in .env: QUEUE_WORKER_MODE)
+// Queue Worker Mode (config/queue.php → worker_mode, .env: QUEUE_WORKER_MODE)
 // - 'cronjob': Queue jobs are processed every minute via cronjob (default, simple setup)
 // - 'supervisor': Queue worker runs continuously as daemon (recommended for production)
-if (env('QUEUE_WORKER_MODE', 'cronjob') === 'cronjob') {
+// Über config() statt env(): env() liefert bei gecachter Konfiguration (config:cache) immer null.
+if (config('queue.worker_mode', 'cronjob') === 'cronjob') {
     Schedule::command('queue:work --stop-when-empty --max-time=50')->everyMinute();
 }
+
+// Lebenszeichen des Schedulers – wird von "php artisan app:check-config" ausgewertet
+Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler:last_run', now()->toIso8601String()))
+    ->everyMinute()
+    ->name('scheduler-heartbeat');
