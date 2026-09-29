@@ -43,40 +43,7 @@
     }
 }" :class="{ 'dark': darkMode }">
     <!-- Public Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" class="h-14 w-14 object-contain">
-                        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            {{ config('app.name') }}
-                        </span>
-                    </a>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('home') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
-                        Home
-                    </a>
-                    <a href="{{ route('events.index') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
-                        Veranstaltungen
-                    </a>
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
-                            Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium">
-                            Anmelden
-                        </a>
-                        <a href="{{ route('register') }}" class="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 px-4 py-2 rounded-md text-sm font-medium">
-                            Registrieren
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </nav>
+    <x-public-nav />
 
     <!-- Success/Error Messages -->
     @if(session('success'))

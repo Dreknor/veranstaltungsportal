@@ -6,6 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon $start_date
+ * @property \Illuminate\Support\Carbon|null $end_date
+ * @property bool $is_cancelled
+ */
 class EventDate extends Model
 {
     use HasFactory;
@@ -39,6 +44,8 @@ class EventDate extends Model
 
     /**
      * Get the event this date belongs to
+     *
+     * @return BelongsTo<Event, $this>
      */
     public function event(): BelongsTo
     {

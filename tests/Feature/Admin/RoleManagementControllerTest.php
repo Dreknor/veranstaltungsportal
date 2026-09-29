@@ -283,7 +283,7 @@ class RoleManagementControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('view events');
-        $response->assertSee('view-only');
+        $response->assertSee('View-only'); // Anzeige mit großem Anfangsbuchstaben
     }
 
     // ─────────────────────────────────────────────────────────────────────────

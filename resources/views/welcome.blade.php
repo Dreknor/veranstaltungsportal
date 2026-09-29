@@ -15,37 +15,7 @@
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/" class="flex items-center gap-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }} Logo" class="h-14 w-14 object-contain">
-                        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            {{ config('app.name') }}
-                        </span>
-                    </a>
-                </div>
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('events.index') }}" class="text-gray-700 hover:text-blue-600 transition">Veranstaltungen</a>
-                    <a href="{{ route('events.calendar') }}" class="text-gray-700 hover:text-blue-600 transition">Kalender</a>
-                    @auth
-                        @if(auth()->user()->hasRole('organizer'))
-                            <a href="{{ route('organizer.dashboard') }}" class="text-gray-700 hover:text-blue-600 transition">Dashboard</a>
-                        @endif
-                        <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
-                            Mein Konto
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 transition">Anmelden</a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg transition">
-                            Registrieren
-                        </a>
-                    @endauth
-                </div>
-            </div>
-        </div>
-    </nav>
+    <x-public-nav sticky />
 
     <!-- Hero Section -->
     <div class="relative bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800 text-white py-24 overflow-hidden">
@@ -61,7 +31,7 @@
                         Für evangelische Schulen & Bildungseinrichtungen
                     </span>
                 </div>
-                <h1 class="text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
+                <h1 class="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 animate-fade-in">
                     Fort- und Weiterbildungen für Bildungseinrichtungen
                 </h1>
                 <p class="text-xl md:text-2xl mb-4 text-white/90">
@@ -75,7 +45,7 @@
                 <div class="max-w-3xl mx-auto mb-8">
                     <form action="{{ route('events.index') }}" method="GET" class="flex flex-col sm:flex-row gap-3">
                         <input type="text" name="search" placeholder="Fortbildung, Thema oder Referent suchen..."
-                               class="flex-1 px-6 py-4 rounded-lg text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg">
+                               class="flex-1 px-6 py-4 rounded-lg bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-lg">
                         <button type="submit" class="px-8 py-4 bg-yellow-500 text-gray-900 rounded-lg hover:bg-yellow-400 font-semibold shadow-lg hover:shadow-xl transition transform hover:scale-105">
                             🔍 Suchen
                         </button>
@@ -85,20 +55,20 @@
                 <!-- Quick Stats -->
                 <div class="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
                     @php
-                        $eventCount = \App\Models\Event::published()->count();
+                        $eventCount = \App\Models\Event::listed()->count();
                         $categoryCount = \App\Models\EventCategory::where('is_active', true)->count();
                         $bookingCount = \App\Models\Booking::where('status', 'confirmed')->count();
                     @endphp
                     <div class="text-center">
-                        <div class="text-3xl font-bold">{{ $eventCount }}+</div>
-                        <div class="text-sm text-white/80">Veranstaltungen</div>
+                        <div class="text-3xl font-bold">{{ $eventCount }}</div>
+                        <div class="text-sm text-white/80">{{ $eventCount === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} geplant</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold">{{ $categoryCount }}+</div>
+                        <div class="text-3xl font-bold">{{ $categoryCount }}</div>
                         <div class="text-sm text-white/80">Themengebiete</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold">{{ $bookingCount }}+</div>
+                        <div class="text-3xl font-bold">{{ $bookingCount }}</div>
                         <div class="text-sm text-white/80">Teilnahmen</div>
                     </div>
                 </div>
@@ -110,13 +80,16 @@
     <div class="py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-4xl font-bold text-gray-900 mb-4">Fortbildungsthemen</h2>
+                <h2 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">Fortbildungsthemen</h2>
                 <p class="text-lg text-gray-600">Finden Sie passende Weiterbildungen für Ihre pädagogische Praxis</p>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 @php
-                    $categories = \App\Models\EventCategory::where('is_active', true)->get();
+                    // Nur kommende Veranstaltungen zählen (entspricht der Liste hinter dem Kategorie-Link)
+                    $categories = \App\Models\EventCategory::where('is_active', true)
+                        ->withCount(['events as listed_events_count' => fn ($q) => $q->listed()])
+                        ->get();
                 @endphp
                 @foreach($categories as $category)
                     <a href="{{ route('events.index', ['category' => $category->id]) }}"
@@ -152,7 +125,7 @@
                         </div>
                         <span class="font-semibold text-gray-900 text-center">{{ $category->name }}</span>
                         <span class="text-xs text-gray-500 mt-1">
-                            {{ $category->events()->published()->count() }} Veranstaltungen
+                            {{ $category->listed_events_count }} {{ $category->listed_events_count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}
                         </span>
                     </a>
                 @endforeach
@@ -163,9 +136,9 @@
     <!-- Featured Events -->
     <div class="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center mb-12">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-8 sm:mb-12">
                 <div>
-                    <h2 class="text-4xl font-bold text-gray-900 mb-2">⭐ Empfohlene Fortbildungen</h2>
+                    <h2 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-2">⭐ Empfohlene Fortbildungen</h2>
                     <p class="text-lg text-gray-600">Besonders relevante Weiterbildungsangebote für Sie</p>
                 </div>
                 <a href="{{ route('events.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold text-lg hover:underline">
@@ -174,7 +147,7 @@
             </div>
 
             @php
-                $featuredEvents = \App\Models\Event::published()->featured()->with('category')->limit(3)->get();
+                $featuredEvents = \App\Models\Event::listed()->featured()->with('category')->orderBy('start_date')->limit(3)->get();
             @endphp
 
             @if($featuredEvents->count() > 0)

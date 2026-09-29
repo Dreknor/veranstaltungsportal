@@ -2,7 +2,7 @@
     $onlyFreeTickets = $ticketTypes->isNotEmpty() && $ticketTypes->every(fn ($t) => $t->price == 0);
     $isExternalInvoicing = $event->organization?->hasExternalInvoicing() ?? false;
     $singleTicketType = $ticketTypes->count() === 1;
-    $input = 'w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base';
+    $input = 'w-full rounded-lg border px-3 py-2.5 border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-base';
     $card = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6';
     $label = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
 @endphp

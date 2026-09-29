@@ -239,7 +239,9 @@ class PermissionManagementControllerTest extends TestCase
             ->delete(route('admin.permissions.destroy', $permission));
 
         $role->refresh()->load('permissions');
-        $this->assertFalse($role->hasPermissionTo('temp-perm'));
+        // Die Berechtigung existiert nicht mehr – sie darf auch der Rolle nicht mehr zugeordnet sein
+        $this->assertDatabaseMissing('permissions', ['name' => 'temp-perm']);
+        $this->assertFalse($role->permissions->contains('name', 'temp-perm'));
     }
 
     // ─────────────────────────────────────────────────────────────────────────

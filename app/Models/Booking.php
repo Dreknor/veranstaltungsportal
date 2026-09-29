@@ -8,10 +8,27 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property 'pending'|'confirmed'|'cancelled'|'completed'|'pending_approval' $status
  * @property 'pending'|'paid'|'refunded'|'failed'|'extern' $payment_status
+ * @property array<array-key, mixed>|null $additional_data
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property \Illuminate\Support\Carbon|null $confirmed_at
+ * @property \Illuminate\Support\Carbon|null $cancelled_at
+ * @property array<array-key, mixed>|null $reminders_sent
+ * @property bool|null $release_tickets_before_payment
+ * @property \Illuminate\Support\Carbon|null $follow_up_sent_at
+ * @property \Illuminate\Support\Carbon|null $anonymized_at
+ * @property \Illuminate\Support\Carbon|null $certificate_generated_at
+ * @property bool $tickets_personalized
+ * @property \Illuminate\Support\Carbon|null $tickets_personalized_at
+ * @property bool $checked_in
+ * @property \Illuminate\Support\Carbon|null $checked_in_at
+ * @property \Illuminate\Support\Carbon|null $invoice_date
+ * @property bool $externally_invoiced
+ * @property \Illuminate\Support\Carbon|null $externally_invoiced_at
  */
 class Booking extends Model
 {
@@ -101,35 +118,56 @@ class Booking extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<Event, $this>
+     */
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<DiscountCode, $this>
+     */
     public function discountCode(): BelongsTo
     {
         return $this->belongsTo(DiscountCode::class);
     }
 
+    /**
+     * @return HasMany<BookingItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(BookingItem::class);
     }
+    /**
+     * @return HasOne<PlatformFee, $this>
+     */
     public function platformFee(): HasOne
     {
         return $this->hasOne(PlatformFee::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function checkedInBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'checked_in_by');
     }
 
+    /**
+     * @return HasOne<EventReview, $this>
+     */
     public function review(): HasOne
     {
         return $this->hasOne(EventReview::class);
@@ -143,11 +181,17 @@ class Booking extends Model
         return $this->relationLoaded('items') ? $this->items->count() : $this->items()->count();
     }
 
-    public function attendances(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    /**
+     * @return HasManyThrough<BookingItemAttendance, BookingItem, $this>
+     */
+    public function attendances(): HasManyThrough
     {
         return $this->hasManyThrough(BookingItemAttendance::class, BookingItem::class);
     }
 
+    /**
+     * @return HasMany<BookingEmailLog, $this>
+     */
     public function emailLogs(): HasMany
     {
         return $this->hasMany(BookingEmailLog::class)->orderByDesc('sent_at')->orderByDesc('id');

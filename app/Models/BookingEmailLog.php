@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Protokolliert jede E-Mail, die im Zusammenhang mit einer Buchung versendet wurde.
  * Wird automatisch über den MessageSent-Listener befüllt.
+ * @property \Illuminate\Support\Carbon|null $sent_at
  */
 class BookingEmailLog extends Model
 {
@@ -46,6 +47,9 @@ class BookingEmailLog extends Model
         'AttendeeMessageMail' => 'Nachricht des Veranstalters',
     ];
 
+    /**
+     * @return BelongsTo<Booking, $this>
+     */
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);

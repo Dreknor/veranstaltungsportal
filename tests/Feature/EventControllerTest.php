@@ -181,9 +181,23 @@ class EventControllerTest extends TestCase
             'is_cancelled' => false,
             'start_date' => now()->addWeek(),
             'max_attendees' => 100,
+            'price_from' => 0, // ohne Ticket-Typen gilt price_from als Standard-Ticket
         ]);
 
         $this->assertTrue($event->canBeBooked());
+    }
+
+    #[Test]
+    public function it_cannot_be_booked_without_any_ticket_or_price()
+    {
+        // Bewusste Produktentscheidung: ohne Ticket-Typ und ohne Preis ist nichts buchbar
+        $event = Event::factory()->create([
+            'is_published' => true,
+            'start_date' => now()->addWeek(),
+            'price_from' => null,
+        ]);
+
+        $this->assertFalse($event->canBeBooked());
     }
 
     #[Test]

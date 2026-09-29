@@ -190,26 +190,20 @@ class InvoiceNumberFormatTest extends TestCase
     #[Test]
     public function organizer_can_update_invoice_number_format()
     {
+        // Das Format wird in den Rechnungseinstellungen der Organisation gepflegt
         $this->actingAs($this->user);
 
-        $response = $this->put(route('organizer.bank-account.billing-data.update'), [
-            'company_name' => 'Test Company',
-            'company_address' => 'Test Street 123',
-            'company_postal_code' => '12345',
-            'company_city' => 'Test City',
-            'company_country' => 'Deutschland',
-            'tax_id' => '123/456/789',
-            'company_email' => 'billing@test.com',
-            'company_phone' => '+49 123 456789',
-            'invoice_number_format' => 'RE-{YEAR}-{COUNTER:5}',
+        $response = $this->put(route('organizer.settings.invoice.update'), [
+            'invoice_number_format_booking' => 'RE-{YEAR}-{COUNTER}',
+            'invoice_number_counter_booking' => 1,
+            'invoice_number_padding' => 5,
+            'invoice_reset_yearly' => 1,
         ]);
 
-        $response->assertRedirect(route('organizer.bank-account.billing-data'));
-        $response->assertSessionHas('success');
-
+        $response->assertSessionHas('status');
         $this->assertEquals(
-            'RE-{YEAR}-{COUNTER:5}',
-            $this->organization->fresh()->billing_data['invoice_number_format']
+            'RE-{YEAR}-{COUNTER}',
+            $this->organization->fresh()->invoice_settings['invoice_number_format_booking']
         );
     }
 
@@ -218,19 +212,28 @@ class InvoiceNumberFormatTest extends TestCase
     {
         $this->actingAs($this->user);
 
-        $response = $this->put(route('organizer.bank-account.billing-data.update'), [
-            'company_name' => 'Test Company',
-            'company_address' => 'Test Street 123',
-            'company_postal_code' => '12345',
-            'company_city' => 'Test City',
-            'company_country' => 'Deutschland',
-            'tax_id' => '123/456/789',
-            'company_email' => 'billing@test.com',
-            'company_phone' => '+49 123 456789',
-            // Missing invoice_number_format
+        $response = $this->put(route('organizer.settings.invoice.update'), [
+            'invoice_number_counter_booking' => 1,
+            'invoice_number_padding' => 5,
+            'invoice_reset_yearly' => 1,
         ]);
 
-        $response->assertSessionHasErrors('invoice_number_format');
+        $response->assertSessionHasErrors('invoice_number_format_booking');
+    }
+
+    #[Test]
+    public function invoice_number_format_must_contain_counter()
+    {
+        $this->actingAs($this->user);
+
+        $response = $this->put(route('organizer.settings.invoice.update'), [
+            'invoice_number_format_booking' => 'RE-{YEAR}',
+            'invoice_number_counter_booking' => 1,
+            'invoice_number_padding' => 5,
+            'invoice_reset_yearly' => 1,
+        ]);
+
+        $response->assertSessionHasErrors('invoice_number_format_booking');
     }
 
     #[Test]

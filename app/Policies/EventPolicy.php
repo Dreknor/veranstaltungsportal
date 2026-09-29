@@ -31,8 +31,8 @@ class EventPolicy
             return $user->isMemberOf($event->organization);
         }
 
-        // Fallback to user-based check (for legacy events)
-        return $user->id === $event->user_id;
+        // Events ohne Organisation gibt es seit der Umstellung nicht mehr
+        return false;
     }
 
     /**
@@ -61,8 +61,8 @@ class EventPolicy
             return in_array($role, ['owner', 'admin']);
         }
 
-        // Fallback to user-based check (for legacy events)
-        return $user->id === $event->user_id;
+        // Events ohne Organisation gibt es seit der Umstellung nicht mehr
+        return false;
     }
 
     /**
@@ -82,8 +82,8 @@ class EventPolicy
             return in_array($role, ['owner', 'admin']);
         }
 
-        // Fallback to user-based check (for legacy events)
-        return $user->id === $event->user_id;
+        // Events ohne Organisation gibt es seit der Umstellung nicht mehr
+        return false;
     }
 
     /**
@@ -125,8 +125,8 @@ class EventPolicy
             return $user->isMemberOf($event->organization);
         }
 
-        // Fallback to user-based check
-        return $user->id === $event->user_id;
+        // Events ohne Organisation gibt es seit der Umstellung nicht mehr
+        return false;
     }
 }
 

@@ -70,7 +70,7 @@ class BadgeManagementController extends Controller
             'icon' => 'required|string|max:100',
             'color' => 'required|string|max:50',
             'points' => 'required|integer|min:0|max:1000',
-            'requirement_type' => 'required|in:events_attended,hours_attended,total_hours_attended,bookings_made,reviews_written,connections_made,events_organized,revenue_generated,participants_reached,categories_explored,early_bird_bookings,event_categories',
+            'requirement_type' => 'required|in:' . implode(',', array_merge(array_keys(\App\Models\Badge::REQUIREMENT_TYPES), array_keys(\App\Models\Badge::REQUIREMENT_ALIASES))),
             'requirement_value' => 'required|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
@@ -121,7 +121,7 @@ class BadgeManagementController extends Controller
             'icon' => 'required|string|max:100',
             'color' => 'required|string|max:50',
             'points' => 'required|integer|min:0|max:1000',
-            'requirement_type' => 'required|in:events_attended,hours_attended,total_hours_attended,bookings_made,reviews_written,connections_made,events_organized,revenue_generated,participants_reached,categories_explored,early_bird_bookings,event_categories',
+            'requirement_type' => 'required|in:' . implode(',', array_merge(array_keys(\App\Models\Badge::REQUIREMENT_TYPES), array_keys(\App\Models\Badge::REQUIREMENT_ALIASES))),
             'requirement_value' => 'required|integer|min:1',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'remove_image' => 'nullable|boolean',

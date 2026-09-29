@@ -121,6 +121,9 @@ class DashboardController extends Controller
     /**
      * "Heute zu tun": offene Aufgaben über alle kommenden Veranstaltungen der Organisation.
      */
+    /**
+     * @return array{tasks: array<int, array{count: int, label: string, tone: string, url: string}>, soon: \Illuminate\Support\Collection<int, array<string, mixed>>, almostFull: \Illuminate\Support\Collection<int, \App\Models\Event>, waiting: int}
+     */
     protected function todo(\App\Models\Organization $organization): array
     {
         $upcoming = fn ($q) => $q->where('organization_id', $organization->id)->where('end_date', '>=', now());
@@ -159,7 +162,7 @@ class DashboardController extends Controller
                 'url' => route('organizer.reviews.index', ['status' => 'pending'])];
         }
 
-        $waiting = \App\Models\EventWaitlist::whereHas('event', $upcoming)->where('status', 'waiting')->sum('quantity');
+        $waiting = (int) \App\Models\EventWaitlist::whereHas('event', $upcoming)->where('status', 'waiting')->sum('quantity');
 
         // Veranstaltungen der nächsten 7 Tage mit Auslastung und direktem Check-in
         $soon = $organization->events()
@@ -168,7 +171,7 @@ class DashboardController extends Controller
             ->orderBy('start_date')
             ->get()
             ->map(function (\App\Models\Event $event) {
-                $booked = \App\Models\BookingItem::whereHas('booking', fn ($q) => $q->where('event_id', $event->id)->readyForParticipation())->count();
+                $booked = \App\Models\BookingItem::whereHas('booking', fn (\Illuminate\Database\Eloquent\Builder $q) => $q->where('event_id', $event->id)->readyForParticipation())->count();
 
                 return [
                     'event' => $event,

@@ -44,6 +44,7 @@ class BadgeFactory extends Factory
     {
         $possibleRequirements = [
             'bookings_count',
+            'connections_made',
             'events_attended',
             'events_organized',
             'reviews_written',

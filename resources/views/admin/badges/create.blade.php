@@ -134,17 +134,9 @@
                         </label>
                         <select name="requirement_type" id="requirement_type" class="input" required>
                             <option value="">Typ auswählen...</option>
-                            <option value="events_attended" {{ old('requirement_type') === 'events_attended' ? 'selected' : '' }}>Events besucht</option>
-                            <option value="hours_attended" {{ old('requirement_type') === 'hours_attended' ? 'selected' : '' }}>Stunden teilgenommen (Einzelevent)</option>
-                            <option value="total_hours_attended" {{ old('requirement_type') === 'total_hours_attended' ? 'selected' : '' }}>Gesamt-Stunden teilgenommen</option>
-                            <option value="bookings_made" {{ old('requirement_type') === 'bookings_made' ? 'selected' : '' }}>Buchungen getätigt</option>
-                            <option value="reviews_written" {{ old('requirement_type') === 'reviews_written' ? 'selected' : '' }}>Bewertungen geschrieben</option>
-                            <option value="connections_made" {{ old('requirement_type') === 'connections_made' ? 'selected' : '' }}>Verbindungen hergestellt</option>
-                            <option value="events_organized" {{ old('requirement_type') === 'events_organized' ? 'selected' : '' }}>Events organisiert</option>
-                            <option value="categories_explored" {{ old('requirement_type') === 'categories_explored' ? 'selected' : '' }}>Verschiedene Kategorien besucht</option>
-                            <option value="early_bird_bookings" {{ old('requirement_type') === 'early_bird_bookings' ? 'selected' : '' }}>Frühbucher-Buchungen (7+ Tage vorher)</option>
-                            <option value="revenue_generated" {{ old('requirement_type') === 'revenue_generated' ? 'selected' : '' }}>Umsatz generiert (€)</option>
-                            <option value="participants_reached" {{ old('requirement_type') === 'participants_reached' ? 'selected' : '' }}>Teilnehmer erreicht</option>
+                            @foreach(\App\Models\Badge::REQUIREMENT_TYPES as $value => $label)
+                                <option value="{{ $value }}" @selected(\App\Models\Badge::normalizeRequirement((string) old('requirement_type')) === $value)>{{ $label }}</option>
+                            @endforeach
                         </select>
                         @error('requirement_type')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>

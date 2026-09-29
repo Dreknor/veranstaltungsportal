@@ -10,11 +10,10 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        // All published events
+        // Kommende, veröffentlichte Veranstaltungen (gleiche Regel wie die Zähler auf der Startseite)
         $eventsQuery = Event::query()
             ->with(['category', 'organization.users', 'dates'])
-            ->upcoming()
-            ->published();
+            ->listed();
 
         // Filter nach Kategorie
         if ($request->filled('category')) {
@@ -172,7 +171,7 @@ class EventController extends Controller
         $event = Event::where('slug', $slug)->firstOrFail();
 
         // Check if event is private and access is granted
-        if ($event->is_private && !session()->has('event_access_' . $event->id) && $event->user_id !== auth()->id()) {
+        if ($event->is_private && !session()->has('event_access_' . $event->id) && !auth()->user()?->can('view', $event)) {
             abort(403, 'Kein Zugriff auf dieses Event');
         }
 

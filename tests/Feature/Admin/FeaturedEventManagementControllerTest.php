@@ -71,9 +71,13 @@ class FeaturedEventManagementControllerTest extends TestCase
         ]);
 
         $paidFee = FeaturedEventFee::factory()->create([
-            'event_id' => Event::factory()->create(['organization_id' => $this->organization->id])->id,
+            'event_id' => Event::factory()->create([
+                'organization_id' => $this->organization->id,
+                'title' => 'Bezahltes Featured Event Unikat',
+            ])->id,
             'payment_status' => 'paid',
         ]);
+        $pendingFee->event->update(['title' => 'Offenes Featured Event Unikat']);
 
         $response = $this->actingAs($this->admin)
             ->get(route('admin.featured-events.index', ['status' => 'pending']));

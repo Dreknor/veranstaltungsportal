@@ -45,6 +45,9 @@ class AttendeeTicketMail extends Mailable
         );
     }
 
+    /**
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
     public function attachments(): array
     {
         if (!$this->booking->hasTicketDocument()) {

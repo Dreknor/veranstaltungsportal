@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $sale_start
+ * @property \Illuminate\Support\Carbon|null $sale_end
+ * @property bool $is_available
+ * @property array<array-key, mixed>|null $included_services
+ */
 class TicketType extends Model
 {
     use HasFactory;
@@ -36,11 +42,17 @@ class TicketType extends Model
         ];
     }
 
+    /**
+     * @return BelongsTo<Event, $this>
+     */
     public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
     }
 
+    /**
+     * @return HasMany<BookingItem, $this>
+     */
     public function bookingItems(): HasMany
     {
         return $this->hasMany(BookingItem::class);

@@ -110,9 +110,12 @@ class SendEventReminders extends Command
      * Ermittelt die fällige Erinnerung (kleinster Zeitpunkt, dessen Fenster bereits begonnen hat)
      * oder null, wenn nichts zu tun ist.
      */
+    /**
+     * @param  array<int, int>  $offsets
+     */
     protected function dueReminderKey(Event $event, Booking $booking, array $offsets, ?EventDate $session = null): ?string
     {
-        $start = $session?->start_date ?? $event->start_date;
+        $start = $session !== null ? $session->start_date : $event->start_date;
         $prefix = $this->keyPrefix($session);
 
         $due = collect($offsets)
@@ -185,6 +188,9 @@ class SendEventReminders extends Command
         return $count;
     }
 
+    /**
+     * @param  array<int, int>  $offsets
+     */
     protected function markSent(Booking $booking, string $key, array $offsets, ?EventDate $session = null): void
     {
         $prefix = $this->keyPrefix($session);

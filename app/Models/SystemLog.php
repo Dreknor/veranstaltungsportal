@@ -4,6 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property array<array-key, mixed>|null $context
+ * @property array<array-key, mixed>|null $extra
+ * @property int|null $unix_time
+ * @property int|null $level
+ */
 class SystemLog extends Model
 {
     /**

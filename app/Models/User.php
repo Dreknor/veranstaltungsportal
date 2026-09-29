@@ -19,7 +19,28 @@ use App\Models\Organization;
 use App\Models\UserConnection;
 use App\Notifications\CustomVerifyEmail;
 use App\Notifications\ResetPasswordNotification;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property bool $is_admin
+ * @property array<array-key, mixed>|null $notification_preferences
+ * @property array<array-key, mixed>|null $interested_category_ids
+ * @property \Illuminate\Support\Carbon|null $newsletter_subscribed_at
+ * @property array<array-key, mixed>|null $payout_settings
+ * @property array<array-key, mixed>|null $bank_account
+ * @property array<array-key, mixed>|null $organizer_billing_data
+ * @property array<array-key, mixed>|null $custom_platform_fee
+ * @property bool $allow_connections
+ * @property bool $show_profile_publicly
+ * @property bool $show_email_to_connections
+ * @property bool $show_phone_to_connections
+ * @property bool $allow_networking
+ * @property bool $show_profile_public
+ * @property bool $allow_data_analytics
+ * @property array<array-key, mixed>|null $invoice_settings
+ */
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -231,16 +252,20 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the bookings made by this user
+     *
+     * @return HasMany<Booking, $this>
      */
-    public function bookings()
+    public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
     /**
      * Get the user's favorite events
+     *
+     * @return BelongsToMany<Event, $this>
      */
-    public function favoriteEvents()
+    public function favoriteEvents(): BelongsToMany
     {
         return $this->belongsToMany(Event::class, 'event_user_favorites')
             ->withTimestamps();
@@ -256,8 +281,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Organizations this user belongs to
+     *
+     * @return BelongsToMany<Organization, $this>
      */
-    public function organizations()
+    public function organizations(): BelongsToMany
     {
         return $this->belongsToMany(Organization::class, 'organization_user')
             ->withPivot(['role', 'is_active', 'invited_at', 'joined_at'])
@@ -633,8 +660,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get user's earned badges
+     *
+     * @return BelongsToMany<Badge, $this>
      */
-    public function badges()
+    public function badges(): BelongsToMany
     {
         return $this->belongsToMany(Badge::class, 'user_badges')
             ->using(UserBadge::class)
@@ -722,12 +751,32 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Check if user meets badge requirements
      */
+    /**
+     * Anzahl Buchungen, die mindestens 7 Tage vor Veranstaltungsbeginn getätigt wurden
+     * (datenbankunabhängig berechnet – funktioniert mit MySQL und SQLite).
+     */
+    public function earlyBirdBookingsCount(): int
+    {
+        return $this->bookings()
+            ->join('events', 'bookings.event_id', '=', 'events.id')
+            ->get(['bookings.created_at as booked_at', 'events.start_date as event_start'])
+            ->filter(fn ($row) => $row->booked_at && $row->event_start
+                && \Illuminate\Support\Carbon::parse($row->booked_at)->lt(\Illuminate\Support\Carbon::parse($row->event_start)->subDays(7)))
+            ->count();
+    }
+
     public function meetsRequirements(Badge $badge): bool
     {
         $requirements = $badge->requirements ?? [];
 
         foreach ($requirements as $key => $value) {
-            switch ($key) {
+            switch (Badge::normalizeRequirement($key)) {
+                case 'connections_made':
+                    if ($this->connections()->where('status', 'accepted')->count() < $value) {
+                        return false;
+                    }
+                    break;
+
                 case 'bookings_count':
                     if ($this->bookings()->where('payment_status', 'paid')->count() < $value) {
                         return false;
@@ -773,10 +822,7 @@ class User extends Authenticatable implements MustVerifyEmail
                     break;
 
                 case 'early_bird_bookings':
-                    $earlyBirdCount = $this->bookings()
-                        ->join('events', 'bookings.event_id', '=', 'events.id')
-                        ->whereRaw('bookings.created_at < DATE_SUB(events.start_date, INTERVAL 7 DAY)')
-                        ->count();
+                    $earlyBirdCount = $this->earlyBirdBookingsCount();
                     if ($earlyBirdCount < $value) {
                         return false;
                     }
@@ -798,8 +844,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get users that this user is following
+     *
+     * @return BelongsToMany<User, $this>
      */
-    public function following()
+    public function following(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_connections', 'follower_id', 'following_id')
             ->wherePivot('status', 'accepted')
@@ -809,8 +857,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get users that are following this user
+     *
+     * @return BelongsToMany<User, $this>
      */
-    public function followers()
+    public function followers(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_connections', 'following_id', 'follower_id')
             ->wherePivot('status', 'accepted')
@@ -820,8 +870,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get pending connection requests sent by this user
+     *
+     * @return HasMany<UserConnection, $this>
      */
-    public function pendingFollowingRequests()
+    public function pendingFollowingRequests(): HasMany
     {
         return $this->hasMany(UserConnection::class, 'follower_id')
             ->where('status', 'pending');
@@ -829,8 +881,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get pending connection requests received by this user
+     *
+     * @return HasMany<UserConnection, $this>
      */
-    public function pendingFollowerRequests()
+    public function pendingFollowerRequests(): HasMany
     {
         return $this->hasMany(UserConnection::class, 'following_id')
             ->where('status', 'pending');
@@ -838,8 +892,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get all connections (following and followers)
+     *
+     * @return HasMany<UserConnection, $this>
      */
-    public function connections()
+    public function connections(): HasMany
     {
         return $this->hasMany(UserConnection::class, 'follower_id')
             ->where(function ($query) {

@@ -59,6 +59,9 @@ class EventFollowUpMail extends Mailable implements ShouldQueue
         return $items->filter(fn (BookingItem $item) => $item->checked_in)->values();
     }
 
+    /**
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
     public function attachments(): array
     {
         $service = app(CertificateService::class);

@@ -25,7 +25,7 @@ class WaitlistService
      */
     public function offerSeats(Event $event, int $seats): int
     {
-        if ($seats <= 0 || $event->is_cancelled || $event->start_date?->isPast()) {
+        if ($seats <= 0 || $event->is_cancelled || $event->start_date->isPast()) {
             return 0;
         }
 

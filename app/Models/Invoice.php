@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $invoice_date
+ * @property \Illuminate\Support\Carbon|null $due_date
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property array<array-key, mixed>|null $billing_data
+ */
 class Invoice extends Model
 {
     use HasFactory;
@@ -46,6 +52,8 @@ class Invoice extends Model
 
     /**
      * Get the event that owns the invoice
+     *
+     * @return BelongsTo<Event, $this>
      */
     public function event(): BelongsTo
     {
@@ -54,6 +62,8 @@ class Invoice extends Model
 
     /**
      * Get the booking that owns the invoice
+     *
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {
@@ -62,6 +72,8 @@ class Invoice extends Model
 
     /**
      * Get the user (organizer) that owns the invoice
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

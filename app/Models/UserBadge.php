@@ -4,6 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $earned_at
+ * @property bool $is_highlighted
+ * @property int|null $progress
+ */
 class UserBadge extends Pivot
 {
     /**

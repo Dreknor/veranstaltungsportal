@@ -38,16 +38,16 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Startdatum</label>
-                                    <div class="text-gray-900 dark:text-white">{{ $fee->event->starts_at->format('d.m.Y H:i') }}</div>
+                                    <div class="text-gray-900 dark:text-white">{{ $fee->event->start_date?->format('d.m.Y H:i') ?? '–' }}</div>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event Status</label>
                                     <div>
                                         <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            {{ $fee->event->published ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
-                                            {{ $fee->event->published ? 'Veröffentlicht' : 'Entwurf' }}
+                                            {{ $fee->event->is_published ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200' }}">
+                                            {{ $fee->event->is_published ? 'Veröffentlicht' : 'Entwurf' }}
                                         </span>
-                                        @if($fee->event->featured)
+                                        @if($fee->event->is_featured)
                                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 ml-2">
                                                 Featured
                                             </span>

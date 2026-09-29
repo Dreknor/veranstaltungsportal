@@ -90,9 +90,9 @@ class FeaturedEventManagementController extends Controller
 
         // Update event featured status
         if ($request->payment_status === 'paid' && \Carbon\Carbon::parse($fee->featured_end_date)->isFuture()) {
-            $fee->event->update(['featured' => true]);
+            $fee->event->update(['is_featured' => true]);
         } elseif ($request->payment_status !== 'paid') {
-            $fee->event->update(['featured' => false]);
+            $fee->event->update(['is_featured' => false]);
         }
 
         return redirect()
@@ -113,7 +113,7 @@ class FeaturedEventManagementController extends Controller
         $fee->save();
 
         // Remove featured status from event
-        $fee->event->update(['featured' => false]);
+        $fee->event->update(['is_featured' => false]);
 
         return redirect()
             ->route('admin.featured-events.index')
@@ -227,8 +227,8 @@ class FeaturedEventManagementController extends Controller
                             'payment_status' => 'paid',
                             'paid_at' => now(),
                         ]);
-                        if ($fee->expires_at->isFuture()) {
-                            $fee->event->update(['featured' => true]);
+                        if (\Carbon\Carbon::parse($fee->featured_end_date)->endOfDay()->isFuture()) {
+                            $fee->event->update(['is_featured' => true]);
                         }
                     }
                     break;
@@ -236,7 +236,7 @@ class FeaturedEventManagementController extends Controller
                 case 'mark_failed':
                     if ($fee->payment_status === 'pending') {
                         $fee->update(['payment_status' => 'failed']);
-                        $fee->event->update(['featured' => false]);
+                        $fee->event->update(['is_featured' => false]);
                     }
                     break;
 

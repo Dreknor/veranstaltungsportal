@@ -35,7 +35,7 @@ class EventReminderMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $start = $this->session?->start_date ?? $this->event->start_date;
+        $start = $this->session !== null ? $this->session->start_date : $this->event->start_date;
         $when = $start->isToday() ? 'heute' : 'am ' . $start->format('d.m.Y');
 
         return new Envelope(
@@ -58,6 +58,9 @@ class EventReminderMail extends Mailable implements ShouldQueue
         );
     }
 
+    /**
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
     public function attachments(): array
     {
         return [];

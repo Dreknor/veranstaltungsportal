@@ -45,7 +45,7 @@
                         <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
                         @foreach($data['published_vs_draft'] as $status)
                             <div class="flex justify-between mb-1">
-                                <span class="text-sm">{{ $status->published ? 'Veröffentlicht' : 'Entwurf' }}</span>
+                                <span class="text-sm">{{ $status->is_published ? 'Veröffentlicht' : 'Entwurf' }}</span>
                                 <span class="text-sm font-semibold">{{ $status->count }}</span>
                             </div>
                         @endforeach
@@ -142,7 +142,7 @@
                         <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
                         @foreach($data['published_vs_draft'] as $status)
                             <div class="flex justify-between mb-1">
-                                <span class="text-sm">{{ $status->published ? 'Veröffentlicht' : 'Entwurf' }}</span>
+                                <span class="text-sm">{{ $status->is_published ? 'Veröffentlicht' : 'Entwurf' }}</span>
                                 <span class="text-sm font-semibold">{{ $status->count }}</span>
                             </div>
                         @endforeach

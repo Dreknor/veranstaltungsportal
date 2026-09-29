@@ -117,8 +117,8 @@ class FeaturedEventService
      */
     public function canFeatureEvent(Event $event, User $user): bool
     {
-        // Check if user owns the event
-        if ($event->user_id !== $user->id) {
+        // Owner/Admin der veranstaltenden Organisation (events.user_id existiert seit der Umstellung auf Organisationen nicht mehr)
+        if (!$user->can('update', $event)) {
             return false;
         }
 

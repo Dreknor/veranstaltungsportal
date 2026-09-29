@@ -92,6 +92,26 @@
     [x-cloak] {
         display: none !important;
     }
+
+    /*
+     * Formularfelder: sichtbarer Rahmen und ausreichende Tippfläche als Standard.
+     * Viele Views setzen nur "border-gray-300" ohne "border" – seit Tailwind v4 bleibt der Rahmen dann unsichtbar.
+     * Utility-Klassen (z. B. border-0, px-6) überschreiben diese Basis weiterhin.
+     */
+    input:where(:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden'], [type='submit'], [type='button'], [type='reset'], [type='image'])),
+    select,
+    textarea {
+        border-width: 1px;
+        border-color: var(--color-gray-300, #d1d5db);
+        padding: 0.5rem 0.75rem;
+        min-height: 2.5rem;
+    }
+
+    input[type='checkbox'],
+    input[type='radio'] {
+        border-width: 1px;
+        border-color: var(--color-gray-300, #d1d5db);
+    }
 }
 
     .dark {

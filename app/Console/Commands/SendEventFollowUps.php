@@ -38,7 +38,7 @@ class SendEventFollowUps extends Command
                 if (!$event->hasMultipleDates()) {
                     return true;
                 }
-                $last = $event->dates()->where('is_cancelled', false)->get()->last();
+                $last = $event->dates()->where('is_cancelled', false)->reorder()->orderByDesc('start_date')->first();
 
                 return !$last || ($last->end_date ?? $last->start_date)->lte($endedBefore);
             });

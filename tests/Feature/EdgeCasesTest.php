@@ -20,6 +20,7 @@ class EdgeCasesTest extends TestCase
         $event = Event::factory()->create([
             'max_attendees' => null,
             'is_published' => true,
+            'price_from' => 0,
         ]);
 
         $this->assertTrue($event->hasAvailableTickets());
@@ -104,6 +105,8 @@ class EdgeCasesTest extends TestCase
         $event = Event::factory()->create([
             'is_published' => true,
             'start_date' => now()->addMinutes(30),
+            'end_date' => now()->addHours(2),
+            'price_from' => 0,
         ]);
 
         // Event should still be bookable if it's in the future

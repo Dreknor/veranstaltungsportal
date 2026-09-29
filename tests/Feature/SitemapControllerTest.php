@@ -15,7 +15,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get(route('sitemap'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/xml');
+        $response->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
         $response->assertSee('<?xml', false);
         $response->assertSee('sitemapindex');
     }
@@ -26,7 +26,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get(route('sitemap.static'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/xml');
+        $response->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
         $response->assertSee('<?xml', false);
         $response->assertSee('urlset');
     }
@@ -48,7 +48,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get(route('sitemap.events'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/xml');
+        $response->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
         $response->assertSee('<?xml', false);
         $response->assertSee('urlset');
     }
@@ -57,12 +57,13 @@ class SitemapControllerTest extends TestCase
     public function events_sitemap_contains_published_events(): void
     {
         $publishedEvent = \App\Models\Event::factory()->create([
-            'published' => true,
-            'starts_at' => now()->addDays(10),
+            'is_published' => true,
+            'start_date' => now()->addDays(10),
+            'end_date' => now()->addDays(10)->addHours(2),
         ]);
 
         $unpublishedEvent = \App\Models\Event::factory()->create([
-            'published' => false,
+            'is_published' => false,
         ]);
 
         $response = $this->get(route('sitemap.events'));
@@ -78,7 +79,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get(route('sitemap.categories'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/xml');
+        $response->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
         $response->assertSee('<?xml', false);
         $response->assertSee('urlset');
     }
@@ -107,7 +108,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get(route('sitemap.organizers'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'application/xml');
+        $response->assertHeader('Content-Type', 'application/xml; charset=UTF-8');
         $response->assertSee('<?xml', false);
         $response->assertSee('urlset');
     }
@@ -115,24 +116,21 @@ class SitemapControllerTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function organizers_sitemap_contains_organizers_with_published_events(): void
     {
-        $organizerWithEvents = \App\Models\User::factory()->create([
-            'is_organizer' => true,
+        $organizerWithEvents = \App\Models\User::factory()->create(['is_organizer' => true]);
+        $organization = \App\Models\Organization::factory()->create();
+        $organization->users()->attach($organizerWithEvents->id, ['role' => 'owner', 'is_active' => true, 'joined_at' => now()]);
+        \App\Models\Event::factory()->create([
+            'organization_id' => $organization->id,
+            'is_published' => true,
         ]);
 
-        $event = \App\Models\Event::factory()->create([
-            'organizer_id' => $organizerWithEvents->id,
-            'published' => true,
-        ]);
-
-        $organizerWithoutEvents = \App\Models\User::factory()->create([
-            'is_organizer' => true,
-        ]);
+        $organizerWithoutEvents = \App\Models\User::factory()->create(['is_organizer' => true]);
 
         $response = $this->get(route('sitemap.organizers'));
 
         $response->assertOk();
-        $response->assertSee(route('user.profile', $organizerWithEvents->id));
-        $response->assertDontSee(route('user.profile', $organizerWithoutEvents->id));
+        $response->assertSee(route('users.show', $organizerWithEvents->id));
+        $response->assertDontSee(route('users.show', $organizerWithoutEvents->id));
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
@@ -141,7 +139,7 @@ class SitemapControllerTest extends TestCase
         $response = $this->get(route('robots'));
 
         $response->assertOk();
-        $response->assertHeader('Content-Type', 'text/plain');
+        $response->assertHeader('Content-Type', 'text/plain; charset=utf-8');
     }
 
     #[\PHPUnit\Framework\Attributes\Test]

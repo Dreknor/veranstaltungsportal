@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Anwesenheit eines Tickets an einem einzelnen Termin (Veranstaltungen mit mehreren Terminen).
+ * @property \Illuminate\Support\Carbon|null $checked_in_at
  */
 class BookingItemAttendance extends Model
 {

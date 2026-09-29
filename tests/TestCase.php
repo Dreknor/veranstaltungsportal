@@ -24,10 +24,16 @@ abstract class TestCase extends BaseTestCase
     protected function createRolesIfNeeded(): void
     {
         $roles = ['admin', 'organizer', 'participant', 'user'];
+        // Wie in Produktion (Migration add_meta_to_roles_table) als Systemrollen markiert
+        $systemRoles = ['admin', 'user', 'organizer', 'moderator', 'viewer'];
 
         foreach ($roles as $roleName) {
             if (!Role::where('name', $roleName)->exists()) {
-                Role::create(['name' => $roleName, 'guard_name' => 'web']);
+                Role::create([
+                    'name' => $roleName,
+                    'guard_name' => 'web',
+                    'is_system' => in_array($roleName, $systemRoles),
+                ]);
             }
         }
     }

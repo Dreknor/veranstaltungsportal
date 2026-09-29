@@ -122,7 +122,7 @@ class InvoiceService
             'invoice_number' => $this->invoiceNumberService->generateBookingInvoiceNumber($booking->event->user),
             'event_id' => $booking->event_id,
             'booking_id' => $booking->id,
-            'user_id' => $booking->event->user_id, // Organizer
+            'user_id' => $booking->event->user?->id, // Organizer (Owner der Organisation)
             'type' => 'participant',
             'recipient_name' => $booking->customer_name,
             'recipient_email' => $booking->customer_email,

@@ -197,7 +197,7 @@ class FeaturedEventController extends Controller
     {
         $user = Auth::user();
 
-        if ($event->user_id !== $user->id) {
+        if (!$user->can('update', $event)) {
             abort(403);
         }
 

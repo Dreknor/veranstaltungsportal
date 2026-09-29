@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $accepted_at
+ */
 class UserConnection extends Model
 {
     use HasFactory;
@@ -33,6 +36,8 @@ class UserConnection extends Model
 
     /**
      * Get the user who is following
+     *
+     * @return BelongsTo<User, $this>
      */
     public function follower(): BelongsTo
     {
@@ -41,6 +46,8 @@ class UserConnection extends Model
 
     /**
      * Get the user being followed
+     *
+     * @return BelongsTo<User, $this>
      */
     public function following(): BelongsTo
     {

@@ -6,6 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $featured_start_date
+ * @property \Illuminate\Support\Carbon|null $featured_end_date
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $expiry_notified_at
+ */
 class FeaturedEventFee extends Model
 {
     use HasFactory;
@@ -36,6 +42,8 @@ class FeaturedEventFee extends Model
 
     /**
      * Get the event that owns the featured fee
+     *
+     * @return BelongsTo<Event, $this>
      */
     public function event(): BelongsTo
     {
@@ -44,6 +52,8 @@ class FeaturedEventFee extends Model
 
     /**
      * Get the user (organizer) that owns the featured fee
+     *
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

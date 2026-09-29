@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @property bool $is_public
+ * @property int|null $order
+ */
 class Setting extends Model
 {
     use HasFactory;

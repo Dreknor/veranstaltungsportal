@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $last_updated_at
+ */
 class LegalPage extends Model
 {
     protected $fillable = [
@@ -27,6 +30,8 @@ class LegalPage extends Model
 
     /**
      * The admin who last updated this page.
+     *
+     * @return BelongsTo<User, $this>
      */
     public function editor(): BelongsTo
     {

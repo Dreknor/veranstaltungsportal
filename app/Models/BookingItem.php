@@ -5,7 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property array<array-key, mixed>|null $custom_fields
+ * @property bool $checked_in
+ * @property \Illuminate\Support\Carbon|null $checked_in_at
+ * @property \Illuminate\Support\Carbon|null $ticket_sent_at
+ */
 class BookingItem extends Model
 {
     use HasFactory;
@@ -47,20 +54,26 @@ class BookingItem extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<Booking, $this>
+     */
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
     }
 
+    /**
+     * @return BelongsTo<TicketType, $this>
+     */
     public function ticketType(): BelongsTo
     {
         return $this->belongsTo(TicketType::class);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<BookingItemAttendance, $this>
+     * @return HasMany<BookingItemAttendance, $this>
      */
-    public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function attendances(): HasMany
     {
         return $this->hasMany(BookingItemAttendance::class);
     }

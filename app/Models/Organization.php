@@ -9,6 +9,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
+/**
+ * @property array<array-key, mixed>|null $billing_data
+ * @property array<array-key, mixed>|null $bank_account
+ * @property array<array-key, mixed>|null $payout_settings
+ * @property array<array-key, mixed>|null $custom_platform_fee
+ * @property array<array-key, mixed>|null $invoice_settings
+ * @property bool $is_active
+ * @property bool $is_verified
+ * @property \Illuminate\Support\Carbon|null $verified_at
+ * @property bool $paypal_enabled
+ */
 class Organization extends Model
 {
     use HasFactory, SoftDeletes;
@@ -104,6 +115,8 @@ class Organization extends Model
 
     /**
      * Users belonging to this organization
+     *
+     * @return BelongsToMany<User, $this>
      */
     public function users(): BelongsToMany
     {
@@ -161,6 +174,8 @@ class Organization extends Model
 
     /**
      * Events created by this organization
+     *
+     * @return HasMany<Event, $this>
      */
     public function events(): HasMany
     {

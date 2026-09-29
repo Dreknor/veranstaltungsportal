@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $paid_at
+ * @property \Illuminate\Support\Carbon|null $invoice_date
+ */
 class PlatformFee extends Model
 {
     use HasFactory;
@@ -34,6 +38,8 @@ class PlatformFee extends Model
 
     /**
      * Get the event that owns the platform fee
+     *
+     * @return BelongsTo<Event, $this>
      */
     public function event(): BelongsTo
     {
@@ -42,6 +48,8 @@ class PlatformFee extends Model
 
     /**
      * Get the booking that owns the platform fee
+     *
+     * @return BelongsTo<Booking, $this>
      */
     public function booking(): BelongsTo
     {

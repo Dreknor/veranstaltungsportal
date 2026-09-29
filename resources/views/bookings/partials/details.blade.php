@@ -386,7 +386,7 @@
                         <a href="{{ route('bookings.ticket', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium">Ticket (PDF)</a>
                     @endif
                     @if(!$booking->isFree() && !$isCancelled && !$isExternalInvoicing && $booking->invoice_number)
-                        <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm font-medium">Rechnung (PDF)</a>
+                        <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm font-medium">Rechnung herunterladen (PDF)</a>
                     @elseif(!$booking->isFree() && $isExternalInvoicing)
                         <p class="text-xs text-gray-600 dark:text-gray-400">Die Rechnung erhalten Sie separat vom Veranstalter.</p>
                     @endif

@@ -6,9 +6,41 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property array<array-key, mixed>|null $requirements
+ * @property bool $is_active
+ * @property int|null $points
+ */
 class Badge extends Model
 {
     use HasFactory;
+
+    /**
+     * Anforderungen, die die Vergabelogik (User::meetsRequirements, BadgeService) auswertet.
+     */
+    public const REQUIREMENT_TYPES = [
+        'events_attended' => 'Events besucht (eingecheckt)',
+        'total_hours_attended' => 'Gesamt-Stunden teilgenommen',
+        'bookings_count' => 'Bezahlte Buchungen',
+        'reviews_written' => 'Bewertungen geschrieben',
+        'connections_made' => 'Verbindungen hergestellt',
+        'events_organized' => 'Events organisiert',
+        'categories_explored' => 'Verschiedene Kategorien besucht',
+        'early_bird_bookings' => 'Frühbucher-Buchungen (7+ Tage vorher)',
+    ];
+
+    /**
+     * Ältere Bezeichnungen aus früheren Formularversionen.
+     */
+    public const REQUIREMENT_ALIASES = [
+        'bookings_made' => 'bookings_count',
+        'event_categories' => 'categories_explored',
+    ];
+
+    public static function normalizeRequirement(string $key): string
+    {
+        return self::REQUIREMENT_ALIASES[$key] ?? $key;
+    }
 
     protected $fillable = [
         'name',
@@ -31,6 +63,8 @@ class Badge extends Model
 
     /**
      * Users who have earned this badge
+     *
+     * @return BelongsToMany<User, $this>
      */
     public function users(): BelongsToMany
     {

@@ -125,7 +125,10 @@ class BadgeService
      */
     protected function getCurrentValue(User $user, string $key): int
     {
-        switch ($key) {
+        switch (\App\Models\Badge::normalizeRequirement($key)) {
+            case 'connections_made':
+                return $user->connections()->where('status', 'accepted')->count();
+
             case 'bookings_count':
                 return $user->bookings()->where('payment_status', 'paid')->count();
 
@@ -151,10 +154,7 @@ class BadgeService
                     ->count('events.event_category_id');
 
             case 'early_bird_bookings':
-                return $user->bookings()
-                    ->join('events', 'bookings.event_id', '=', 'events.id')
-                    ->whereRaw("bookings.created_at < DATE_SUB(events.start_date, INTERVAL 7 DAY)")
-                    ->count();
+                return $user->earlyBirdBookingsCount();
 
             default:
                 return 0;

@@ -44,6 +44,9 @@ class BookingWorkflowService
      *
      * @return bool true, wenn Tickets/Zugangsdaten versendet wurden
      */
+    /**
+     * @param  array<string, mixed>  $attributes  zusätzliche Buchungsfelder (z. B. externe Rechnungsnummer)
+     */
     public function confirmPayment(Booking $booking, string $paymentStatus = 'paid', array $attributes = [], bool $queue = false): bool
     {
         // Wurden Tickets schon vorher freigegeben (bezahlt oder Vorab-Freigabe), nicht erneut senden
@@ -312,7 +315,7 @@ class BookingWorkflowService
     /**
      * Veranstalter-Benachrichtigung an alle Owner/Admins der Organisation (mit aktivierten Buchungsbenachrichtigungen).
      */
-    public function notifyOrganizers(Booking $booking, $notification): void
+    public function notifyOrganizers(Booking $booking, \Illuminate\Notifications\Notification $notification): void
     {
         foreach ($this->organizerRecipients($booking->event) as $user) {
             try {
@@ -350,7 +353,7 @@ class BookingWorkflowService
             ->filter(function (User $user) {
                 $preferences = $user->notification_preferences ?? [];
 
-                return !is_array($preferences) || ($preferences['booking_notifications'] ?? true);
+                return (bool) ($preferences['booking_notifications'] ?? true);
             })
             ->values();
     }
@@ -411,7 +414,7 @@ class BookingWorkflowService
         }
     }
 
-    protected function notifyCustomer(Booking $booking, $notification): void
+    protected function notifyCustomer(Booking $booking, \Illuminate\Notifications\Notification $notification): void
     {
         try {
             if ($booking->user) {

@@ -602,7 +602,8 @@ describe('E-Mail Buchungsbestätigung – externer Modus', function () {
 
         // Kein Attachment mit 'Rechnung' im Namen
         $invoiceAttachments = array_filter($attachments, function ($a) {
-            return isset($a['as']) && str_contains($a['as'], 'Rechnung');
+            $name = $a instanceof \Illuminate\Mail\Mailables\Attachment ? $a->as : ($a['as'] ?? null);
+            return $name && str_contains($name, 'Rechnung');
         });
 
         expect(count($invoiceAttachments))->toBe(0);

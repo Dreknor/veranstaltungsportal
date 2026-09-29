@@ -27,10 +27,10 @@
     <div class="min-h-screen bg-gray-50">
         <!-- Header mit Suche und Filter -->
         <div class="bg-white shadow-sm border-b">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-gray-900">Veranstaltungen entdecken</h1>
-                    <a href="{{ route('login') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Veranstaltungen entdecken</h1>
+                    <a href="{{ route('login') }}" class="text-sm sm:text-base text-blue-600 hover:text-blue-800 font-medium">
                         <x-icon.user class="w-5 h-5 inline-block mr-1" />
                         Anmelden für mehr Funktionen
                     </a>
@@ -38,15 +38,15 @@
 
                 <form method="GET" action="{{ route('events.index') }}" class="space-y-4">
                     <!-- Suchleiste -->
-                    <div class="flex gap-4">
-                        <div class="flex-1">
+                    <div class="flex gap-2 sm:gap-4">
+                        <div class="flex-1 min-w-0">
                             <input type="text" name="search" value="{{ request('search') }}"
                                    placeholder="Nach Events suchen..."
                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                            <x-icon.search class="w-5 h-5 inline-block mr-2" />
-                            Suchen
+                        <button type="submit" class="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shrink-0" aria-label="Suchen">
+                            <x-icon.search class="w-5 h-5 inline-block sm:mr-2" />
+                            <span class="hidden sm:inline">Suchen</span>
                         </button>
                     </div>
 

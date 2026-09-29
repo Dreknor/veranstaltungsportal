@@ -4,7 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property \Illuminate\Support\Carbon|null $notified_at
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ */
 class EventWaitlist extends Model
 {
     use HasFactory;
@@ -33,24 +38,30 @@ class EventWaitlist extends Model
 
     /**
      * Get the event
+     *
+     * @return BelongsTo<Event, $this>
      */
-    public function event()
+    public function event(): BelongsTo
     {
         return $this->belongsTo(Event::class);
     }
 
     /**
      * Get the user
+     *
+     * @return BelongsTo<User, $this>
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
     /**
      * Get the ticket type
+     *
+     * @return BelongsTo<TicketType, $this>
      */
-    public function ticketType()
+    public function ticketType(): BelongsTo
     {
         return $this->belongsTo(TicketType::class);
     }

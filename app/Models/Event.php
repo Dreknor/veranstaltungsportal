@@ -10,6 +10,26 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
+/**
+ * @property-read \App\Models\User|null $user Owner/Admin der Organisation (Legacy-Accessor)
+ * @property \Illuminate\Support\Carbon $start_date
+ * @property \Illuminate\Support\Carbon|null $end_date
+ * @property \Illuminate\Support\Carbon|null $cancelled_at
+ * @property bool $has_multiple_dates
+ * @property array<array-key, mixed>|null $gallery_images
+ * @property bool $is_published
+ * @property bool $is_featured
+ * @property bool $is_private
+ * @property bool $registration_required
+ * @property array<array-key, mixed>|null $meta_data
+ * @property bool $is_cancelled
+ * @property bool $show_qr_code_on_ticket
+ * @property bool $requires_ticket
+ * @property bool $cancellation_allowed
+ * @property int|null $cancellation_days_before
+ * @property bool $free_ticket_auto_confirm
+ * @property bool $tickets_before_invoice
+ */
 class Event extends Model implements HasMedia
 {
     use HasFactory, SoftDeletes, InteractsWithMedia;
@@ -96,6 +116,9 @@ class Event extends Model implements HasMedia
         ];
     }
 
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
@@ -160,6 +183,9 @@ class Event extends Model implements HasMedia
         return $this->organization?->description;
     }
 
+    /**
+     * @return BelongsTo<EventCategory, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(EventCategory::class, 'event_category_id');
@@ -167,37 +193,57 @@ class Event extends Model implements HasMedia
 
     /**
      * Get all dates for this event (for events with multiple dates)
+     *
+     * @return HasMany<EventDate, $this>
      */
     public function dates(): HasMany
     {
         return $this->hasMany(EventDate::class)->orderBy('start_date');
     }
 
+    /**
+     * @return HasMany<TicketType, $this>
+     */
     public function ticketTypes(): HasMany
     {
         return $this->hasMany(TicketType::class);
     }
 
+    /**
+     * @return HasMany<Booking, $this>
+     */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
 
+    /**
+     * @return HasMany<Invoice, $this>
+     */
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
+    /**
+     * @return HasMany<EventReview, $this>
+     */
     public function reviews(): HasMany
     {
         return $this->hasMany(EventReview::class);
     }
 
+    /**
+     * @return HasMany<DiscountCode, $this>
+     */
     public function discountCodes(): HasMany
     {
         return $this->hasMany(DiscountCode::class);
     }
 
+    /**
+     * @return HasMany<FeaturedEventFee, $this>
+     */
     public function featuredFees(): HasMany
     {
         return $this->hasMany(FeaturedEventFee::class);
@@ -457,6 +503,16 @@ class Event extends Model implements HasMedia
     public function scopeUpcoming($query)
     {
         return $query->where('start_date', '>', now());
+    }
+
+    /**
+     * Öffentlich gelistete Veranstaltungen: veröffentlicht und noch nicht begonnen.
+     * Grundlage für die Veranstaltungsliste UND alle Zähler (Startseite, Kategorien),
+     * damit Zahl und Trefferliste immer übereinstimmen.
+     */
+    public function scopeListed($query)
+    {
+        return $query->published()->upcoming();
     }
 
     public function scopeFeatured($query)

@@ -54,14 +54,15 @@ class ConnectionManagementControllerTest extends TestCase
             ->get(route('admin.connections.index', ['status' => 'pending']));
 
         $response->assertOk();
-        $response->assertSee($pendingConnection->follower->name);
-        $response->assertDontSee($acceptedConnection->follower->name);
+        // Liste prüfen (Namen können zusätzlich in der Statistik "aktivste Person" auftauchen)
+        $response->assertViewHas('connections', fn ($connections) =>
+            $connections->pluck('id')->all() === [$pendingConnection->id]);
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
     public function admin_can_search_connections(): void
     {
-        $user1 = User::factory()->create(['name' => 'John Doe']);
+        $user1 = User::factory()->create(['name' => 'Johannes Zwiebelmann']);
         $user2 = User::factory()->create(['name' => 'Jane Smith']);
 
         $connection1 = UserConnection::factory()->create([
@@ -73,11 +74,13 @@ class ConnectionManagementControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($this->admin)
-            ->get(route('admin.connections.index', ['search' => 'John']));
+            ->get(route('admin.connections.index', ['search' => 'Zwiebelmann']));
 
         $response->assertOk();
-        $response->assertSee('John Doe');
-        $response->assertDontSee('Jane Smith');
+        $response->assertSee('Johannes Zwiebelmann');
+        $response->assertViewHas('connections', fn ($connections) =>
+            $connections->pluck('id')->contains($connection1->id)
+            && !$connections->pluck('id')->contains($connection2->id));
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
