@@ -161,7 +161,7 @@ class TicketPdfService
         $booking->load(['event.organization', 'items.ticketType']);
 
         // Debug: Log the number of items
-        \Log::info('Generating tickets for booking', [
+        \Illuminate\Support\Facades\Log::info('Generating tickets for booking', [
             'booking_id' => $booking->id,
             'items_count' => $booking->items->count(),
         ]);
@@ -193,7 +193,7 @@ class TicketPdfService
             }
         }
 
-        \Log::info('Tickets data prepared', [
+        \Illuminate\Support\Facades\Log::info('Tickets data prepared', [
             'tickets_count' => count($ticketsData),
         ]);
 

@@ -147,7 +147,7 @@ class CertificateService
                 $paths[] = $this->saveCertificate($booking);
             } catch (\Exception $e) {
                 // Log error but continue with other certificates
-                \Log::error("Failed to generate certificate for booking {$booking->id}: " . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error("Failed to generate certificate for booking {$booking->id}: " . $e->getMessage());
             }
         }
 
@@ -257,7 +257,7 @@ class CertificateService
                         'filename' => $this->getIndividualCertificateFilename($item),
                     ];
                 } catch (\Exception $e) {
-                    \Log::error("Failed to generate certificate for booking item {$item->id}: " . $e->getMessage());
+                    \Illuminate\Support\Facades\Log::error("Failed to generate certificate for booking item {$item->id}: " . $e->getMessage());
                 }
             }
         }

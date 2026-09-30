@@ -299,7 +299,7 @@ class CheckConfiguration extends Command
             if ($this->option('live')) {
                 try {
                     $symfony = Mail::mailer($mailer)->getSymfonyTransport();
-                    if (method_exists($symfony, 'start')) {
+                    if ($symfony instanceof \Symfony\Component\Mailer\Transport\Smtp\SmtpTransport) {
                         $symfony->start();
                         $symfony->stop();
                     }
@@ -531,7 +531,7 @@ class CheckConfiguration extends Command
         }
 
         // Nur Organisationen mit kommenden, veröffentlichten Veranstaltungen sind für Teilnehmende relevant
-        $organizations = Organization::whereHas('events', fn ($q) => $q->listed())->get();
+        $organizations = Organization::whereHas('events', fn (\Illuminate\Database\Eloquent\Builder $q) => $q->where('is_published', true)->where('start_date', '>', now()))->get();
         if ($organizations->isEmpty()) {
             $this->markOk('Keine Organisation mit kommenden Veranstaltungen.');
 

@@ -94,9 +94,12 @@
     }
 
     /*
-     * Formularfelder: sichtbarer Rahmen und ausreichende Tippfläche als Standard.
-     * Viele Views setzen nur "border-gray-300" ohne "border" – seit Tailwind v4 bleibt der Rahmen dann unsichtbar.
-     * Utility-Klassen (z. B. border-0, px-6) überschreiben diese Basis weiterhin.
+     * Formularfelder: sichtbarer Rahmen, ausreichende Tippfläche und IMMER lesbare Farben als Standard.
+     * - Viele Views setzen nur "border-gray-300" ohne "border" – seit Tailwind v4 bleibt der Rahmen dann unsichtbar.
+     * - Ohne eigene Farbe erben Felder die Schriftfarbe der Seite. Im Dark Mode (System-Einstellung auf dem
+     *   Handy) ist das hellgrau – auf weißen Karten war der eingegebene Text dann nicht lesbar.
+     *   Deshalb bekommen Felder ein festes Paar aus hellem Hintergrund und dunkler Schrift.
+     * Utility-Klassen (z. B. dark:bg-gray-900 dark:text-gray-100, border-0, px-6) überschreiben diese Basis weiterhin.
      */
     input:where(:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden'], [type='submit'], [type='button'], [type='reset'], [type='image'])),
     select,
@@ -105,6 +108,23 @@
         border-color: var(--color-gray-300, #d1d5db);
         padding: 0.5rem 0.75rem;
         min-height: 2.5rem;
+        background-color: #ffffff;
+        color: var(--color-gray-900, #111827);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--color-gray-500, #6b7280);
+        opacity: 1;
+    }
+
+    /* Deaktivierte/schreibgeschützte Felder erkennbar, aber lesbar */
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+        background-color: var(--color-gray-100, #f3f4f6);
+        color: var(--color-gray-600, #4b5563);
+        cursor: not-allowed;
     }
 
     input[type='checkbox'],

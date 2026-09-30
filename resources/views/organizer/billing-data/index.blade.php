@@ -144,7 +144,7 @@
                                 <div x-show="open" class="mb-2">
                                     <input type="text" name="external_invoice_number"
                                            placeholder="Ext. Rechnungsnr. (optional)"
-                                           class="text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 w-40">
+                                           class="text-xs rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 w-40">
                                 </div>
                                 <button type="button" @click="open = !open"
                                         class="text-blue-600 hover:text-blue-800 dark:text-blue-400 text-xs" x-show="!open">

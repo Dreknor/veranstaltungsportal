@@ -510,7 +510,11 @@ class Event extends Model implements HasMedia
      * Grundlage für die Veranstaltungsliste UND alle Zähler (Startseite, Kategorien),
      * damit Zahl und Trefferliste immer übereinstimmen.
      */
-    public function scopeListed($query)
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<Event>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<Event>
+     */
+    public function scopeListed(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
         return $query->published()->upcoming();
     }
