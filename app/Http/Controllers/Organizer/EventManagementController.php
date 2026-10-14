@@ -324,7 +324,7 @@ class EventManagementController extends Controller
         // Dupliziere Event
         $newEvent = $event->replicate();
         $newEvent->title = $event->title . ' (Kopie)';
-        $newEvent->slug = Str::slug($newEvent->title) . '-' . Str::random(6);
+        $newEvent->slug = Str::slug($event->title) . '-' . Str::random(6);
         $newEvent->is_published = false;
         $newEvent->is_featured = false;
         $newEvent->created_at = now();
