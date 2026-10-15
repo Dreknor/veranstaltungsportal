@@ -27,6 +27,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
 
+        // Fortschritt des Online-Updaters auch im Wartungsmodus abrufbar
+        $middleware->preventRequestsDuringMaintenance(except: [
+            'admin/updates',
+            'admin/updates/progress',
+        ]);
+
         // Exclude PayPal webhook from CSRF verification
         $middleware->validateCsrfTokens(except: [
             'paypal/webhook',

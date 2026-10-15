@@ -350,6 +350,11 @@
                         Audit Logs
                     </x-layouts.sidebar-link>
 
+                    <x-layouts.sidebar-link href="{{ route('admin.updates.index') }}" icon='fas-cloud-arrow-down'
+                        :active="request()->routeIs('admin.updates.*')">
+                        Updates
+                    </x-layouts.sidebar-link>
+
                     <!-- Communication -->
                     <li class="pt-4 pb-2">
                         <div :class="{ 'px-3': sidebarOpen, 'px-0 text-center': !sidebarOpen }">

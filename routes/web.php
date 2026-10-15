@@ -519,6 +519,11 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::delete('/audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'destroy'])->name('audit-logs.destroy');
 
     // System Logs
+    // Online-Updater
+    Route::get('/updates', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('updates.index');
+    Route::post('/updates', [\App\Http\Controllers\Admin\UpdateController::class, 'store'])->name('updates.store');
+    Route::get('/updates/progress', [\App\Http\Controllers\Admin\UpdateController::class, 'progress'])->name('updates.progress');
+
     Route::get('/system-logs', [\App\Http\Controllers\Admin\SystemLogController::class, 'index'])->name('system-logs.index');
     Route::get('/system-logs/statistics', [\App\Http\Controllers\Admin\SystemLogController::class, 'statistics'])->name('system-logs.statistics');
     Route::get('/system-logs/export', [\App\Http\Controllers\Admin\SystemLogController::class, 'export'])->name('system-logs.export');
