@@ -37,7 +37,7 @@
     {{-- Einstieg --}}
     <x-ui.zone aria-labelledby="einstieg-titel">
         <div class="flex flex-col gap-8 pt-[clamp(40px,6vw,72px)] pb-[clamp(40px,6vw,64px)]">
-            <h1 id="einstieg-titel" class="m-0 max-w-prose text-display text-ink">
+            <h1 id="einstieg-titel" class="m-0 max-w-[760px] text-display text-ink">
                 Fortbildungen für Menschen, die Schule gestalten.
             </h1>
 
@@ -87,14 +87,15 @@
                     @foreach ($categories as $category)
                         <li>
                             <a href="{{ route('events.index', ['category' => $category->id]) }}"
-                                class="flex min-h-15 items-center justify-between gap-4 border-t border-line px-2 text-base font-medium text-ink no-underline transition-colors duration-150 hover:bg-zone">
-                                <span class="min-w-0">{{ $category->name }}</span>
-                                <span
-                                    class="flex flex-none items-center gap-3 text-small font-normal text-muted tabular-nums">
-                                    {{ $category->listed_events_count }}
-                                    {{ $category->listed_events_count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}
-                                    <x-icon.arrow-right class="h-4 w-4" />
+                                class="flex min-h-15 items-center justify-between gap-4 border-t border-line px-2 py-2 text-ink no-underline transition-colors duration-150 hover:bg-zone">
+                                <span class="flex min-w-0 flex-col">
+                                    <span class="text-base font-medium break-words">{{ $category->name }}</span>
+                                    <span class="text-small text-muted tabular-nums">
+                                        {{ $category->listed_events_count }}
+                                        {{ $category->listed_events_count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}
+                                    </span>
                                 </span>
+                                <x-icon.arrow-right class="h-4 w-4 flex-none text-muted" />
                             </a>
                         </li>
                     @endforeach
