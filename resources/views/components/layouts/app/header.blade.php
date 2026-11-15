@@ -7,7 +7,7 @@
 @props(['title' => null])
 
 <header class="sticky top-0 z-30 border-b border-line bg-surface">
-    <div class="flex h-16 items-center gap-2 px-page lg:px-8">
+    <div class="flex h-16 items-center gap-2 px-page">
         <button type="button" x-data x-on:click="$dispatch('open-sidebar')" aria-controls="app-sidebar"
             aria-haspopup="dialog"
             class="-ml-2 inline-flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-control border-0 bg-transparent text-ink transition-colors duration-150 hover:bg-zone lg:hidden">

@@ -387,6 +387,72 @@
     }
 }
 
+/*
+ * Cookie-Hinweis (vanilla-cookieconsent, B6): Farben, Radius und Schrift über die Variablen der
+ * Bibliothek an die Tokens angleichen; Buttons wie <x-ui.button> (44 px, Text ui, 500).
+ */
+#cc-main {
+    --cc-font-family: var(--font-sans);
+    --cc-modal-border-radius: var(--radius-box);
+    --cc-btn-border-radius: var(--radius-control);
+    --cc-modal-transition-duration: 0s;
+    --cc-bg: var(--color-surface);
+    --cc-primary-color: var(--color-ink);
+    --cc-secondary-color: var(--color-muted);
+    --cc-link-color: var(--color-ink);
+    --cc-btn-primary-bg: var(--color-primary);
+    --cc-btn-primary-color: var(--color-on-primary);
+    --cc-btn-primary-border-color: var(--color-primary);
+    --cc-btn-primary-hover-bg: var(--color-ink);
+    --cc-btn-primary-hover-color: var(--color-on-primary);
+    --cc-btn-primary-hover-border-color: var(--color-ink);
+    --cc-btn-secondary-bg: var(--color-surface);
+    --cc-btn-secondary-color: var(--color-ink);
+    --cc-btn-secondary-border-color: var(--color-line-strong);
+    --cc-btn-secondary-hover-bg: var(--color-zone);
+    --cc-btn-secondary-hover-color: var(--color-ink);
+    --cc-btn-secondary-hover-border-color: var(--color-ink);
+    --cc-separator-border-color: var(--color-line);
+    --cc-toggle-on-bg: var(--color-primary);
+    --cc-toggle-off-bg: var(--color-line-strong);
+    --cc-toggle-on-knob-bg: var(--color-surface);
+    --cc-toggle-off-knob-bg: var(--color-surface);
+    --cc-toggle-enabled-icon-color: var(--color-primary);
+    --cc-toggle-disabled-icon-color: var(--color-line-strong);
+    --cc-toggle-readonly-bg: var(--color-disabled);
+    --cc-toggle-readonly-knob-bg: var(--color-surface);
+    --cc-toggle-readonly-knob-icon-color: var(--color-disabled);
+    --cc-section-category-border: var(--color-line);
+    --cc-cookie-category-block-bg: var(--color-zone);
+    --cc-cookie-category-block-border: var(--color-line);
+    --cc-cookie-category-block-hover-bg: var(--color-zone-hover);
+    --cc-cookie-category-block-hover-border: var(--color-line);
+    --cc-cookie-category-expanded-block-bg: transparent;
+    --cc-cookie-category-expanded-block-hover-bg: var(--color-zone);
+    --cc-overlay-bg: rgba(30, 49, 53, 0.5);
+    --cc-webkit-scrollbar-bg: var(--color-line);
+    --cc-webkit-scrollbar-hover-bg: var(--color-line-strong);
+    --cc-footer-bg: var(--color-zone);
+    --cc-footer-color: var(--color-muted);
+    --cc-footer-border-color: var(--color-line);
+}
+#cc-main .cm,
+#cc-main .pm {
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-overlay);
+}
+#cc-main .cm__btn,
+#cc-main .pm__btn {
+    min-height: 44px;
+    border-width: 1px;
+    font-size: var(--text-ui);
+    font-weight: 500;
+}
+#cc-main .cm__title,
+#cc-main .pm__title {
+    font-weight: 600;
+}
+
 /* ================================================================== */
 /* ALT – entfällt in Phase 7                                           */
 /* Alles ab hier gehört zum bisherigen Design und bleibt nur stehen,   */

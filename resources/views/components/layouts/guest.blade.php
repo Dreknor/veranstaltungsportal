@@ -1,48 +1,5 @@
-<!DOCTYPE html>
-<html lang="de">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    @include('components.layouts.app.favicon')
-    <title>{{ config('app.name') }}</title>
-
-    <!-- Font Awesome (lokal via Vite-Build, kein CDN) -->
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    @if(config('recaptcha.enabled') && config('recaptcha.site_key'))
-        <meta name="recaptcha-site-key" content="{{ config('recaptcha.site_key') }}">
-    @endif
-
-    <script>
-        function applyTheme() {
-            const userPref = localStorage.getItem('darkMode');
-            const systemPref = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (userPref === 'true' || (userPref === null && systemPref)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-        applyTheme();
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (!('darkMode' in localStorage)) applyTheme();
-        });
-    </script>
-</head>
-
-<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased min-h-screen flex flex-col">
-    <div class="flex-1">
-        {{ $slot }}
-    </div>
-
-    <!-- Footer -->
-    <x-footer />
-
-    @stack('scripts')
-</body>
-
-</html>
-
+{{-- Entfällt in Phase 7 (B4): leitet auf das öffentliche Seitengerüst um. --}}
+@props(['title' => null])
+<x-layouts.public :title="$title">
+    {{ $slot }}
+</x-layouts.public>

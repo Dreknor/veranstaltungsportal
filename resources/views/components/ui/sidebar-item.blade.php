@@ -3,7 +3,7 @@
     Aktiv: Fläche zone, Gewicht 600, aria-current="page" – kein farbiger Balken.
 
     icon: Name eines Icons unter components/icon/ ("calendar") oder ein alter Font-Awesome-Name
-          ("fas-calendar-days", "fa-solid fa-ticket"), der über die Zuordnung unten abgebildet wird.
+          (z. B. "fas-calendar-days"), der über die Zuordnung unten abgebildet wird.
           Unbekannte Namen fallen auf das Listen-Icon zurück.
     count: Zahl rechts (z. B. ungelesene Benachrichtigungen); count-label ergänzt sie für Screenreader.
     href: Link; ohne href ein <button> (z. B. für Aufklapp-Einträge).
@@ -17,7 +17,7 @@
 ])
 
 @php
-    // Font-Awesome-Namen (Seitenleiste, Konfiguration, Datenbank) → eigene Linien-Icons
+    // Font-Awesome-Namen (Seitenleiste, Konfiguration, Datenbank) auf eigene Linien-Icons abbilden
     $faMap = [
         'house' => 'home',
         'home' => 'home',
@@ -74,8 +74,8 @@
 
     $iconComponent = null;
     if ($icon) {
-        // "fas-calendar-days", "fab-paypal", "fa-solid fa-ticket", "fas fa-ticket" → "calendar-days" usw.
-        $key = preg_replace('/^(fa[srbld]?|fa-(solid|regular|brands))[-\s]+/', '', trim((string) $icon));
+        // Präfixe entfernen: "fas-calendar-days", "fab-paypal" und Klassen-Schreibweisen ergeben "calendar-days", "paypal"
+        $key = preg_replace('/^(fa-(solid|regular|brands)|fa[srbld]?)[-\s]+/', '', trim((string) $icon));
         $key = preg_replace('/^fa-/', '', $key);
         $name = $faMap[$key] ?? $key;
         $iconComponent = view()->exists('components.icon.' . $name) ? 'icon.' . $name : 'icon.list';

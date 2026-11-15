@@ -6,6 +6,14 @@ import { richEditor } from "./rich-editor";
 window.Alpine = Alpine;
 window.CookieConsent = CookieConsent;
 
+/**
+ * Darstellung (DESIGN-RICHTLINIEN B2): Eine dunkle Fassung ist nicht abgenommen. Die Layouts setzen
+ * die Klasse "dark" nicht mehr; gespeicherte Einstellungen ("appearance", "darkMode") werden ignoriert.
+ * setAppearance bleibt als wirkungslose Funktion für ältere Aufrufer bestehen.
+ */
+document.documentElement.classList.remove("dark");
+window.setAppearance = () => {};
+
 // Rich-Text-Editor als Alpine-Komponente registrieren (vor Alpine.start())
 Alpine.data("richEditor", richEditor);
 

@@ -23,7 +23,7 @@
 @if ($compact)
     <footer {{ $attributes->class('border-t border-line bg-surface') }}>
         <div
-            class="mx-auto flex max-w-page flex-wrap items-center justify-between gap-x-8 gap-y-1 px-page py-2 text-small text-muted lg:px-8">
+            class="mx-auto flex max-w-page flex-wrap items-center justify-between gap-x-8 gap-y-1 px-page py-2 text-small text-muted">
             <span class="py-3">© {{ date('Y') }} {{ config('app.name') }} · Ein Angebot der
                 <a href="https://www.esdigmbh.de/" target="_blank" rel="noopener"
                     class="text-muted underline-offset-[3px] hover:underline">ESdi GmbH</a></span>
