@@ -7,7 +7,7 @@
     @php($currentOrg = auth()->user()->currentOrganization())
     <div class="border-b border-line bg-surface" x-data="{ mobileOpen: false }">
         <div class="mx-auto flex max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-page py-2">
-            <div class="flex min-w-0 items-center gap-3">
+            <div class="flex min-w-0 flex-1 items-center gap-3">
                 @if ($currentOrg)
                     @if ($currentOrg->logo)
                         <img src="{{ asset('storage/' . $currentOrg->logo) }}"

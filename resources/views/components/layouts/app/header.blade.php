@@ -32,13 +32,14 @@
 
                 <x-ui.dropdown width="w-64" class="flex-none">
                     <x-slot:trigger>
-                        <button type="button" x-ref="button" x-on:click="toggle()"
-                            x-bind:aria-expanded="open.toString()" aria-expanded="false"
+                        <button type="button" x-ref="button" x-on:click="toggle()" x-bind:aria-expanded="open.toString()"
+                            aria-expanded="false"
                             class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-control border-0 bg-transparent px-1.5 text-ink transition-colors duration-150 hover:bg-zone">
                             <img src="{{ Auth::user()->profilePhotoUrl() }}" alt=""
                                 class="h-8 w-8 flex-none rounded-full border border-line object-cover">
                             <span class="sr-only">Konto: </span>
-                            <span class="hidden max-w-[200px] truncate text-ui font-medium md:inline">{{ Auth::user()->fullName() }}</span>
+                            <span
+                                class="hidden max-w-[200px] truncate text-ui font-medium md:inline">{{ Auth::user()->fullName() }}</span>
                             <x-icon.chevron-down class="hidden h-4 w-4 flex-none text-muted md:block" />
                         </button>
                     </x-slot:trigger>

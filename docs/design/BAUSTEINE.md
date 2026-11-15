@@ -802,6 +802,46 @@ Slot zeigt „–".
 </x-ui.dl>
 ```
 
+## Navigation
+
+Die Seitengerüste (`layouts.public`, `layouts.app`) bringen Kopf, Seitenleiste, Fuß und
+`<x-ui.flash>` mit – Views setzen nur ihren Inhalt. Für Navigationen außerhalb der Layouts:
+
+### `<x-ui.nav-link>`
+
+Navigationslink in Kopfzeilen und Linkleisten: 44 px hoch, Text `ui`, Hover unterstrichen.
+Props: `href`, `active` (Gewicht 600 + `aria-current="page"`, sonst 500), `block` (volle Breite,
+z. B. Einträge in einem aufklappbaren Handy-Menü).
+
+```blade
+<nav aria-label="Veranstalter-Bereich" class="flex items-center gap-1">
+    <x-ui.nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">Dashboard</x-ui.nav-link>
+</nav>
+```
+
+### `<x-ui.sidebar-item>` und `<x-ui.sidebar-group>`
+
+Eintrag der Seitenleiste im angemeldeten Bereich: 44 px, Text `ui`, Icon 20 px in `muted`; aktiv
+Fläche `zone`, Gewicht 600, `aria-current="page"` (kein farbiger Balken). Props: `href` (ohne:
+`<button>`), `active`, `icon`, `count` (Zahl rechts), `count-label` (Ergänzung für Screenreader, Standard
+„neu"). `icon` nimmt einen Icon-Namen (`calendar`) **oder** einen alten Font-Awesome-Namen
+(`fas-calendar-days`, `fa-solid fa-ticket`) – eine Zuordnung im Baustein bildet ihn auf ein Linien-Icon
+ab, unbekannte Namen fallen auf `list` zurück. Ältere Icons mit Strich 2 werden in der Leiste auf 1,6 gesetzt.
+
+`sidebar-group`: Gruppe mit Label (`caption`, `muted`) und `<ul>` für die Einträge. Prop `label`.
+In der Seitenleiste werden Einträge über `<x-layouts.sidebar-link>` (= `<li>` + `sidebar-item`) gesetzt.
+
+```blade
+<x-ui.sidebar-group label="Veranstalter">
+    <x-layouts.sidebar-link :href="route('organizer.events.index')" icon="calendar" :active="request()->routeIs('organizer.events.*')">
+        Meine Veranstaltungen
+    </x-layouts.sidebar-link>
+    <x-layouts.sidebar-link :href="route('notifications.index')" icon="bell" :count="3" count-label="ungelesen">
+        Benachrichtigungen
+    </x-layouts.sidebar-link>
+</x-ui.sidebar-group>
+```
+
 ## Wortmarke und Icons
 
 ### `<x-wordmark>`
@@ -817,7 +857,7 @@ Für helle Flächen (weiß, `zone`). Props: `size` (`md` Kopf 36 px · `sm` Fuß
 `arrow-left`, `arrow-right`, `chevron-down/-up/-left/-right`, `search`, `plus`, `minus`, `check`,
 `check-circle`, `x`, `info`, `warning`, `error`, `calendar`, `clock`, `location`, `monitor`, `ticket`,
 `download`, `upload`, `external-link`, `filter`, `more`, `mail`, `lock`, `eye`, `copy`, `trash`,
-`settings`, `home`, `menu`, `logout` – vollständige Liste auf `/styleguide`. Ältere Icons (`edit`,
+`settings`, `home`, `menu`, `logout`, `medal`, `receipt`, `document`, `bank`, `tag`, `calendar-check`, `credit-card` – vollständige Liste auf `/styleguide`. Ältere Icons (`edit`,
 `user`, `bell` …) haben noch Strich 2 und werden beim Umbau angeglichen. Icon-Buttons ohne Text
 brauchen `aria-label`. Font Awesome (`<i class="fas …">`) und Emojis werden ersetzt oder entfallen.
 

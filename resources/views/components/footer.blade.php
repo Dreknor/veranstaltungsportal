@@ -43,7 +43,8 @@
                 <x-wordmark size="sm" />
                 <nav aria-label="Fußnavigation" class="flex flex-wrap gap-x-7">
                     @foreach ($footerLinks as $link)
-                        <a href="{{ $link['url'] }}" class="{{ $linkClass }} text-ui font-medium">{{ $link['label'] }}</a>
+                        <a href="{{ $link['url'] }}"
+                            class="{{ $linkClass }} text-ui font-medium">{{ $link['label'] }}</a>
                     @endforeach
                 </nav>
             </div>

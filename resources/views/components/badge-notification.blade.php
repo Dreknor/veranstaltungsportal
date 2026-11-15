@@ -7,7 +7,8 @@
 <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" role="status"
     class="fixed right-4 bottom-4 z-50 w-[calc(100%-32px)] max-w-sm rounded-box border border-line bg-surface p-4 text-ink shadow-overlay">
     <div class="flex items-start gap-4">
-        <span class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-control border border-line bg-zone"
+        <span
+            class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-control border border-line bg-zone"
             style="color: {{ $badge->color }};">
             <x-icon.medal class="h-6 w-6" />
         </span>

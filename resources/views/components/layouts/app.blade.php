@@ -44,7 +44,8 @@
                         </p>
                         <form action="{{ route('impersonate.leave') }}" method="POST" class="m-0">
                             @csrf
-                            <x-ui.button type="submit" variant="secondary" size="sm">Verkörperung beenden</x-ui.button>
+                            <x-ui.button type="submit" variant="secondary" size="sm">Verkörperung
+                                beenden</x-ui.button>
                         </form>
                     </div>
                 </div>

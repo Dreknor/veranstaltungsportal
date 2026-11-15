@@ -28,8 +28,8 @@
 
         return date.toLocaleDateString('de-DE');
     }
-}" @click.away="open = false" x-on:keydown.escape.stop="if (open) { open = false; $refs.button.focus(); }"
-    class="relative flex-none max-sm:static">
+}" @click.away="open = false"
+    x-on:keydown.escape.stop="if (open) { open = false; $refs.button.focus(); }" class="relative flex-none max-sm:static">
 
     <button type="button" x-ref="button" @click="open = !open; if(open) loadNotifications()"
         x-bind:aria-expanded="open.toString()" aria-expanded="false" aria-controls="notification-panel"
@@ -100,11 +100,13 @@
                     </div>
 
                     <div class="min-w-0 flex-1">
-                        <p class="m-0 text-small font-semibold" x-text="notification.data.title || 'Benachrichtigung'"></p>
+                        <p class="m-0 text-small font-semibold" x-text="notification.data.title || 'Benachrichtigung'">
+                        </p>
                         <p class="m-0 mt-1 line-clamp-2 text-small text-muted"
                             x-text="notification.data.message || 'Keine Details verfügbar'"></p>
                         <div class="mt-1 flex items-center justify-between gap-4">
-                            <span class="text-caption text-muted tabular-nums" x-text="formatTime(notification.created_at)"></span>
+                            <span class="text-caption text-muted tabular-nums"
+                                x-text="formatTime(notification.created_at)"></span>
                             <template x-if="notification.data.url">
                                 <a :href="`/notifications/${notification.id}/read`"
                                     class="inline-flex min-h-11 items-center gap-1 text-small font-medium text-ink underline-offset-[3px] hover:underline">

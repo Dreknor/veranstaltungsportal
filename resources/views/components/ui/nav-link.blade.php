@@ -3,11 +3,7 @@
     Aktiv: Gewicht 600 und aria-current="page"; sonst 500. Hover: Unterstreichung (3 px Abstand).
     block: volle Breite (Einträge in Aufklappmenüs auf dem Handy).
 --}}
-@props([
-    'href',
-    'active' => false,
-    'block' => false,
-])
+@props(['href', 'active' => false, 'block' => false])
 
 <a href="{{ $href }}" @if ($active) aria-current="page" @endif
     {{ $attributes->class([

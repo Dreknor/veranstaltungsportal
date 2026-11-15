@@ -91,9 +91,14 @@
 @endphp
 
 @if ($href !== null)
-    <a href="{{ $href }}" @if ($active) aria-current="page" @endif {{ $attributes->class($classes) }}>
+    <a href="{{ $href }}" @if ($active) aria-current="page" @endif
+        {{ $attributes->class($classes) }}>
         @if ($iconComponent)
-            <x-dynamic-component :component="$iconComponent" aria-hidden="true" @class(['h-5 w-5 flex-none', 'text-ink' => $active, 'text-muted' => !$active]) />
+            <x-dynamic-component :component="$iconComponent" aria-hidden="true" @class([
+                'h-5 w-5 flex-none',
+                'text-ink' => $active,
+                'text-muted' => !$active,
+            ]) />
         @endif
         <span class="min-w-0 flex-1">{{ $slot }}</span>
         @if ($count)
@@ -104,7 +109,11 @@
 @else
     <button type="button" {{ $attributes->class(['cursor-pointer border-0', 'bg-transparent' => !$active, $classes]) }}>
         @if ($iconComponent)
-            <x-dynamic-component :component="$iconComponent" aria-hidden="true" @class(['h-5 w-5 flex-none', 'text-ink' => $active, 'text-muted' => !$active]) />
+            <x-dynamic-component :component="$iconComponent" aria-hidden="true" @class([
+                'h-5 w-5 flex-none',
+                'text-ink' => $active,
+                'text-muted' => !$active,
+            ]) />
         @endif
         <span class="min-w-0 flex-1">{{ $slot }}</span>
         @if ($count)
