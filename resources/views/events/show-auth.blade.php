@@ -6,7 +6,10 @@
             $breadcrumbs = [
                 ['name' => 'Home', 'url' => route('home')],
                 ['name' => 'Veranstaltungen', 'url' => route('events.index')],
-                ['name' => $event->category->name ?? 'Event', 'url' => route('events.index', ['category' => $event->event_category_id])],
+                [
+                    'name' => $event->category->name ?? 'Event',
+                    'url' => route('events.index', ['category' => $event->event_category_id]),
+                ],
                 ['name' => $event->title, 'url' => route('events.show', $event->slug)],
             ];
         @endphp
@@ -89,7 +92,8 @@
                 </p>
 
                 @if ($event->is_cancelled)
-                    <x-ui.alert tone="danger" title="Diese Veranstaltung wurde abgesagt." size="base" class="mt-3">
+                    <x-ui.alert tone="danger" title="Diese Veranstaltung wurde abgesagt." size="base"
+                        class="mt-3">
                         <p>Diese Veranstaltung findet nicht wie geplant statt.</p>
                         @if ($event->cancellation_reason)
                             <p><span class="font-medium">Grund:</span> {{ $event->cancellation_reason }}</p>
@@ -108,8 +112,7 @@
             </header>
 
             {{-- Mitlaufender Kasten: unter 1024 px direkt nach dem Titelbereich --}}
-            <x-ui.summary title="Auf einen Blick" id="kasten-titel"
-                class="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+            <x-ui.summary title="Auf einen Blick" id="kasten-titel" class="lg:col-start-2 lg:row-span-2 lg:row-start-1">
                 <dl class="m-0 flex flex-col gap-3 border-t border-line pt-4">
                     <div class="flex flex-col gap-0.5">
                         <dt class="text-small text-muted">Datum</dt>
@@ -161,7 +164,8 @@
                 <div class="flex flex-col gap-3">
                     @switch($state)
                         @case('bookable')
-                            <x-ui.status tone="free">{{ $free === null ? 'Plätze frei' : 'noch ' . $free . ' frei' }}</x-ui.status>
+                            <x-ui.status
+                                tone="free">{{ $free === null ? 'Plätze frei' : 'noch ' . $free . ' frei' }}</x-ui.status>
                             <x-ui.button :href="route('bookings.create', $event)" size="lg" full>Buchen</x-ui.button>
                         @break
 
@@ -173,8 +177,7 @@
                         @case('external')
                             <x-ui.status tone="neutral">Anmeldung extern</x-ui.status>
                             @if ($event->external_booking_url)
-                                <x-ui.button :href="$event->external_booking_url" target="_blank" rel="noopener noreferrer"
-                                    size="lg" full>
+                                <x-ui.button :href="$event->external_booking_url" target="_blank" rel="noopener noreferrer" size="lg" full>
                                     {{ $event->external_booking_button_text ?? 'Zur Anmeldung' }}
                                     <x-icon.external-link class="h-4 w-4 shrink-0" />
                                     <span class="sr-only">(öffnet eine externe Seite)</span>
@@ -369,7 +372,8 @@
                                 <p class="m-0 text-h3">{{ $organization->name }}</p>
                             </div>
                             @if ($organization->description)
-                                <p class="m-0 max-w-prose text-base text-ink-soft">{{ $organization->description }}</p>
+                                <p class="m-0 max-w-prose text-base text-ink-soft">{{ $organization->description }}
+                                </p>
                             @endif
                             @if ($organization->email || $organization->phone || $organization->website)
                                 <ul class="m-0 flex list-none flex-col gap-2 p-0 text-base">
@@ -429,7 +433,8 @@
                                                 @endif
                                             @endfor
                                         </span>
-                                        <span class="text-small text-muted">{{ $review->created_at->diffForHumans() }}</span>
+                                        <span
+                                            class="text-small text-muted">{{ $review->created_at->diffForHumans() }}</span>
                                     </div>
                                     @if ($review->comment)
                                         <p class="m-0 max-w-prose text-base text-ink-soft">{{ $review->comment }}</p>
@@ -444,7 +449,10 @@
                     <!-- Review Form for Authenticated Users -->
                     @auth
                         @php
-                            $userReview = $event->reviews()->where('user_id', auth()->id())->first();
+                            $userReview = $event
+                                ->reviews()
+                                ->where('user_id', auth()->id())
+                                ->first();
                             $hasAttended = \App\Models\Booking::where('user_id', auth()->id())
                                 ->where('event_id', $event->id)
                                 ->where('status', 'confirmed')
@@ -469,7 +477,9 @@
                                                     aria-label="{{ $i }} von 5 Sternen"
                                                     :aria-pressed="(rating === {{ $i }}).toString()"
                                                     class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control transition-colors duration-150 hover:bg-zone"
-                                                    :class="(hoverRating >= {{ $i }} || (rating >= {{ $i }} && hoverRating === 0)) ? 'text-ink' : 'text-line-strong'">
+                                                    :class="(hoverRating >= {{ $i }} || (rating >=
+                                                        {{ $i }} && hoverRating === 0)) ? 'text-ink' :
+                                                    'text-line-strong'">
                                                     <x-icon.star-filled class="h-6 w-6" />
                                                 </button>
                                             @endfor

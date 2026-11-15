@@ -43,8 +43,8 @@
                 <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
                 <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                    <x-ui.field label="Name" name="name" id="waitlist_name" required
-                        :value="auth()->check() ? auth()->user()->fullName() : null" autocomplete="name" />
+                    <x-ui.field label="Name" name="name" id="waitlist_name" required :value="auth()->check() ? auth()->user()->fullName() : null"
+                        autocomplete="name" />
                     <x-ui.field label="E-Mail" name="email" id="waitlist_email" type="email" required
                         :value="auth()->check() ? auth()->user()->email : null" autocomplete="email" />
                     <x-ui.field label="Telefon" name="phone" id="waitlist_phone" type="tel" optional

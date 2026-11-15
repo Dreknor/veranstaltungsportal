@@ -13,8 +13,8 @@
 
 <x-ui.dropdown align="left" width="w-full" {{ $attributes->class('w-full') }}>
     <x-slot:trigger>
-        <x-ui.button variant="secondary" full x-ref="button" x-on:click="toggle()"
-            x-bind:aria-expanded="open.toString()" aria-expanded="false" aria-haspopup="true">
+        <x-ui.button variant="secondary" full x-ref="button" x-on:click="toggle()" x-bind:aria-expanded="open.toString()"
+            aria-expanded="false" aria-haspopup="true">
             <x-slot:icon>
                 <x-icon.calendar />
             </x-slot:icon>
