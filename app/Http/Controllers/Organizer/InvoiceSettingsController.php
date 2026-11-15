@@ -109,8 +109,9 @@ class InvoiceSettingsController extends Controller
      */
     public function preview(Request $request)
     {
-        $format = $request->input('format', 'RE-{YEAR}-{NUMBER}');
-        $padding = $request->input('padding', 5);
+        // Leeres Feld kommt als null an (ConvertEmptyStringsToNull) – dann als ungültig melden statt 500
+        $format = (string) $request->input('format', '');
+        $padding = (int) $request->input('padding', 5);
 
         if (!$this->invoiceNumberService->validateFormat($format)) {
             return response()->json([
