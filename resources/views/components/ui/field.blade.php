@@ -21,7 +21,7 @@
 ])
 
 @php
-    $id ??= \App\Support\Ui::id($name);
+    $id ??= \App\Support\Ui::id($name) ?? 'feld-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
     $error ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
     $describedBy = trim(($hint ? $id.'-hint ' : '').($error ? $id.'-error' : ''));
 @endphp

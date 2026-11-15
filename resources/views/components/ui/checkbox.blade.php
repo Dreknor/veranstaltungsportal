@@ -41,5 +41,5 @@
             @if ($hint)<span id="{{ $id }}-hint" class="mt-0.5 block text-small text-muted">{{ $hint }}</span>@endif
         </span>
     </label>
-    <x-ui.field-error :message="$error" :id="$id.'-error'" class="mt-0" />
+    <x-ui.field-error :message="$error" :id="$id.'-error'" />
 </div>

@@ -112,7 +112,8 @@
     outline: 2px solid var(--color-ink);
     outline-offset: 2px;
 }
-.focus-inset:focus-visible {
+.focus-inset:focus-visible,
+.ui-search-control:focus-visible {
     outline-offset: -2px;
 }
 /* Auswahlkarte: der Rahmen zeigt den Fokus, nicht das Radio darin */
