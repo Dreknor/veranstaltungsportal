@@ -24,230 +24,106 @@
               href="{{ route('feed.atom') }}">
     @endpush
 
-    <div class="min-h-screen bg-gray-50">
-        <!-- Header mit Suche und Filter -->
-        <div class="bg-white shadow-sm border-b">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-6">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Veranstaltungen entdecken</h1>
-                    <a href="{{ route('login') }}" class="text-sm sm:text-base text-blue-600 hover:text-blue-800 font-medium">
-                        <x-icon.user class="w-5 h-5 inline-block mr-1" />
-                        Anmelden für mehr Funktionen
-                    </a>
-                </div>
+    @php
+        $filterCount = collect(['city', 'date_from', 'date_to'])->filter(fn($key) => request()->filled($key))->count();
+        $activeCategory = request()->filled('category') ? $categories->firstWhere('id', (int) request('category')) : null;
+        $activeFilters = array_filter([
+            $activeCategory ? 'Kategorie: ' . $activeCategory->name : null,
+            request()->filled('city') ? 'Ort: ' . request('city') : null,
+            request()->filled('date_from') ? 'ab ' . \Carbon\Carbon::parse(request('date_from'))->format('d.m.Y') : null,
+            request()->filled('date_to') ? 'bis ' . \Carbon\Carbon::parse(request('date_to'))->format('d.m.Y') : null,
+        ]);
+        $total = $items->total();
+    @endphp
 
-                <form method="GET" action="{{ route('events.index') }}" class="space-y-4">
-                    <!-- Suchleiste -->
-                    <div class="flex gap-2 sm:gap-4">
-                        <div class="flex-1 min-w-0">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                   placeholder="Nach Events suchen..."
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shrink-0" aria-label="Suchen">
-                            <x-icon.search class="w-5 h-5 inline-block sm:mr-2" />
-                            <span class="hidden sm:inline">Suchen</span>
-                        </button>
+    <div class="mx-auto max-w-page px-page pt-8 pb-16">
+        <x-ui.page-header title="Veranstaltungen entdecken">
+            <x-slot:actions>
+                <x-ui.button variant="secondary" :href="route('events.calendar')">
+                    <x-slot:icon><x-icon.calendar /></x-slot:icon>
+                    Zur Kalenderansicht
+                </x-ui.button>
+                <x-ui.button variant="link" :href="route('login')">
+                    <x-slot:icon><x-icon.user /></x-slot:icon>
+                    Anmelden für mehr Funktionen
+                </x-ui.button>
+            </x-slot:actions>
+        </x-ui.page-header>
+
+        <x-ui.search-bar :action="route('events.index')" :filter-count="$filterCount">
+            <x-ui.search-cell label="Kategorie" name="category" wide :options="['' => 'Alle Kategorien'] + $categories->pluck('name', 'id')->all()" />
+            <x-ui.search-cell label="Ort" name="city">
+                <input id="city" name="city" type="text" value="{{ request('city') }}" placeholder="Beliebig"
+                    autocomplete="address-level2" class="ui-search-control">
+            </x-ui.search-cell>
+            <x-slot:filters>
+                <fieldset class="m-0 min-w-0 border-0 p-0">
+                    <legend class="mb-4 p-0 text-h3 text-ink">Zeitraum</legend>
+                    <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
+                        <x-ui.field label="Von" name="date_from" type="date" :value="request('date_from')" :error="false" />
+                        <x-ui.field label="Bis" name="date_to" type="date" :value="request('date_to')" :error="false" />
                     </div>
+                </fieldset>
+            </x-slot:filters>
+            @if ($activeFilters || request()->filled('search'))
+                <x-slot:active>
+                    {{ implode(' · ', $activeFilters) }}@if ($activeFilters) · @endif<a href="{{ route('events.index') }}"
+                        class="font-medium text-ink underline underline-offset-[3px]">Filter zurücksetzen</a>
+                </x-slot:active>
+            @endif
+        </x-ui.search-bar>
 
-                    <!-- Filter -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
-                            <select name="category" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="">Alle Kategorien</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
-                            <input type="text" name="city" value="{{ request('city') }}"
-                                   placeholder="Stadt"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Von</label>
-                            <input type="date" name="date_from" value="{{ request('date_from') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Bis</label>
-                            <input type="date" name="date_to" value="{{ request('date_to') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <div class="flex gap-2">
-                            <a href="{{ route('events.index') }}" class="text-sm text-gray-600 hover:text-gray-900">Filter zurücksetzen</a>
-                        </div>
-                        <a href="{{ route('events.calendar') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                            <x-icon.calendar class="w-4 h-4 inline-block" />
-                            Zur Kalenderansicht
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Events Liste -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            @if($items->isEmpty())
-                <div class="text-center py-12">
-                    <div class="text-gray-400 mb-4">
-                        <x-icon.calendar class="w-16 h-16 mx-auto" />
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Keine Veranstaltungen gefunden</h3>
-                    <p class="text-gray-600">Passen Sie Ihre Suchkriterien an oder schauen Sie später wieder vorbei.</p>
-                </div>
+        <p class="mt-8 mb-4 text-base text-ink-soft" role="status">
+            @if ($total === 0)
+                Keine Veranstaltungen gefunden.
+            @elseif ($total === 1)
+                1 Veranstaltung gefunden.
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($items as $itemData)
-                        @if($itemData['type'] === 'event')
-                            @php $event = $itemData['item']; @endphp
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                                <!-- Event Bild -->
-                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 relative">
-                                    @if($event->featured_image)
-                                        <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
-                                    @else
-                                        <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                                            <x-icon.calendar class="w-16 h-16 text-white opacity-50" />
-                                        </div>
-                                    @endif
+                <span class="tabular-nums">{{ $total }}</span> Veranstaltungen gefunden.
+            @endif
+        </p>
 
-                                    @if($event->is_featured)
-                                        <span class="absolute top-2 right-2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                            Featured
-                                        </span>
-                                    @endif
-                                </div>
+        @if ($items->isEmpty())
+            <x-ui.empty title="Keine Veranstaltungen gefunden" :action-href="route('events.index')" action-label="Filter zurücksetzen">
+                Passen Sie Ihre Suchkriterien an oder schauen Sie später wieder vorbei.
+            </x-ui.empty>
+        @else
+            <x-ui.row-list>
+                @foreach ($items as $itemData)
+                    @if ($itemData['type'] === 'event')
+                        <x-ui.event-row :event="$itemData['item']" heading="h2" />
+                    @else
+                        @php
+                            $series = $itemData['item'];
+                            $firstEvent = $series->events->first();
+                            // route('series.show') existiert nicht – Link auf den ersten Termin der Reihe
+                            $seriesUrl = $firstEvent ? route('events.show', $firstEvent->slug) : route('events.index');
+                        @endphp
+                        <x-ui.row>
+                            @if ($firstEvent)
+                                <x-slot:lead>
+                                    <x-ui.date-block :date="$firstEvent->start_date" />
+                                </x-slot:lead>
+                            @endif
+                            <span class="text-small text-muted">Veranstaltungsreihe{{ $series->category ? ' · ' . $series->category->name : '' }}</span>
+                            <h2 class="m-0 text-h3 text-ink">
+                                <a href="{{ $seriesUrl }}" class="text-ink no-underline underline-offset-[3px] hover:underline">{{ $series->title }}</a>
+                            </h2>
+                            <x-slot:meta>
+                                <span class="text-ui font-medium tabular-nums">{{ $series->events->count() }} Termine</span>
+                                @if ($firstEvent && $firstEvent->venue_city)
+                                    <span class="text-small text-muted">{{ $firstEvent->venue_city }}</span>
+                                @endif
+                            </x-slot:meta>
+                            <x-slot:action>
+                                <x-ui.button variant="secondary" :href="$seriesUrl" full>Reihe ansehen</x-ui.button>
+                            </x-slot:action>
+                        </x-ui.row>
+                    @endif
+                @endforeach
+            </x-ui.row-list>
 
-                                <!-- Event Details -->
-                                <div class="p-5">
-                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                              style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
-                                            {{ $event->category->name }}
-                                        </span>
-                                        <x-event-type-badge :event="$event" />
-                                    </div>
-
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                        <a href="{{ route('events.show', $event->slug) }}" class="hover:text-blue-600">
-                                            {{ $event->title }}
-                                        </a>
-                                    </h3>
-
-                                    <div class="space-y-2 mb-4">
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.calendar class="w-4 h-4 mr-2" />
-                                            @if($event->start_date->isSameDay($event->end_date))
-                                                {{ $event->start_date->format('d.m.Y H:i') }} Uhr
-                                            @else
-                                                {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
-                                            @endif
-                                        </div>
-
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.location class="w-4 h-4 mr-2" />
-                                            {{ $event->venue_city }}
-                                        </div>
-
-                                        @php
-                                            $minPrice = $event->getMinimumPrice();
-                                        @endphp
-                                        @if($minPrice)
-                                            <div class="flex items-center text-sm text-gray-600">
-                                                <x-icon.ticket class="w-4 h-4 mr-2" />
-                                                ab {{ number_format($minPrice, 2, ',', '.') }} €
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <a href="{{ route('events.show', $event->slug) }}"
-                                       class="block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                        Details ansehen
-                                    </a>
-                                </div>
-                            </div>
-                        @else
-                            @php $series = $itemData['item']; @endphp
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition border-2 border-purple-200">
-                                <!-- Series Bild -->
-                                <div class="aspect-w-16 aspect-h-9 bg-gray-200 relative">
-                                    <div class="w-full h-48 bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center">
-                                        <div class="text-center text-white">
-                                            <x-icon.calendar class="w-12 h-12 mx-auto mb-2 opacity-75" />
-                                            <div class="text-sm font-semibold">Veranstaltungsreihe</div>
-                                        </div>
-                                    </div>
-
-                                    <span class="absolute top-2 left-2 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                        {{ $series->events->count() }} Termine
-                                    </span>
-                                </div>
-
-                                <!-- Series Details -->
-                                <div class="p-5">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                              style="background-color: {{ $series->category->color }}20; color: {{ $series->category->color }}">
-                                            {{ $series->category->name }}
-                                        </span>
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                            Reihe
-                                        </span>
-                                    </div>
-
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                        <a href="{{ route('series.show', $series->id) }}" class="hover:text-purple-600">
-                                            {{ $series->title }}
-                                        </a>
-                                    </h3>
-
-                                    <div class="space-y-2 mb-4">
-                                        @if($series->events->first())
-                                            <div class="flex items-center text-sm text-gray-600">
-                                                <x-icon.calendar class="w-4 h-4 mr-2" />
-                                                Start: {{ $series->events->first()->start_date->format('d.m.Y') }}
-                                            </div>
-                                        @endif
-
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.list class="w-4 h-4 mr-2" />
-                                            {{ $series->events->count() }} Termine
-                                        </div>
-
-                                        @if($series->events->first() && $series->events->first()->venue_city)
-                                            <div class="flex items-center text-sm text-gray-600">
-                                                <x-icon.location class="w-4 h-4 mr-2" />
-                                                {{ $series->events->first()->venue_city }}
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <a href="{{ route('series.show', $series->id) }}"
-                                       class="block w-full text-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-                                        Reihe ansehen
-                                    </a>
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-
-                <!-- Pagination -->
-                <div class="mt-8">
-                    {{ $items->links() }}
-                </div>
+            <x-ui.pagination :paginator="$items" />
 
                 <!-- ItemList Schema for Events -->
                 @if($items->isNotEmpty())
@@ -274,8 +150,7 @@
                 {!! json_encode($itemListSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
                 </script>
                 @endif
-            @endif
-        </div>
+        @endif
     </div>
 </x-layouts.public>
 
