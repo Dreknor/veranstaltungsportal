@@ -92,7 +92,7 @@
                                     'bg-primary text-on-primary' => $currentDate->isToday(),
                                     'text-ink' => !$currentDate->isToday(),
                                 ])>
-                                <span class="sr-only">{{ \App\Support\Ui::date($currentDate) }}@if ($currentDate->isToday())
+                                <span class="sr-only">{{ \App\Support\Ui::date(\Illuminate\Support\Carbon::instance($currentDate)) }}@if ($currentDate->isToday())
                                         , heute
                                     @endif
                                 </span>
@@ -135,7 +135,7 @@
                             @php $currentDate = \Carbon\Carbon::parse($dateString); @endphp
                             <li class="flex flex-col gap-1 border-t border-line py-3">
                                 <h3 class="m-0 text-small font-semibold text-ink tabular-nums">
-                                    {{ \App\Support\Ui::date($currentDate) }}
+                                    {{ \App\Support\Ui::date(\Illuminate\Support\Carbon::instance($currentDate)) }}
                                     @if ($currentDate->isToday())
                                         <span class="font-normal text-muted">· heute</span>
                                     @endif
