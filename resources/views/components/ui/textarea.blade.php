@@ -18,9 +18,9 @@
 ])
 
 @php
-    $id ??= \App\Support\Ui::id($name) ?? 'feld-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
+    $id ??= \App\Support\Ui::id($name) ?? 'feld-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
     $error ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
-    $describedBy = trim(($hint ? $id.'-hint ' : '').($error ? $id.'-error' : ''));
+    $describedBy = trim(($hint ? $id . '-hint ' : '') . ($error ? $id . '-error' : ''));
     $content = $value ?? ($slot->isNotEmpty() ? trim($slot->toHtml()) : null);
     $content = $old ? \App\Support\Ui::old($name, $content) : $content;
     $fromSlot = $value === null && $content !== null && $slot->isNotEmpty() && $content === trim($slot->toHtml());
@@ -40,18 +40,18 @@
         <x-ui.label :for="$id" :required="$required" :optional="$optional">{{ $label }}</x-ui.label>
     @endif
 
-    <textarea
-        @if ($name) name="{{ $name }}" @endif
-        @if ($id) id="{{ $id }}" @endif
-        rows="{{ $rows }}"
-        @required($required)
+    <textarea @if ($name) name="{{ $name }}" @endif
+        @if ($id) id="{{ $id }}" @endif rows="{{ $rows }}" @required($required)
         @if ($error) aria-invalid="true" @endif
         @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
-        {{ $attributes->except('class')->class($classes) }}
-    >@if ($fromSlot){!! $content !!}@else{{ $content }}@endif</textarea>
+        {{ $attributes->except('class')->class($classes) }}>
+@if ($fromSlot)
+{!! $content !!}@else{{ $content }}
+@endif
+</textarea>
 
     @if ($hint)
-        <x-ui.hint :id="$id.'-hint'">{{ $hint }}</x-ui.hint>
+        <x-ui.hint :id="$id . '-hint'">{{ $hint }}</x-ui.hint>
     @endif
-    <x-ui.field-error :message="$error" :id="$id.'-error'" />
+    <x-ui.field-error :message="$error" :id="$id . '-error'" />
 </div>

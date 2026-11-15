@@ -18,7 +18,10 @@
     ];
 
     $messages = [];
-    foreach (['success' => 'success', 'status' => 'success', 'error' => 'danger', 'warning' => 'warning', 'info' => 'info'] as $key => $tone) {
+    foreach (
+        ['success' => 'success', 'status' => 'success', 'error' => 'danger', 'warning' => 'warning', 'info' => 'info']
+        as $key => $tone
+    ) {
         $value = session($key);
         if (is_string($value) && $value !== '') {
             $messages[] = ['tone' => $tone, 'text' => $statusTexts[$value] ?? $value];

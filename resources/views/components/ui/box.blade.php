@@ -8,13 +8,14 @@
     'padding' => 'md', // none | sm (16) | md (24) | lg (24–48, wächst mit der Breite)
 ])
 
-<{{ $as }} {{ $attributes->class([
-    'rounded-box border border-line text-ink',
-    'bg-surface' => $tone !== 'zone',
-    'bg-zone' => $tone === 'zone',
-    'p-4' => $padding === 'sm',
-    'p-6' => $padding === 'md',
-    'p-[clamp(24px,4vw,48px)]' => $padding === 'lg',
-]) }}>
+<{{ $as }}
+    {{ $attributes->class([
+        'rounded-box border border-line text-ink',
+        'bg-surface' => $tone !== 'zone',
+        'bg-zone' => $tone === 'zone',
+        'p-4' => $padding === 'sm',
+        'p-6' => $padding === 'md',
+        'p-[clamp(24px,4vw,48px)]' => $padding === 'lg',
+    ]) }}>
     {{ $slot }}
-</{{ $as }}>
+    </{{ $as }}>

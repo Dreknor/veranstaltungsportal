@@ -21,9 +21,9 @@
 ])
 
 @php
-    $id ??= \App\Support\Ui::id($name) ?? 'feld-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
+    $id ??= \App\Support\Ui::id($name) ?? 'feld-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
     $error ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
-    $describedBy = trim(($hint ? $id.'-hint ' : '').($error ? $id.'-error' : ''));
+    $describedBy = trim(($hint ? $id . '-hint ' : '') . ($error ? $id . '-error' : ''));
     $current = $old ? \App\Support\Ui::old($name, $selected) : $selected;
 
     $classes = \Illuminate\Support\Arr::toCssClasses([
@@ -43,14 +43,11 @@
     @endif
 
     <div class="relative">
-        <select
-            @if ($name) name="{{ $name }}" @endif
-            @if ($id) id="{{ $id }}" @endif
-            @required($required)
+        <select @if ($name) name="{{ $name }}" @endif
+            @if ($id) id="{{ $id }}" @endif @required($required)
             @if ($error) aria-invalid="true" @endif
             @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
-            {{ $attributes->except('class')->class($classes) }}
-        >
+            {{ $attributes->except('class')->class($classes) }}>
             @if ($placeholder !== null)
                 <option value="">{{ $placeholder }}</option>
             @endif
@@ -65,7 +62,7 @@
     </div>
 
     @if ($hint)
-        <x-ui.hint :id="$id.'-hint'">{{ $hint }}</x-ui.hint>
+        <x-ui.hint :id="$id . '-hint'">{{ $hint }}</x-ui.hint>
     @endif
-    <x-ui.field-error :message="$error" :id="$id.'-error'" />
+    <x-ui.field-error :message="$error" :id="$id . '-error'" />
 </div>

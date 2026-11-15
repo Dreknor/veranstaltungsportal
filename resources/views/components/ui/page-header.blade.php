@@ -14,14 +14,19 @@
 
 <div {{ $attributes->class('mb-8 flex flex-col') }}>
     @if ($backHref)
-        <a href="{{ $backHref }}" class="mb-2 inline-flex min-h-11 items-center gap-2 self-start text-ui font-medium text-ink-soft no-underline underline-offset-[3px] hover:underline">
+        <a href="{{ $backHref }}"
+            class="mb-2 inline-flex min-h-11 items-center gap-2 self-start text-ui font-medium text-ink-soft no-underline underline-offset-[3px] hover:underline">
             <x-icon.arrow-left class="h-4 w-4" />
             {{ $backLabel }}
         </a>
     @endif
     <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
         <div class="flex min-w-0 flex-col gap-2">
-            <h1 @class(['m-0 text-ink', 'text-title' => $size !== 'display', 'text-display' => $size === 'display'])>{{ $title ?? $slot }}</h1>
+            <h1 @class([
+                'm-0 text-ink',
+                'text-title' => $size !== 'display',
+                'text-display' => $size === 'display',
+            ])>{{ $title ?? $slot }}</h1>
             @if ($subtitle)
                 <p class="m-0 max-w-prose text-base text-muted">{{ $subtitle }}</p>
             @endif

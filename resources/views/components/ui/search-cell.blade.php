@@ -13,14 +13,15 @@
 ])
 
 @php
-    $id ??= \App\Support\Ui::id($name) ?? 'cell-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
+    $id ??= \App\Support\Ui::id($name) ?? 'cell-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
     $selected ??= $name ? request()->input(\App\Support\Ui::key($name)) : null;
 @endphp
 
 <div {{ $attributes->only('class')->class(['ui-search-cell', 'ui-search-cell--md' => $wide]) }}>
     <label for="{{ $id }}" class="ui-search-label">{{ $label }}</label>
     @if ($options !== null)
-        <select id="{{ $id }}" @if ($name) name="{{ $name }}" @endif {{ $attributes->except('class')->class('ui-search-control') }}>
+        <select id="{{ $id }}" @if ($name) name="{{ $name }}" @endif
+            {{ $attributes->except('class')->class('ui-search-control') }}>
             @foreach ($options as $optionValue => $optionLabel)
                 <option value="{{ $optionValue }}" @selected((string) $selected === (string) $optionValue)>{{ $optionLabel }}</option>
             @endforeach

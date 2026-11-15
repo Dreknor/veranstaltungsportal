@@ -22,18 +22,16 @@
 @endphp
 
 <label for="{{ $id }}" {{ $attributes->only('class')->class('ui-choice') }}>
-    <input
-        type="{{ $type }}"
-        @if ($name) name="{{ $name }}" @endif
-        id="{{ $id }}"
-        value="{{ $value }}"
-        @checked($isChecked)
-        @required($required)
-        {{ $attributes->except('class')->class([$type === 'checkbox' ? 'ui-checkbox' : 'ui-radio', 'mt-0.5']) }}
-    >
+    <input type="{{ $type }}" @if ($name) name="{{ $name }}" @endif
+        id="{{ $id }}" value="{{ $value }}" @checked($isChecked) @required($required)
+        {{ $attributes->except('class')->class([$type === 'checkbox' ? 'ui-checkbox' : 'ui-radio', 'mt-0.5']) }}>
     <span class="flex min-w-0 flex-1 flex-col gap-0.5">
-        @if ($title)<span class="text-base font-semibold">{{ $title }}</span>@endif
-        @if ($description)<span class="text-small text-ink-soft">{{ $description }}</span>@endif
+        @if ($title)
+            <span class="text-base font-semibold">{{ $title }}</span>
+        @endif
+        @if ($description)
+            <span class="text-small text-ink-soft">{{ $description }}</span>
+        @endif
         {{ $slot }}
     </span>
     @if ($aside)

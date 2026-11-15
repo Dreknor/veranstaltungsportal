@@ -1,8 +1,9 @@
 {{-- Einfache Seitennavigation (ohne Gesamtzahl): Sekundärbuttons "Zurück" und "Weiter". --}}
 @php
-    $edge = 'inline-flex h-11 items-center justify-center gap-2 rounded-control border px-4 text-ui font-medium whitespace-nowrap no-underline transition-colors duration-150';
-    $edgeOn = $edge.' border-line-strong bg-surface text-ink hover:border-ink hover:bg-zone';
-    $edgeOff = $edge.' cursor-not-allowed border-line bg-zone text-disabled';
+    $edge =
+        'inline-flex h-11 items-center justify-center gap-2 rounded-control border px-4 text-ui font-medium whitespace-nowrap no-underline transition-colors duration-150';
+    $edgeOn = $edge . ' border-line-strong bg-surface text-ink hover:border-ink hover:bg-zone';
+    $edgeOff = $edge . ' cursor-not-allowed border-line bg-zone text-disabled';
 @endphp
 
 @if ($paginator->hasPages())

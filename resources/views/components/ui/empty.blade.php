@@ -11,10 +11,11 @@
     'action' => null,
 ])
 
-<div {{ $attributes->class([
-    'flex flex-col items-start gap-3 px-6 py-8 text-ink',
-    'rounded-box border border-line bg-surface' => $bordered,
-]) }}>
+<div
+    {{ $attributes->class([
+        'flex flex-col items-start gap-3 px-6 py-8 text-ink',
+        'rounded-box border border-line bg-surface' => $bordered,
+    ]) }}>
     @if ($title)
         <p class="m-0 text-h3">{{ $title }}</p>
     @endif

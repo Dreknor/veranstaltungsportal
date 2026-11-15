@@ -1,8 +1,8 @@
-@import "tailwindcss";
-@import "@fontsource-variable/geist";
-@import "vanilla-cookieconsent/dist/cookieconsent.css";
+@import 'tailwindcss';
+@import '@fontsource-variable/geist';
+@import 'vanilla-cookieconsent/dist/cookieconsent.css';
 /* ALT – entfällt in Phase 7 */
-@import "@fortawesome/fontawesome-free/css/all.min.css";
+@import '@fortawesome/fontawesome-free/css/all.min.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -15,7 +15,7 @@
  * rounded-control, text-h2, max-w-page …). Nachschlagewerk: docs/design/BAUSTEINE.md
  */
 @theme {
-    --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
 
     --color-ink: #1e3135;
     --color-primary: #2b4347;
@@ -374,6 +374,9 @@
     .ui-table td.actions > * + * {
         margin-left: 8px;
     }
+    .ui-table td.actions > * {
+        vertical-align: middle;
+    }
     .ui-table--dense th,
     .ui-table--dense td {
         padding: 8px 12px;
@@ -446,7 +449,20 @@
      *   Deshalb bekommen Felder ein festes Paar aus hellem Hintergrund und dunkler Schrift.
      * Utility-Klassen (z. B. dark:bg-gray-900 dark:text-gray-100, border-0, px-6) überschreiben diese Basis weiterhin.
      */
-    input:where(:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='hidden'], [type='submit'], [type='button'], [type='reset'], [type='image'])),
+    input:where(
+            :not(
+                [type='checkbox'],
+                [type='radio'],
+                [type='range'],
+                [type='file'],
+                [type='color'],
+                [type='hidden'],
+                [type='submit'],
+                [type='button'],
+                [type='reset'],
+                [type='image']
+            )
+        ),
     select,
     textarea {
         border-width: 1px;
@@ -479,83 +495,83 @@
     }
 }
 
-    .dark {
-        --sidebar-background: 222 47% 11%;
-        --sidebar-foreground: 213 31% 91%;
-        --sidebar-accent: 217 91% 60%;
-        --sidebar-accent-foreground: 222 47% 11%;
-        --sidebar-border: 223 47% 16%;
-        --sidebar-ring: 217 91% 60%;
-    }
+.dark {
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-accent: 217 91% 60%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 223 47% 16%;
+    --sidebar-ring: 217 91% 60%;
+}
 
-    /* Smooth scrolling */
-    html {
-        scroll-behavior: smooth;
-    }
-
-
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
 
 @layer utilities {
     /* Modern Card Styles */
     .card {
-        @apply bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-all duration-200;
+        @apply rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 dark:border-gray-700 dark:bg-gray-800;
     }
 
     .card-hover {
-        @apply hover:shadow-lg hover:scale-[1.02] hover:border-blue-300 dark:hover:border-blue-700;
+        @apply hover:scale-[1.02] hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700;
     }
 
     /* Modern Button Styles */
     .btn-primary {
-        @apply px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-md shadow-blue-500/30 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/40 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+        @apply rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 font-medium text-white shadow-md shadow-blue-500/30 transition-all duration-200 hover:scale-105 hover:from-blue-700 hover:to-blue-800 hover:shadow-lg hover:shadow-blue-500/40 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none;
     }
 
     .btn-secondary {
-        @apply px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2;
+        @apply rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-200 hover:shadow-md focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
     }
 
     .btn-success {
-        @apply px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium rounded-lg shadow-md shadow-green-500/30 transition-all duration-200 hover:shadow-lg hover:shadow-green-500/40 hover:scale-105;
+        @apply rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 font-medium text-white shadow-md shadow-green-500/30 transition-all duration-200 hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg hover:shadow-green-500/40;
     }
 
     .btn-danger {
-        @apply px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-medium rounded-lg shadow-md shadow-red-500/30 transition-all duration-200 hover:shadow-lg hover:shadow-red-500/40 hover:scale-105;
+        @apply rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 font-medium text-white shadow-md shadow-red-500/30 transition-all duration-200 hover:scale-105 hover:from-red-700 hover:to-rose-700 hover:shadow-lg hover:shadow-red-500/40;
     }
 
     /* Input Styles */
     .input-modern {
-        @apply w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200;
+        @apply w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400;
     }
 
     /* Badge Styles */
     .badge {
-        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-200;
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-all duration-200;
     }
 
     .badge-primary {
-        @apply bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 ring-1 ring-blue-600/20;
+        @apply bg-blue-100 text-blue-800 ring-1 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300;
     }
 
     .badge-success {
-        @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 ring-1 ring-green-600/20;
+        @apply bg-green-100 text-green-800 ring-1 ring-green-600/20 dark:bg-green-900/30 dark:text-green-300;
     }
 
     .badge-warning {
-        @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-yellow-600/20;
+        @apply bg-yellow-100 text-yellow-800 ring-1 ring-yellow-600/20 dark:bg-yellow-900/30 dark:text-yellow-300;
     }
 
     .badge-danger {
-        @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 ring-1 ring-red-600/20;
+        @apply bg-red-100 text-red-800 ring-1 ring-red-600/20 dark:bg-red-900/30 dark:text-red-300;
     }
 
     /* Glassmorphism Effect */
     .glass {
-        @apply bg-white/70 dark:bg-gray-800/70 backdrop-blur-lg border border-gray-200/50 dark:border-gray-700/50;
+        @apply border border-gray-200/50 bg-white/70 backdrop-blur-lg dark:border-gray-700/50 dark:bg-gray-800/70;
     }
 
     /* Modern Shadow Styles */
     .shadow-soft {
-        box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1), 0 6px 20px -3px rgba(0, 0, 0, 0.1);
+        box-shadow:
+            0 2px 8px -2px rgba(0, 0, 0, 0.1),
+            0 6px 20px -3px rgba(0, 0, 0, 0.1);
     }
 
     .shadow-glow-blue {
@@ -573,7 +589,7 @@
 
     /* Gradient Text */
     .gradient-text {
-        @apply bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent;
+        @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400;
     }
 }
 
@@ -612,7 +628,7 @@
 }
 
 .custom-file-input::before {
-    content: "Select files";
+    content: 'Select files';
     display: inline-block;
     background: #f9fafb;
     border: 1px solid #d1d5db;

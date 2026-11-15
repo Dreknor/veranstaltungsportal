@@ -13,10 +13,8 @@
     'tableClass' => '',
 ])
 
-<div
-    @if ($label) role="region" aria-label="{{ $label }}" tabindex="0" @endif
-    {{ $attributes->class('w-full overflow-x-auto rounded-box border border-line bg-surface') }}
->
+<div @if ($label) role="region" aria-label="{{ $label }}" tabindex="0" @endif
+    {{ $attributes->class('relative w-full overflow-x-auto rounded-box border border-line bg-surface') }}>
     <table @class(['ui-table', 'ui-table--dense' => $dense, $tableClass])>
         @if ($caption)
             <caption>{{ $caption }}</caption>

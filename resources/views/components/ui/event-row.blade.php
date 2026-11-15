@@ -27,16 +27,16 @@
     use App\Support\Ui;
     use Illuminate\View\ComponentSlot;
 
-    $filled = fn ($part) => $part instanceof ComponentSlot ? $part->isNotEmpty() : filled($part);
+    $filled = fn($part) => $part instanceof ComponentSlot ? $part->isNotEmpty() : filled($part);
 
     $start = $event->start_date;
     $end = $event->end_date;
-    $multiDay = $end && ! $end->isSameDay($start);
+    $multiDay = $end && !$end->isSameDay($start);
     $href ??= route('events.show', $event->slug);
     $category = $event->category?->name;
 
     // Zustand der Veranstaltung – nur berechnen, wenn er gebraucht wird
-    $needsState = ($showAction && ! $filled($action)) || ! $filled($aside);
+    $needsState = ($showAction && !$filled($action)) || !$filled($aside);
     $state = null;
     $free = null;
 
@@ -52,25 +52,28 @@
             if ($event->max_attendees) {
                 $free = $event->availableTickets();
             } else {
-                $onSale = $event->ticketTypes->filter(fn ($t) => $t->isOnSale());
-                $free = $onSale->isNotEmpty() && $onSale->every(fn ($t) => $t->quantity !== null)
-                    ? $onSale->sum(fn ($t) => $t->availableQuantity())
-                    : null;
+                $onSale = $event->ticketTypes->filter(fn($t) => $t->isOnSale());
+                $free =
+                    $onSale->isNotEmpty() && $onSale->every(fn($t) => $t->quantity !== null)
+                        ? $onSale->sum(fn($t) => $t->availableQuantity())
+                        : null;
             }
         } else {
-            $soldOut = ($event->max_attendees && $event->availableTickets() <= 0)
-                || ($event->ticketTypes->isNotEmpty() && $event->ticketTypes->every(fn ($t) => $t->availableQuantity() === 0));
+            $soldOut =
+                ($event->max_attendees && $event->availableTickets() <= 0) ||
+                ($event->ticketTypes->isNotEmpty() &&
+                    $event->ticketTypes->every(fn($t) => $t->availableQuantity() === 0));
             $state = $soldOut ? 'waitlist' : 'closed';
         }
     }
 
     // Preis: niedrigster buchbarer Preis; "ab", wenn es mehrere Preise gibt
     $priceText = null;
-    if (! $filled($aside) && ! $event->isExternal()) {
+    if (!$filled($aside) && !$event->isExternal()) {
         $price = $event->getMinimumPrice() ?? $event->ticketTypes->min('price');
         if ($price !== null) {
-            $several = $event->ticketTypes->pluck('price')->map(fn ($p) => (float) $p)->unique()->count() > 1;
-            $priceText = ($several && (float) $price > 0 ? 'ab ' : '').Ui::price($price);
+            $several = $event->ticketTypes->pluck('price')->map(fn($p) => (float) $p)->unique()->count() > 1;
+            $priceText = ($several && (float) $price > 0 ? 'ab ' : '') . Ui::price($price);
         }
     }
 
@@ -90,75 +93,85 @@
         <span class="text-small text-muted">{{ $category }}</span>
     @endif
     <{{ $heading }} class="m-0 text-h3 text-ink">
-        <a href="{{ $href }}" class="text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
-    </{{ $heading }}>
-    {{ $slot }}
+        <a href="{{ $href }}"
+            class="text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
+        </{{ $heading }}>
+        {{ $slot }}
 
-    <x-slot:meta>
-        @if ($filled($meta))
-            {{ $meta }}
-        @else
-            <span class="text-ui font-medium">{{ Ui::formatAndPlace($event) }}</span>
-            <span class="text-small text-muted tabular-nums">{{ $timeText }}</span>
-        @endif
-    </x-slot:meta>
-
-    <x-slot:aside>
-        @if ($filled($aside))
-            {{ $aside }}
-        @else
-            @if ($priceText)
-                <span class="text-base font-semibold whitespace-nowrap">{{ $priceText }}</span>
-            @endif
-            @switch($state)
-                @case('bookable')
-                    <x-ui.status tone="free">{{ $free === null ? 'Plätze frei' : 'noch '.$free.' frei' }}</x-ui.status>
-                    @break
-                @case('waitlist')
-                    <x-ui.status tone="waitlist">Warteliste</x-ui.status>
-                    @break
-                @case('cancelled')
-                    <x-ui.status tone="danger">Abgesagt</x-ui.status>
-                    @break
-                @case('past')
-                    <x-ui.status tone="neutral">Beendet</x-ui.status>
-                    @break
-                @case('external')
-                    <x-ui.status tone="neutral">Anmeldung extern</x-ui.status>
-                    @break
-                @default
-                    <x-ui.status tone="neutral">derzeit nicht buchbar</x-ui.status>
-            @endswitch
-        @endif
-    </x-slot:aside>
-
-    @if ($showAction)
-        <x-slot:action>
-            @if ($filled($action))
-                {{ $action }}
+        <x-slot:meta>
+            @if ($filled($meta))
+                {{ $meta }}
             @else
+                <span class="text-ui font-medium">{{ Ui::formatAndPlace($event) }}</span>
+                <span class="text-small text-muted tabular-nums">{{ $timeText }}</span>
+            @endif
+        </x-slot:meta>
+
+        <x-slot:aside>
+            @if ($filled($aside))
+                {{ $aside }}
+            @else
+                @if ($priceText)
+                    <span class="text-base font-semibold whitespace-nowrap">{{ $priceText }}</span>
+                @endif
                 @switch($state)
                     @case('bookable')
-                        <x-ui.button :href="route('bookings.create', $event)" full>Buchen</x-ui.button>
-                        @break
+                        <x-ui.status tone="free">{{ $free === null ? 'Plätze frei' : 'noch ' . $free . ' frei' }}</x-ui.status>
+                    @break
+
                     @case('waitlist')
-                        <x-ui.button variant="secondary" :href="route('events.show', $event->slug).'#warteliste'" full>Auf die Warteliste</x-ui.button>
-                        @break
+                        <x-ui.status tone="waitlist">Warteliste</x-ui.status>
+                    @break
+
+                    @case('cancelled')
+                        <x-ui.status tone="danger">Abgesagt</x-ui.status>
+                    @break
+
+                    @case('past')
+                        <x-ui.status tone="neutral">Beendet</x-ui.status>
+                    @break
+
                     @case('external')
-                        @if ($event->external_booking_url)
-                            <x-ui.button variant="secondary" :href="$event->external_booking_url" target="_blank" rel="noopener noreferrer" full>
-                                {{ $event->external_booking_button_text ?: 'Zur Anmeldung' }}
-                                <x-icon.external-link class="h-4 w-4 shrink-0" />
-                                <span class="sr-only">(öffnet eine externe Seite)</span>
-                            </x-ui.button>
-                        @else
-                            <x-ui.button variant="secondary" :href="$href" full>Details</x-ui.button>
-                        @endif
-                        @break
+                        <x-ui.status tone="neutral">Anmeldung extern</x-ui.status>
+                    @break
+
                     @default
-                        <x-ui.button variant="secondary" :href="$href" full>Details</x-ui.button>
+                        <x-ui.status tone="neutral">derzeit nicht buchbar</x-ui.status>
                 @endswitch
             @endif
-        </x-slot:action>
-    @endif
+        </x-slot:aside>
+
+        @if ($showAction)
+            <x-slot:action>
+                @if ($filled($action))
+                    {{ $action }}
+                @else
+                    @switch($state)
+                        @case('bookable')
+                            <x-ui.button :href="route('bookings.create', $event)" full>Buchen</x-ui.button>
+                        @break
+
+                        @case('waitlist')
+                            <x-ui.button variant="secondary" :href="route('events.show', $event->slug) . '#warteliste'" full>Auf die Warteliste</x-ui.button>
+                        @break
+
+                        @case('external')
+                            @if ($event->external_booking_url)
+                                <x-ui.button variant="secondary" :href="$event->external_booking_url" target="_blank" rel="noopener noreferrer"
+                                    full>
+                                    {{ $event->external_booking_button_text ?: 'Zur Anmeldung' }}
+                                    <x-icon.external-link class="h-4 w-4 shrink-0" />
+                                    <span class="sr-only">(öffnet eine externe Seite)</span>
+                                </x-ui.button>
+                            @else
+                                <x-ui.button variant="secondary" :href="$href" full>Details</x-ui.button>
+                            @endif
+                        @break
+
+                        @default
+                            <x-ui.button variant="secondary" :href="$href" full>Details</x-ui.button>
+                    @endswitch
+                @endif
+            </x-slot:action>
+        @endif
 </x-ui.row>

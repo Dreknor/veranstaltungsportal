@@ -31,15 +31,12 @@
         'aria-invalid:border-danger-field',
         'h-12' => $size !== 'sm',
         'h-11' => $size === 'sm',
-        'py-2.5 file:mr-3 file:border-0 file:bg-transparent file:p-0 file:text-small file:font-medium file:text-ink' => $type === 'file',
+        'py-2.5 file:mr-3 file:border-0 file:bg-transparent file:p-0 file:text-small file:font-medium file:text-ink' =>
+            $type === 'file',
     ]);
 @endphp
 
-<input
-    type="{{ $type }}"
-    @if ($name) name="{{ $name }}" @endif
+<input type="{{ $type }}" @if ($name) name="{{ $name }}" @endif
     @if ($id) id="{{ $id }}" @endif
-    @if ($value !== null && ! is_array($value)) value="{{ $value }}" @endif
-    @if ($invalid) aria-invalid="true" @endif
-    {{ $attributes->class($classes) }}
->
+    @if ($value !== null && !is_array($value)) value="{{ $value }}" @endif
+    @if ($invalid) aria-invalid="true" @endif {{ $attributes->class($classes) }}>

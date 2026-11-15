@@ -21,9 +21,9 @@
 ])
 
 @php
-    $id ??= \App\Support\Ui::id($name) ?? 'feld-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
+    $id ??= \App\Support\Ui::id($name) ?? 'feld-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
     $error ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
-    $describedBy = trim(($hint ? $id.'-hint ' : '').($error ? $id.'-error' : ''));
+    $describedBy = trim(($hint ? $id . '-hint ' : '') . ($error ? $id . '-error' : ''));
 @endphp
 
 <div {{ $attributes->only('class') }}>
@@ -34,23 +34,13 @@
     @if ($slot->isNotEmpty())
         {{ $slot }}
     @else
-        <x-ui.input
-            :type="$type"
-            :name="$name"
-            :id="$id"
-            :value="$value"
-            :size="$size"
-            :old="$old"
-            :invalid="(bool) $error"
-            :required="$required"
-            :aria-describedby="$describedBy ?: null"
-            :class="$inputClass"
-            {{ $attributes->except('class') }}
-        />
+        <x-ui.input :type="$type" :name="$name" :id="$id" :value="$value" :size="$size"
+            :old="$old" :invalid="(bool) $error" :required="$required" :aria-describedby="$describedBy ?: null" :class="$inputClass"
+            {{ $attributes->except('class') }} />
     @endif
 
     @if ($hint)
-        <x-ui.hint :id="$id.'-hint'">{{ $hint }}</x-ui.hint>
+        <x-ui.hint :id="$id . '-hint'">{{ $hint }}</x-ui.hint>
     @endif
-    <x-ui.field-error :message="$error" :id="$id.'-error'" />
+    <x-ui.field-error :message="$error" :id="$id . '-error'" />
 </div>

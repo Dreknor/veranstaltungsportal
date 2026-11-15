@@ -11,6 +11,7 @@
     'm-0 text-ink',
     'divide-y divide-line border-y border-line' => $layout === 'rows',
     'grid gap-x-8 gap-y-5 sm:grid-cols-2 lg:grid-cols-3' => $layout === 'stack',
-]) }} data-layout="{{ $layout }}">
+]) }}
+    data-layout="{{ $layout }}">
     {{ $slot }}
 </dl>

@@ -7,7 +7,7 @@
     'label' => 'Bereiche',
 ])
 
-<nav aria-label="{{ $label }}" {{ $attributes->class('overflow-x-auto border-b border-line') }}>
+<nav aria-label="{{ $label }}" {{ $attributes->class('relative overflow-x-auto border-b border-line') }}>
     <ul class="m-0 flex list-none gap-1 p-0">
         {{ $slot }}
     </ul>

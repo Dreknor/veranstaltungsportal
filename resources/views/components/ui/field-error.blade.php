@@ -11,11 +11,12 @@
 
 @php
     $message ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
-    $id ??= $name ? \App\Support\Ui::id($name).'-error' : null;
+    $id ??= $name ? \App\Support\Ui::id($name) . '-error' : null;
 @endphp
 
 @if ($message)
-    <p @if ($id) id="{{ $id }}" @endif {{ $attributes->class('mt-1.5 flex items-start gap-1.5 text-small text-danger') }}>
+    <p @if ($id) id="{{ $id }}" @endif
+        {{ $attributes->class('mt-1.5 flex items-start gap-1.5 text-small text-danger') }}>
         <x-icon.error class="mt-0.5 h-4 w-4 shrink-0" />
         <span>{{ $message }}</span>
     </p>

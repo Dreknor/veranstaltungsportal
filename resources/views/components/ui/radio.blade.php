@@ -19,20 +19,17 @@
 @endphp
 
 <div {{ $attributes->only('class') }}>
-    <label for="{{ $id }}" class="flex min-h-11 cursor-pointer items-start gap-3 py-[11px] text-ui text-ink has-disabled:cursor-not-allowed has-disabled:text-muted">
-        <input
-            type="radio"
-            @if ($name) name="{{ $name }}" @endif
-            id="{{ $id }}"
-            value="{{ $value }}"
-            @checked($isChecked)
-            @required($required)
+    <label for="{{ $id }}"
+        class="flex min-h-11 cursor-pointer items-start gap-3 py-[11px] text-ui text-ink has-disabled:cursor-not-allowed has-disabled:text-muted">
+        <input type="radio" @if ($name) name="{{ $name }}" @endif id="{{ $id }}"
+            value="{{ $value }}" @checked($isChecked) @required($required)
             @if ($hint) aria-describedby="{{ $id }}-hint" @endif
-            {{ $attributes->except('class')->class('ui-radio') }}
-        >
+            {{ $attributes->except('class')->class('ui-radio') }}>
         <span class="min-w-0">
             {{ $label ?? $slot }}
-            @if ($hint)<span id="{{ $id }}-hint" class="mt-0.5 block text-small text-muted">{{ $hint }}</span>@endif
+            @if ($hint)
+                <span id="{{ $id }}-hint" class="mt-0.5 block text-small text-muted">{{ $hint }}</span>
+            @endif
         </span>
     </label>
 </div>

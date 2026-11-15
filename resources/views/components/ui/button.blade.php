@@ -22,15 +22,16 @@
         'w-full' => $full,
 
         // Flächen-Buttons
-        'rounded-control border whitespace-nowrap' => ! $isLink,
-        'disabled:border-line disabled:bg-zone disabled:text-disabled aria-disabled:border-line aria-disabled:bg-zone aria-disabled:text-disabled' => ! $isLink,
-        'h-9 px-3 text-small' => ! $isLink && $size === 'sm',
-        'h-11 px-4 text-ui' => ! $isLink && $size === 'md',
-        'h-12 px-5 text-base' => ! $isLink && $size === 'lg',
-        'h-13 px-5 text-base font-semibold' => ! $isLink && $size === 'xl',
+        'rounded-control border whitespace-nowrap' => !$isLink,
+        'disabled:border-line disabled:bg-zone disabled:text-disabled aria-disabled:border-line aria-disabled:bg-zone aria-disabled:text-disabled' => !$isLink,
+        'h-9 px-3 text-small' => !$isLink && $size === 'sm',
+        'h-11 px-4 text-ui' => !$isLink && $size === 'md',
+        'h-12 px-5 text-base' => !$isLink && $size === 'lg',
+        'h-13 px-5 text-base font-semibold' => !$isLink && $size === 'xl',
         'border-primary bg-primary text-on-primary hover:border-ink hover:bg-ink' => $variant === 'primary',
         'border-line-strong bg-surface text-ink hover:border-ink hover:bg-zone' => $variant === 'secondary',
-        'border-danger bg-danger text-on-primary hover:border-danger-hover hover:bg-danger-hover' => $variant === 'danger',
+        'border-danger bg-danger text-on-primary hover:border-danger-hover hover:bg-danger-hover' =>
+            $variant === 'danger',
 
         // Textlink
         'text-ink underline-offset-[3px] hover:underline disabled:text-disabled disabled:no-underline aria-disabled:text-disabled aria-disabled:no-underline' => $isLink,
@@ -40,22 +41,34 @@
     ]);
 @endphp
 
-@if ($href !== null && ! $disabled)
+@if ($href !== null && !$disabled)
     <a href="{{ $href }}" {{ $attributes->class($classes) }}>
-        @if ($icon)<span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{{ $icon }}</span>@endif
+        @if ($icon)
+            <span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{{ $icon }}</span>
+        @endif
         {{ $slot }}
-        @if ($arrow)<x-icon.arrow-right class="h-4 w-4 shrink-0" />@endif
+        @if ($arrow)
+            <x-icon.arrow-right class="h-4 w-4 shrink-0" />
+        @endif
     </a>
 @elseif ($href !== null)
     <a role="link" aria-disabled="true" {{ $attributes->class($classes) }}>
-        @if ($icon)<span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{{ $icon }}</span>@endif
+        @if ($icon)
+            <span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{{ $icon }}</span>
+        @endif
         {{ $slot }}
-        @if ($arrow)<x-icon.arrow-right class="h-4 w-4 shrink-0" />@endif
+        @if ($arrow)
+            <x-icon.arrow-right class="h-4 w-4 shrink-0" />
+        @endif
     </a>
 @else
     <button type="{{ $type }}" @disabled($disabled) {{ $attributes->class($classes) }}>
-        @if ($icon)<span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{{ $icon }}</span>@endif
+        @if ($icon)
+            <span class="shrink-0 [&>svg]:h-4 [&>svg]:w-4">{{ $icon }}</span>
+        @endif
         {{ $slot }}
-        @if ($arrow)<x-icon.arrow-right class="h-4 w-4 shrink-0" />@endif
+        @if ($arrow)
+            <x-icon.arrow-right class="h-4 w-4 shrink-0" />
+        @endif
     </button>
 @endif
