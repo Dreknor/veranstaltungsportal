@@ -1,342 +1,199 @@
-<x-layouts.app>
-    <div class="mb-6">
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-            <div>
-                <a href="{{ route('organizer.events.index') }}" class="text-blue-600 hover:text-blue-800 mb-2 inline-block">
-                    <i class="fas fa-arrow-left mr-1"></i> Zurück zu Events
-                </a>
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">Check-In: {{ $event->title }}</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">
-                    {{ $event->start_date->format('d.m.Y H:i') }} Uhr
-                </p>
-            </div>
-            <div class="flex gap-2">
-                <a href="{{ route('organizer.check-in.export', $event) }}"
-                   class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 sm:py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
-                    <i class="fas fa-download mr-2"></i> Export
-                </a>
-                <button onclick="openQrScanner()"
-                        class="flex-1 sm:flex-none justify-center inline-flex items-center px-4 py-3 sm:py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700">
-                    <i class="fas fa-qrcode mr-2"></i> QR-Scanner
-                </button>
-            </div>
+<x-layouts.app title="Check-in">
+    <x-ui.page-header title="Check-in" :back-href="route('organizer.events.index')" back-label="Zu den Veranstaltungen"
+        subtitle="{{ $event->title }} · {{ \App\Support\Ui::date($event->start_date) }}, {{ $event->start_date->format('H:i') }} Uhr">
+        <x-slot:actions>
+            <x-ui.button variant="secondary" :href="route('organizer.check-in.export', $event)">
+                <x-slot:icon><x-icon.download /></x-slot:icon>
+                Export
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    @if ($dates->isNotEmpty())
+        {{-- Terminauswahl (Veranstaltung mit mehreren Terminen) --}}
+        <x-ui.tabs label="Check-in für Termin" class="mb-8">
+            @foreach ($dates as $date)
+                <x-ui.tab :href="route('organizer.check-in.index', [$event, 'date' => $date->id])" :active="$selectedDate?->id === $date->id" class="tabular-nums">
+                    {{ $date->start_date->translatedFormat('D d.m.') }} {{ $date->start_date->format('H:i') }}
+                    @if ($date->start_date->isToday())
+                        <span class="text-small font-normal text-muted">(heute)</span>
+                    @endif
+                </x-ui.tab>
+            @endforeach
+        </x-ui.tabs>
+    @endif
+
+    @php
+        $progress = $stats['total'] > 0 ? round(($stats['checked_in'] / $stats['total']) * 100, 1) : 0;
+    @endphp
+
+    <div class="mb-6 grid gap-4 sm:grid-cols-3">
+        <x-ui.stat label="Tickets gesamt" :value="$stats['total']" />
+        <x-ui.stat label="Eingecheckt" :value="$stats['checked_in']" />
+        <x-ui.stat label="Ausstehend" :value="$stats['pending']" />
+    </div>
+
+    <div class="mb-12">
+        <div class="mb-2 flex items-center justify-between gap-4 text-small">
+            <span class="font-medium text-ink" id="checkin-progress-label">Check-in-Fortschritt</span>
+            <span class="text-muted tabular-nums">{{ $progress }} %</span>
+        </div>
+        <div class="h-2 w-full overflow-hidden rounded-full bg-line" role="progressbar" aria-labelledby="checkin-progress-label"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress }}">
+            <div class="h-2 rounded-full bg-primary" style="width: {{ $progress }}%"></div>
         </div>
     </div>
 
-    <!-- Flash Messages -->
-    @if(session('status'))
-        <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg" role="alert">
-            <div class="flex items-center">
-                <i class="fas fa-check-circle text-xl mr-3"></i>
-                <p class="font-medium">{{ session('status') }}</p>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
-            <div class="flex items-center">
-                <i class="fas fa-exclamation-circle text-xl mr-3"></i>
-                <p class="font-medium">{{ session('error') }}</p>
-            </div>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg" role="alert">
-            <div class="flex items-center mb-2">
-                <i class="fas fa-exclamation-triangle text-xl mr-3"></i>
-                <p class="font-medium">Fehler aufgetreten:</p>
-            </div>
-            <ul class="list-disc list-inside ml-8">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @if($dates->isNotEmpty())
-        <!-- Terminauswahl (Veranstaltung mit mehreren Terminen) -->
-        <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Check-in für Termin:</p>
-            <div class="flex gap-2 overflow-x-auto pb-1">
-                @foreach($dates as $date)
-                    <a href="{{ route('organizer.check-in.index', [$event, 'date' => $date->id]) }}"
-                       class="shrink-0 px-3 py-2 rounded-lg text-sm font-medium border transition
-                              {{ $selectedDate?->id === $date->id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50' }}">
-                        {{ $date->start_date->translatedFormat('D d.m.') }} {{ $date->start_date->format('H:i') }}
-                        @if($date->start_date->isToday()) <span class="ml-1 text-xs">(heute)</span> @endif
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    <!-- Statistics -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                    <i class="fas fa-ticket-alt text-blue-600 dark:text-blue-400 text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Tickets gesamt</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $stats['total'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 p-3 rounded-full">
-                    <i class="fas fa-check text-green-600 dark:text-green-400 text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Eingecheckt</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $stats['checked_in'] }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-yellow-100 dark:bg-yellow-900 p-3 rounded-full">
-                    <i class="fas fa-clock text-yellow-600 dark:text-yellow-400 text-2xl"></i>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Ausstehend</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $stats['pending'] }}</p>
-                </div>
-            </div>
-        </div>
+    {{-- Suche, Filter und QR-Scanner --}}
+    <div class="mb-6 flex flex-wrap items-end gap-x-4 gap-y-4">
+        <x-ui.field label="Suche" id="searchInput" type="search" class="min-w-0 flex-[3_1_280px]" autocomplete="off"
+            placeholder="Name, E-Mail, Ticket- oder Buchungsnummer" />
+        <x-ui.select label="Status" id="statusFilter" class="flex-[1_1_160px]"
+            :options="['' => 'Alle', 'pending' => 'Ausstehend', 'checked_in' => 'Eingecheckt']" />
+        <x-ui.button size="lg" onclick="openQrScanner()" class="flex-[1_1_200px]">QR-Code scannen</x-ui.button>
     </div>
 
-    <!-- Progress Bar -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-        <div class="flex justify-between items-center mb-2">
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Check-In Fortschritt</span>
-            <span class="text-sm text-gray-600 dark:text-gray-400">
-                {{ $stats['total'] > 0 ? round(($stats['checked_in'] / $stats['total']) * 100, 1) : 0 }}%
-            </span>
-        </div>
-        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
-            <div class="bg-green-600 h-4 rounded-full transition-all"
-                 style="width: {{ $stats['total'] > 0 ? round(($stats['checked_in'] / $stats['total']) * 100, 1) : 0 }}%"></div>
-        </div>
-    </div>
+    <section aria-labelledby="ticket-list-heading">
+        <div class="mb-4 flex min-h-12 flex-wrap items-center justify-between gap-4">
+            <h2 id="ticket-list-heading" class="m-0 text-h2">Tickets</h2>
 
-    <!-- Ticket List -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-        <div class="p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Ticket-Liste</h2>
-
-                <!-- Bulk-Action-Toolbar (nur sichtbar wenn etwas ausgewählt) -->
-                <div id="bulkToolbar" class="hidden items-center gap-3">
-                    <span id="selectedCount" class="text-sm text-gray-600 dark:text-gray-400 font-medium"></span>
-                    <form id="bulkForm"
-                          action="{{ route('organizer.check-in.bulk', $event) }}"
-                          method="POST">
-                        @csrf
-                        @if($selectedDate)<input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">@endif
-                        <div id="bulkItemInputs"></div>
-                        <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 transition">
-                            <i class="fas fa-check-double mr-2"></i> Ausgewählte einchecken
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Suche & Filter -->
-            <div class="flex flex-col sm:flex-row gap-3 mb-4">
-                <div class="flex-1">
-                    <input type="text"
-                           id="searchInput"
-                           placeholder="Nach Name, E-Mail, Ticket-Nr. oder Buchungsnr. suchen..."
-                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100">
-                </div>
-                <div>
-                    <select id="statusFilter"
-                            class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100">
-                        <option value="">Alle</option>
-                        <option value="pending">Ausstehend</option>
-                        <option value="checked_in">Eingecheckt</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="ticketsTable">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="px-4 py-3 w-10">
-                                <!-- Alle ausstehenden auswählen -->
-                                <input type="checkbox" id="selectAllPending"
-                                       class="rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500"
-                                       title="Alle ausstehenden auswählen">
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th class="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Ticket-Nr.
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Name / Organisation
-                            </th>
-                            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                E-Mail
-                            </th>
-                            <th class="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Ticket-Typ
-                            </th>
-                            <th class="hidden xl:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Buchungs-Nr.
-                            </th>
-                            <th class="hidden md:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Check-In Zeit
-                            </th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Aktionen
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($items as $item)
-                            @php
-                                $isChecked = $item->isCheckedInFor($selectedDate);
-                                $checkedAt = $selectedDate
-                                    ? $item->attendances->firstWhere('event_date_id', $selectedDate->id)?->checked_in_at
-                                    : $item->checked_in_at;
-                                $name  = $item->attendee_name  ?: $item->booking->customer_name;
-                                $email = $item->attendee_email ?: $item->booking->customer_email;
-                                $org   = $item->attendee_organization ?: $item->booking->customer_organization;
-                            @endphp
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 ticket-row"
-                                data-checked="{{ $isChecked ? '1' : '0' }}"
-                                data-item-id="{{ $item->id }}">
-                                <!-- Checkbox (nur für noch nicht eingecheckte Tickets) -->
-                                <td class="px-4 py-4">
-                                    @if(!$isChecked)
-                                        <input type="checkbox"
-                                               class="item-checkbox rounded border-gray-300 dark:border-gray-500 text-blue-600 focus:ring-blue-500"
-                                               value="{{ $item->id }}">
-                                    @endif
-                                </td>
-
-                                <!-- Status -->
-                                <td class="px-4 py-4 whitespace-nowrap">
-                                    @if($isChecked)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                            <i class="fas fa-check-circle mr-1"></i> Eingecheckt
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                            <i class="fas fa-clock mr-1"></i> Ausstehend
-                                        </span>
-                                    @endif
-                                </td>
-
-                                <!-- Ticket-Nummer -->
-                                <td class="hidden lg:table-cell px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-600 dark:text-gray-400">
-                                    {{ $item->ticket_number }}
-                                </td>
-
-                                <!-- Name / Organisation -->
-                                <td class="px-4 py-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $name }}</div>
-                                    @if($org)
-                                        <div class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{{ $org }}</div>
-                                    @endif
-                                    <div class="md:hidden text-xs text-gray-500 dark:text-gray-400 mt-0.5 break-all">{{ $email }}</div>
-                                    <div class="lg:hidden text-xs text-gray-500 dark:text-gray-400">{{ $item->ticketType->name ?? '' }}</div>
-                                </td>
-
-                                <!-- E-Mail -->
-                                <td class="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $email }}
-                                </td>
-
-                                <!-- Ticket-Typ -->
-                                <td class="hidden lg:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                                    {{ $item->ticketType->name ?? '—' }}
-                                </td>
-
-                                <!-- Buchungs-Nr. -->
-                                <td class="hidden xl:table-cell px-4 py-4 whitespace-nowrap text-xs font-mono text-gray-500 dark:text-gray-400">
-                                    {{ $item->booking->booking_number }}
-                                </td>
-
-                                <!-- Check-In Zeit -->
-                                <td class="hidden md:table-cell px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                    @if($isChecked && $checkedAt)
-                                        {{ $checkedAt->format('d.m.Y H:i') }}
-                                    @else
-                                        —
-                                    @endif
-                                </td>
-
-                                <!-- Aktionen -->
-                                <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    @if($isChecked)
-                                        <form action="{{ route('organizer.check-in.item.undo', [$event, $item]) }}"
-                                              method="POST"
-                                              class="inline"
-                                              onsubmit="return confirm('Check-in für dieses Ticket wirklich rückgängig machen?')">
-                                            @csrf
-                                            @if($selectedDate)<input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">@endif
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="text-red-600 hover:text-red-900 dark:text-red-400 text-xs">
-                                                <i class="fas fa-undo mr-1"></i> Rückgängig
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('organizer.check-in.item.store', [$event, $item]) }}"
-                                              method="POST"
-                                              class="inline check-in-form">
-                                            @csrf
-                                            @if($selectedDate)<input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">@endif
-                                            <button type="submit"
-                                                    class="check-in-btn inline-flex items-center px-3 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 text-sm font-medium">
-                                                <i class="fas fa-check mr-1"></i> Einchecken
-                                            </button>
-                                        </form>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="9" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                    Keine bestätigten Buchungen vorhanden.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+            {{-- Sammel-Check-in (nur sichtbar, wenn etwas ausgewählt ist) --}}
+            <div id="bulkToolbar" class="hidden flex-wrap items-center gap-3">
+                <span id="selectedCount" class="text-small font-medium text-ink-soft" aria-live="polite"></span>
+                <form id="bulkForm" action="{{ route('organizer.check-in.bulk', $event) }}" method="POST" class="m-0">
+                    @csrf
+                    @if ($selectedDate)
+                        <input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">
+                    @endif
+                    <div id="bulkItemInputs"></div>
+                    <x-ui.button type="submit">
+                        <x-slot:icon><x-icon.check /></x-slot:icon>
+                        Ausgewählte einchecken
+                    </x-ui.button>
+                </form>
             </div>
         </div>
-    </div>
 
-    <!-- QR Scanner Modal -->
-    <div id="qrScannerModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center">
-        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">QR-Code Scanner</h3>
-                <button onclick="closeQrScanner()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400">
-                    <i class="fas fa-times text-2xl"></i>
+        <x-ui.table label="Tickets" id="ticketsTable">
+            <thead>
+                <tr>
+                    <th scope="col" class="w-12">
+                        <input type="checkbox" id="selectAllPending" class="ui-checkbox" title="Alle ausstehenden auswählen"
+                            aria-label="Alle ausstehenden auswählen">
+                    </th>
+                    <th scope="col">Status</th>
+                    <th scope="col" class="hidden lg:table-cell">Ticket-Nr.</th>
+                    <th scope="col">Name / Organisation</th>
+                    <th scope="col" class="hidden md:table-cell">E-Mail</th>
+                    <th scope="col" class="hidden lg:table-cell">Ticketart</th>
+                    <th scope="col" class="hidden xl:table-cell">Buchungs-Nr.</th>
+                    <th scope="col" class="hidden md:table-cell">Check-in-Zeit</th>
+                    <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($items as $item)
+                    @php
+                        $isChecked = $item->isCheckedInFor($selectedDate);
+                        $checkedAt = $selectedDate
+                            ? $item->attendances->firstWhere('event_date_id', $selectedDate->id)?->checked_in_at
+                            : $item->checked_in_at;
+                        $name = $item->attendee_name ?: $item->booking->customer_name;
+                        $email = $item->attendee_email ?: $item->booking->customer_email;
+                        $org = $item->attendee_organization ?: $item->booking->customer_organization;
+                    @endphp
+                    <tr class="ticket-row" data-checked="{{ $isChecked ? '1' : '0' }}" data-item-id="{{ $item->id }}">
+                        {{-- Auswahl (nur für noch nicht eingecheckte Tickets) --}}
+                        <td>
+                            @if (!$isChecked)
+                                <input type="checkbox" class="item-checkbox ui-checkbox" value="{{ $item->id }}"
+                                    aria-label="{{ $name }} auswählen">
+                            @endif
+                        </td>
+
+                        <td class="whitespace-nowrap">
+                            @if ($isChecked)
+                                <x-ui.status tone="success">Eingecheckt</x-ui.status>
+                            @else
+                                <x-ui.status tone="warning">Ausstehend</x-ui.status>
+                            @endif
+                        </td>
+
+                        <td class="hidden whitespace-nowrap text-small text-muted tabular-nums lg:table-cell">{{ $item->ticket_number }}</td>
+
+                        <td>
+                            <span class="block font-medium">{{ $name }}</span>
+                            @if ($org)
+                                <span class="block text-small text-muted">{{ $org }}</span>
+                            @endif
+                            <span class="block break-all text-small text-muted md:hidden">{{ $email }}</span>
+                            <span class="block text-small text-muted lg:hidden">{{ $item->ticketType->name ?? '' }}</span>
+                        </td>
+
+                        <td class="hidden whitespace-nowrap text-muted md:table-cell">{{ $email }}</td>
+
+                        <td class="hidden whitespace-nowrap lg:table-cell">{{ $item->ticketType->name ?? '–' }}</td>
+
+                        <td class="hidden whitespace-nowrap text-small text-muted tabular-nums xl:table-cell">{{ $item->booking->booking_number }}</td>
+
+                        <td class="hidden whitespace-nowrap text-muted tabular-nums md:table-cell">
+                            @if ($isChecked && $checkedAt)
+                                {{ $checkedAt->format('d.m.Y H:i') }}
+                            @else
+                                –
+                            @endif
+                        </td>
+
+                        <td class="actions">
+                            @if ($isChecked)
+                                <form action="{{ route('organizer.check-in.item.undo', [$event, $item]) }}" method="POST" class="inline"
+                                    onsubmit="return confirm('Check-in für dieses Ticket wirklich rückgängig machen?')">
+                                    @csrf
+                                    @if ($selectedDate)
+                                        <input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">
+                                    @endif
+                                    @method('DELETE')
+                                    <x-ui.button type="submit" variant="link" size="sm">Rückgängig</x-ui.button>
+                                </form>
+                            @else
+                                <form action="{{ route('organizer.check-in.item.store', [$event, $item]) }}" method="POST" class="check-in-form inline">
+                                    @csrf
+                                    @if ($selectedDate)
+                                        <input type="hidden" name="event_date_id" value="{{ $selectedDate->id }}">
+                                    @endif
+                                    <x-ui.button type="submit" variant="secondary" size="sm" class="check-in-btn">Einchecken</x-ui.button>
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="9" class="p-0">
+                            <x-ui.empty :bordered="false">Keine bestätigten Buchungen vorhanden.</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </section>
+
+    {{-- QR-Scanner (wird per JavaScript ein- und ausgeblendet) --}}
+    <div id="qrScannerModal" class="fixed inset-0 z-50 flex hidden items-center justify-center bg-ink/50 p-4" role="dialog" aria-modal="true"
+        aria-labelledby="qrScannerTitle">
+        <div class="w-full max-w-[640px] rounded-box border border-line bg-surface p-6 text-ink shadow-overlay">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <h2 id="qrScannerTitle" class="m-0 pt-2 text-h3">QR-Code scannen</h2>
+                <button type="button" onclick="closeQrScanner()" aria-label="Scanner schließen"
+                    class="-mt-1 -mr-3 inline-flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-control text-ink transition-colors duration-150 hover:bg-zone">
+                    <x-icon.x class="h-5 w-5" />
                 </button>
             </div>
 
             <div id="qrReader" class="mb-4"></div>
 
-            <div id="scanResult" class="hidden mb-4 p-4 rounded-lg"></div>
+            <div id="scanResult" class="mb-4 hidden rounded-control border p-4" role="status"></div>
 
-            <div class="text-center text-sm text-gray-600 dark:text-gray-400">
-                Halten Sie den QR-Code vor die Kamera
-            </div>
+            <p class="m-0 text-small text-muted">Halten Sie den QR-Code vor die Kamera.</p>
         </div>
     </div>
 
@@ -424,10 +281,10 @@
                 form.addEventListener('submit', function () {
                     const btn = this.querySelector('.check-in-btn');
                     btn.disabled  = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> …';
+                    btn.innerHTML = 'Wird eingecheckt …';
                     setTimeout(() => {
                         btn.disabled  = false;
-                        btn.innerHTML = '<i class="fas fa-check mr-1"></i> Einchecken';
+                        btn.innerHTML = 'Einchecken';
                     }, 4000);
                 });
             });
@@ -478,27 +335,17 @@
                 resultDiv.classList.remove('hidden');
 
                 if (data.success) {
-                    resultDiv.className = 'mb-4 p-4 rounded-lg bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+                    resultDiv.className = 'mb-4 rounded-control border border-success-line bg-success-zone p-4 text-success';
                     resultDiv.innerHTML = `
-                        <div class="flex items-center">
-                            <i class="fas fa-check-circle text-2xl mr-3"></i>
-                            <div>
-                                <p class="font-semibold">${data.message}</p>
-                                <p class="text-sm">${data.booking.customer_name}</p>
-                                <p class="text-xs">${data.booking.tickets_count} Ticket(s) eingecheckt</p>
-                            </div>
-                        </div>`;
+                        <p class="m-0 font-semibold">${data.message}</p>
+                        <p class="m-0 text-small">${data.booking.customer_name}</p>
+                        <p class="m-0 text-small">${data.booking.tickets_count} Ticket(s) eingecheckt</p>`;
                     setTimeout(() => location.reload(), 2000);
                 } else {
-                    resultDiv.className = 'mb-4 p-4 rounded-lg bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+                    resultDiv.className = 'mb-4 rounded-control border border-danger-line bg-danger-zone p-4 text-danger';
                     resultDiv.innerHTML = `
-                        <div class="flex items-center">
-                            <i class="fas fa-exclamation-circle text-2xl mr-3"></i>
-                            <div>
-                                <p class="font-semibold">Fehler</p>
-                                <p class="text-sm">${data.message}</p>
-                            </div>
-                        </div>`;
+                        <p class="m-0 font-semibold">Fehler</p>
+                        <p class="m-0 text-small">${data.message}</p>`;
                     setTimeout(() => {
                         html5QrCode.resume();
                         resultDiv.classList.add('hidden');
@@ -508,7 +355,7 @@
             .catch(() => {
                 const resultDiv = document.getElementById('scanResult');
                 resultDiv.classList.remove('hidden');
-                resultDiv.className = 'mb-4 p-4 rounded-lg bg-red-100 text-red-800';
+                resultDiv.className = 'mb-4 rounded-control border border-danger-line bg-danger-zone p-4 text-danger';
                 resultDiv.textContent = 'Fehler beim Check-in. Bitte versuchen Sie es erneut.';
                 setTimeout(() => {
                     html5QrCode.resume();

@@ -10,7 +10,7 @@
     </div>
 
     <div class="mb-12 grid gap-x-12 gap-y-12 lg:grid-cols-2">
-        <x-ui.section title="Grundinformationen" level="h2">
+        <x-ui.section class="min-w-0" title="Grundinformationen" level="h2">
             <x-ui.dl>
                 <x-ui.dl-item label="Name">{{ $organization->name }}</x-ui.dl-item>
                 <x-ui.dl-item label="E-Mail">{{ $organization->email }}</x-ui.dl-item>
@@ -34,7 +34,7 @@
             </x-ui.dl>
         </x-ui.section>
 
-        <x-ui.section title="Gebühren-Einstellungen" level="h2" :link-href="route('admin.organizer-fees.edit', $organization)" link-label="Bearbeiten">
+        <x-ui.section class="min-w-0" title="Gebühren-Einstellungen" level="h2" :link-href="route('admin.organizer-fees.edit', $organization)" link-label="Bearbeiten">
             @if ($organization->custom_platform_fee && ($organization->custom_platform_fee['enabled'] ?? false))
                 @php
                     $customFee = $organization->custom_platform_fee;

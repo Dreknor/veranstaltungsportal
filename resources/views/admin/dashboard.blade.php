@@ -43,7 +43,7 @@
     </x-ui.section>
 
     <div class="grid gap-x-12 gap-y-12 lg:grid-cols-2">
-        <x-ui.section title="Neueste Benutzer" level="h2" :link-href="route('admin.users.index')" link-label="Alle Benutzer">
+        <x-ui.section class="min-w-0" title="Neueste Benutzer" level="h2" :link-href="route('admin.users.index')" link-label="Alle Benutzer">
             <x-ui.table label="Neueste Benutzer">
                 <thead>
                     <tr>
@@ -74,7 +74,7 @@
             </x-ui.table>
         </x-ui.section>
 
-        <x-ui.section title="Neueste Veranstaltungen" level="h2" :link-href="route('admin.events.index')" link-label="Alle Veranstaltungen">
+        <x-ui.section class="min-w-0" title="Neueste Veranstaltungen" level="h2" :link-href="route('admin.events.index')" link-label="Alle Veranstaltungen">
             <x-ui.table label="Neueste Veranstaltungen">
                 <thead>
                     <tr>
