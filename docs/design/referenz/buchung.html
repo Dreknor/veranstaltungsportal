@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referenz E – Buchung</title>
+<!-- Statische Referenz zum Entwurf E. Nur zum Nachschlagen; kein Produktivcode.
+     Die Schrift wird hier von Google Fonts geladen; im Portal wird Geist lokal eingebunden. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fff}
+*{box-sizing:border-box}
+a{color:#1E3135;text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible,button:focus-visible,input[type=checkbox]:focus-visible{outline:2px solid #1E3135;outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.bp{background:#2B4347;color:#fff;border:1px solid #2B4347}
+.bp:hover{background:#1E3135;border-color:#1E3135;text-decoration:none}
+.bs{background:#fff;color:#1E3135;border:1px solid #7F9091}
+.bs:hover{background:#F3F6F5;border-color:#1E3135;text-decoration:none}
+/* Formularfelder */
+.fld{background:#fff;border:1px solid #7F9091}
+.fld:hover{border-color:#1E3135}
+.fld:focus{border-color:#1E3135;outline:2px solid #1E3135;outline-offset:2px}
+/* Stepper */
+.st{background:#fff;color:#1E3135;border:0}
+.st:hover{background:#F3F6F5}
+.st:disabled{color:#9AA8A9;background:#fff;cursor:not-allowed}
+.st:focus-visible{outline-offset:-2px}
+/* Zahlungskarten */
+.pay{background:#fff;border:1px solid #7F9091}
+.pay:hover{border-color:#1E3135}
+.pay:has(input:checked){background:#F3F6F5;border-color:#1E3135;box-shadow:inset 0 0 0 1px #1E3135}
+.pay:focus-within{outline:2px solid #1E3135;outline-offset:2px}
+.pay input{outline:none}
+/* Zwei Spalten: Formular + Zusammenfassung */
+.book{display:grid;grid-template-columns:minmax(0,640px) minmax(0,368px);justify-content:space-between;column-gap:48px;row-gap:40px;align-items:start}
+.sum{position:sticky;top:24px}
+@media (max-width:960px){
+.book{grid-template-columns:minmax(0,1fr)}
+.sum{position:static}
+}
+@media (max-width:720px){
+.nav-links{order:3;flex:1 1 100%;margin-left:-12px !important;border-top:1px solid #DCE3E2}
+}
+</style>
+</head>
+<body>
+<div style="font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;color:#1E3135;background:#fff;-webkit-font-smoothing:antialiased">
+
+  <!-- Navigation -->
+  <header style="border-bottom:1px solid #DCE3E2;background:#fff">
+    <div style="max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,32px);display:flex;flex-wrap:wrap;align-items:center;column-gap:16px;min-height:72px">
+      <a href="#" aria-label="Bildungsportal Hauptfach Mensch – Startseite" style="display:flex;align-items:center;gap:12px;min-height:56px;text-decoration:none;margin-right:auto">
+        <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+          <circle cx="18" cy="18" r="18" fill="#2B4347"></circle>
+          <path d="M11 25c0-8.5 5-14 14-14 0 8.5-5 14-14 14z" fill="#8DC11D"></path>
+          <path d="M11 25l8-8" stroke="#2B4347" stroke-width="1.5" stroke-linecap="round" fill="none"></path>
+        </svg>
+        <span style="display:flex;flex-direction:column;line-height:1.15">
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em">Bildungsportal</span>
+          <span style="font-size:13px;color:#55676A">Hauptfach Mensch</span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Hauptnavigation" style="display:flex;align-items:center;gap:4px;margin-left:0">
+        <a href="#" aria-current="page" style="display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600">Veranstaltungen</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:500">Kalender</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:500">Anmelden</a>
+      </nav>
+      <a href="#" class="bp" style="display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border-radius:8px;font-size:15px;font-weight:500">Registrieren</a>
+    </div>
+  </header>
+
+  <main style="max-width:1200px;margin:0 auto;padding:16px clamp(16px,4vw,32px) clamp(56px,7vw,96px)">
+
+    <!-- Seitenkopf -->
+    <a href="#" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;font-weight:500;color:#3B5053">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4"></path></svg>
+      Zur Veranstaltung
+    </a>
+    <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 24px;margin:8px 0 32px">
+      <h1 style="margin:0;font-size:clamp(30px,3.6vw,44px);line-height:1.1;font-weight:600;letter-spacing:-0.025em">Tickets buchen</h1>
+    </div>
+
+    <div class="book">
+
+      <!-- Formular -->
+      <form action="#" style="margin:0;min-width:0">
+
+        <!-- Gebuchte Veranstaltung -->
+        <div style="display:flex;gap:16px 20px;align-items:center;padding:16px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:12px;margin-bottom:8px">
+          <time datetime="2026-11-26" style="flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#fff;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Do</span>
+            <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">26</span>
+            <span style="font-size:13px;font-weight:500">Nov 2026</span>
+          </time>
+          <div style="min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Hauptfach Mensch</span>
+            <span style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Beziehung vor Stoff: Klassenführung, die trägt</span>
+            <span style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 16px;font-size:14px;color:#3B5053;font-variant-numeric:tabular-nums">
+              <span>Do, 26.11.2026, 14:00–17:30 Uhr</span>
+              <span>Präsenz · Radebeul</span>
+              <span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#8DC11D"></span>noch 6 frei</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 1 Tickets -->
+        <section aria-labelledby="h-1" style="padding:32px 0">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+            <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#2B4347;color:#fff;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">1</span>
+            <h2 id="h-1" style="margin:0;font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-0.015em"><span class="vh">1. </span>Tickets wählen</h2>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:16px 0;border-bottom:1px solid #DCE3E2">
+            <div style="flex:1 1 200px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:16px;font-weight:600">Teilnahme</span>
+              <span style="font-size:15px;color:#55676A;font-variant-numeric:tabular-nums">45,00 € pro Person</span>
+            </div>
+            <div role="group" aria-label="Anzahl Teilnahme" style="display:inline-flex;align-items:center;height:46px;border:1px solid #7F9091;border-radius:8px;background:#fff">
+              <button type="button" class="st" aria-label="Teilnahme: ein Ticket weniger" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:7px;cursor:pointer">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 8h9"></path></svg>
+              </button>
+              <label class="vh" for="qty-teilnahme">Anzahl Teilnahme</label>
+              <input id="qty-teilnahme" name="qty-teilnahme" type="text" inputmode="numeric" value="2" style="width:40px;height:44px;border:0;background:transparent;text-align:center;font:inherit;font-size:16px;font-weight:600;color:#1E3135;font-variant-numeric:tabular-nums;padding:0">
+              <button type="button" class="st" aria-label="Teilnahme: ein Ticket mehr" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:7px;cursor:pointer">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 8h9M8 3.5v9"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding:16px 0;border-bottom:1px solid #DCE3E2">
+            <div style="flex:1 1 200px;display:flex;flex-direction:column;gap:2px">
+              <span style="font-size:16px;font-weight:600">Ermäßigt <span style="font-weight:400">(Referendariat, Studium)</span></span>
+              <span style="font-size:15px;color:#55676A;font-variant-numeric:tabular-nums">30,00 € pro Person</span>
+            </div>
+            <div role="group" aria-label="Anzahl Ermäßigt" style="display:inline-flex;align-items:center;height:46px;border:1px solid #7F9091;border-radius:8px;background:#fff">
+              <button type="button" class="st" disabled="disabled" aria-label="Ermäßigt: ein Ticket weniger" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:7px">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 8h9"></path></svg>
+              </button>
+              <label class="vh" for="qty-ermaessigt">Anzahl Ermäßigt</label>
+              <input id="qty-ermaessigt" name="qty-ermaessigt" type="text" inputmode="numeric" value="0" style="width:40px;height:44px;border:0;background:transparent;text-align:center;font:inherit;font-size:16px;font-weight:600;color:#55676A;font-variant-numeric:tabular-nums;padding:0">
+              <button type="button" class="st" aria-label="Ermäßigt: ein Ticket mehr" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:7px;cursor:pointer">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M3.5 8h9M8 3.5v9"></path></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2 Ihre Daten -->
+        <section aria-labelledby="h-2" style="padding:32px 0;border-top:1px solid #DCE3E2;margin-top:-1px">
+          <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 24px;margin-bottom:24px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#2B4347;color:#fff;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">2</span>
+              <h2 id="h-2" style="margin:0;font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-0.015em"><span class="vh">2. </span>Ihre Daten</h2>
+            </div>
+            <span style="font-size:14px;color:#55676A">* Pflichtfeld</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:20px 16px">
+            <div>
+              <label for="name" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Name <span aria-hidden="true">*</span></label>
+              <input class="fld" id="name" name="name" type="text" autocomplete="name" required="required" value="Maria Muster" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+            </div>
+            <div>
+              <label for="email" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">E-Mail <span aria-hidden="true">*</span></label>
+              <input class="fld" id="email" name="email" type="email" autocomplete="email" required="required" value="maria.muster@beispielschule.de" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+            </div>
+            <div>
+              <label for="tel" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Telefon <span style="font-weight:400;color:#55676A">(optional)</span></label>
+              <input class="fld" id="tel" name="tel" type="tel" autocomplete="tel" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+            </div>
+            <div>
+              <label for="schule" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Schule / Einrichtung <span style="font-weight:400;color:#55676A">(optional)</span></label>
+              <input class="fld" id="schule" name="schule" type="text" autocomplete="organization" value="Evangelische Beispielschule Radebeul" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+            </div>
+          </div>
+        </section>
+
+        <!-- 3 Rechnung & Zahlung -->
+        <section aria-labelledby="h-3" style="padding:32px 0 0;border-top:1px solid #DCE3E2">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+            <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#2B4347;color:#fff;font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">3</span>
+            <h2 id="h-3" style="margin:0;font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-0.015em"><span class="vh">3. </span>Rechnung &amp; Zahlung</h2>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:20px">
+            <div>
+              <label for="empfaenger" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Rechnungsempfänger (Schule, Träger, Firma) <span style="font-weight:400;color:#55676A">(optional)</span></label>
+              <input class="fld" id="empfaenger" name="empfaenger" type="text" autocomplete="organization" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+            </div>
+            <div>
+              <label for="strasse" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Straße und Hausnummer <span aria-hidden="true">*</span></label>
+              <!-- Fokus-Zustand statisch gezeigt -->
+              <input class="fld" id="strasse" name="strasse" type="text" autocomplete="street-address" required="required" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135;border-color:#1E3135;outline:2px solid #1E3135;outline-offset:2px">
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:20px 16px">
+              <div style="flex:1 1 112px;max-width:160px">
+                <label for="plz" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">PLZ <span aria-hidden="true">*</span></label>
+                <input class="fld" id="plz" name="plz" type="text" inputmode="numeric" autocomplete="postal-code" required="required" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135;font-variant-numeric:tabular-nums">
+              </div>
+              <div style="flex:3 1 200px;min-width:0">
+                <label for="ort" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Ort <span aria-hidden="true">*</span></label>
+                <input class="fld" id="ort" name="ort" type="text" autocomplete="address-level2" required="required" style="display:block;width:100%;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+              </div>
+            </div>
+            <div>
+              <label for="land" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Land <span aria-hidden="true">*</span></label>
+              <div style="position:relative">
+                <select class="fld" id="land" name="land" autocomplete="country-name" required="required" style="display:block;width:100%;height:48px;padding:0 40px 0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135;cursor:pointer;-webkit-appearance:none;appearance:none">
+                  <option selected="selected">Deutschland</option>
+                  <option>Österreich</option>
+                  <option>Schweiz</option>
+                </select>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#1E3135" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;right:14px;top:16px;pointer-events:none"><path d="M4 6l4 4 4-4"></path></svg>
+              </div>
+            </div>
+
+            <fieldset style="border:0;padding:0;margin:12px 0 0;min-width:0">
+              <legend style="padding:0;margin-bottom:8px;font-size:14px;font-weight:500">Zahlungsmethode <span aria-hidden="true">*</span></legend>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:12px 16px">
+                <label class="pay" for="pay-rechnung" style="display:flex;align-items:flex-start;gap:12px;min-height:88px;padding:16px;border-radius:10px;cursor:pointer">
+                  <input type="radio" id="pay-rechnung" name="zahlung" value="rechnung" checked="checked" style="flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:#2B4347">
+                  <span style="display:flex;flex-direction:column;gap:2px">
+                    <span style="font-size:16px;font-weight:600">Rechnung</span>
+                    <span style="font-size:14px;color:#3B5053">Sie erhalten die Rechnung per E-Mail</span>
+                  </span>
+                </label>
+                <label class="pay" for="pay-paypal" style="display:flex;align-items:flex-start;gap:12px;min-height:88px;padding:16px;border-radius:10px;cursor:pointer">
+                  <input type="radio" id="pay-paypal" name="zahlung" value="paypal" style="flex:none;width:20px;height:20px;margin:2px 0 0;accent-color:#2B4347">
+                  <span style="display:flex;flex-direction:column;gap:2px">
+                    <span style="font-size:16px;font-weight:600">PayPal</span>
+                    <span style="font-size:14px;color:#3B5053">Sie werden nach dem Absenden zu PayPal weitergeleitet</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div style="margin-top:12px">
+              <label for="rabatt" style="display:block;margin-bottom:6px;font-size:14px;font-weight:500">Rabattcode <span style="font-weight:400;color:#55676A">(optional)</span></label>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;max-width:400px">
+                <input class="fld" id="rabatt" name="rabatt" type="text" autocomplete="off" style="flex:1 1 180px;min-width:0;height:48px;padding:0 14px;border-radius:8px;font:inherit;font-size:16px;color:#1E3135">
+                <button type="button" class="bs" style="flex:none;height:48px;padding:0 20px;border-radius:8px;font:inherit;font-size:16px;font-weight:500;cursor:pointer">Einlösen</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <!-- Zusammenfassung -->
+      <aside class="sum" aria-labelledby="h-sum" style="background:#F3F6F5;border:1px solid #DCE3E2;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:20px;min-width:0">
+        <h2 id="h-sum" style="margin:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Zusammenfassung</h2>
+
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:16px;line-height:1.35;font-weight:600">Beziehung vor Stoff: Klassenführung, die trägt</span>
+          <span style="font-size:14px;color:#3B5053;font-variant-numeric:tabular-nums">Do, 26.11.2026, 14:00–17:30 Uhr</span>
+          <span style="font-size:14px;color:#3B5053">Präsenz · Radebeul</span>
+        </div>
+
+        <div style="border-top:1px solid #C9D3D2;padding-top:16px;display:flex;justify-content:space-between;gap:16px;font-size:15px;font-variant-numeric:tabular-nums">
+          <span>2 × Teilnahme</span>
+          <span style="white-space:nowrap">90,00 €</span>
+        </div>
+
+        <div style="border-top:1px solid #1E3135;padding-top:16px;display:flex;align-items:baseline;justify-content:space-between;gap:16px;font-variant-numeric:tabular-nums">
+          <span style="font-size:16px;font-weight:600">Gesamt</span>
+          <span style="font-size:24px;line-height:1.2;font-weight:600;letter-spacing:-0.02em;white-space:nowrap">90,00 €</span>
+        </div>
+
+        <label for="datenschutz" style="display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:4px 0;font-size:14px;line-height:1.45;cursor:pointer">
+          <input type="checkbox" id="datenschutz" name="datenschutz" required="required" style="flex:none;width:20px;height:20px;margin:0;accent-color:#2B4347">
+          <span>Ich habe die <a href="#" style="text-decoration:underline;text-underline-offset:3px;font-weight:500">Datenschutzerklärung</a> gelesen und akzeptiere sie. <span aria-hidden="true">*</span></span>
+        </label>
+
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <button type="button" class="bp" style="width:100%;height:52px;padding:0 20px;border-radius:8px;font:inherit;font-size:16px;font-weight:600;cursor:pointer">Kostenpflichtig buchen</button>
+          <p style="margin:0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;color:#3B5053;text-align:center">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><rect x="1.75" y="3.25" width="12.5" height="9.5" rx="1.5"></rect><path d="M2.5 4.5L8 8.75l5.5-4.25"></path></svg>
+            Sie erhalten eine Bestätigung per E-Mail.
+          </p>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <!-- Footer (gekürzt) -->
+  <footer style="background:#F3F6F5;border-top:1px solid #DCE3E2">
+    <div style="max-width:1200px;margin:0 auto;padding:16px clamp(16px,4vw,32px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 32px;font-size:14px;color:#55676A">
+      <span>© 2026 Bildungsportal · Ein Angebot der ESdi GmbH</span>
+      <nav aria-label="Fußnavigation" style="display:flex;flex-wrap:wrap;gap:0 24px">
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:500">FAQ</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:500">Kontakt</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:500">Impressum</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:500">Datenschutz</a>
+      </nav>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

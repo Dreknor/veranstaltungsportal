@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Referenz E – Startseite</title>
+<!-- Statische Referenz zum Entwurf E. Nur zum Nachschlagen; kein Produktivcode.
+     Die Schrift wird hier von Google Fonts geladen; im Portal wird Geist lokal eingebunden. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fff}
+*{box-sizing:border-box}
+a{color:#1E3135;text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid #1E3135;outline-offset:2px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.bp{background:#2B4347;color:#fff;border:1px solid #2B4347}
+.bp:hover{background:#1E3135;border-color:#1E3135;text-decoration:none}
+.bs{background:#fff;color:#1E3135;border:1px solid #7F9091}
+.bs:hover{background:#F3F6F5;border-color:#1E3135;text-decoration:none}
+.cat:hover{background:#F3F6F5;text-decoration:none}
+/* Suchzeile: ein Rahmen, vier Zellen */
+.sc{background:transparent;border:0}
+.sc:hover{background:#F6F8F8}
+.sc:focus-visible{outline:2px solid #1E3135;outline-offset:-2px;border-radius:10px}
+.s-q{flex:1 1 320px}
+.s-f{flex:0 0 176px;border-left:1px solid #DCE3E2}
+.s-z{flex:0 0 200px;border-left:1px solid #DCE3E2}
+.s-b{flex:0 0 auto;padding:4px}
+/* Listenzeile */
+.ev{display:grid;grid-template-columns:80px minmax(0,1.7fr) minmax(0,1fr) 128px 184px;grid-template-areas:"date main meta price action";column-gap:24px;row-gap:16px;align-items:center;padding:20px 24px}
+.ev:hover{background:#F6F8F8}
+@media (max-width:960px){
+.ev{grid-template-columns:80px minmax(0,1fr) auto;grid-template-areas:"date main main" "meta meta price" "action action action";column-gap:16px;padding:16px}
+}
+@media (max-width:720px){
+.s-q{flex:1 1 100%}
+.s-f{flex:1 1 40%;min-width:0;border-left:0;border-top:1px solid #DCE3E2}
+.s-z{flex:1 1 40%;min-width:0;border-top:1px solid #DCE3E2}
+.s-b{flex:1 1 100%;border-top:1px solid #DCE3E2}
+.nav-links{order:3;flex:1 1 100%;margin-left:-12px !important;border-top:1px solid #DCE3E2}
+}
+</style>
+</head>
+<body>
+<div style="font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;color:#1E3135;background:#fff;-webkit-font-smoothing:antialiased;overflow:hidden">
+
+  <!-- Navigation -->
+  <header style="border-bottom:1px solid #DCE3E2;background:#fff">
+    <div style="max-width:1200px;margin:0 auto;padding:0 clamp(16px,4vw,32px);display:flex;flex-wrap:wrap;align-items:center;column-gap:16px;min-height:72px">
+      <a href="#" aria-label="Bildungsportal Hauptfach Mensch – Startseite" style="display:flex;align-items:center;gap:12px;min-height:56px;text-decoration:none;margin-right:auto">
+        <svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true">
+          <circle cx="18" cy="18" r="18" fill="#2B4347"></circle>
+          <path d="M11 25c0-8.5 5-14 14-14 0 8.5-5 14-14 14z" fill="#8DC11D"></path>
+          <path d="M11 25l8-8" stroke="#2B4347" stroke-width="1.5" stroke-linecap="round" fill="none"></path>
+        </svg>
+        <span style="display:flex;flex-direction:column;line-height:1.15">
+          <span style="font-size:17px;font-weight:600;letter-spacing:-0.01em">Bildungsportal</span>
+          <span style="font-size:13px;color:#55676A">Hauptfach Mensch</span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Hauptnavigation" style="display:flex;align-items:center;gap:4px;margin-left:0">
+        <a href="#" aria-current="page" style="display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:600">Veranstaltungen</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:500">Kalender</a>
+        <a href="#" style="display:inline-flex;align-items:center;min-height:44px;padding:0 12px;font-size:15px;font-weight:500">Anmelden</a>
+      </nav>
+      <a href="#" class="bp" style="display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border-radius:8px;font-size:15px;font-weight:500">Registrieren</a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Einstieg -->
+    <section aria-labelledby="h-start" style="background:#F3F6F5;border-bottom:1px solid #DCE3E2">
+      <div style="max-width:1200px;margin:0 auto;padding:clamp(40px,6vw,72px) clamp(16px,4vw,32px) clamp(40px,6vw,64px);display:flex;flex-direction:column;gap:32px">
+        <h1 id="h-start" style="margin:0;max-width:760px;font-size:clamp(30px,4.2vw,52px);line-height:1.08;font-weight:600;letter-spacing:-0.025em">Fortbildungen für Menschen, die Schule gestalten.</h1>
+
+        <form role="search" aria-label="Veranstaltungen suchen" action="#" style="margin:0;max-width:960px;display:flex;flex-wrap:wrap;align-items:stretch;background:#fff;border:1px solid #7F9091;border-radius:12px">
+          <div class="s-q" style="position:relative;min-width:0">
+            <label for="q" style="position:absolute;left:16px;top:9px;font-size:13px;font-weight:500;color:#55676A;pointer-events:none">Suche</label>
+            <input class="sc" id="q" name="q" type="search" placeholder="Thema, Titel oder Ort" style="display:block;width:100%;height:64px;padding:28px 16px 10px;font:inherit;font-size:16px;color:#1E3135;border-radius:11px;-webkit-appearance:none;appearance:none">
+          </div>
+          <div class="s-f" style="position:relative">
+            <label for="format" style="position:absolute;left:16px;top:9px;font-size:13px;font-weight:500;color:#55676A;pointer-events:none">Format</label>
+            <select class="sc" id="format" name="format" style="display:block;width:100%;height:64px;padding:28px 40px 10px 16px;font:inherit;font-size:16px;color:#1E3135;cursor:pointer;-webkit-appearance:none;appearance:none">
+              <option selected="selected">Alle</option>
+              <option>Präsenz</option>
+              <option>Online</option>
+              <option>Hybrid</option>
+            </select>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#1E3135" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;right:16px;top:32px;pointer-events:none"><path d="M4 6l4 4 4-4"></path></svg>
+          </div>
+          <div class="s-z" style="position:relative">
+            <label for="zeitraum" style="position:absolute;left:16px;top:9px;font-size:13px;font-weight:500;color:#55676A;pointer-events:none">Zeitraum</label>
+            <select class="sc" id="zeitraum" name="zeitraum" style="display:block;width:100%;height:64px;padding:28px 40px 10px 16px;font:inherit;font-size:16px;color:#1E3135;cursor:pointer;-webkit-appearance:none;appearance:none">
+              <option selected="selected">Beliebig</option>
+              <option>Diesen Monat</option>
+              <option>Nächste 3 Monate</option>
+              <option>Dieses Schuljahr</option>
+            </select>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#1E3135" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="position:absolute;right:16px;top:32px;pointer-events:none"><path d="M4 6l4 4 4-4"></path></svg>
+          </div>
+          <div class="s-b" style="display:flex">
+            <button type="button" class="bp" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:56px;padding:0 24px;border-radius:8px;font:inherit;font-size:16px;font-weight:500;cursor:pointer">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="5.25"></circle><path d="M12 12l3.5 3.5"></path></svg>
+              Suchen
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Kommende Veranstaltungen -->
+    <section aria-labelledby="h-events" style="max-width:1200px;margin:0 auto;padding:clamp(40px,5vw,64px) clamp(16px,4vw,32px) 0">
+      <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:24px">
+        <h2 id="h-events" style="margin:0;font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-0.015em">Kommende Veranstaltungen</h2>
+        <a href="#" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;font-weight:500">Alle Veranstaltungen
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+        </a>
+      </div>
+
+      <ul style="list-style:none;margin:0;padding:0;background:#fff;border:1px solid #DCE3E2;border-radius:12px;overflow:hidden">
+
+        <li class="ev">
+          <time datetime="2026-11-26" style="grid-area:date;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Do</span>
+            <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">26</span>
+            <span style="font-size:13px;font-weight:500">Nov 2026</span>
+          </time>
+          <div style="grid-area:main;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Hauptfach Mensch</span>
+            <a href="#" style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Beziehung vor Stoff: Klassenführung, die trägt</a>
+          </div>
+          <div style="grid-area:meta;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:15px;font-weight:500">Präsenz · Radebeul</span>
+            <span style="font-size:14px;color:#55676A;font-variant-numeric:tabular-nums">14:00–17:30 Uhr</span>
+          </div>
+          <div style="grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-variant-numeric:tabular-nums">
+            <span style="font-size:16px;font-weight:600">45 €</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#3B5053;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#8DC11D"></span>noch 6 frei</span>
+          </div>
+          <a href="#" class="bp" style="grid-area:action;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:8px;font-size:15px;font-weight:500">Buchen</a>
+        </li>
+
+        <li class="ev" style="border-top:1px solid #DCE3E2">
+          <time datetime="2026-12-01" style="grid-area:date;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Di</span>
+            <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">01</span>
+            <span style="font-size:13px;font-weight:500">Dez 2026</span>
+          </time>
+          <div style="grid-area:main;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Digitales Lehren &amp; Lernen</span>
+            <a href="#" style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">KI im Unterricht: Werkzeuge sinnvoll einsetzen</a>
+          </div>
+          <div style="grid-area:meta;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:15px;font-weight:500">Online</span>
+            <span style="font-size:14px;color:#55676A;font-variant-numeric:tabular-nums">16:00–18:00 Uhr</span>
+          </div>
+          <div style="grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-variant-numeric:tabular-nums">
+            <span style="font-size:16px;font-weight:600">kostenfrei</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#3B5053;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#8DC11D"></span>noch 23 frei</span>
+          </div>
+          <a href="#" class="bp" style="grid-area:action;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:8px;font-size:15px;font-weight:500">Buchen</a>
+        </li>
+
+        <li class="ev" style="border-top:1px solid #DCE3E2">
+          <time datetime="2026-12-04" style="grid-area:date;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Fr</span>
+            <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">04</span>
+            <span style="font-size:13px;font-weight:500">Dez 2026</span>
+          </time>
+          <div style="grid-area:main;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Konfliktmanagement</span>
+            <a href="#" style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Schwierige Elterngespräche sicher führen</a>
+          </div>
+          <div style="grid-area:meta;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:15px;font-weight:500">Präsenz · Dresden</span>
+            <span style="font-size:14px;color:#55676A;font-variant-numeric:tabular-nums">09:00–16:00 Uhr</span>
+          </div>
+          <div style="grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-variant-numeric:tabular-nums">
+            <span style="font-size:16px;font-weight:600">80 €</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#3B5053;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;border:1.5px solid #55676A"></span>Warteliste</span>
+          </div>
+          <a href="#" class="bs" style="grid-area:action;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:8px;font-size:15px;font-weight:500;white-space:nowrap">Auf die Warteliste</a>
+        </li>
+
+        <li class="ev" style="border-top:1px solid #DCE3E2">
+          <time datetime="2027-01-13" style="grid-area:date;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Mi</span>
+            <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">13</span>
+            <span style="font-size:13px;font-weight:500">Jan 2027</span>
+          </time>
+          <div style="grid-area:main;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Seelsorge &amp; Spiritualität</span>
+            <a href="#" style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Andachten gestalten für den Schulalltag</a>
+          </div>
+          <div style="grid-area:meta;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:15px;font-weight:500">Hybrid · Leipzig</span>
+            <span style="font-size:14px;color:#55676A;font-variant-numeric:tabular-nums">15:00–18:00 Uhr</span>
+          </div>
+          <div style="grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-variant-numeric:tabular-nums">
+            <span style="font-size:16px;font-weight:600">25 €</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#3B5053;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#8DC11D"></span>noch 14 frei</span>
+          </div>
+          <a href="#" class="bp" style="grid-area:action;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:8px;font-size:15px;font-weight:500">Buchen</a>
+        </li>
+
+        <li class="ev" style="border-top:1px solid #DCE3E2">
+          <time datetime="2027-01-22" style="grid-area:date;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Fr–Sa</span>
+            <span style="font-size:22px;font-weight:600;letter-spacing:-0.02em">22–23</span>
+            <span style="font-size:13px;font-weight:500">Jan 2027</span>
+          </time>
+          <div style="grid-area:main;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Schulentwicklung</span>
+            <a href="#" style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Schulentwicklung gemeinsam steuern</a>
+          </div>
+          <div style="grid-area:meta;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:15px;font-weight:500">Präsenz · Meißen</span>
+            <span style="font-size:14px;color:#55676A">zweitägig</span>
+          </div>
+          <div style="grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-variant-numeric:tabular-nums">
+            <span style="font-size:16px;font-weight:600">160 €</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#3B5053;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#8DC11D"></span>noch 9 frei</span>
+          </div>
+          <a href="#" class="bp" style="grid-area:action;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:8px;font-size:15px;font-weight:500">Buchen</a>
+        </li>
+
+        <li class="ev" style="border-top:1px solid #DCE3E2">
+          <time datetime="2027-02-04" style="grid-area:date;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:80px;height:80px;background:#F3F6F5;border:1px solid #DCE3E2;border-radius:8px;font-variant-numeric:tabular-nums;line-height:1.1">
+            <span style="font-size:13px;color:#55676A">Do</span>
+            <span style="font-size:24px;font-weight:600;letter-spacing:-0.02em">04</span>
+            <span style="font-size:13px;font-weight:500">Feb 2027</span>
+          </time>
+          <div style="grid-area:main;min-width:0;display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:14px;color:#55676A">Inklusion &amp; Diversität</span>
+            <a href="#" style="font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Inklusiver Fachunterricht in der Sekundarstufe</a>
+          </div>
+          <div style="grid-area:meta;min-width:0;display:flex;flex-direction:column;gap:2px">
+            <span style="font-size:15px;font-weight:500">Präsenz · Chemnitz</span>
+            <span style="font-size:14px;color:#55676A;font-variant-numeric:tabular-nums">14:30–17:30 Uhr</span>
+          </div>
+          <div style="grid-area:price;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right;font-variant-numeric:tabular-nums">
+            <span style="font-size:16px;font-weight:600">45 €</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#3B5053;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:#8DC11D"></span>noch 11 frei</span>
+          </div>
+          <a href="#" class="bp" style="grid-area:action;display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 16px;border-radius:8px;font-size:15px;font-weight:500">Buchen</a>
+        </li>
+
+      </ul>
+    </section>
+
+    <!-- Kategorien -->
+    <section aria-labelledby="h-cats" style="max-width:1200px;margin:0 auto;padding:clamp(48px,6vw,80px) clamp(16px,4vw,32px) 0">
+      <div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 24px;margin-bottom:16px">
+        <h2 id="h-cats" style="margin:0;font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-0.015em">Kategorien</h2>
+        <a href="#" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:15px;font-weight:500">Alle 15 Kategorien
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+        </a>
+      </div>
+      <ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));column-gap:32px">
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Hauptfach Mensch<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Pädagogik &amp; Didaktik<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Digitales Lehren &amp; Lernen<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Schulentwicklung<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Seelsorge &amp; Spiritualität<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Inklusion &amp; Diversität<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Fachfortbildungen<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+        <li><a class="cat" href="#" style="display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:60px;padding:0 8px;border-top:1px solid #DCE3E2;font-size:16px;font-weight:500">Konfliktmanagement<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#55676A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8h10M9 4l4 4-4 4"></path></svg></a></li>
+      </ul>
+    </section>
+
+    <!-- Schwerpunkt Hauptfach Mensch -->
+    <section aria-labelledby="h-focus" style="max-width:1200px;margin:0 auto;padding:clamp(48px,6vw,80px) clamp(16px,4vw,32px) 0">
+      <div style="background:#F3F6F5;border:1px solid #DCE3E2;border-radius:12px;padding:clamp(24px,4vw,48px);display:flex;flex-wrap:wrap;gap:24px 64px;align-items:flex-start">
+        <div style="flex:1 1 280px;display:flex;flex-direction:column;gap:12px">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:#3B5053">
+            <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 14C2 6.5 6.5 2 14 2c0 7.5-4.5 12-12 12z" fill="#8DC11D"></path></svg>
+            Schwerpunkt
+          </span>
+          <h2 id="h-focus" style="margin:0;font-size:clamp(26px,3vw,36px);line-height:1.15;font-weight:600;letter-spacing:-0.02em">Hauptfach Mensch</h2>
+        </div>
+        <div style="flex:2 1 400px;display:flex;flex-direction:column;gap:16px;align-items:flex-start">
+          <p style="margin:0;max-width:640px;font-size:18px;line-height:1.55;color:#1E3135">Jeder Mensch ist einzigartig – mit Stärken und mit Schwächen. Die Themenreihe „Hauptfach Mensch“ stellt diese Haltung in den Mittelpunkt des Schulalltags: Fortbildungen zu Beziehung, Wahrnehmung und Teilhabe, damit Bildung möglichst viele erreicht.</p>
+          <a href="#" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:16px;font-weight:600">Zur Themenreihe
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nutzen -->
+    <section aria-labelledby="h-nutzen" style="max-width:1200px;margin:0 auto;padding:clamp(48px,6vw,80px) clamp(16px,4vw,32px) 0">
+      <h2 id="h-nutzen" style="margin:0 0 24px;font-size:24px;line-height:1.25;font-weight:600;letter-spacing:-0.015em">So funktioniert das Portal</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(264px,1fr));gap:32px 48px">
+        <li style="display:flex;flex-direction:column;gap:12px;padding-top:24px;border-top:1px solid #1E3135">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3135" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16v4a2 2 0 000 4v4H4v-4a2 2 0 000-4V7z"></path><path d="M14 7v12" stroke-dasharray="2 3"></path></svg>
+          <h3 style="margin:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Buchen in wenigen Schritten</h3>
+          <p style="margin:0;font-size:15px;color:#55676A;max-width:360px">Tickets wählen, Daten eintragen, fertig. Ist eine Veranstaltung ausgebucht, setzen Sie sich auf die Warteliste.</p>
+        </li>
+        <li style="display:flex;flex-direction:column;gap:12px;padding-top:24px;border-top:1px solid #1E3135">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3135" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h5"></path><path d="M13.5 16.5l1.5 1.5 3-3"></path></svg>
+          <h3 style="margin:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Teilnahmezertifikat nach der Veranstaltung</h3>
+          <p style="margin:0;font-size:15px;color:#55676A;max-width:360px">Ihr Zertifikat steht nach der Teilnahme in Ihrem Konto zum Herunterladen bereit.</p>
+        </li>
+        <li style="display:flex;flex-direction:column;gap:12px;padding-top:24px;border-top:1px solid #1E3135">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3135" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path><path d="M12 13v5M9.5 15.5h5"></path></svg>
+          <h3 style="margin:0;font-size:18px;line-height:1.3;font-weight:600;letter-spacing:-0.01em">Termine direkt in den eigenen Kalender</h3>
+          <p style="margin:0;font-size:15px;color:#55676A;max-width:360px">Gebuchte Termine übernehmen Sie als Kalenderdatei in Outlook, Google Kalender oder Apple Kalender.</p>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Veranstalter -->
+    <section aria-labelledby="h-org" style="max-width:1200px;margin:0 auto;padding:clamp(48px,6vw,80px) clamp(16px,4vw,32px) clamp(56px,7vw,96px)">
+      <div style="border:1px solid #DCE3E2;border-radius:12px;padding:clamp(24px,3vw,32px) clamp(24px,4vw,48px);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px 48px">
+        <div style="flex:1 1 320px;display:flex;flex-direction:column;gap:4px">
+          <h2 id="h-org" style="margin:0;font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-0.015em">Sie bieten selbst Fortbildungen an?</h2>
+          <p style="margin:0;font-size:16px;color:#55676A;max-width:600px">Legen Sie Ihre Veranstaltung im Portal an und verwalten Sie Anmeldungen und Warteliste an einem Ort.</p>
+        </div>
+        <a href="#" class="bs" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:8px;font-size:16px;font-weight:500;white-space:nowrap">Veranstaltung anlegen
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"></path></svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer style="background:#F3F6F5;border-top:1px solid #DCE3E2">
+    <div style="max-width:1200px;margin:0 auto;padding:40px clamp(16px,4vw,32px) 32px;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 48px">
+        <a href="#" aria-label="Bildungsportal Hauptfach Mensch – Startseite" style="display:flex;align-items:center;gap:12px;min-height:44px;text-decoration:none">
+          <svg width="32" height="32" viewBox="0 0 36 36" aria-hidden="true">
+            <circle cx="18" cy="18" r="18" fill="#2B4347"></circle>
+            <path d="M11 25c0-8.5 5-14 14-14 0 8.5-5 14-14 14z" fill="#8DC11D"></path>
+            <path d="M11 25l8-8" stroke="#2B4347" stroke-width="1.5" stroke-linecap="round" fill="none"></path>
+          </svg>
+          <span style="display:flex;flex-direction:column;line-height:1.15">
+            <span style="font-size:16px;font-weight:600;letter-spacing:-0.01em">Bildungsportal</span>
+            <span style="font-size:13px;color:#55676A">Hauptfach Mensch</span>
+          </span>
+        </a>
+        <nav aria-label="Fußnavigation" style="display:flex;flex-wrap:wrap;gap:0 28px">
+          <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:500">Veranstaltungen</a>
+          <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:500">Kalender</a>
+          <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:500">FAQ</a>
+          <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:500">Kontakt</a>
+          <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:500">Impressum</a>
+          <a href="#" style="display:inline-flex;align-items:center;min-height:44px;font-size:15px;font-weight:500">Datenschutz</a>
+        </nav>
+      </div>
+      <div style="border-top:1px solid #DCE3E2;padding-top:16px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 32px;font-size:14px;color:#55676A">
+        <span>© 2026 Bildungsportal · Ein Angebot der ESdi GmbH</span>
+        <a href="#" style="display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;font-weight:500">Mehr zur Aktion Hauptfach Mensch
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11l6-6M6 5h5v5"></path></svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
