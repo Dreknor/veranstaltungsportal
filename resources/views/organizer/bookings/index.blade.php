@@ -79,10 +79,10 @@
                 <option value="completed" @selected(request('status') === 'completed')>Abgeschlossen</option>
                 <option value="cancelled" @selected(request('status') === 'cancelled')>Storniert</option>
             </x-ui.select>
-            <div class="flex gap-3">
-                <x-ui.button type="submit" size="lg">Filtern</x-ui.button>
-                <x-ui.button variant="secondary" size="lg" :href="route('organizer.bookings.index', $isArchive ? ['archive' => 1] : [])">Zurücksetzen</x-ui.button>
-            </div>
+        </div>
+        <div class="mt-5 flex flex-wrap gap-3">
+            <x-ui.button type="submit" size="lg">Filtern</x-ui.button>
+            <x-ui.button variant="secondary" size="lg" :href="route('organizer.bookings.index', $isArchive ? ['archive' => 1] : [])">Zurücksetzen</x-ui.button>
         </div>
     </form>
 

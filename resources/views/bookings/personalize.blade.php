@@ -46,7 +46,8 @@
                 @endforeach
 
                 <div class="mt-8 flex flex-wrap items-center gap-3">
-                    <x-ui.button type="submit">Personalisierung speichern und Tickets versenden</x-ui.button>
+                    <x-ui.button type="submit" class="h-auto! min-h-11 py-2 whitespace-normal!">Personalisierung speichern und Tickets
+                        versenden</x-ui.button>
                     <x-ui.button variant="secondary" :href="route('bookings.show', $booking->booking_number)">
                         Abbrechen
                     </x-ui.button>

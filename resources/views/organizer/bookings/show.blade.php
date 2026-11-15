@@ -80,7 +80,7 @@
                         <form action="{{ route('organizer.billing-data.mark-invoiced', $booking) }}" method="POST" class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
                             @csrf @method('PUT')
                             <x-ui.field label="Externe Rechnungsnummer" name="external_invoice_number" optional class="sm:w-72" />
-                            <x-ui.button type="submit">Als fakturiert markieren &amp; {{ $deliverable }} senden</x-ui.button>
+                            <x-ui.button type="submit" class="h-auto min-h-11 max-w-full whitespace-normal py-2 text-left">Als fakturiert markieren &amp; {{ $deliverable }} senden</x-ui.button>
                         </form>
                     @elseif ($booking->payment_method === 'paypal')
                         <p class="m-0 font-medium">Die Person hat die PayPal-Zahlung noch nicht abgeschlossen.</p>
@@ -95,7 +95,7 @@
                               onsubmit="return confirm('Zahlungseingang verbuchen? Die Person erhält daraufhin {{ $deliverable }} per E-Mail.')">
                             @csrf @method('PUT')
                             <input type="hidden" name="payment_status" value="paid">
-                            <x-ui.button type="submit">Zahlung eingegangen – {{ $deliverable }} senden</x-ui.button>
+                            <x-ui.button type="submit" class="h-auto min-h-11 max-w-full whitespace-normal py-2 text-left">Zahlung eingegangen – {{ $deliverable }} senden</x-ui.button>
                         </form>
                     @endif
 
@@ -103,7 +103,7 @@
                         <form action="{{ route('organizer.bookings.release-tickets', $booking) }}" method="POST" class="mt-3"
                               onsubmit="return confirm('{{ $deliverable }} jetzt senden, obwohl {{ $isExternalInvoicing ? 'die Rechnung noch nicht gestellt' : 'die Zahlung noch nicht eingegangen' }} ist?')">
                             @csrf
-                            <x-ui.button type="submit" variant="secondary">
+                            <x-ui.button type="submit" variant="secondary" class="h-auto min-h-11 max-w-full whitespace-normal py-2 text-left">
                                 {{ $deliverable }} vorab senden – {{ $isExternalInvoicing ? 'Rechnung folgt' : 'Zahlung folgt' }} später
                             </x-ui.button>
                         </form>
@@ -115,7 +115,7 @@
                     <form action="{{ route('organizer.bookings.update-status', $booking) }}" method="POST" class="mt-4">
                         @csrf @method('PUT')
                         <input type="hidden" name="status" value="confirmed">
-                        <x-ui.button type="submit">Bestätigen &amp; {{ $deliverable }} senden</x-ui.button>
+                        <x-ui.button type="submit" class="h-auto min-h-11 max-w-full whitespace-normal py-2 text-left">Bestätigen &amp; {{ $deliverable }} senden</x-ui.button>
                     </form>
 
                 @elseif ($booking->needsPersonalization())
@@ -136,7 +136,7 @@
                 @if ($booking->status !== 'pending_approval')
                     <form action="{{ route('organizer.bookings.resend', $booking) }}" method="POST" class="mt-3">
                         @csrf
-                        <x-ui.button type="submit" variant="link">
+                        <x-ui.button type="submit" variant="link" class="text-left">
                             <x-slot:icon><x-icon.mail /></x-slot:icon>
                             Aktuelle Bestätigung erneut an {{ $booking->customer_email }} senden
                         </x-ui.button>
