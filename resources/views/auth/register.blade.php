@@ -4,7 +4,7 @@
             <x-ui.page-header :title="__('Konto erstellen')" />
 
             <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-5"
-                x-data="{ userType: 'participant' }" data-recaptcha data-recaptcha-action="register">
+                x-data="{ userType: @js(old('account_type', 'participant')) }" data-recaptcha data-recaptcha-action="register">
                 @csrf
                 <x-ui.field label="Vollständiger Name" name="name" type="text" autocomplete="name" autofocus />
 
@@ -25,7 +25,7 @@
                     <x-ui.field-error name="account_type" />
                 </fieldset>
 
-                <!-- Organisationsfelder (nur für Organisatoren) -->
+                {{-- Organisationsfelder, nur bei Kontotyp Veranstalter --}}
                 <div x-show="userType === 'organizer'" class="flex flex-col gap-5">
                     <x-ui.field label="Organisation / Firma" name="organization_name" type="text"
                         autocomplete="organization" x-bind:required="userType === 'organizer'" />

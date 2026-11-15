@@ -188,7 +188,7 @@
             </div>
 
             {{-- Zusammenfassung --}}
-            <x-ui.summary id="summary-title" class="scroll-mt-6" x-ref="summary">
+            <x-ui.summary id="summary-title">
                 <x-slot:event>
                     <span>{{ $event->title }}</span>
                     <span>{{ Ui::dateTime($event->start_date, $event->end_date) }}</span>

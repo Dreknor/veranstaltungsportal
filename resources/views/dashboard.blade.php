@@ -1,154 +1,30 @@
 <x-layouts.app>
+    <x-ui.page-header :title="__('Dashboard')" :subtitle="__('Welcome to the dashboard')" />
 
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Dashboard')}}</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Welcome to the dashboard') }}</p>
+    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <x-ui.stat :label="__('Total Users')" value="--" :sub="__('No data')" />
+        <x-ui.stat :label="__('Total Revenue')" value="--" :sub="__('No data')" />
+        <x-ui.stat :label="__('Total Orders')" value="--" :sub="__('No data')" />
+        <x-ui.stat :label="__('Total Visitors')" value="--" :sub="__('No data')" />
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total Users') }}</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">--</p>
-                    <p class="text-xs text-gray-500 flex items-center mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        {{ __('No data') }}
-                    </p>
-                </div>
-                <div class="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 dark:text-blue-300"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Revenue Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total Revenue') }}</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">--</p>
-                    <p class="text-xs text-gray-500 flex items-center mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        {{ __('No data') }}
-                    </p>
-                </div>
-                <div class="bg-green-100 dark:bg-green-900 p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 dark:text-green-300"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Orders Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total Orders') }}</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">--</p>
-                    <p class="text-xs text-gray-500 flex items-center mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                        </svg>
-                        {{ __('No data') }}
-                    </p>
-                </div>
-                <div class="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-500 dark:text-purple-300"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-
-        <!-- Visitors Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total Visitors') }}</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">--</p>
-                    <p class="text-xs text-gray-500 flex items-center mt-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                        </svg>
-                        {{ __('No data') }}
-                    </p>
-                </div>
-                <div class="bg-orange-100 dark:bg-orange-900 p-3 rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-500 dark:text-orange-300"
-                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Badges Section -->
-    @if(auth()->user()->badges()->count() > 0)
-    <div class="mb-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                    <i class="fas fa-medal text-yellow-500 mr-2"></i>Ihre Abzeichen
-                </h2>
-                <a href="{{ route('badges.index') }}" class="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                    Alle ansehen <i class="fas fa-arrow-right ml-1"></i>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                @foreach(auth()->user()->badges()->latest('user_badges.earned_at')->limit(6)->get() as $badge)
-                <a href="{{ route('badges.show', $badge) }}"
-                   class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-2"
-                         style="background-color: {{ $badge->color }}20;">
-                        <i class="fas fa-medal text-3xl" style="color: {{ $badge->color }};"></i>
-                    </div>
-                    <span class="text-xs font-medium text-gray-800 dark:text-gray-200 text-center line-clamp-2">
-                        {{ $badge->name }}
-                    </span>
-                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        +{{ $badge->points }}
-                    </span>
-                </a>
+    @if (auth()->user()->badges()->count() > 0)
+        <x-ui.section title="Ihre Abzeichen" :link-href="route('badges.index')" link-label="Alle ansehen">
+            <ul class="m-0 grid list-none grid-cols-2 gap-x-8 p-0 sm:grid-cols-3 lg:grid-cols-6">
+                @foreach (auth()->user()->badges()->latest('user_badges.earned_at')->limit(6)->get() as $badge)
+                    <li class="border-t border-line">
+                        <a href="{{ route('badges.show', $badge) }}"
+                            class="flex flex-col items-start gap-2 py-4 text-ink no-underline hover:underline">
+                            <x-badge-icon :badge="$badge" size="sm" />
+                            <span class="text-small font-medium">{{ $badge->name }}</span>
+                            <span class="text-small text-muted tabular-nums">+{{ $badge->points }}</span>
+                        </a>
+                    </li>
                 @endforeach
-            </div>
-
-            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <div class="flex justify-between items-center text-sm">
-                    <span class="text-gray-600 dark:text-gray-400">Gesamt:</span>
-                    <span class="font-semibold text-gray-800 dark:text-gray-200">
-                        {{ auth()->user()->badges()->count() }} Abzeichen · {{ auth()->user()->getTotalBadgePoints() }} Punkte
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
+            </ul>
+            <p class="m-0 mt-4 border-t border-line pt-4 text-small text-muted">
+                Gesamt: <span class="font-semibold text-ink tabular-nums">{{ auth()->user()->badges()->count() }} Abzeichen · {{ auth()->user()->getTotalBadgePoints() }} Punkte</span>
+            </p>
+        </x-ui.section>
     @endif
-
 </x-layouts.app>

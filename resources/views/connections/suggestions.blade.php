@@ -3,8 +3,7 @@
         :back-href="route('connections.index')" back-label="Zurück zu Verbindungen" />
 
     @if ($suggestions->isEmpty())
-        <x-ui.empty title="Keine Vorschläge verfügbar" :action-href="route('settings.interests.edit')"
-            action-label="Interessen bearbeiten" action-variant="primary">
+        <x-ui.empty title="Keine Vorschläge verfügbar">
             Wir konnten keine passenden Verbindungsvorschläge für Sie finden.
             Versuchen Sie, Ihre Interessen in den Einstellungen zu aktualisieren.
             <x-slot:action>

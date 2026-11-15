@@ -119,7 +119,7 @@
                 <div class="flex flex-[2_1_400px] flex-col items-start gap-4">
                     <p class="m-0 max-w-form text-h3 leading-[1.55] font-normal tracking-normal text-ink">
                         Jeder Mensch ist einzigartig – mit Stärken und mit Schwächen. Die Themenreihe „Hauptfach
-                        Mensch" stellt diese Haltung in den Mittelpunkt des Schulalltags: Fortbildungen zu Beziehung,
+                        Mensch“ stellt diese Haltung in den Mittelpunkt des Schulalltags: Fortbildungen zu Beziehung,
                         Wahrnehmung und Teilhabe, damit Bildung möglichst viele erreicht.
                     </p>
                     <x-ui.button variant="link" size="lg" :href="$focusHref" arrow>Zur Themenreihe</x-ui.button>
