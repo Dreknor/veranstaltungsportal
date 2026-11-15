@@ -1,5 +1,7 @@
 @import "tailwindcss";
+@import "@fontsource-variable/geist";
 @import "vanilla-cookieconsent/dist/cookieconsent.css";
+/* ALT – entfällt in Phase 7 */
 @import "@fortawesome/fontawesome-free/css/all.min.css";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -7,31 +9,82 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
-/* Instrument Sans – lokal gehostet (DSGVO-konform, kein Google-CDN) */
-@font-face {
-    font-family: 'Instrument Sans';
-    font-style: normal;
-    font-weight: 400 700;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url('/fonts/instrument-sans-latin-ext.woff2') format('woff2');
-    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-@font-face {
-    font-family: 'Instrument Sans';
-    font-style: normal;
-    font-weight: 400 700;
-    font-stretch: 100%;
-    font-display: swap;
-    src: url('/fonts/instrument-sans-latin.woff2') format('woff2');
-    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
+/*
+ * Design-Tokens (docs/design/DESIGN-RICHTLINIEN.md, B1).
+ * Views verwenden ausschließlich die daraus erzeugten Klassen (bg-zone, text-muted, border-line,
+ * rounded-control, text-h2, max-w-page …). Nachschlagewerk: docs/design/BAUSTEINE.md
+ */
 @theme {
-    --font-sans:
-        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
+    --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+
+    --color-ink: #1e3135;
+    --color-primary: #2b4347;
+    --color-ink-soft: #3b5053;
+    --color-muted: #55676a;
+    --color-line: #dce3e2;
+    --color-line-strong: #7f9091;
+    --color-disabled: #9aa8a9;
+    --color-surface: #ffffff;
+    --color-zone: #f3f6f5;
+    --color-zone-hover: #f6f8f8;
+    --color-leaf: #8dc11d;
+    --color-on-primary: #ffffff;
+
+    --color-success: #2c5e1a;
+    --color-success-zone: #eef6e0;
+    --color-success-line: #b9d98a;
+    --color-warning: #6b4a0a;
+    --color-warning-zone: #fbf3df;
+    --color-warning-line: #e2c88a;
+    --color-danger: #9b1c1c;
+    --color-danger-zone: #fceeee;
+    --color-danger-line: #e3a9a9;
+    --color-danger-field: #b42318;
+    /* Ergänzung: Hover des Löschen-Buttons (dunkleres danger, Weiß darauf 10,9:1) */
+    --color-danger-hover: #7a1414;
+
+    --radius-control: 8px;
+    --radius-box: 12px;
+
+    /* Überschriften tragen Gewicht 600 und Laufweite gleich mit (A3). */
+    --text-caption: 13px;
+    --text-caption--line-height: 1.3;
+    --text-small: 14px;
+    --text-small--line-height: 1.4;
+    --text-ui: 15px;
+    --text-ui--line-height: 1.4;
+    --text-base: 16px;
+    --text-base--line-height: 1.5;
+    --text-h3: 18px;
+    --text-h3--line-height: 1.3;
+    --text-h3--font-weight: 600;
+    --text-h3--letter-spacing: -0.01em;
+    --text-h2-form: 22px;
+    --text-h2-form--line-height: 1.25;
+    --text-h2-form--font-weight: 600;
+    --text-h2-form--letter-spacing: -0.015em;
+    --text-h2: 24px;
+    --text-h2--line-height: 1.25;
+    --text-h2--font-weight: 600;
+    --text-h2--letter-spacing: -0.015em;
+    --text-title: clamp(30px, 3.6vw, 44px);
+    --text-title--line-height: 1.1;
+    --text-title--font-weight: 600;
+    --text-title--letter-spacing: -0.025em;
+    --text-display: clamp(30px, 4.2vw, 52px);
+    --text-display--line-height: 1.08;
+    --text-display--font-weight: 600;
+    --text-display--letter-spacing: -0.025em;
+
+    --container-page: 1200px;
+    --container-prose: 760px;
+    --container-form: 640px;
+    --container-summary: 368px;
+
+    /* Einzige erlaubte Ebene mit Schatten: Dialoge und Aufklappmenüs (A4) */
+    --shadow-overlay: 0 8px 24px rgba(30, 49, 53, 0.12);
+
+    /* ALT – entfällt in Phase 7 */
     --sidebar-background: hsl(var(--sidebar-background));
     --sidebar-foreground: hsl(var(--sidebar-foreground));
     --sidebar-accent: hsl(var(--sidebar-accent));
@@ -39,6 +92,302 @@
     --sidebar-border: hsl(var(--sidebar-border));
     --sidebar-ring: hsl(var(--sidebar-ring));
 }
+
+/* Seitlicher Seitenrand (A4): px-page */
+@utility px-page {
+    padding-inline: clamp(16px, 4vw, 32px);
+}
+
+/* Alpine.js: Elemente bis zur Initialisierung verbergen */
+[x-cloak] {
+    display: none !important;
+}
+
+/*
+ * Globale Fokus-Regel (A8): 2 px ink, 2 px Abstand, als outline.
+ * Bewusst ohne @layer, damit sie auch gegen alte "focus:outline-none"-Klassen gilt.
+ * In Zellen ohne Platz nach außen: Klasse "focus-inset".
+ */
+:where(*):focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+}
+.focus-inset:focus-visible {
+    outline-offset: -2px;
+}
+/* Auswahlkarte: der Rahmen zeigt den Fokus, nicht das Radio darin */
+.ui-choice :is(input[type='radio'], input[type='checkbox']):focus-visible {
+    outline: none;
+}
+.ui-choice:has(input:focus-visible) {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Bausteine, die sich nicht sinnvoll als Utility-Kette schreiben      */
+/* lassen. Verwendung nur über die Komponenten unter components/ui/.   */
+/* ------------------------------------------------------------------ */
+@layer components {
+    /* Checkbox und Radio: 20 px, Kontur line-strong, gewählt primary */
+    .ui-checkbox,
+    .ui-radio {
+        appearance: none;
+        flex: none;
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid var(--color-line-strong);
+        background-color: var(--color-surface);
+        background-position: center;
+        background-repeat: no-repeat;
+        cursor: pointer;
+        transition:
+            border-color 150ms,
+            background-color 150ms;
+    }
+    .ui-checkbox {
+        border-radius: 4px;
+    }
+    .ui-radio {
+        border-radius: 50%;
+    }
+    .ui-checkbox:hover,
+    .ui-radio:hover {
+        border-color: var(--color-ink);
+    }
+    .ui-checkbox:checked {
+        border-color: var(--color-primary);
+        background-color: var(--color-primary);
+        background-size: 14px 14px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5l3 3 6-6.5'/%3E%3C/svg%3E");
+    }
+    .ui-checkbox:indeterminate {
+        border-color: var(--color-primary);
+        background-color: var(--color-primary);
+        background-size: 14px 14px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+    }
+    .ui-radio:checked {
+        border-color: var(--color-primary);
+        background-color: var(--color-primary);
+        box-shadow: inset 0 0 0 4px var(--color-surface);
+    }
+    .ui-checkbox[aria-invalid='true'],
+    .ui-radio[aria-invalid='true'] {
+        border-color: var(--color-danger-field);
+    }
+    .ui-checkbox:disabled,
+    .ui-radio:disabled {
+        border-color: var(--color-disabled);
+        background-color: var(--color-zone);
+        cursor: not-allowed;
+    }
+    .ui-checkbox:disabled:checked,
+    .ui-radio:disabled:checked {
+        background-color: var(--color-disabled);
+    }
+
+    /* Auswahlkarte */
+    .ui-choice {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        min-height: 88px;
+        padding: 16px;
+        border: 1px solid var(--color-line-strong);
+        border-radius: var(--radius-control);
+        background-color: var(--color-surface);
+        color: var(--color-ink);
+        cursor: pointer;
+        transition:
+            border-color 150ms,
+            background-color 150ms;
+    }
+    .ui-choice:hover {
+        border-color: var(--color-ink);
+    }
+    .ui-choice:has(input:checked) {
+        background-color: var(--color-zone);
+        border-color: var(--color-ink);
+        box-shadow: inset 0 0 0 1px var(--color-ink);
+    }
+    .ui-choice:has(input:disabled) {
+        border-color: var(--color-line);
+        background-color: var(--color-zone);
+        color: var(--color-muted);
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    /* Suchzeile: ein Rahmen, mehrere Zellen */
+    .ui-search {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        background-color: var(--color-surface);
+        border: 1px solid var(--color-line-strong);
+        border-radius: var(--radius-box);
+    }
+    .ui-search-q,
+    .ui-search-cell {
+        position: relative;
+        min-width: 0;
+    }
+    .ui-search-q {
+        flex: 1 1 100%;
+    }
+    .ui-search-cell {
+        flex: 1 1 40%;
+        border-top: 1px solid var(--color-line);
+    }
+    .ui-search-cell + .ui-search-cell {
+        border-left: 1px solid var(--color-line);
+    }
+    .ui-search-button {
+        display: flex;
+        flex: 1 1 100%;
+        padding: 4px;
+        border-top: 1px solid var(--color-line);
+    }
+    .ui-search-label {
+        position: absolute;
+        left: 16px;
+        top: 9px;
+        font-size: var(--text-caption);
+        line-height: 1.3;
+        font-weight: 500;
+        color: var(--color-muted);
+        pointer-events: none;
+    }
+    .ui-search-control {
+        display: block;
+        width: 100%;
+        height: 64px;
+        min-height: 0;
+        padding: 28px 16px 10px;
+        border: 0;
+        border-radius: 11px;
+        background-color: transparent;
+        color: var(--color-ink);
+        font-size: 16px;
+        line-height: 1.5;
+        appearance: none;
+    }
+    select.ui-search-control {
+        padding-right: 40px;
+        cursor: pointer;
+        text-overflow: ellipsis;
+    }
+    .ui-search-control:hover {
+        background-color: var(--color-zone-hover);
+    }
+    .ui-search-control::placeholder {
+        color: var(--color-muted);
+        opacity: 1;
+    }
+    @media (min-width: 48rem) {
+        .ui-search-q {
+            flex: 1 1 320px;
+        }
+        .ui-search-cell {
+            flex: 0 0 176px;
+            border-top: 0;
+            border-left: 1px solid var(--color-line);
+        }
+        .ui-search-cell--md {
+            flex-basis: 200px;
+        }
+        .ui-search-button {
+            flex: 0 0 auto;
+            border-top: 0;
+        }
+    }
+
+    /*
+     * Tabelle: <x-ui.table> setzt die Klasse; th/td brauchen keine eigenen Klassen.
+     * Hilfsklassen an Zellen: "num" (Zahl, rechtsbündig, tabellarisch), "actions" (rechts, kein Umbruch).
+     */
+    .ui-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: var(--text-ui);
+        line-height: 1.4;
+        color: var(--color-ink);
+    }
+    .ui-table caption {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: var(--text-small);
+        color: var(--color-muted);
+    }
+    .ui-table th,
+    .ui-table td {
+        padding: 12px 16px;
+        vertical-align: middle;
+    }
+    .ui-table thead th {
+        background-color: var(--color-zone);
+        border-bottom: 1px solid var(--color-line);
+        font-size: var(--text-small);
+        font-weight: 500;
+        color: var(--color-muted);
+        text-align: left;
+        text-transform: none;
+        letter-spacing: 0;
+        white-space: nowrap;
+    }
+    .ui-table thead th a {
+        color: inherit;
+    }
+    .ui-table tbody th {
+        font-weight: 500;
+    }
+    .ui-table tbody td,
+    .ui-table tbody th {
+        height: 56px;
+    }
+    .ui-table tbody tr + tr,
+    .ui-table tbody + tbody tr,
+    .ui-table tfoot tr {
+        border-top: 1px solid var(--color-line);
+    }
+    .ui-table tbody tr:hover {
+        background-color: var(--color-zone-hover);
+    }
+    .ui-table tfoot td,
+    .ui-table tfoot th {
+        font-weight: 600;
+    }
+    .ui-table :is(th, td).num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+    .ui-table :is(th, td).actions {
+        text-align: right;
+        white-space: nowrap;
+    }
+    .ui-table td.actions > * + * {
+        margin-left: 8px;
+    }
+    .ui-table--dense th,
+    .ui-table--dense td {
+        padding: 8px 12px;
+    }
+    .ui-table--dense tbody td,
+    .ui-table--dense tbody th {
+        height: 44px;
+    }
+}
+
+/* ================================================================== */
+/* ALT – entfällt in Phase 7                                           */
+/* Alles ab hier gehört zum bisherigen Design und bleibt nur stehen,   */
+/* bis die letzte View umgestellt ist.                                 */
+/* ================================================================== */
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -86,11 +435,6 @@
         --sidebar-accent: 217 91% 60%;
         --sidebar-accent-foreground: 0 0% 100%;
         --sidebar-border: 214 32% 91%;
-    }
-
-    /* Alpine.js x-cloak directive */
-    [x-cloak] {
-        display: none !important;
     }
 
     /*
@@ -148,12 +492,6 @@
         scroll-behavior: smooth;
     }
 
-    /* Better focus styles */
-    *:focus-visible {
-        outline: 2px solid theme('colors.blue.500');
-        outline-offset: 2px;
-        border-radius: 0.25rem;
-    }
 
 
 @layer utilities {

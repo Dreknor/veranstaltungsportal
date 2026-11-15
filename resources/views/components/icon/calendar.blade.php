@@ -1,6 +1,6 @@
-@props(['class' => 'w-6 h-6'])
+@props(['class' => 'w-5 h-5'])
 
-<svg {{ $attributes->merge(['class' => $class]) }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+<svg {{ $attributes->merge(['class' => $class]) }} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2"/>
+    <path d="M3.5 10h17M8 3v4M16 3v4"/>
 </svg>
-
