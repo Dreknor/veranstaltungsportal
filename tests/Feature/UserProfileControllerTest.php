@@ -73,7 +73,7 @@ test('profile shows user statistics', function () {
     $this->actingAs($this->user)
         ->get(route('users.show', $this->profileUser))
         ->assertOk()
-        ->assertSee('Events besucht');
+        ->assertSee('Veranstaltungen besucht');
 });
 
 test('profile shows user badges', function () {
@@ -83,7 +83,7 @@ test('profile shows user badges', function () {
     $this->actingAs($this->user)
         ->get(route('users.show', $this->profileUser))
         ->assertOk()
-        ->assertSee('Auszeichnungen')
+        ->assertSee('Abzeichen')
         ->assertSee($badge->name);
 });
 
@@ -231,6 +231,6 @@ test('profile shows activity feed', function () {
         ->assertOk()
         ->assertSee('Aktivität')
         ->assertSee('Veranstaltung(en) besucht')
-        ->assertSee('Badge(s) verdient');
+        ->assertSee('Abzeichen verdient');
 });
 
