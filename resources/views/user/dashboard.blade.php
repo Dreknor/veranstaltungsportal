@@ -1,5 +1,5 @@
 <x-layouts.app title="Mein Dashboard">
-    <x-ui.page-header title="Willkommen zurück, {{ $user->name }}" subtitle="Verwalten Sie Ihre Buchungen und Fortbildungen." />
+    <x-ui.page-header title="Willkommen zurück, {{ $user->fullName() }}" subtitle="Verwalten Sie Ihre Buchungen und Fortbildungen." />
 
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$stats['total_bookings']" :href="route('user.bookings')" />

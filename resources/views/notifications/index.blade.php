@@ -58,7 +58,7 @@
                     </x-slot:aside>
 
                     <x-slot:action>
-                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 lg:flex-col lg:items-start">
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
                             @if ($url)
                                 <x-ui.button variant="link" size="sm" :href="route('notifications.mark-read', $notification->id)">Details</x-ui.button>
                             @endif
