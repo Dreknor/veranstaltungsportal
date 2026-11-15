@@ -114,7 +114,7 @@
                                 @if ($groupedEvent->pending_bookings_count > 0)
                                     <x-ui.status tone="warning" class="tabular-nums">{{ $groupedEvent->pending_bookings_count }} offen</x-ui.status>
                                 @endif
-                                <x-icon.chevron-down class="h-5 w-5 text-muted transition-transform duration-150" ::class="{ 'rotate-180': open }" />
+                                <x-icon.chevron-down class="h-5 w-5 text-muted transition-transform duration-150" x-bind:class="open && 'rotate-180'" />
                             </span>
                         </button>
                         <a href="{{ route('organizer.bookings.index', array_filter(['event_id' => $groupedEvent->id, 'archive' => $isArchive ? 1 : null])) }}"

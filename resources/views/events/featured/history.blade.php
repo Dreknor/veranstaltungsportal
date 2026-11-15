@@ -18,7 +18,7 @@
                     <th scope="row">{{ $fee->event->title }}</th>
                     <td class="tabular-nums whitespace-nowrap">{{ optional($fee->featured_start_date)->format('d.m.Y') }}–{{ optional($fee->featured_end_date)->format('d.m.Y') }}</td>
                     <td>
-                        <x-ui.status :tone="\App\Support\Ui::paymentTone($fee->payment_status)">{{ ucfirst($fee->payment_status) }}</x-ui.status>
+                        <x-ui.status :tone="\App\Support\Ui::paymentTone($fee->payment_status)">{{ ['paid' => 'Bezahlt', 'pending' => 'Offen', 'failed' => 'Fehlgeschlagen'][$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status>
                     </td>
                     <td class="num">{{ \App\Support\Ui::money($fee->amount) }}</td>
                     <td class="actions">

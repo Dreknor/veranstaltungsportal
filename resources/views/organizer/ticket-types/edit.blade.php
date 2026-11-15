@@ -1,132 +1,47 @@
 <x-layouts.app title="Ticket-Typ bearbeiten">
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="mb-6">
-                <a href="{{ route('organizer.events.ticket-types.index', $event) }}" class="text-blue-600 hover:text-blue-800">
-                    ← Zurück zur Übersicht
-                </a>
-                <h1 class="text-2xl font-bold text-gray-900 mt-4">Ticket-Typ bearbeiten</h1>
-                <p class="text-gray-600 mt-1">{{ $ticketType->name }}</p>
-            </div>
+    <x-ui.page-header
+        title="Ticket-Typ bearbeiten"
+        :subtitle="$ticketType->name"
+        :back-href="route('organizer.events.ticket-types.index', $event)"
+        back-label="Zurück zur Übersicht"
+    />
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    @if ($ticketType->hasActiveSales())
-                    <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-                        <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                        <div>
-                            <p class="text-sm font-semibold text-amber-900">Aktive Buchungen vorhanden</p>
-                            <p class="text-sm text-amber-800 mt-1">
-                                Für diesen Ticket-Typ gibt es noch aktive (nicht-stornierte) Buchungen.
-                                Der <strong>Preis kann nicht geändert</strong> werden, solange aktive Buchungen bestehen.
-                                Alle anderen Felder (Name, Beschreibung, Verfügbarkeit etc.) können weiterhin bearbeitet werden.
-                            </p>
-                        </div>
-                    </div>
-                    @endif
+    @if ($ticketType->hasActiveSales())
+        <x-ui.alert tone="warning" title="Aktive Buchungen vorhanden" class="mb-8 max-w-form">
+            Für diesen Ticket-Typ gibt es noch aktive (nicht-stornierte) Buchungen.
+            Der <strong class="font-semibold">Preis kann nicht geändert</strong> werden, solange aktive Buchungen bestehen.
+            Alle anderen Felder (Name, Beschreibung, Verfügbarkeit etc.) können weiterhin bearbeitet werden.
+        </x-ui.alert>
+    @endif
 
-                    <form action="{{ route('organizer.events.ticket-types.update', [$event, $ticketType]) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+    <form action="{{ route('organizer.events.ticket-types.update', [$event, $ticketType]) }}" method="POST" class="flex max-w-form flex-col gap-5">
+        @csrf
+        @method('PUT')
+        <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
-                        <div class="mb-6">
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-                            <input type="text" name="name" id="name" value="{{ old('name', $ticketType->name) }}" required
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+        <x-ui.field label="Name" name="name" :value="$ticketType->name" required />
+        <x-ui.textarea label="Beschreibung" name="description" :value="$ticketType->description" optional rows="3" />
 
-                        <div class="mb-6">
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Beschreibung</label>
-                            <textarea name="description" id="description" rows="3"
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('description', $ticketType->description) }}</textarea>
-                            @error('description')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Preis (€) *</label>
-                                <input type="number" name="price" id="price" step="0.01" min="0" value="{{ old('price', $ticketType->price) }}" required
-                                       {{ $ticketType->hasActiveSales() ? 'readonly' : '' }}
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 {{ $ticketType->hasActiveSales() ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : '' }}">
-                                @if ($ticketType->hasActiveSales())
-                                    <p class="mt-1 text-xs text-amber-700">🔒 Preisänderung nicht möglich – aktive Buchungen vorhanden</p>
-                                @endif
-                                @error('price')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="quantity_available" class="block text-sm font-medium text-gray-700 mb-2">Verfügbare Menge</label>
-                                <input type="number" name="quantity_available" id="quantity_available" min="1" value="{{ old('quantity_available', $ticketType->quantity_available) }}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <p class="mt-1 text-xs text-gray-500">Leer lassen für unbegrenzt</p>
-                                @error('quantity_available')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label for="max_per_booking" class="block text-sm font-medium text-gray-700 mb-2">Max. pro Buchung</label>
-                            <input type="number" name="max_per_booking" id="max_per_booking" min="1" value="{{ old('max_per_booking', $ticketType->max_per_booking) }}"
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('max_per_booking')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div>
-                                <label for="sale_start" class="block text-sm font-medium text-gray-700 mb-2">Verkaufsstart</label>
-                                <input type="datetime-local" name="sale_start" id="sale_start"
-                                       value="{{ old('sale_start', $ticketType->sale_start ? $ticketType->sale_start->format('Y-m-d\TH:i') : '') }}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                @error('sale_start')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div>
-                                <label for="sale_end" class="block text-sm font-medium text-gray-700 mb-2">Verkaufsende</label>
-                                <input type="datetime-local" name="sale_end" id="sale_end"
-                                       value="{{ old('sale_end', $ticketType->sale_end ? $ticketType->sale_end->format('Y-m-d\TH:i') : '') }}"
-                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                @error('sale_end')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="is_available" value="1" {{ old('is_available', $ticketType->is_available) ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <span class="ml-2 text-sm text-gray-700">Aktiv</span>
-                            </label>
-                        </div>
-
-                        <div class="flex items-center justify-end space-x-4">
-                            <a href="{{ route('organizer.events.ticket-types.index', $event) }}"
-                               class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-400 focus:bg-gray-400 active:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                Abbrechen
-                            </a>
-                            <button type="submit"
-                                    class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 focus:bg-blue-700 active:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                                Änderungen speichern
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
+            <x-ui.field label="Preis (€)" name="price" type="number" step="0.01" min="0" :value="$ticketType->price" required
+                        :readonly="$ticketType->hasActiveSales()"
+                        :input-class="$ticketType->hasActiveSales() ? 'cursor-not-allowed text-muted' : ''"
+                        :hint="$ticketType->hasActiveSales() ? 'Preisänderung nicht möglich – aktive Buchungen vorhanden.' : null" />
+            <x-ui.field label="Verfügbare Menge" name="quantity_available" type="number" min="1" :value="$ticketType->quantity_available" optional hint="Leer lassen für unbegrenzt." />
         </div>
-    </div>
-</x-layouts.app>
 
+        <x-ui.field label="Max. pro Buchung" name="max_per_booking" type="number" min="1" :value="$ticketType->max_per_booking" optional />
+
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
+            <x-ui.field label="Verkaufsstart" name="sale_start" type="datetime-local" :value="$ticketType->sale_start ? $ticketType->sale_start->format('Y-m-d\TH:i') : ''" optional />
+            <x-ui.field label="Verkaufsende" name="sale_end" type="datetime-local" :value="$ticketType->sale_end ? $ticketType->sale_end->format('Y-m-d\TH:i') : ''" optional />
+        </div>
+
+        <x-ui.checkbox name="is_available" value="1" :checked="(bool) $ticketType->is_available" label="Aktiv" />
+
+        <div class="flex flex-wrap justify-end gap-3 border-t border-line pt-6">
+            <x-ui.button variant="secondary" :href="route('organizer.events.ticket-types.index', $event)">Abbrechen</x-ui.button>
+            <x-ui.button type="submit">Änderungen speichern</x-ui.button>
+        </div>
+    </form>
+</x-layouts.app>

@@ -25,7 +25,7 @@
                 <x-ui.choice name="duration_type" value="monthly" title="30 Tage" required>
                     <x-slot:aside>{{ \App\Support\Ui::money($pricing['monthly']['rate']) }}</x-slot:aside>
                 </x-ui.choice>
-                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Geben Sie unten die Anzahl der Tage an." required />
+                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Anzahl unten angeben" required />
             </div>
             <x-ui.field-error name="duration_type" />
         </fieldset>

@@ -12,6 +12,7 @@
     $eventPast = $event->end_date?->isPast() ?? false;
     $needsAttendees = $booking->canBePersonalized() && !$booking->tickets_personalized;
     $isFree = $booking->isFree();
+    $canCancelOnline = $booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture();
 
     // [Text, Ton für <x-ui.status>]
     $statusBadge = match (true) {
@@ -222,14 +223,7 @@
             @if ($event->requiresVenue() && ($event->venue_name || $event->location))
                 <p class="mt-4 mb-0 flex items-start gap-2 text-base">
                     <x-icon.location class="mt-1 h-4 w-4 flex-none text-muted" />
-                    <span>
-                        {{ $event->venue_name }}@if ($event->venue_address)
-                            , {{ $event->venue_address }}
-                        @endif
-                        @if ($event->venue_city)
-                            , {{ trim($event->venue_postal_code . ' ' . $event->venue_city) }}
-                        @endif
-                    </span>
+                    <span>{{ implode(', ', array_filter([$event->venue_name, $event->venue_address, $event->venue_city ? trim($event->venue_postal_code . ' ' . $event->venue_city) : null])) }}</span>
                 </p>
             @endif
 
@@ -295,7 +289,7 @@
                             <th scope="row">
                                 {{ $item->ticketType?->name ?? 'Ticket' }}
                                 <span
-                                    class="block text-caption font-normal text-muted tabular-nums">{{ $item->ticket_number }}</span>
+                                    class="block text-caption font-normal whitespace-nowrap text-muted tabular-nums">{{ $item->ticket_number }}</span>
                             </th>
                             <td>
                                 @if ($item->attendee_name)
@@ -437,7 +431,7 @@
         </x-ui.summary>
 
         <section aria-labelledby="dokumente-titel" class="flex flex-col gap-3">
-            <h2 id="dokumente-titel" class="m-0 mb-1 text-h3">Dokumente &amp; Aktionen</h2>
+            <h2 id="dokumente-titel" @class(['m-0 mb-1 text-h3', 'max-sm:hidden' => $isCancelled && !$canCancelOnline])>Dokumente &amp; Aktionen</h2>
             @if ($booking->hasTicketDocument() && $isReady && $booking->canSendTickets())
                 <x-ui.button :href="route('bookings.ticket', $booking->booking_number)" full>
                     <x-slot:icon><x-icon.ticket /></x-slot:icon>
@@ -464,10 +458,10 @@
                     Kalendereintrag (.ics)
                 </x-ui.button>
             @endif
-            <x-ui.button variant="link" onclick="window.print()" class="hidden self-start sm:inline-flex">Seite
+            <x-ui.button variant="link" onclick="window.print()" class="self-start max-sm:hidden">Seite
                 drucken</x-ui.button>
 
-            @if ($booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture())
+            @if ($canCancelOnline)
                 <div class="mt-2 flex flex-col gap-2 border-t border-line pt-4">
                     @if ($event->canCancelBooking())
                         <x-ui.modal name="cancel-booking" title="Buchung stornieren?">

@@ -74,7 +74,7 @@
                                         @endif
                                     </td>
                                     <td class="num">{{ \App\Support\Ui::money($fee->booking_amount) }}</td>
-                                    <td class="num">{{ $fee->fee_percentage }} %</td>
+                                    <td class="num">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
                                     <td class="num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
                                 </tr>
                             @endforeach

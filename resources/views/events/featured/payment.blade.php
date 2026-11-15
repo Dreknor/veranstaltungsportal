@@ -28,7 +28,7 @@
                 <span>Start: {{ $featuredEventFee->featured_start_date->format('d.m.Y') }}</span>
             </x-slot:event>
             <x-ui.summary-lines>
-                <x-ui.summary-line label="Dauer" :amount="ucfirst($featuredEventFee->duration_type)" />
+                <x-ui.summary-line label="Dauer" :amount="['daily' => '1 Tag', 'weekly' => '7 Tage', 'monthly' => '30 Tage', 'custom' => 'Individuell'][$featuredEventFee->duration_type] ?? ucfirst($featuredEventFee->duration_type)" />
             </x-ui.summary-lines>
             <x-ui.summary-total label="Betrag" :amount="\App\Support\Ui::money($featuredEventFee->amount)" />
         </x-ui.summary>
