@@ -1,118 +1,77 @@
-<x-layouts.app>
-    <!-- Page Header -->
-    <div class="mb-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Kategorien verwalten</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">Verwalten Sie Event-Kategorien</p>
-            </div>
-            <a href="{{ route('admin.categories.create') }}" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition">
-                <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
+<x-layouts.app title="Kategorien verwalten" :header="false">
+    <x-ui.page-header title="Kategorien verwalten" subtitle="Verwalten Sie die Veranstaltungskategorien.">
+        <x-slot:actions>
+            <x-ui.button :href="route('admin.categories.create')">
+                <x-slot:icon><x-icon.plus /></x-slot:icon>
                 Neue Kategorie
-            </a>
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <form method="GET" action="{{ route('admin.categories.index') }}"
+        class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
+        <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Kategorie suchen" />
+        <div class="flex flex-wrap items-center gap-3">
+            <x-ui.button type="submit" variant="secondary" size="lg">Suchen</x-ui.button>
+            @if (request('search'))
+                <x-ui.button variant="link" :href="route('admin.categories.index')">Zurücksetzen</x-ui.button>
+            @endif
         </div>
-    </div>
+    </form>
 
-    <div class="space-y-6">
-        @if (session('success'))
-            <div class="mb-4 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
-                <p class="text-sm font-medium text-green-800 dark:text-green-200">{{ session('success') }}</p>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="mb-4 rounded-md bg-red-50 p-4 dark:bg-red-900/20">
-                <p class="text-sm font-medium text-red-800 dark:text-red-200">{{ session('error') }}</p>
-            </div>
-        @endif
-
-        <!-- Search -->
-        <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                <div class="p-6">
-                    <form method="GET" action="{{ route('admin.categories.index') }}" class="flex gap-4">
-                        <input type="text" name="search" placeholder="Kategorie suchen..." value="{{ request('search') }}" class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                        <button type="submit" class="rounded-md bg-gray-600 px-4 py-2 text-white hover:bg-gray-700">Suchen</button>
-                        @if(request('search'))
-                            <a href="{{ route('admin.categories.index') }}" class="rounded-md bg-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-400">Zurücksetzen</a>
+    <x-ui.table label="Kategorien">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Slug</th>
+                <th scope="col">Icon</th>
+                <th scope="col" class="num">Veranstaltungen</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($categories as $category)
+                <tr>
+                    <th scope="row">{{ $category->name }}</th>
+                    <td class="text-muted">{{ $category->slug }}</td>
+                    <td class="text-muted">{{ $category->icon }}</td>
+                    <td class="num">{{ $category->events_count }}</td>
+                    <td>
+                        @if ($category->is_active)
+                            <x-ui.status tone="success">Aktiv</x-ui.status>
+                        @else
+                            <x-ui.status tone="neutral">Inaktiv</x-ui.status>
                         @endif
-                    </form>
-                </div>
-            </div>
+                    </td>
+                    <td class="actions">
+                        <x-ui.dropdown label="Aktionen für {{ $category->name }}" icon-only>
+                            <x-ui.dropdown-item :href="route('admin.categories.edit', $category)">Bearbeiten</x-ui.dropdown-item>
+                            <x-ui.dropdown-item type="submit" form="toggle-{{ $category->id }}">{{ $category->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
+                            @if ($category->events_count === 0)
+                                <x-ui.dropdown-item danger type="submit" form="destroy-{{ $category->id }}">Löschen</x-ui.dropdown-item>
+                            @endif
+                        </x-ui.dropdown>
+                        <form id="toggle-{{ $category->id }}" method="POST" action="{{ route('admin.categories.toggle-active', $category) }}" class="hidden">@csrf</form>
+                        @if ($category->events_count === 0)
+                            <form id="destroy-{{ $category->id }}" method="POST" action="{{ route('admin.categories.destroy', $category) }}"
+                                onsubmit="return confirm('Sind Sie sicher, dass Sie diese Kategorie löschen möchten?');" class="hidden">@csrf @method('DELETE')</form>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr class="hover:bg-transparent">
+                    <td colspan="6" class="p-0">
+                        <x-ui.empty :bordered="false">Keine Kategorien gefunden.</x-ui.empty>
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </x-ui.table>
 
-            <!-- Categories Table -->
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Name</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Slug</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Icon</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Events</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Aktionen</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
-                            @forelse($categories as $category)
-                                <tr>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        <div class="flex items-center">
-                                            @if($category->color)
-                                                <div class="mr-3 h-4 w-4 rounded" style="background-color: {{ $category->color }}"></div>
-                                            @endif
-                                            <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ $category->name }}</div>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $category->slug }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $category->icon }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ $category->events_count }}</td>
-                                    <td class="whitespace-nowrap px-6 py-4">
-                                        @if($category->is_active)
-                                            <span class="inline-flex rounded-full bg-green-100 px-2 text-xs font-semibold leading-5 text-green-800 dark:bg-green-900 dark:text-green-200">Aktiv</span>
-                                        @else
-                                            <span class="inline-flex rounded-full bg-gray-100 px-2 text-xs font-semibold leading-5 text-gray-800 dark:bg-gray-700 dark:text-gray-200">Inaktiv</span>
-                                        @endif
-                                    </td>
-                                    <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
-                                        <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('admin.categories.edit', $category) }}" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">Bearbeiten</a>
-
-                                            <form method="POST" action="{{ route('admin.categories.toggle-active', $category) }}" class="inline">
-                                                @csrf
-                                                <button type="submit" class="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
-                                                    {{ $category->is_active ? 'Deaktivieren' : 'Aktivieren' }}
-                                                </button>
-                                            </form>
-
-                                            @if($category->events_count === 0)
-                                                <form method="POST" action="{{ route('admin.categories.destroy', $category) }}" class="inline" onsubmit="return confirm('Sind Sie sicher, dass Sie diese Kategorie löschen möchten?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Löschen</button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Keine Kategorien gefunden.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                @if($categories->hasPages())
-                    <div class="border-t border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
-                        {{ $categories->links() }}
-                    </div>
-                @endif
-            </div>
+    @if ($categories->hasPages())
+        <div class="mt-6">
+            {{ $categories->links() }}
         </div>
-    </div>
+    @endif
 </x-layouts.app>
-
