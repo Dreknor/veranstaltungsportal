@@ -10,7 +10,7 @@
             <div><strong>Betrag:</strong> {{ number_format($featuredEventFee->amount, 2, ',', '.') }} €</div>
         </div>
 
-        <form method="POST" action="{{ route('featured-events.process-payment', $featuredEventFee) }}" class="space-y-4">
+        <form method="POST" action="{{ route('organizer.featured-events.process-payment', $featuredEventFee) }}" class="space-y-4">
             @csrf
             <div>
                 <label class="block font-medium mb-1">Zahlungsmethode</label>

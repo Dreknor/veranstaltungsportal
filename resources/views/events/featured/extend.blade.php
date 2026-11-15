@@ -9,14 +9,14 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('featured-events.process-extension', $event) }}" class="space-y-4">
+        <form method="POST" action="{{ route('organizer.featured-events.process-extension', $event) }}" class="space-y-4">
             @csrf
             <div>
                 <label class="block font-medium mb-1">Dauer</label>
                 <select name="duration_type" class="w-full border rounded p-2" required>
-                    <option value="daily">1 Tag ({{ number_format($pricing['daily'], 2, ',', '.') }} €)</option>
-                    <option value="weekly">7 Tage ({{ number_format($pricing['weekly'], 2, ',', '.') }} €)</option>
-                    <option value="monthly">30 Tage ({{ number_format($pricing['monthly'], 2, ',', '.') }} €)</option>
+                    <option value="daily">1 Tag ({{ number_format((float) $pricing['daily']['rate'], 2, ',', '.') }} €)</option>
+                    <option value="weekly">7 Tage ({{ number_format((float) $pricing['weekly']['rate'], 2, ',', '.') }} €)</option>
+                    <option value="monthly">30 Tage ({{ number_format((float) $pricing['monthly']['rate'], 2, ',', '.') }} €)</option>
                     <option value="custom">Individuell</option>
                 </select>
             </div>

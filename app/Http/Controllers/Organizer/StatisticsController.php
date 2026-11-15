@@ -165,8 +165,50 @@ class StatisticsController extends Controller
         $ticketsAvailable = $event->max_attendees ? $event->max_attendees - $ticketsSold : null;
         $capacityPercentage = $event->max_attendees ? round(($ticketsSold / $event->max_attendees) * 100, 2) : null;
 
+        // Eingecheckte Tickets (Ticket-Ebene) bezogen auf verkaufte Tickets
+        $checkedInCount = (int) DB::table('booking_items')
+            ->join('bookings', 'booking_items.booking_id', '=', 'bookings.id')
+            ->where('bookings.event_id', $event->id)
+            ->where('bookings.status', '!=', 'cancelled')
+            ->where('booking_items.checked_in', true)
+            ->sum('booking_items.quantity');
+        $checkInRate = $ticketsSold > 0 ? round(($checkedInCount / $ticketsSold) * 100, 1) : 0;
+
+        // Verkauf je Ticketart
+        $ticketTypeStats = DB::table('booking_items')
+            ->join('bookings', 'booking_items.booking_id', '=', 'bookings.id')
+            ->join('ticket_types', 'booking_items.ticket_type_id', '=', 'ticket_types.id')
+            ->where('bookings.event_id', $event->id)
+            ->where('bookings.status', '!=', 'cancelled')
+            ->groupBy('ticket_types.id', 'ticket_types.name')
+            ->select(
+                'ticket_types.name',
+                DB::raw('SUM(booking_items.quantity) as quantity_sold'),
+                DB::raw('SUM(booking_items.price * booking_items.quantity) as revenue')
+            )
+            ->orderByDesc('quantity_sold')
+            ->get();
+
+        // Buchungen je Tag
+        $dailyBookings = $event->bookings()
+            ->where('status', '!=', 'cancelled')
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(total) as revenue')
+            ->groupBy('date')
+            ->orderByDesc('date')
+            ->get();
+
+        // Nutzung der Rabattcodes
+        $discountCodeStats = $event->bookings()
+            ->with('discountCode')
+            ->whereNotNull('discount_code_id')
+            ->where('status', '!=', 'cancelled')
+            ->selectRaw('discount_code_id, COUNT(*) as usage_count, SUM(discount) as total_discount')
+            ->groupBy('discount_code_id')
+            ->get();
+
         return view('organizer.statistics.event', compact(
-            'event','totalBookings','confirmedBookings','pendingBookings','cancelledBookings','totalRevenue','confirmedRevenue','pendingRevenue','ticketsSold','ticketsAvailable','capacityPercentage'
+            'event','totalBookings','confirmedBookings','pendingBookings','cancelledBookings','totalRevenue','confirmedRevenue','pendingRevenue','ticketsSold','ticketsAvailable','capacityPercentage',
+            'checkedInCount','checkInRate','ticketTypeStats','dailyBookings','discountCodeStats'
         ));
     }
 }

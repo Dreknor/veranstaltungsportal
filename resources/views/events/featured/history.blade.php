@@ -23,9 +23,9 @@
                             <td class="px-4 py-2">{{ number_format($fee->amount, 2, ',', '.') }} €</td>
                             <td class="px-4 py-2">
                                 @if($fee->payment_status !== 'paid')
-                                    <a href="{{ route('featured-events.payment', $fee) }}" class="text-blue-600 hover:text-blue-800">Zahlung</a>
+                                    <a href="{{ route('organizer.featured-events.payment', $fee) }}" class="text-blue-600 hover:text-blue-800">Zahlung</a>
                                 @else
-                                    <a href="{{ route('featured-events.extend', $fee->event) }}" class="text-blue-600 hover:text-blue-800">Verlängern</a>
+                                    <a href="{{ route('organizer.featured-events.extend', $fee->event) }}" class="text-blue-600 hover:text-blue-800">Verlängern</a>
                                 @endif
                             </td>
                         </tr>

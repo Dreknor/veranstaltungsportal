@@ -66,7 +66,7 @@ class FeaturedEventController extends Controller
             );
 
             return redirect()
-                ->route('featured-events.payment', $featuredFee)
+                ->route('organizer.featured-events.payment', $featuredFee)
                 ->with('success', 'Featured Event Antrag erstellt. Bitte schließen Sie die Zahlung ab.');
         } catch (\Exception $e) {
             return redirect()
@@ -180,7 +180,7 @@ class FeaturedEventController extends Controller
             );
 
             return redirect()
-                ->route('featured-events.payment', $featuredFee)
+                ->route('organizer.featured-events.payment', $featuredFee)
                 ->with('success', 'Verlängerung erstellt. Bitte schließen Sie die Zahlung ab.');
         } catch (\Exception $e) {
             return redirect()
