@@ -1,221 +1,166 @@
-<x-layouts.app title="Bewertungen">
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Bewertungen verwalten</h1>
+<x-layouts.app title="Bewertungen" :header="false">
+    <x-ui.page-header title="Bewertungen verwalten" />
+
+    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <x-ui.stat label="Gesamt" :value="$stats['total']" />
+        <x-ui.stat label="Warten auf Freigabe" :value="$stats['pending']" />
+        <x-ui.stat label="Freigegeben" :value="$stats['approved']" />
+        <x-ui.stat label="Durchschnittliche Bewertung" :value="($stats['average_rating'] ?? '0') . ' von 5'" />
     </div>
 
-    {{-- Statistics Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 mb-2">Gesamt</div>
-            <div class="text-3xl font-bold text-gray-900">{{ $stats['total'] }}</div>
+    <form method="GET" action="{{ route('admin.reviews.index') }}"
+        class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
+        <x-ui.select label="Status" name="status" :old="false"
+            :options="['' => 'Alle', 'pending' => 'Warten auf Freigabe', 'approved' => 'Freigegeben']"
+            :selected="request('status')" />
+        <x-ui.select label="Bewertung" name="rating" :old="false">
+            <option value="">Alle</option>
+            @for ($i = 5; $i >= 1; $i--)
+                <option value="{{ $i }}" @selected(request('rating') == $i)>{{ $i }} {{ $i === 1 ? 'Stern' : 'Sterne' }}</option>
+            @endfor
+        </x-ui.select>
+        <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Veranstaltung, Benutzer" />
+        <div>
+            <x-ui.button type="submit" variant="secondary" size="lg" full>Filtern</x-ui.button>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 mb-2">Warten auf Freigabe</div>
-            <div class="text-3xl font-bold text-orange-600">{{ $stats['pending'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 mb-2">Freigegeben</div>
-            <div class="text-3xl font-bold text-green-600">{{ $stats['approved'] }}</div>
-        </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-gray-600 mb-2">Ø Bewertung</div>
-            <div class="text-3xl font-bold text-blue-600">
-                {{ $stats['average_rating'] ?? '0' }}
-                <span class="text-lg text-gray-500">/5</span>
-            </div>
-        </div>
-    </div>
+    </form>
 
-    {{-- Filters --}}
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-        <form method="GET" action="{{ route('admin.reviews.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-                <label class="block text-sm font-medium mb-2">Status</label>
-                <select name="status" class="w-full border-gray-300 rounded">
-                    <option value="">Alle</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Warten auf Freigabe</option>
-                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Freigegeben</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-2">Bewertung</label>
-                <select name="rating" class="w-full border-gray-300 rounded">
-                    <option value="">Alle</option>
-                    @for($i = 5; $i >= 1; $i--)
-                        <option value="{{ $i }}" {{ request('rating') == $i ? 'selected' : '' }}>
-                            {{ str_repeat('⭐', $i) }} ({{ $i }})
-                        </option>
-                    @endfor
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-2">Suche</label>
-                <input type="text" name="search" value="{{ request('search') }}"
-                       placeholder="Event, Benutzer..."
-                       class="w-full border-gray-300 rounded">
-            </div>
-            <div class="flex items-end">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-                    Filtern
-                </button>
-            </div>
-        </form>
-    </div>
-
-    {{-- Bulk Actions --}}
-    <div class="bg-white rounded-lg shadow p-4 mb-6" id="bulk-actions" style="display: none;">
-        <div class="flex items-center justify-between">
-            <span class="text-sm text-gray-600">
+    {{-- Sammelaktionen --}}
+    <div class="mb-6 rounded-box border border-line bg-zone p-4" id="bulk-actions" style="display: none;">
+        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <p class="m-0 text-small text-ink">
                 <span id="selected-count">0</span> Bewertung(en) ausgewählt
-            </span>
-            <div class="space-x-2">
-                <form method="POST" action="{{ route('admin.reviews.bulk-approve') }}" class="inline" id="bulk-approve-form">
+            </p>
+            <div class="flex flex-wrap items-center gap-3">
+                <form method="POST" action="{{ route('admin.reviews.bulk-approve') }}" id="bulk-approve-form">
                     @csrf
                     <input type="hidden" name="review_ids" id="bulk-approve-ids">
-                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">
-                        Freigeben
-                    </button>
+                    <x-ui.button type="submit">Freigeben</x-ui.button>
                 </form>
-                <form method="POST" action="{{ route('admin.reviews.bulk-reject') }}" class="inline" id="bulk-reject-form">
+                <form method="POST" action="{{ route('admin.reviews.bulk-reject') }}" id="bulk-reject-form">
                     @csrf
                     <input type="hidden" name="review_ids" id="bulk-reject-ids">
-                    <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm">
-                        Ablehnen
-                    </button>
+                    <x-ui.button type="submit" variant="secondary">Ablehnen</x-ui.button>
                 </form>
             </div>
         </div>
     </div>
 
-    {{-- Reviews Table --}}
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <x-ui.table label="Bewertungen">
+        <thead>
+            <tr>
+                <th scope="col" class="w-12">
+                    <input type="checkbox" id="select-all" class="ui-checkbox" aria-label="Alle Bewertungen auswählen">
+                </th>
+                <th scope="col">Veranstaltung</th>
+                <th scope="col">Benutzer</th>
+                <th scope="col">Bewertung</th>
+                <th scope="col">Kommentar</th>
+                <th scope="col">Datum</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($reviews as $review)
                 <tr>
-                    <th class="px-6 py-3 text-left">
-                        <input type="checkbox" id="select-all" class="rounded">
-                    </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Benutzer</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bewertung</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kommentar</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Datum</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aktionen</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($reviews as $review)
-                <tr>
-                    <td class="px-6 py-4">
-                        <input type="checkbox" class="review-checkbox rounded" value="{{ $review->id }}">
+                    <td>
+                        <input type="checkbox" class="ui-checkbox review-checkbox" value="{{ $review->id }}"
+                            aria-label="Bewertung von {{ $review->reviewerName() }} auswählen">
                     </td>
-                    <td class="px-6 py-4">
-                        <a href="{{ route('events.show', $review->event->slug) }}" target="_blank" class="text-blue-600 hover:underline">
-                            {{ Str::limit($review->event->title, 40) }}
-                        </a>
+                    <td class="min-w-48">
+                        <a href="{{ route('events.show', $review->event->slug) }}" target="_blank" rel="noopener"
+                            class="text-ink underline underline-offset-[3px]">{{ Str::limit($review->event->title, 40) }}</a>
                     </td>
-                    <td class="px-6 py-4 text-sm">
-                        <div class="font-medium">{{ $review->reviewerName() }}</div>
-                        <div class="text-gray-500 text-xs">{{ $review->reviewerEmail() }}</div>
+                    <td>
+                        <span class="block">{{ $review->reviewerName() }}</span>
+                        <span class="block text-small text-muted">{{ $review->reviewerEmail() }}</span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-yellow-500">{{ str_repeat('⭐', $review->rating) }}</div>
-                        <div class="text-xs text-gray-500">{{ $review->rating }}/5</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        @if($review->comment)
-                            <div class="text-sm text-gray-900">{{ Str::limit($review->comment, 100) }}</div>
+                    <td class="whitespace-nowrap tabular-nums">{{ $review->rating }} von 5</td>
+                    <td class="min-w-56">
+                        @if ($review->comment)
+                            {{ Str::limit($review->comment, 100) }}
                         @else
-                            <span class="text-gray-400 text-sm italic">Kein Kommentar</span>
+                            <span class="text-muted">Kein Kommentar</span>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td class="whitespace-nowrap tabular-nums">
                         {{ $review->created_at->format('d.m.Y') }}
-                        <div class="text-xs">{{ $review->created_at->diffForHumans() }}</div>
+                        <span class="block text-small text-muted">{{ $review->created_at->diffForHumans() }}</span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @if($review->is_approved)
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                Freigegeben
-                            </span>
+                    <td>
+                        @if ($review->is_approved)
+                            <x-ui.status tone="success">Freigegeben</x-ui.status>
                         @else
-                            <span class="px-2 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-800">
-                                Wartet
-                            </span>
+                            <x-ui.status tone="warning">Wartet</x-ui.status>
                         @endif
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm space-x-2">
-                        @if(!$review->is_approved)
+                    <td class="actions">
+                        @if (!$review->is_approved)
                             <form method="POST" action="{{ route('admin.reviews.approve', $review) }}" class="inline">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="text-green-600 hover:text-green-900">Freigeben</button>
+                                <x-ui.button type="submit" size="sm" variant="secondary">Freigeben</x-ui.button>
                             </form>
                         @else
                             <form method="POST" action="{{ route('admin.reviews.reject', $review) }}" class="inline">
                                 @csrf
                                 @method('PATCH')
-                                <button type="submit" class="text-orange-600 hover:text-orange-900">Ablehnen</button>
+                                <x-ui.button type="submit" size="sm" variant="secondary">Ablehnen</x-ui.button>
                             </form>
                         @endif
                         <form method="POST" action="{{ route('admin.reviews.destroy', $review) }}" class="inline"
-                              onsubmit="return confirm('Bewertung wirklich löschen?')">
+                            onsubmit="return confirm('Bewertung wirklich löschen?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600 hover:text-red-900">Löschen</button>
+                            <x-ui.button type="submit" size="sm" variant="secondary">Löschen</x-ui.button>
                         </form>
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="8" class="px-6 py-12 text-center text-gray-500">
-                        <div class="text-4xl mb-4">⭐</div>
-                        <div class="text-lg">Keine Bewertungen vorhanden</div>
+            @empty
+                <tr class="hover:bg-transparent">
+                    <td colspan="8" class="p-0">
+                        <x-ui.empty :bordered="false">Keine Bewertungen vorhanden.</x-ui.empty>
                     </td>
                 </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+            @endforelse
+        </tbody>
+    </x-ui.table>
 
-    {{-- Pagination --}}
-    @if($reviews->hasPages())
-    <div class="mt-6">
-        {{ $reviews->links() }}
-    </div>
+    @if ($reviews->hasPages())
+        <div class="mt-6">
+            {{ $reviews->links() }}
+        </div>
     @endif
-</div>
 
-<script>
-// Bulk selection
-const selectAllCheckbox = document.getElementById('select-all');
-const reviewCheckboxes = document.querySelectorAll('.review-checkbox');
-const bulkActions = document.getElementById('bulk-actions');
-const selectedCountEl = document.getElementById('selected-count');
+    <script>
+        // Sammelauswahl
+        const selectAllCheckbox = document.getElementById('select-all');
+        const reviewCheckboxes = document.querySelectorAll('.review-checkbox');
+        const bulkActions = document.getElementById('bulk-actions');
+        const selectedCountEl = document.getElementById('selected-count');
 
-selectAllCheckbox?.addEventListener('change', function() {
-    reviewCheckboxes.forEach(cb => cb.checked = this.checked);
-    updateBulkActions();
-});
+        selectAllCheckbox?.addEventListener('change', function() {
+            reviewCheckboxes.forEach(cb => cb.checked = this.checked);
+            updateBulkActions();
+        });
 
-reviewCheckboxes.forEach(cb => {
-    cb.addEventListener('change', updateBulkActions);
-});
+        reviewCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateBulkActions);
+        });
 
-function updateBulkActions() {
-    const selected = Array.from(reviewCheckboxes).filter(cb => cb.checked);
-    const selectedIds = selected.map(cb => cb.value);
+        function updateBulkActions() {
+            const selected = Array.from(reviewCheckboxes).filter(cb => cb.checked);
+            const selectedIds = selected.map(cb => cb.value);
 
-    if (selected.length > 0) {
-        bulkActions.style.display = 'block';
-        selectedCountEl.textContent = selected.length;
-        document.getElementById('bulk-approve-ids').value = JSON.stringify(selectedIds);
-        document.getElementById('bulk-reject-ids').value = JSON.stringify(selectedIds);
-    } else {
-        bulkActions.style.display = 'none';
-    }
-}
-</script>
+            if (selected.length > 0) {
+                bulkActions.style.display = 'block';
+                selectedCountEl.textContent = selected.length;
+                document.getElementById('bulk-approve-ids').value = JSON.stringify(selectedIds);
+                document.getElementById('bulk-reject-ids').value = JSON.stringify(selectedIds);
+            } else {
+                bulkActions.style.display = 'none';
+            }
+        }
+    </script>
 </x-layouts.app>
