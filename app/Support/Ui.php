@@ -13,17 +13,6 @@ use Illuminate\Support\ViewErrorBag;
  */
 class Ui
 {
-    private const WEEKDAYS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-
-    private const MONTHS = [1 => 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-
-    private const FORMATS = [
-        'physical' => 'Präsenz',
-        'online' => 'Online',
-        'hybrid' => 'Hybrid',
-        'external' => 'Extern',
-    ];
-
     /**
      * Feldname in Punkt-Schreibweise, wie ihn old() und der Fehler-Speicher verwenden:
      * "tickets[0][quantity]" wird "tickets.0.quantity", "tags[]" wird "tags".
@@ -111,13 +100,34 @@ class Ui
     /** Wochentag kurz: "Do". */
     public static function weekday(Carbon $date): string
     {
-        return self::WEEKDAYS[$date->dayOfWeek];
+        return match ($date->dayOfWeek) {
+            0 => 'So',
+            1 => 'Mo',
+            2 => 'Di',
+            3 => 'Mi',
+            4 => 'Do',
+            5 => 'Fr',
+            default => 'Sa',
+        };
     }
 
     /** Monat kurz: "Nov". */
     public static function month(Carbon $date): string
     {
-        return self::MONTHS[$date->month];
+        return match ($date->month) {
+            1 => 'Jan',
+            2 => 'Feb',
+            3 => 'Mär',
+            4 => 'Apr',
+            5 => 'Mai',
+            6 => 'Jun',
+            7 => 'Jul',
+            8 => 'Aug',
+            9 => 'Sep',
+            10 => 'Okt',
+            11 => 'Nov',
+            default => 'Dez',
+        };
     }
 
     /** Datum nach A7: "Do, 26.11.2026". */
@@ -146,15 +156,16 @@ class Ui
         return self::date($start).', '.self::time($start, $end);
     }
 
-    /** Dauer in Kalendertagen als Wort: "zweitägig", "3-tägig". */
+    /** Dauer in Kalendertagen: "zweitägig", "5-tägig"; ab acht Tagen "bis 23.12.2026". */
     public static function days(Carbon $start, Carbon $end): string
     {
         $days = (int) $start->copy()->startOfDay()->diffInDays($end->copy()->startOfDay()) + 1;
 
-        return match ($days) {
-            2 => 'zweitägig',
-            3 => 'dreitägig',
-            default => $days.'-tägig',
+        return match (true) {
+            $days === 2 => 'zweitägig',
+            $days === 3 => 'dreitägig',
+            $days <= 7 => $days.'-tägig',
+            default => 'bis '.$end->format('d.m.Y'),
         };
     }
 
@@ -181,7 +192,15 @@ class Ui
     /** Format einer Veranstaltung als Wort: "Präsenz", "Online", "Hybrid", "Extern". */
     public static function format(Event $event): string
     {
-        return self::FORMATS[$event->event_type] ?? 'Präsenz';
+        // Bewusst als string gelesen: Die Spalte kann ältere Werte enthalten als das Schema vorsieht.
+        $type = (string) $event->getAttribute('event_type');
+
+        return match ($type) {
+            'online' => 'Online',
+            'hybrid' => 'Hybrid',
+            'external' => 'Extern',
+            default => 'Präsenz',
+        };
     }
 
     /** "Format · Ort" (Ort nur bei Präsenz und Hybrid, falls vorhanden). */
@@ -189,8 +208,10 @@ class Ui
     {
         $parts = [self::format($event)];
 
-        if (! $event->isOnline() && filled($event->venue_city)) {
-            $parts[] = $event->venue_city;
+        $city = (string) $event->getAttribute('venue_city');
+
+        if (! $event->isOnline() && $city !== '') {
+            $parts[] = $city;
         }
 
         return implode(' · ', $parts);
@@ -200,7 +221,7 @@ class Ui
     public static function bookingTone(?string $status): string
     {
         return match ($status) {
-            'confirmed' => 'success',
+            'confirmed', 'completed' => 'success',
             'pending', 'pending_approval' => 'warning',
             'cancelled' => 'danger',
             default => 'neutral',

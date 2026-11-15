@@ -240,7 +240,7 @@ class OrganizationController extends Controller
             ]);
 
             // Send welcome email with credentials and cancellation link
-            \Mail::to($user->email)->send(new \App\Mail\NewUserAccountCreated(
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\NewUserAccountCreated(
                 $user,
                 $temporaryPassword,
                 $organization,
@@ -266,7 +266,7 @@ class OrganizationController extends Controller
         ]);
 
         // Send invitation email
-        \Mail::to($user->email)->send(new \App\Mail\OrganizationInvitation(
+        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrganizationInvitation(
             $organization,
             auth()->user(),
             $validated['role']
@@ -301,7 +301,7 @@ class OrganizationController extends Controller
 
         // Send role change notification
         if ($oldRole !== $validated['role']) {
-            \Mail::to($user->email)->send(new \App\Mail\OrganizationRoleChanged(
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrganizationRoleChanged(
                 $organization,
                 auth()->user(),
                 $oldRole,
@@ -413,7 +413,7 @@ class OrganizationController extends Controller
             ]);
 
             // Send invitation email
-            \Mail::to($user->email)->send(new \App\Mail\OrganizationInvitation(
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OrganizationInvitation(
                 $organization,
                 auth()->user(),
                 $role

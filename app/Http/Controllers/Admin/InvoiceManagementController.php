@@ -130,7 +130,7 @@ class InvoiceManagementController extends Controller
 
             // We need to call the private method via reflection or make it public
             // For now, we'll send directly
-            \Mail::send('emails.invoice', compact('invoice'), function ($message) use ($invoice) {
+            \Illuminate\Support\Facades\Mail::send('emails.invoice', compact('invoice'), function ($message) use ($invoice) {
                 $message->to($invoice->recipient_email)
                         ->subject("Rechnung {$invoice->invoice_number}");
 
