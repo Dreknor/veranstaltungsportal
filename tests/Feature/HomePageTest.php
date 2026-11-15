@@ -20,9 +20,12 @@ test('Kategorien auf der Startseite zählen nur kommende, veröffentlichte Veran
     expect(Event::listed()->where('event_category_id', $category->id)->count())->toBe(2);
 });
 
-test('Startseite hat eine mobile Navigation mit Menü-Button', function () {
+test('Startseite hat eine Hauptnavigation, die auf dem Handy ohne Menü-Button auskommt', function () {
+    // B4: Unter 768 px rutschen die Links in eine zweite Zeile, es gibt kein Hamburger-Menü.
     $this->get(route('home'))
         ->assertOk()
-        ->assertSee('aria-controls="public-mobile-menu"', false)
-        ->assertSee('Menü öffnen');
+        ->assertSee('aria-label="Hauptnavigation"', false)
+        ->assertSee('href="'.route('events.index').'"', false)
+        ->assertSee('href="'.route('login').'"', false)
+        ->assertDontSee('aria-controls="public-mobile-menu"', false);
 });
