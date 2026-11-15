@@ -1,286 +1,126 @@
-<x-layouts.app>
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Meine Events</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-2">Verwalten Sie Ihre Veranstaltungen</p>
-            </div>
-            <div class="flex gap-3">
-                <a href="{{ route('organizer.events.create') }}"
-                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
-                    <svg class="inline-block w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Neues Event erstellen
-                </a>
-            </div>
-        </div>
+<x-layouts.app title="Meine Veranstaltungen">
+    <x-ui.page-header title="Meine Veranstaltungen" subtitle="Verwalten Sie Ihre Veranstaltungen.">
+        <x-slot:actions>
+            <x-ui.button :href="route('organizer.events.create')">
+                <x-slot:icon><x-icon.plus /></x-slot:icon>
+                Veranstaltung anlegen
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
-        <!-- Navigation Tabs -->
-        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-            <nav class="-mb-px flex space-x-8">
-                <a href="{{ route('organizer.events.index') }}"
-                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
-                          {{ !$isArchive
-                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
-                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    Aktuelle &amp; zukünftige Events
-                    @if($upcomingCount > 0)
-                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
-                                     {{ !$isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
-                            {{ $upcomingCount }}
-                        </span>
-                    @endif
-                </a>
-                <a href="{{ route('organizer.events.index', ['archive' => 1]) }}"
-                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
-                          {{ $isArchive
-                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
-                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                    </svg>
-                    Archiv
-                    @if($archiveCount > 0)
-                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
-                                     {{ $isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
-                            {{ $archiveCount }}
-                        </span>
-                    @endif
-                </a>
-            </nav>
-        </div>
+    <x-ui.tabs label="Veranstaltungen filtern" class="mb-8">
+        <x-ui.tab :href="route('organizer.events.index')" :active="!$isArchive" :count="$upcomingCount > 0 ? $upcomingCount : null">
+            Aktuelle und kommende
+        </x-ui.tab>
+        <x-ui.tab :href="route('organizer.events.index', ['archive' => 1])" :active="$isArchive" :count="$archiveCount > 0 ? $archiveCount : null">
+            Archiv
+        </x-ui.tab>
+    </x-ui.tabs>
 
-        @if($isArchive)
-            <div class="mb-4 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg px-4 py-3">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                </svg>
-                <span>Sie sehen das <strong>Event-Archiv</strong> – abgeschlossene Veranstaltungen der Vergangenheit.</span>
-            </div>
-        @endif
+    @if ($isArchive)
+        <x-ui.alert tone="info" class="mb-6">
+            Sie sehen das <strong>Archiv</strong> – abgeschlossene Veranstaltungen der Vergangenheit.
+        </x-ui.alert>
+    @endif
 
-        @if (session('success'))
-            <div class="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded relative">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="mb-6 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded relative">
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        @endif
-
-        <!-- Events Grid -->
-        @if($events->count() > 0)
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($events as $event)
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                        <!-- Event Image -->
-                        @if($event->featured_image)
-                            <div class="h-48 overflow-hidden">
-                                <img src="{{ asset('storage/' . $event->featured_image) }}" alt="{{ $event->title }}"
-                                     class="w-full h-full object-cover">
-                            </div>
+    @if ($events->count() > 0)
+        <x-ui.row-list>
+            @foreach ($events as $event)
+                <x-ui.event-row :event="$event" :href="route('organizer.events.edit', $event)">
+                    <x-slot:aside>
+                        @if ($event->is_cancelled)
+                            <x-ui.status tone="danger">Abgesagt</x-ui.status>
+                        @elseif ($event->is_published)
+                            <x-ui.status tone="success">Veröffentlicht</x-ui.status>
                         @else
-                            <div class="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                                <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </div>
+                            <x-ui.status tone="neutral">Entwurf</x-ui.status>
                         @endif
-
-                        <!-- Event Details -->
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                        {{ $event->category->name }}
-                                    </span>
-                                    <x-event-type-badge :event="$event" size="xs" />
-                                </div>
-                                <div class="flex gap-2">
-                                    @if($event->is_cancelled)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
-                                            Abgesagt
-                                        </span>
-                                    @elseif($event->is_published)
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                            Veröffentlicht
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                            Entwurf
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                                {{ Str::limit($event->title, 50) }}
-                            </h3>
-
-                            <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                    {{ $event->start_date->format('d.m.Y H:i') }}
-                                </div>
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    </svg>
-                                    {{ $event->venue_city }}
-                                </div>
-                                <div class="flex items-center">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-                                    </svg>
-                                    {{ $event->bookings->count() }} Buchungen
-                                </div>
-                            </div>
-
-                            <!-- Actions -->
-                            <div class="flex flex-wrap gap-2">
-                                <a href="{{ route('events.show', $event->slug) }}" target="_blank"
-                                   class="flex-1 px-3 py-2 text-center bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-sm">
-                                    Anzeigen
-                                </a>
-                                <a href="{{ route('organizer.events.edit', $event) }}"
-                                   class="flex-1 px-3 py-2 text-center bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-                                    Bearbeiten
-                                </a>
-                                @if($event->hasAttendees())
-                                    <a href="{{ route('organizer.check-in.index', $event) }}"
-                                       class="flex-1 px-3 py-2 text-center bg-purple-600 text-white rounded hover:bg-purple-700 text-sm">
-                                        <i class="fas fa-qrcode mr-1"></i> Check-In
-                                    </a>
+                        <span class="text-small text-muted whitespace-nowrap">{{ $event->bookings->count() }} Buchungen</span>
+                    </x-slot:aside>
+                    <x-slot:action>
+                        <div class="flex gap-2">
+                            <x-ui.button variant="secondary" :href="route('organizer.events.edit', $event)" class="min-w-0 flex-1">Bearbeiten</x-ui.button>
+                            <x-ui.dropdown label="Weitere Aktionen für {{ $event->title }}" icon-only size="md" width="w-64">
+                                <x-ui.dropdown-item :href="route('events.show', $event->slug)" target="_blank" rel="noopener">
+                                    <x-slot:icon><x-icon.external-link /></x-slot:icon>
+                                    Öffentlich ansehen
+                                </x-ui.dropdown-item>
+                                <x-ui.dropdown-item :href="route('organizer.events.ticket-types.index', $event)">Ticketarten</x-ui.dropdown-item>
+                                <x-ui.dropdown-item :href="route('organizer.events.discount-codes.index', $event)">Rabattcodes</x-ui.dropdown-item>
+                                <x-ui.dropdown-item :href="route('organizer.events.waitlist.index', $event)">Warteliste</x-ui.dropdown-item>
+                                <x-ui.dropdown-item :href="route('organizer.bookings.index', ['event_id' => $event->id])">Buchungen</x-ui.dropdown-item>
+                                @if ($event->hasAttendees())
+                                    <x-ui.dropdown-item :href="route('organizer.check-in.index', $event)">Check-in</x-ui.dropdown-item>
                                 @endif
-                                @if(!$event->is_cancelled)
-                                    <form action="{{ route('organizer.events.duplicate', $event) }}" method="POST"
-                                          class="flex-1">
-                                        @csrf
-                                        <button type="submit"
-                                                class="w-full px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">
-                                            Duplizieren
-                                        </button>
-                                    </form>
-
-                                    @if($event->hasAttendees())
-                                        <!-- Absagen Button wenn Teilnehmer vorhanden -->
-                                        <button type="button" onclick="showCancelModal{{ $event->id }}()"
-                                                class="flex-1 px-3 py-2 bg-orange-600 text-white rounded hover:bg-orange-700 text-sm">
-                                            Absagen
-                                        </button>
+                                <x-ui.dropdown-item :href="route('organizer.statistics.event', $event)">Statistik</x-ui.dropdown-item>
+                                <x-ui.dropdown-item :href="route('organizer.events.certificates.index', $event)">Zertifikate</x-ui.dropdown-item>
+                                @if (!$event->is_cancelled && !$isArchive)
+                                    <x-ui.dropdown-item :href="route('organizer.featured-events.create', $event)">Hervorheben</x-ui.dropdown-item>
+                                @endif
+                                @if (!$event->is_cancelled)
+                                    <x-ui.dropdown-item type="submit" form="duplicate-{{ $event->id }}">Duplizieren</x-ui.dropdown-item>
+                                    @if ($event->hasAttendees())
+                                        <x-ui.dropdown-item danger x-on:click="$dispatch('open-modal', 'cancel-event-{{ $event->id }}')">Absagen</x-ui.dropdown-item>
                                     @else
-                                        <!-- Löschen Button wenn keine Teilnehmer vorhanden -->
-                                        <form action="{{ route('organizer.events.destroy', $event) }}" method="POST"
-                                              class="flex-1" onsubmit="return confirm('Event wirklich löschen?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit"
-                                                    class="w-full px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                                Löschen
-                                            </button>
-                                        </form>
+                                        <x-ui.dropdown-item type="submit" form="delete-{{ $event->id }}" danger>Löschen</x-ui.dropdown-item>
                                     @endif
                                 @endif
-                            </div>
+                            </x-ui.dropdown>
                         </div>
-                    </div>
+                    </x-slot:action>
+                </x-ui.event-row>
+            @endforeach
+        </x-ui.row-list>
 
-                    <!-- Modal für Event-Absage -->
-                    @if($event->hasAttendees() && !$event->is_cancelled)
-                        <div id="cancelModal{{ $event->id }}" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                                <div class="mt-3">
-                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Event absagen</h3>
-                                    <p class="text-sm text-gray-600 mb-4">
-                                        Dieses Event hat {{ $event->getAttendeesCount() }} Teilnehmer.
-                                        Alle Teilnehmer werden per E-Mail über die Absage informiert.
-                                    </p>
-                                    <form action="{{ route('organizer.events.cancel', $event) }}" method="POST">
-                                        @csrf
-                                        <div class="mb-4">
-                                            <label for="cancellation_reason{{ $event->id }}" class="block text-sm font-medium text-gray-700 mb-2">
-                                                Grund der Absage (optional)
-                                            </label>
-                                            <textarea id="cancellation_reason{{ $event->id }}" name="cancellation_reason" rows="3"
-                                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                      placeholder="Teilen Sie den Teilnehmern mit, warum das Event abgesagt wird..."></textarea>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <button type="button" onclick="hideCancelModal{{ $event->id }}()"
-                                                    class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
-                                                Abbrechen
-                                            </button>
-                                            <button type="submit"
-                                                    class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                                                Event absagen
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+        {{-- Formulare außerhalb des Menüs, angesprochen über form="…" --}}
+        @foreach ($events as $event)
+            @if (!$event->is_cancelled)
+                <form id="duplicate-{{ $event->id }}" action="{{ route('organizer.events.duplicate', $event) }}" method="POST" class="hidden">
+                    @csrf
+                </form>
 
-                        <script>
-                            function showCancelModal{{ $event->id }}() {
-                                document.getElementById('cancelModal{{ $event->id }}').classList.remove('hidden');
-                            }
-                            function hideCancelModal{{ $event->id }}() {
-                                document.getElementById('cancelModal{{ $event->id }}').classList.add('hidden');
-                            }
-                        </script>
-                    @endif
-                @endforeach
-            </div>
-
-            <!-- Pagination -->
-            @if($events->hasPages())
-                <div class="mt-8">
-                    {{ $events->appends(request()->query())->links() }}
-                </div>
-            @endif
-        @else
-            <!-- Empty State -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
-                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                @if($isArchive)
-                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine archivierten Events vorhanden</h3>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        Abgeschlossene Veranstaltungen erscheinen hier im Archiv.
-                    </p>
-                    <div class="mt-6">
-                        <a href="{{ route('organizer.events.index') }}"
-                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                            Zu aktuellen Events
-                        </a>
-                    </div>
+                @if ($event->hasAttendees())
+                    {{-- Dialog für die Absage --}}
+                    <x-ui.modal name="cancel-event-{{ $event->id }}" title="Veranstaltung absagen">
+                        <form id="cancel-form-{{ $event->id }}" action="{{ route('organizer.events.cancel', $event) }}" method="POST" class="flex flex-col gap-4">
+                            @csrf
+                            <p class="m-0">
+                                Diese Veranstaltung hat {{ $event->getAttendeesCount() }} Teilnehmende.
+                                Alle Teilnehmenden werden per E-Mail über die Absage informiert.
+                            </p>
+                            <x-ui.textarea label="Grund der Absage" optional name="cancellation_reason" id="cancellation_reason{{ $event->id }}" rows="3"
+                                :old="false" :error="false"
+                                placeholder="Teilen Sie den Teilnehmenden mit, warum die Veranstaltung abgesagt wird …" />
+                        </form>
+                        <x-slot:footer>
+                            <x-ui.button variant="secondary" x-on:click="close()">Abbrechen</x-ui.button>
+                            <x-ui.button variant="danger" type="submit" form="cancel-form-{{ $event->id }}">Veranstaltung absagen</x-ui.button>
+                        </x-slot:footer>
+                    </x-ui.modal>
                 @else
-                    <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Keine Events vorhanden</h3>
-                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                        Erstellen Sie Ihr erstes Event, um loszulegen.
-                    </p>
-                    <div class="mt-6">
-                        <a href="{{ route('organizer.events.create') }}"
-                           class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            Neues Event erstellen
-                        </a>
-                    </div>
+                    <form id="delete-{{ $event->id }}" action="{{ route('organizer.events.destroy', $event) }}" method="POST" class="hidden"
+                        onsubmit="return confirm('Veranstaltung wirklich löschen?');">
+                        @csrf
+                        @method('DELETE')
+                    </form>
                 @endif
+            @endif
+        @endforeach
+
+        @if ($events->hasPages())
+            <div class="mt-8">
+                {{ $events->appends(request()->query())->links() }}
             </div>
         @endif
-    </div>
+    @else
+        @if ($isArchive)
+            <x-ui.empty title="Keine archivierten Veranstaltungen vorhanden" :action-href="route('organizer.events.index')" action-label="Zu den aktuellen Veranstaltungen">
+                Abgeschlossene Veranstaltungen erscheinen hier im Archiv.
+            </x-ui.empty>
+        @else
+            <x-ui.empty title="Keine Veranstaltungen vorhanden" :action-href="route('organizer.events.create')" action-label="Veranstaltung anlegen" action-variant="primary">
+                Legen Sie Ihre erste Veranstaltung an, um loszulegen.
+            </x-ui.empty>
+        @endif
+    @endif
 </x-layouts.app>

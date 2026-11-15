@@ -1,65 +1,77 @@
 {{-- "Heute zu tun" – offene Aufgaben und anstehende Veranstaltungen --}}
-@php
-    $tones = [
-        'amber' => 'bg-amber-50 border-amber-200 text-amber-900 dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-100',
-        'yellow' => 'bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-100',
-        'blue' => 'bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-100',
-        'purple' => 'bg-purple-50 border-purple-200 text-purple-900 dark:bg-purple-900/20 dark:border-purple-800 dark:text-purple-100',
-    ];
-@endphp
-<section class="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-4" aria-labelledby="todo-heading">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-        <h2 id="todo-heading" class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Zu tun</h2>
-        @if(empty($todo['tasks']))
-            <p class="text-sm text-gray-600 dark:text-gray-400">✓ Alles erledigt – keine offenen Freigaben, Zahlungen oder Rechnungen.</p>
+<div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
+    <x-ui.section title="Zu tun" id="todo-heading">
+        @if (empty($todo['tasks']))
+            <p class="m-0 flex items-center gap-2 border-t border-line pt-4 text-base text-ink-soft">
+                <x-icon.check-circle class="h-5 w-5 flex-none" />
+                Alles erledigt – keine offenen Freigaben, Zahlungen oder Rechnungen.
+            </p>
         @else
-            <ul class="space-y-2">
-                @foreach($todo['tasks'] as $task)
-                    <li>
-                        <a href="{{ $task['url'] }}" class="flex items-center justify-between gap-3 rounded-lg border px-4 py-3 hover:shadow-sm transition {{ $tones[$task['tone']] }}">
-                            <span class="text-sm font-medium"><span class="text-lg font-bold mr-1">{{ $task['count'] }}</span> {{ $task['label'] }}</span>
-                            <span aria-hidden="true">→</span>
+            <ul class="m-0 list-none p-0">
+                @foreach ($todo['tasks'] as $task)
+                    <li class="border-t border-line last:border-b">
+                        <a href="{{ $task['url'] }}"
+                            class="flex min-h-15 items-center justify-between gap-4 py-3 text-ui font-medium text-ink no-underline underline-offset-[3px] hover:underline">
+                            <span>
+                                <span class="mr-1 text-h3 tabular-nums">{{ $task['count'] }}</span>
+                                {{ $task['label'] }}
+                            </span>
+                            <x-icon.arrow-right class="h-4 w-4 shrink-0" />
                         </a>
                     </li>
                 @endforeach
             </ul>
         @endif
-        @if($todo['waiting'] > 0)
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">{{ $todo['waiting'] }} Platz/Plätze auf Wartelisten angefragt – bei Stornierungen rücken Wartende automatisch nach.</p>
-        @endif
-        @foreach($todo['almostFull'] as $event)
-            <p class="text-sm text-amber-800 dark:text-amber-300 mt-2">
-                ⚠ „{{ $event->title }}“ ist fast ausgebucht ({{ $event->max_attendees - $event->availableTickets() }}/{{ $event->max_attendees }}).
-                <a href="{{ route('organizer.events.edit', $event) }}" class="underline">Kapazität prüfen</a>
-            </p>
-        @endforeach
-    </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-        <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Die nächsten 7 Tage</h2>
-        @forelse($todo['soon'] as $row)
-            @php $event = $row['event']; @endphp
-            <div class="py-3 border-b last:border-0 border-gray-100 dark:border-gray-700">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <p class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ $event->title }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">
-                            {{ $event->start_date->isToday() ? 'Heute' : ($event->start_date->isTomorrow() ? 'Morgen' : $event->start_date->translatedFormat('D, d.m.')) }},
-                            {{ $event->start_date->format('H:i') }} Uhr ·
-                            {{ $row['booked'] }}{{ $row['capacity'] ? '/' . $row['capacity'] : '' }} Plätze bestätigt
-                            @if($row['open']) · <span class="text-amber-700 dark:text-amber-400">{{ $row['open'] }} offen</span> @endif
-                        </p>
-                    </div>
-                    <div class="flex gap-2 shrink-0">
-                        @unless($event->isOnline())
-                            <a href="{{ route('organizer.check-in.index', $event) }}" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-green-600 text-white hover:bg-green-700">Check-in</a>
-                        @endunless
-                        <a href="{{ route('organizer.bookings.index', ['event_id' => $event->id]) }}" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300">Buchungen</a>
-                    </div>
-                </div>
+        @if ($todo['waiting'] > 0)
+            <p class="mt-4 mb-0 text-small text-muted">
+                {{ $todo['waiting'] }} Platz/Plätze auf Wartelisten angefragt – bei Stornierungen rücken Wartende
+                automatisch nach.
+            </p>
+        @endif
+
+        @if ($todo['almostFull']->isNotEmpty())
+            <div class="mt-4 flex flex-col gap-3">
+                @foreach ($todo['almostFull'] as $event)
+                    <x-ui.alert tone="warning">
+                        „{{ $event->title }}“ ist fast ausgebucht
+                        (<span class="tabular-nums">{{ $event->max_attendees - $event->availableTickets() }}/{{ $event->max_attendees }}</span>).
+                        <a href="{{ route('organizer.events.edit', $event) }}">Kapazität prüfen</a>
+                    </x-ui.alert>
+                @endforeach
             </div>
-        @empty
-            <p class="text-sm text-gray-600 dark:text-gray-400">Keine Veranstaltungen in den nächsten 7 Tagen.</p>
-        @endforelse
-    </div>
-</section>
+        @endif
+    </x-ui.section>
+
+    <x-ui.section title="Die nächsten 7 Tage" id="todo-soon-heading">
+        @if ($todo['soon']->isEmpty())
+            <p class="m-0 border-t border-line pt-4 text-base text-muted">Keine Veranstaltungen in den nächsten 7 Tagen.</p>
+        @else
+            <ul class="m-0 list-none p-0">
+                @foreach ($todo['soon'] as $row)
+                    @php $event = $row['event']; @endphp
+                    <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-line py-3 last:border-b">
+                        <div class="flex min-w-0 flex-[1_1_240px] flex-col gap-0.5">
+                            <a href="{{ route('organizer.events.edit', $event) }}"
+                                class="text-base font-semibold text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
+                            <span class="text-small text-muted tabular-nums">
+                                {{ $event->start_date->isToday() ? 'Heute' : ($event->start_date->isTomorrow() ? 'Morgen' : $event->start_date->translatedFormat('D, d.m.')) }},
+                                {{ $event->start_date->format('H:i') }} Uhr ·
+                                {{ $row['booked'] }}{{ $row['capacity'] ? '/' . $row['capacity'] : '' }} Plätze bestätigt
+                                @if ($row['open'])
+                                    · <span class="font-medium text-warning">{{ $row['open'] }} offen</span>
+                                @endif
+                            </span>
+                        </div>
+                        <div class="flex shrink-0 gap-2">
+                            @unless ($event->isOnline())
+                                <x-ui.button variant="secondary" :href="route('organizer.check-in.index', $event)">Check-in</x-ui.button>
+                            @endunless
+                            <x-ui.button variant="secondary" :href="route('organizer.bookings.index', ['event_id' => $event->id])">Buchungen</x-ui.button>
+                        </div>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </x-ui.section>
+</div>
