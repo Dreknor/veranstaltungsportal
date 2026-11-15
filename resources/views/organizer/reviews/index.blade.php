@@ -70,7 +70,7 @@
                         </span>
                         <span class="block text-small text-muted tabular-nums">{{ $review->rating }}/5</span>
                     </td>
-                    <td class="min-w-60">
+                    <td>
                         @if ($review->comment)
                             {{ Str::limit($review->comment, 100) }}
                         @else
