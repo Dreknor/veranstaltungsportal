@@ -1,287 +1,174 @@
 <x-layouts.app>
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <a href="{{ route('organizer.invoices.index') }}" class="text-blue-600 hover:underline mb-2 inline-block">
-                ← Zurück zu Rechnungen
-            </a>
-            <h1 class="text-3xl font-bold">Rechnung {{ $invoice->invoice_number }}</h1>
-        </div>
-        <div class="space-x-2">
-            <a href="{{ route('organizer.invoices.download', $invoice) }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded inline-flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+    <x-ui.page-header :title="'Rechnung ' . $invoice->invoice_number"
+        :back-href="route('organizer.invoices.index')" back-label="Zu den Rechnungen">
+        <x-slot:actions>
+            <x-ui.button :href="route('organizer.invoices.download', $invoice)">
+                <x-slot:icon><x-icon.download /></x-slot:icon>
                 PDF herunterladen
-            </a>
-        </div>
-    </div>
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
-    {{-- Status Alert --}}
-    @if($invoice->status === 'paid')
-        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="font-medium">Rechnung bezahlt</p>
-                    <p class="text-sm">Bezahlt am {{ $invoice->paid_at->format('d.m.Y') }}</p>
-                </div>
-            </div>
-        </div>
-    @elseif($invoice->due_date->isPast())
-        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="font-medium">Rechnung überfällig</p>
-                    <p class="text-sm">Fällig seit {{ $invoice->due_date->format('d.m.Y') }}</p>
-                </div>
-            </div>
-        </div>
+    @if ($invoice->status === 'paid')
+        <x-ui.alert tone="success" class="mb-8" title="Rechnung bezahlt">
+            Bezahlt am {{ $invoice->paid_at->format('d.m.Y') }}
+        </x-ui.alert>
+    @elseif ($invoice->due_date->isPast())
+        <x-ui.alert tone="danger" class="mb-8" title="Rechnung überfällig">
+            Fällig seit {{ $invoice->due_date->format('d.m.Y') }}
+        </x-ui.alert>
     @else
-        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-6">
-            <div class="flex">
-                <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-orange-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
-                    </svg>
-                </div>
-                <div class="ml-3">
-                    <p class="font-medium">Zahlungsziel</p>
-                    <p class="text-sm">Fällig am {{ $invoice->due_date->format('d.m.Y') }}</p>
-                </div>
-            </div>
-        </div>
+        <x-ui.alert tone="warning" class="mb-8" title="Zahlungsziel">
+            Fällig am {{ $invoice->due_date->format('d.m.Y') }}
+        </x-ui.alert>
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {{-- Main Content --}}
-        <div class="lg:col-span-2 space-y-6">
-            {{-- Invoice Details --}}
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b">
-                    <h2 class="text-xl font-semibold">Rechnungsdetails</h2>
-                </div>
-                <div class="p-6">
-                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Rechnungsnummer</dt>
-                            <dd class="mt-1 text-lg font-semibold">{{ $invoice->invoice_number }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Status</dt>
-                            <dd class="mt-1">
-                                @if($invoice->status === 'paid')
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-green-100 text-green-800">Bezahlt</span>
-                                @elseif($invoice->status === 'overdue')
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-red-100 text-red-800">Überfällig</span>
-                                @else
-                                    <span class="px-3 py-1 text-sm font-semibold rounded-full bg-orange-100 text-orange-800">Offen</span>
-                                @endif
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Rechnungsdatum</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ $invoice->invoice_date->format('d.m.Y') }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Fälligkeitsdatum</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ $invoice->due_date->format('d.m.Y') }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Veranstaltung</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                @if($invoice->event)
-                                    <a href="{{ route('organizer.events.edit', $invoice->event) }}" class="text-blue-600 hover:underline">
-                                        {{ $invoice->event->title }}
-                                    </a>
-                                @else
-                                    N/A
-                                @endif
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500">Event-Datum</dt>
-                            <dd class="mt-1 text-sm text-gray-900">
-                                @if($invoice->event)
-                                    {{ $invoice->event->start_date->format('d.m.Y') }}
-                                @else
-                                    N/A
-                                @endif
-                            </dd>
-                        </div>
-                    </dl>
-                </div>
-            </div>
+    <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,368px)] lg:gap-x-12">
+        <div class="flex min-w-0 flex-col gap-12">
+            <x-ui.section title="Rechnungsdetails">
+                <x-ui.dl>
+                    <x-ui.dl-item label="Rechnungsnummer" num>{{ $invoice->invoice_number }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Status">
+                        @if ($invoice->status === 'paid')
+                            <x-ui.status tone="success">Bezahlt</x-ui.status>
+                        @elseif ($invoice->status === 'overdue')
+                            <x-ui.status tone="danger">Überfällig</x-ui.status>
+                        @else
+                            <x-ui.status tone="warning">Offen</x-ui.status>
+                        @endif
+                    </x-ui.dl-item>
+                    <x-ui.dl-item label="Rechnungsdatum" num>{{ $invoice->invoice_date->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Fälligkeitsdatum" num>{{ $invoice->due_date->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Veranstaltung">
+                        @if ($invoice->event)
+                            <a href="{{ route('organizer.events.edit', $invoice->event) }}" class="font-medium text-ink underline underline-offset-[3px]">{{ $invoice->event->title }}</a>
+                        @endif
+                    </x-ui.dl-item>
+                    <x-ui.dl-item label="Datum der Veranstaltung" num>
+                        @if ($invoice->event)
+                            {{ $invoice->event->start_date->format('d.m.Y') }}
+                        @endif
+                    </x-ui.dl-item>
+                </x-ui.dl>
+            </x-ui.section>
 
-            {{-- Platform Fees Breakdown --}}
-            @if(isset($platformFees) && $platformFees->count() > 0)
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b">
-                    <h2 class="text-xl font-semibold">Platform-Fees Aufschlüsselung</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buchung</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buchungsbetrag</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fee %</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Fee Betrag</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($platformFees as $fee)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    @if($fee->booking)
-                                        <a href="{{ route('organizer.bookings.show', $fee->booking) }}" class="text-blue-600 hover:underline">
-                                            {{ $fee->booking->booking_number }}
-                                        </a>
-                                    @else
-                                        N/A
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">€{{ number_format($fee->booking_amount, 2, ',', '.') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">{{ $fee->fee_percentage }}%</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium">€{{ number_format($fee->fee_amount, 2, ',', '.') }}</td>
-                            </tr>
-                            @endforeach
-                            <tr class="bg-gray-50 font-semibold">
-                                <td colspan="3" class="px-6 py-4 text-right">Gesamt (netto):</td>
-                                <td class="px-6 py-4 text-right">€{{ number_format($platformFees->sum('fee_amount'), 2, ',', '.') }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @endif
-
-            {{-- Billing Data --}}
-            @if(isset($invoice->billing_data['items']))
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b">
-                    <h2 class="text-xl font-semibold">Rechnungspositionen</h2>
-                </div>
-                <div class="p-6">
-                    <table class="min-w-full">
+            @if (isset($platformFees) && $platformFees->count() > 0)
+                <x-ui.section title="Aufschlüsselung der Plattformgebühren">
+                    <x-ui.table label="Plattformgebühren dieser Rechnung">
                         <thead>
-                            <tr class="border-b">
-                                <th class="text-left py-2">Beschreibung</th>
-                                <th class="text-right py-2">Menge</th>
-                                <th class="text-right py-2">Einzelpreis</th>
-                                <th class="text-right py-2">Gesamt</th>
+                            <tr>
+                                <th scope="col">Buchung</th>
+                                <th scope="col" class="num">Buchungsbetrag</th>
+                                <th scope="col" class="num">Gebührensatz</th>
+                                <th scope="col" class="num">Gebühr</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($invoice->billing_data['items'] as $item)
-                            <tr class="border-b">
-                                <td class="py-3">
-                                    {{ $item['description'] ?? 'Platform-Fee' }}
-                                    @if(isset($item['details']))
-                                        <br><small class="text-gray-600">{{ $item['details'] }}</small>
-                                    @endif
-                                </td>
-                                <td class="text-right py-3">{{ $item['quantity'] ?? 1 }}</td>
-                                <td class="text-right py-3">€{{ number_format($item['unit_price'] ?? $item['total'], 2, ',', '.') }}</td>
-                                <td class="text-right py-3 font-medium">€{{ number_format($item['total'], 2, ',', '.') }}</td>
-                            </tr>
+                            @foreach ($platformFees as $fee)
+                                <tr>
+                                    <td class="tabular-nums">
+                                        @if ($fee->booking)
+                                            <a href="{{ route('organizer.bookings.show', $fee->booking) }}" class="text-ink underline underline-offset-[3px]">{{ $fee->booking->booking_number }}</a>
+                                        @else
+                                            –
+                                        @endif
+                                    </td>
+                                    <td class="num">{{ \App\Support\Ui::money($fee->booking_amount) }}</td>
+                                    <td class="num">{{ $fee->fee_percentage }} %</td>
+                                    <td class="num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
+                                </tr>
                             @endforeach
                         </tbody>
-                    </table>
-                </div>
-            </div>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="num">Gesamt (netto)</td>
+                                <td class="num">{{ \App\Support\Ui::money($platformFees->sum('fee_amount')) }}</td>
+                            </tr>
+                        </tfoot>
+                    </x-ui.table>
+                </x-ui.section>
+            @endif
+
+            @if (isset($invoice->billing_data['items']))
+                <x-ui.section title="Rechnungspositionen">
+                    <x-ui.table label="Rechnungspositionen">
+                        <thead>
+                            <tr>
+                                <th scope="col">Beschreibung</th>
+                                <th scope="col" class="num">Menge</th>
+                                <th scope="col" class="num">Einzelpreis</th>
+                                <th scope="col" class="num">Gesamt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($invoice->billing_data['items'] as $item)
+                                <tr>
+                                    <td>
+                                        {{ $item['description'] ?? 'Platform-Fee' }}
+                                        @if (isset($item['details']))
+                                            <span class="block text-small text-muted">{{ $item['details'] }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="num">{{ $item['quantity'] ?? 1 }}</td>
+                                    <td class="num">{{ \App\Support\Ui::money($item['unit_price'] ?? $item['total']) }}</td>
+                                    <td class="num">{{ \App\Support\Ui::money($item['total']) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </x-ui.table>
+                </x-ui.section>
             @endif
         </div>
 
-        {{-- Sidebar --}}
-        <div class="space-y-6">
-            {{-- Amount Summary --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Rechnungsbetrag</h3>
-                <dl class="space-y-2">
-                    <div class="flex justify-between">
-                        <dt class="text-gray-600">Zwischensumme (netto):</dt>
-                        <dd class="font-medium">€{{ number_format($invoice->amount, 2, ',', '.') }}</dd>
-                    </div>
-                    <div class="flex justify-between">
-                        <dt class="text-gray-600">MwSt. ({{ number_format($invoice->tax_rate, 1) }}%):</dt>
-                        <dd class="font-medium">€{{ number_format($invoice->tax_amount, 2, ',', '.') }}</dd>
-                    </div>
-                    <div class="flex justify-between pt-2 border-t-2 border-gray-300">
-                        <dt class="text-lg font-semibold">Gesamtbetrag (brutto):</dt>
-                        <dd class="text-lg font-bold text-blue-600">€{{ number_format($invoice->total_amount, 2, ',', '.') }}</dd>
-                    </div>
-                </dl>
-            </div>
+        <aside class="flex min-w-0 flex-col gap-8">
+            <x-ui.box tone="zone">
+                <h2 class="m-0 mb-4 text-h3">Rechnungsbetrag</h2>
+                <x-ui.summary-lines>
+                    <x-ui.summary-line label="Zwischensumme (netto)" :amount="\App\Support\Ui::money($invoice->amount)" />
+                    <x-ui.summary-line :label="'MwSt. (' . number_format($invoice->tax_rate, 1, ',', '.') . ' %)'" :amount="\App\Support\Ui::money($invoice->tax_amount)" />
+                </x-ui.summary-lines>
+                <x-ui.summary-total label="Gesamtbetrag (brutto)" :amount="\App\Support\Ui::money($invoice->total_amount)" />
+            </x-ui.box>
 
-            {{-- Payment Info --}}
-            @if($invoice->status !== 'paid' && isset($invoice->billing_data['platform']))
+            @if ($invoice->status !== 'paid' && isset($invoice->billing_data['platform']))
                 @php $platform = $invoice->billing_data['platform']; @endphp
-                <div class="bg-blue-50 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold mb-4">Zahlungsinformationen</h3>
-                    <dl class="space-y-2 text-sm">
-                        @if(!empty($platform['bank_name']))
-                        <div>
-                            <dt class="text-gray-600">Bank:</dt>
-                            <dd class="font-medium">{{ $platform['bank_name'] }}</dd>
-                        </div>
+                <section aria-labelledby="zahlungsinformationen" class="border-t border-line pt-6">
+                    <h2 id="zahlungsinformationen" class="m-0 mb-4 text-h3">Zahlungsinformationen</h2>
+                    <x-ui.dl layout="rows">
+                        @if (!empty($platform['bank_name']))
+                            <x-ui.dl-item label="Bank">{{ $platform['bank_name'] }}</x-ui.dl-item>
                         @endif
-                        @if(!empty($platform['iban']))
-                        <div>
-                            <dt class="text-gray-600">IBAN:</dt>
-                            <dd class="font-mono font-medium">{{ $platform['iban'] }}</dd>
-                        </div>
+                        @if (!empty($platform['iban']))
+                            <x-ui.dl-item label="IBAN" num>{{ $platform['iban'] }}</x-ui.dl-item>
                         @endif
-                        @if(!empty($platform['bic']))
-                        <div>
-                            <dt class="text-gray-600">BIC:</dt>
-                            <dd class="font-medium">{{ $platform['bic'] }}</dd>
-                        </div>
+                        @if (!empty($platform['bic']))
+                            <x-ui.dl-item label="BIC" num>{{ $platform['bic'] }}</x-ui.dl-item>
                         @endif
-                        <div class="pt-2 border-t">
-                            <dt class="text-gray-600">Verwendungszweck:</dt>
-                            <dd class="font-medium">{{ $invoice->invoice_number }}</dd>
-                        </div>
-                    </dl>
-                </div>
+                        <x-ui.dl-item label="Verwendungszweck" num>{{ $invoice->invoice_number }}</x-ui.dl-item>
+                    </x-ui.dl>
+                </section>
             @endif
 
-            {{-- Recipient Info --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Rechnungsempfänger</h3>
-                <div class="text-sm">
-                    <p class="font-medium">{{ $invoice->recipient_name }}</p>
-                    @if($invoice->recipient_address)
-                        <p class="text-gray-600 whitespace-pre-line">{{ $invoice->recipient_address }}</p>
-                    @endif
-                    <p class="text-gray-600 mt-2">{{ $invoice->recipient_email }}</p>
-                </div>
-            </div>
-
-            {{-- PDF Download --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold mb-4">Dokument</h3>
-                @if($invoice->pdf_path)
-                    <a href="{{ route('organizer.invoices.download', $invoice) }}" class="block w-full bg-green-600 hover:bg-green-700 text-white text-center px-4 py-3 rounded">
-                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        PDF herunterladen
-                    </a>
-                @else
-                    <p class="text-gray-500 text-sm">PDF wird generiert...</p>
+            <section aria-labelledby="rechnungsempfaenger" class="border-t border-line pt-6">
+                <h2 id="rechnungsempfaenger" class="m-0 mb-4 text-h3">Rechnungsempfänger</h2>
+                <p class="m-0 text-base font-medium">{{ $invoice->recipient_name }}</p>
+                @if ($invoice->recipient_address)
+                    <p class="m-0 whitespace-pre-line text-muted">{{ $invoice->recipient_address }}</p>
                 @endif
-            </div>
-        </div>
+                <p class="m-0 mt-2 text-muted">{{ $invoice->recipient_email }}</p>
+            </section>
+
+            <section aria-labelledby="dokument" class="border-t border-line pt-6">
+                <h2 id="dokument" class="m-0 mb-4 text-h3">Dokument</h2>
+                @if ($invoice->pdf_path)
+                    <x-ui.button variant="secondary" :href="route('organizer.invoices.download', $invoice)" full>
+                        <x-slot:icon><x-icon.download /></x-slot:icon>
+                        PDF herunterladen
+                    </x-ui.button>
+                @else
+                    <p class="m-0 text-small text-muted">PDF wird generiert …</p>
+                @endif
+            </section>
+        </aside>
     </div>
-</div>
 </x-layouts.app>

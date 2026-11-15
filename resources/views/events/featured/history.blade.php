@@ -1,41 +1,41 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto py-8">
-        <h1 class="text-2xl font-bold mb-4">Meine Featured Events</h1>
-        <p class="text-gray-600 mb-6">Übersicht der hervorgehobenen Events und Zahlungen.</p>
+    <x-ui.page-header title="Meine hervorgehobenen Veranstaltungen"
+        subtitle="Übersicht der hervorgehobenen Veranstaltungen und Zahlungen." />
 
-        <div class="bg-white rounded shadow">
-            <table class="min-w-full">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="text-left px-4 py-2">Event</th>
-                        <th class="text-left px-4 py-2">Zeitraum</th>
-                        <th class="text-left px-4 py-2">Status</th>
-                        <th class="text-left px-4 py-2">Betrag</th>
-                        <th class="text-left px-4 py-2">Aktion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($featuredHistory as $fee)
-                        <tr class="border-t">
-                            <td class="px-4 py-2">{{ $fee->event->title }}</td>
-                            <td class="px-4 py-2">{{ optional($fee->featured_start_date)->format('d.m.Y') }} — {{ optional($fee->featured_end_date)->format('d.m.Y') }}</td>
-                            <td class="px-4 py-2">{{ ucfirst($fee->payment_status) }}</td>
-                            <td class="px-4 py-2">{{ number_format($fee->amount, 2, ',', '.') }} €</td>
-                            <td class="px-4 py-2">
-                                @if($fee->payment_status !== 'paid')
-                                    <a href="{{ route('organizer.featured-events.payment', $fee) }}" class="text-blue-600 hover:text-blue-800">Zahlung</a>
-                                @else
-                                    <a href="{{ route('organizer.featured-events.extend', $fee->event) }}" class="text-blue-600 hover:text-blue-800">Verlängern</a>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-gray-500">Keine hervorgehobenen Events gefunden.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <x-ui.table label="Hervorhebungen">
+        <thead>
+            <tr>
+                <th scope="col">Veranstaltung</th>
+                <th scope="col">Zeitraum</th>
+                <th scope="col">Status</th>
+                <th scope="col" class="num">Betrag</th>
+                <th scope="col" class="actions"><span class="sr-only">Aktion</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($featuredHistory as $fee)
+                <tr>
+                    <th scope="row">{{ $fee->event->title }}</th>
+                    <td class="tabular-nums whitespace-nowrap">{{ optional($fee->featured_start_date)->format('d.m.Y') }}–{{ optional($fee->featured_end_date)->format('d.m.Y') }}</td>
+                    <td>
+                        <x-ui.status :tone="\App\Support\Ui::paymentTone($fee->payment_status)">{{ ucfirst($fee->payment_status) }}</x-ui.status>
+                    </td>
+                    <td class="num">{{ \App\Support\Ui::money($fee->amount) }}</td>
+                    <td class="actions">
+                        @if ($fee->payment_status !== 'paid')
+                            <x-ui.button size="sm" variant="secondary" :href="route('organizer.featured-events.payment', $fee)">Zahlung</x-ui.button>
+                        @else
+                            <x-ui.button size="sm" variant="secondary" :href="route('organizer.featured-events.extend', $fee->event)">Verlängern</x-ui.button>
+                        @endif
+                    </td>
+                </tr>
+            @empty
+                <tr class="hover:bg-transparent">
+                    <td colspan="5" class="p-0">
+                        <x-ui.empty :bordered="false">Keine hervorgehobenen Veranstaltungen gefunden.</x-ui.empty>
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </x-ui.table>
 </x-layouts.app>

@@ -1,322 +1,221 @@
-<x-layouts.app>
-    <div class="px-4 py-4 sm:py-8">
-        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Event-Buchungen</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-2">
-                    @if($groupByEvent)
-                        {{ $isArchive ? 'Archiv – abgeschlossene Veranstaltungen und deren Buchungen' : 'Übersicht aller Buchungen, nach Veranstaltung gruppiert' }}
-                    @else
-                        Gefilterte Buchungsliste
-                    @endif
-                </p>
-            </div>
-            <div class="flex gap-2 shrink-0">
-                <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'csv'])) }}"
-                   class="px-3 sm:px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    CSV Export
-                </a>
-                <a href="{{ route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'excel'])) }}"
-                   class="px-3 sm:px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Excel Export
-                </a>
+<x-layouts.app title="Buchungen">
+    <x-ui.page-header title="Buchungen">
+        <x-slot:meta>
+            @if ($groupByEvent)
+                {{ $isArchive ? 'Archiv – abgeschlossene Veranstaltungen und deren Buchungen' : 'Übersicht aller Buchungen, nach Veranstaltung gruppiert' }}
+            @else
+                Gefilterte Buchungsliste
+            @endif
+        </x-slot:meta>
+        <x-slot:actions>
+            <x-ui.button variant="secondary" :href="route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'csv']))">
+                <x-slot:icon><x-icon.download /></x-slot:icon>
+                CSV-Export
+            </x-ui.button>
+            <x-ui.button variant="secondary" :href="route('organizer.bookings.export', array_merge(request()->all(), ['format' => 'excel']))">
+                <x-slot:icon><x-icon.download /></x-slot:icon>
+                Excel-Export
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    {{-- Archiv-Reiter --}}
+    <x-ui.tabs label="Buchungen" class="mb-6">
+        <x-ui.tab :href="route('organizer.bookings.index')" :active="!$isArchive" :count="$upcomingBookingsCount > 0 ? $upcomingBookingsCount : null">Aktuelle Buchungen</x-ui.tab>
+        <x-ui.tab :href="route('organizer.bookings.index', ['archive' => 1])" :active="$isArchive" :count="$archiveBookingsCount > 0 ? $archiveBookingsCount : null">Buchungsarchiv</x-ui.tab>
+    </x-ui.tabs>
+
+    @if ($isArchive)
+        <x-ui.alert tone="info" class="mb-6">
+            Sie sehen das Buchungsarchiv – Buchungen zu abgeschlossenen Veranstaltungen der Vergangenheit.
+        </x-ui.alert>
+    @endif
+
+    {{-- Handlungsbedarf --}}
+    @if (!$isArchive && ($pendingApprovalCount > 0 || $unpaidCount > 0))
+        <div class="mb-6 flex flex-col gap-3" aria-label="Handlungsbedarf">
+            @if ($pendingApprovalCount > 0)
+                <x-ui.alert tone="warning">
+                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending_approval']) }}" class="font-medium">{{ $pendingApprovalCount }} Anmeldung(en) warten auf Freigabe</a>
+                </x-ui.alert>
+            @endif
+            @if ($unpaidCount > 0)
+                <x-ui.alert tone="warning">
+                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending']) }}" class="font-medium">{{ $unpaidCount }} Buchung(en) mit offener Zahlung</a>
+                </x-ui.alert>
+            @endif
+        </div>
+    @endif
+
+    {{-- Filter --}}
+    <form action="{{ route('organizer.bookings.index') }}" method="GET" class="mb-8">
+        {{-- Archiv-Status im Filter erhalten --}}
+        @if ($isArchive)
+            <input type="hidden" name="archive" value="1">
+        @endif
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
+            <x-ui.field label="Suche" name="search" :value="request('search')" placeholder="Buchungsnummer, Name, E-Mail" :old="false" />
+            <x-ui.select label="Veranstaltung" name="event_id" :old="false">
+                <option value="">Alle Veranstaltungen</option>
+                @foreach ($events as $event)
+                    <option value="{{ $event->id }}" @selected(request('event_id') == $event->id)>{{ $event->title }}</option>
+                @endforeach
+            </x-ui.select>
+            <x-ui.select label="Zahlungsstatus" name="payment_status" :old="false">
+                <option value="">Alle</option>
+                <option value="pending" @selected(request('payment_status') === 'pending')>Ausstehend</option>
+                <option value="paid" @selected(request('payment_status') === 'paid')>Bezahlt</option>
+                @if ($organization->hasExternalInvoicing())
+                    <option value="extern" @selected(request('payment_status') === 'extern')>Extern fakturiert</option>
+                @endif
+                <option value="failed" @selected(request('payment_status') === 'failed')>Fehlgeschlagen</option>
+                <option value="refunded" @selected(request('payment_status') === 'refunded')>Erstattet</option>
+            </x-ui.select>
+            <x-ui.select label="Buchungsstatus" name="status" :old="false">
+                <option value="">Alle</option>
+                <option value="pending" @selected(request('status') === 'pending')>Zahlung ausstehend</option>
+                <option value="pending_approval" @selected(request('status') === 'pending_approval')>Wartet auf Freigabe</option>
+                <option value="confirmed" @selected(request('status') === 'confirmed')>Bestätigt</option>
+                <option value="completed" @selected(request('status') === 'completed')>Abgeschlossen</option>
+                <option value="cancelled" @selected(request('status') === 'cancelled')>Storniert</option>
+            </x-ui.select>
+            <div class="flex gap-3">
+                <x-ui.button type="submit" size="lg">Filtern</x-ui.button>
+                <x-ui.button variant="secondary" size="lg" :href="route('organizer.bookings.index', $isArchive ? ['archive' => 1] : [])">Zurücksetzen</x-ui.button>
             </div>
         </div>
+    </form>
 
-        {{-- ── Archiv-Tabs ──────────────────────────────────────────────────── --}}
-        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-            <nav class="-mb-px flex space-x-8">
-                <a href="{{ route('organizer.bookings.index') }}"
-                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
-                          {{ !$isArchive
-                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
-                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    Aktuelle Buchungen
-                    @if($upcomingBookingsCount > 0)
-                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
-                                     {{ !$isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
-                            {{ $upcomingBookingsCount }}
-                        </span>
-                    @endif
-                </a>
-                <a href="{{ route('organizer.bookings.index', ['archive' => 1]) }}"
-                   class="border-b-2 py-4 px-1 text-sm font-medium whitespace-nowrap transition-colors
-                          {{ $isArchive
-                              ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                              : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300' }}">
-                    <svg class="inline-block w-4 h-4 mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                    </svg>
-                    Buchungsarchiv
-                    @if($archiveBookingsCount > 0)
-                        <span class="ml-1 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-medium
-                                     {{ $isArchive ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
-                            {{ $archiveBookingsCount }}
-                        </span>
-                    @endif
-                </a>
-            </nav>
-        </div>
-
-        @if($isArchive)
-            <div class="mb-4 flex items-center gap-2 text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg px-4 py-3">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-                </svg>
-                <span>Sie sehen das <strong>Buchungsarchiv</strong> – Buchungen zu abgeschlossenen Veranstaltungen der Vergangenheit.</span>
-            </div>
-        @endif
-
-        {{-- Handlungsbedarf --}}
-        @if(!$isArchive && ($pendingApprovalCount > 0 || $unpaidCount > 0))
-            <div class="mb-4 flex flex-wrap gap-2" aria-label="Handlungsbedarf">
-                @if($pendingApprovalCount > 0)
-                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending_approval']) }}"
-                       class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/40 dark:text-amber-100">
-                        ⏳ {{ $pendingApprovalCount }} Anmeldung(en) warten auf Freigabe
-                    </a>
-                @endif
-                @if($unpaidCount > 0)
-                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending']) }}"
-                       class="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-yellow-100 text-yellow-900 hover:bg-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-100">
-                        💶 {{ $unpaidCount }} Buchung(en) mit offener Zahlung
-                    </a>
-                @endif
-            </div>
-        @endif
-
-        <!-- Filters -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow mb-6 p-4 sm:p-6">
-            <form action="{{ route('organizer.bookings.index') }}" method="GET" class="space-y-4">
-                {{-- Archiv-Status im Filter erhalten --}}
-                @if($isArchive)
-                    <input type="hidden" name="archive" value="1">
-                @endif
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div>
-                        <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Suche</label>
-                        <input type="text" name="search" id="search" value="{{ request('search') }}"
-                               placeholder="Buchungsnummer, Name, E-Mail..."
-                               class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="event_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Event</label>
-                        <select name="event_id" id="event_id"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Alle Events</option>
-                            @foreach($events as $event)
-                                <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
-                                    {{ $event->title }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="payment_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Zahlungsstatus</label>
-                        <select name="payment_status" id="payment_status"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Alle</option>
-                            <option value="pending" {{ request('payment_status') === 'pending' ? 'selected' : '' }}>Ausstehend</option>
-                            <option value="paid" {{ request('payment_status') === 'paid' ? 'selected' : '' }}>Bezahlt</option>
-                            @if($organization->hasExternalInvoicing())
-                                <option value="extern" {{ request('payment_status') === 'extern' ? 'selected' : '' }}>Extern fakturiert</option>
-                            @endif
-                            <option value="failed" {{ request('payment_status') === 'failed' ? 'selected' : '' }}>Fehlgeschlagen</option>
-                            <option value="refunded" {{ request('payment_status') === 'refunded' ? 'selected' : '' }}>Erstattet</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Buchungsstatus</label>
-                        <select name="status" id="status"
-                                class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">Alle</option>
-                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Zahlung ausstehend</option>
-                            <option value="pending_approval" {{ request('status') === 'pending_approval' ? 'selected' : '' }}>Wartet auf Freigabe</option>
-                            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Bestätigt</option>
-                            <option value="completed" {{ request('status') === 'completed' ? 'selected' : '' }}>Abgeschlossen</option>
-                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Storniert</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end gap-2">
-                        <button type="submit" class="flex-1 md:flex-none px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            Filtern
+    {{-- ================================================================
+         MODUS 1: Gruppierte Ansicht (kein aktiver Filter)
+         ================================================================ --}}
+    @if ($groupByEvent)
+        <div class="flex flex-col gap-4">
+            @forelse ($groupedEvents as $groupedEvent)
+                <div class="overflow-hidden rounded-box border border-line bg-surface" x-data="{ open: false }">
+                    {{-- Veranstaltungskopf --}}
+                    <div class="flex flex-col sm:flex-row sm:items-center">
+                        <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-expanded="false"
+                                class="focus-inset flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-4 bg-transparent px-4 py-4 text-left text-ink transition-colors duration-150 hover:bg-zone-hover sm:px-6">
+                            <span class="min-w-0">
+                                <span class="block truncate text-h3">{{ $groupedEvent->title }}</span>
+                                <span class="block text-small text-muted tabular-nums">
+                                    {{ $groupedEvent->start_date->format('d.m.Y') }}
+                                    @if ($groupedEvent->location)
+                                        – {{ $groupedEvent->location }}
+                                    @endif
+                                </span>
+                            </span>
+                            <span class="flex shrink-0 flex-wrap items-center justify-end gap-x-4 gap-y-1">
+                                <span class="text-small font-medium tabular-nums">{{ $groupedEvent->bookings_count }} Buchung(en)</span>
+                                @if ($groupedEvent->confirmed_bookings_count > 0)
+                                    <x-ui.status tone="success" class="tabular-nums">{{ $groupedEvent->confirmed_bookings_count }} bestätigt</x-ui.status>
+                                @endif
+                                @if ($groupedEvent->pending_bookings_count > 0)
+                                    <x-ui.status tone="warning" class="tabular-nums">{{ $groupedEvent->pending_bookings_count }} offen</x-ui.status>
+                                @endif
+                                <x-icon.chevron-down class="h-5 w-5 text-muted transition-transform duration-150" ::class="{ 'rotate-180': open }" />
+                            </span>
                         </button>
-                        <a href="{{ route('organizer.bookings.index', $isArchive ? ['archive' => 1] : []) }}"
-                           class="flex-1 md:flex-none text-center px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-400 dark:hover:bg-gray-500">
-                            Zurücksetzen
+                        <a href="{{ route('organizer.bookings.index', array_filter(['event_id' => $groupedEvent->id, 'archive' => $isArchive ? 1 : null])) }}"
+                           class="inline-flex min-h-11 items-center px-4 pb-3 text-small font-medium whitespace-nowrap text-ink underline underline-offset-[3px] sm:px-6 sm:pb-0">
+                            Nur diese Veranstaltung
                         </a>
                     </div>
-                </div>
-            </form>
-        </div>
 
-        @if (session('success'))
-            <div class="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded relative">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="mb-6 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded relative">
-                <span class="block sm:inline">{{ session('error') }}</span>
-            </div>
-        @endif
-
-        {{-- ================================================================
-             MODUS 1: Gruppierte Ansicht (kein aktiver Filter)
-             ================================================================ --}}
-        @if($groupByEvent)
-            @forelse($groupedEvents as $groupedEvent)
-                <div class="mb-4 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden"
-                     x-data="{ open: false }">
-                    {{-- Event-Header --}}
-                    <button type="button"
-                            @click="open = !open"
-                            class="w-full flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 sm:px-6 py-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <div class="min-w-0">
-                            <div class="text-base font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                {{ $groupedEvent->title }}
-                            </div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-                                {{ $groupedEvent->start_date->format('d.m.Y') }}
-                                @if($groupedEvent->location)
-                                    &mdash; {{ $groupedEvent->location }}
-                                @endif
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-2 sm:gap-3 sm:ml-4 shrink-0">
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                {{ $groupedEvent->bookings_count }} Buchung(en)
-                            </span>
-                            @if($groupedEvent->confirmed_bookings_count > 0)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                    ✓ {{ $groupedEvent->confirmed_bookings_count }}
-                                </span>
-                            @endif
-                            @if($groupedEvent->pending_bookings_count > 0)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-                                    ⏳ {{ $groupedEvent->pending_bookings_count }}
-                                </span>
-                            @endif
-                            <a href="{{ route('organizer.bookings.index', array_filter(['event_id' => $groupedEvent->id, 'archive' => $isArchive ? 1 : null])) }}"
-                               @click.stop
-                               class="text-xs text-blue-600 dark:text-blue-400 hover:underline whitespace-nowrap">
-                                Nur dieses Event
-                            </a>
-                            <svg class="w-5 h-5 text-gray-400 transition-transform duration-200"
-                                 :class="{ 'rotate-180': open }"
-                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </div>
-                    </button>
-
-                    {{-- Buchungstabelle (aufgeklappt) --}}
-                    <div x-show="open" x-cloak class="border-t border-gray-200 dark:border-gray-700">
-                        <ul class="md:hidden divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach($groupedEvent->bookings as $booking)
+                    {{-- Buchungen (aufgeklappt) --}}
+                    <div x-show="open" x-cloak class="border-t border-line">
+                        <ul class="m-0 list-none divide-y divide-line p-0 md:hidden">
+                            @foreach ($groupedEvent->bookings as $booking)
                                 @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization])
                             @endforeach
                         </ul>
-                        <div class="hidden md:block overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50 dark:bg-gray-700">
+                        <div class="hidden md:block">
+                            <x-ui.table label="Buchungen zu {{ $groupedEvent->title }}" class="rounded-none border-0">
+                                <thead>
                                     <tr>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buchungsnr.</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
-                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                                        @if($organization->hasExternalInvoicing())
-                                            <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
+                                        <th scope="col">Buchungsnr.</th>
+                                        <th scope="col">Kunde</th>
+                                        <th scope="col" class="num">Tickets</th>
+                                        <th scope="col" class="num">Betrag</th>
+                                        <th scope="col">Status</th>
+                                        @if ($organization->hasExternalInvoicing())
+                                            <th scope="col">Fakturiert</th>
                                         @endif
-                                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktionen</th>
+                                        <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                                     </tr>
                                 </thead>
-                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                    @forelse($groupedEvent->bookings as $booking)
+                                <tbody>
+                                    @forelse ($groupedEvent->bookings as $booking)
                                         @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization])
                                     @empty
-                                        <tr>
-                                            <td colspan="8" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-                                                Keine Buchungen vorhanden.
+                                        <tr class="hover:bg-transparent">
+                                            <td colspan="7" class="p-0">
+                                                <x-ui.empty :bordered="false">Keine Buchungen vorhanden.</x-ui.empty>
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
-                            </table>
+                            </x-ui.table>
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-12 text-center">
-                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                    </svg>
-                    <p class="text-gray-500 dark:text-gray-400">Noch keine Buchungen vorhanden.</p>
-                </div>
+                <x-ui.empty title="Noch keine Buchungen">Sobald sich jemand anmeldet, erscheint die Buchung hier.</x-ui.empty>
             @endforelse
+        </div>
 
-            @if(isset($groupedEvents) && $groupedEvents->hasPages())
-                <div class="mt-6">
-                    {{ $groupedEvents->appends(request()->query())->links() }}
-                </div>
-            @endif
-
-        {{-- ================================================================
-             MODUS 2: Gefilterte Flachliste
-             ================================================================ --}}
-        @else
-            <ul class="md:hidden bg-white dark:bg-gray-800 rounded-lg shadow divide-y divide-gray-200 dark:divide-gray-700">
-                @forelse($bookings as $booking)
-                    @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
-                @empty
-                    <li class="p-6 text-center text-gray-500 dark:text-gray-400">Keine Buchungen gefunden.</li>
-                @endforelse
-            </ul>
-            <div class="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Buchungsnr.</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Event</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Kunde</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tickets</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Betrag</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                            @if($organization->hasExternalInvoicing())
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fakt.</th>
-                            @endif
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Aktionen</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($bookings as $booking)
-                            @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
-                        @empty
-                            <tr>
-                                <td colspan="10" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                                    Keine Buchungen gefunden.
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+        @if (isset($groupedEvents) && $groupedEvents->hasPages())
+            <div class="mt-6">
+                {{ $groupedEvents->appends(request()->query())->links() }}
             </div>
-
-            @if(isset($bookings) && $bookings->hasPages())
-                <div class="mt-6">
-                    {{ $bookings->appends(request()->query())->links() }}
-                </div>
-            @endif
         @endif
-    </div>
+
+    {{-- ================================================================
+         MODUS 2: Gefilterte Flachliste
+         ================================================================ --}}
+    @else
+        <ul class="m-0 list-none divide-y divide-line overflow-hidden rounded-box border border-line bg-surface p-0 md:hidden">
+            @forelse ($bookings as $booking)
+                @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
+            @empty
+                <li class="p-6 text-base text-muted">Keine Buchungen gefunden.</li>
+            @endforelse
+        </ul>
+        <div class="hidden md:block">
+            <x-ui.table label="Gefilterte Buchungen">
+                <thead>
+                    <tr>
+                        <th scope="col">Buchungsnr.</th>
+                        <th scope="col">Veranstaltung</th>
+                        <th scope="col">Kunde</th>
+                        <th scope="col" class="num">Tickets</th>
+                        <th scope="col" class="num">Betrag</th>
+                        <th scope="col">Status</th>
+                        @if ($organization->hasExternalInvoicing())
+                            <th scope="col">Fakturiert</th>
+                        @endif
+                        <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($bookings as $booking)
+                        @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
+                    @empty
+                        <tr class="hover:bg-transparent">
+                            <td colspan="8" class="p-0">
+                                <x-ui.empty :bordered="false">Keine Buchungen gefunden.</x-ui.empty>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-ui.table>
+        </div>
+
+        @if (isset($bookings) && $bookings->hasPages())
+            <div class="mt-6">
+                {{ $bookings->appends(request()->query())->links() }}
+            </div>
+        @endif
+    @endif
 </x-layouts.app>

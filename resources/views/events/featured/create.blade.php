@@ -1,35 +1,44 @@
 <x-layouts.app>
-    <div class="max-w-3xl mx-auto py-8">
-        <h1 class="text-2xl font-bold mb-4">Event hervorheben</h1>
-        <p class="text-gray-600 mb-6">Wählen Sie die Dauer, um Ihr Event als Featured zu markieren.</p>
+    <x-ui.page-header title="Veranstaltung hervorheben"
+        subtitle="Wählen Sie die Dauer, für die Ihre Veranstaltung hervorgehoben werden soll."
+        :back-href="route('organizer.events.edit', $event)" back-label="Zur Veranstaltung" />
 
-        @if($activeFee)
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded">
-                <strong>Aktiv:</strong> Ihr Event ist aktuell bis {{ $activeFee->featured_end_date->format('d.m.Y') }} hervorgehoben.
-            </div>
-        @endif
+    @if ($activeFee)
+        <x-ui.alert tone="success" class="mb-8 max-w-form" title="Aktiv">
+            Ihre Veranstaltung ist aktuell bis {{ $activeFee->featured_end_date->format('d.m.Y') }} hervorgehoben.
+        </x-ui.alert>
+    @endif
 
-        <form method="POST" action="{{ route('organizer.featured-events.store', $event) }}" class="space-y-4">
-            @csrf
-            <div>
-                <label class="block font-medium mb-1">Dauer</label>
-                <select name="duration_type" class="w-full border rounded p-2" required>
-                    <option value="daily">1 Tag ({{ number_format((float) $pricing['daily']['rate'], 2, ',', '.') }} €)</option>
-                    <option value="weekly">7 Tage ({{ number_format((float) $pricing['weekly']['rate'], 2, ',', '.') }} €)</option>
-                    <option value="monthly">30 Tage ({{ number_format((float) $pricing['monthly']['rate'], 2, ',', '.') }} €)</option>
-                    <option value="custom">Individuell</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-medium mb-1">Startdatum</label>
-                <input type="date" name="start_date" class="w-full border rounded p-2" value="{{ now()->format('Y-m-d') }}" required>
-            </div>
-            <div>
-                <label class="block font-medium mb-1">Eigene Tage (optional)</label>
-                <input type="number" name="custom_days" class="w-full border rounded p-2" min="1" max="{{ config('monetization.featured_event_max_duration_days') }}">
-            </div>
+    <form method="POST" action="{{ route('organizer.featured-events.store', $event) }}" class="flex max-w-form flex-col gap-y-8">
+        @csrf
+        <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Antrag erstellen</button>
-        </form>
-    </div>
+        <fieldset class="m-0 min-w-0 border-0 p-0">
+            <x-ui.label as="legend" required class="mb-2">Dauer</x-ui.label>
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-3">
+                <x-ui.choice name="duration_type" value="daily" title="1 Tag" checked required>
+                    <x-slot:aside>{{ \App\Support\Ui::money($pricing['daily']['rate']) }}</x-slot:aside>
+                </x-ui.choice>
+                <x-ui.choice name="duration_type" value="weekly" title="7 Tage" required>
+                    <x-slot:aside>{{ \App\Support\Ui::money($pricing['weekly']['rate']) }}</x-slot:aside>
+                </x-ui.choice>
+                <x-ui.choice name="duration_type" value="monthly" title="30 Tage" required>
+                    <x-slot:aside>{{ \App\Support\Ui::money($pricing['monthly']['rate']) }}</x-slot:aside>
+                </x-ui.choice>
+                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Geben Sie unten die Anzahl der Tage an." required />
+            </div>
+            <x-ui.field-error name="duration_type" />
+        </fieldset>
+
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
+            <x-ui.field label="Startdatum" name="start_date" type="date" :value="now()->format('Y-m-d')" required />
+            <x-ui.field label="Eigene Tage" name="custom_days" type="number" optional min="1"
+                max="{{ config('monetization.featured_event_max_duration_days') }}"
+                hint="Nur bei der Dauer „Individuell“." />
+        </div>
+
+        <div>
+            <x-ui.button type="submit">Antrag erstellen</x-ui.button>
+        </div>
+    </form>
 </x-layouts.app>

@@ -305,7 +305,7 @@
                     updateSubmitButton();
                 }
 
-                // Die Mengenwahl (<x-ui.stepper>) löst bei jedem Klick "input" am Feld aus.
+                // Die Mengenwahl (Stepper-Baustein) löst bei jedem Klick "input" am Feld aus.
                 document.querySelectorAll('.quantity-input').forEach(input => input.addEventListener('input',
                     updateSummary));
                 document.querySelectorAll('input[name="payment_method"]').forEach(r => r.addEventListener('change',

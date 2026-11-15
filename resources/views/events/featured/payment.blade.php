@@ -1,32 +1,36 @@
 <x-layouts.app>
-    <div class="max-w-3xl mx-auto py-8">
-        <h1 class="text-2xl font-bold mb-4">Featured Event Zahlung</h1>
-        <p class="text-gray-600 mb-6">Bitte schließen Sie die Zahlung ab, um Ihr Event als Featured zu markieren.</p>
+    <x-ui.page-header title="Zahlung für die Hervorhebung"
+        subtitle="Bitte schließen Sie die Zahlung ab, um Ihre Veranstaltung hervorzuheben."
+        :back-href="route('organizer.featured-events.history')" back-label="Zu den Hervorhebungen" />
 
-        <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
-            <div><strong>Event:</strong> {{ $featuredEventFee->event->title }}</div>
-            <div><strong>Dauer:</strong> {{ ucfirst($featuredEventFee->duration_type) }}</div>
-            <div><strong>Start:</strong> {{ $featuredEventFee->featured_start_date->format('d.m.Y') }}</div>
-            <div><strong>Betrag:</strong> {{ number_format($featuredEventFee->amount, 2, ',', '.') }} €</div>
-        </div>
-
-        <form method="POST" action="{{ route('organizer.featured-events.process-payment', $featuredEventFee) }}" class="space-y-4">
+    <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,640px)_minmax(0,368px)] lg:justify-between lg:gap-x-12">
+        <form method="POST" action="{{ route('organizer.featured-events.process-payment', $featuredEventFee) }}" class="flex flex-col gap-y-8">
             @csrf
-            <div>
-                <label class="block font-medium mb-1">Zahlungsmethode</label>
-                <select name="payment_method" class="w-full border rounded p-2" required>
-                    <option value="stripe">Kreditkarte (Stripe)</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="invoice">Rechnung</option>
-                    <option value="bank_transfer">Banküberweisung</option>
-                </select>
-            </div>
-            <div>
-                <label class="block font-medium mb-1">Referenz (optional)</label>
-                <input type="text" name="payment_reference" class="w-full border rounded p-2" placeholder="z.B. Transaktions-ID">
-            </div>
+            <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
-            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Zahlung abschließen</button>
+            <x-ui.select label="Zahlungsmethode" name="payment_method" required :options="[
+                'stripe' => 'Kreditkarte (Stripe)',
+                'paypal' => 'PayPal',
+                'invoice' => 'Rechnung',
+                'bank_transfer' => 'Banküberweisung',
+            ]" />
+
+            <x-ui.field label="Referenz" name="payment_reference" optional placeholder="z. B. Transaktions-ID" />
+
+            <div>
+                <x-ui.button type="submit">Zahlung abschließen</x-ui.button>
+            </div>
         </form>
+
+        <x-ui.summary title="Ihre Hervorhebung" :sticky="false">
+            <x-slot:event>
+                <span>{{ $featuredEventFee->event->title }}</span>
+                <span>Start: {{ $featuredEventFee->featured_start_date->format('d.m.Y') }}</span>
+            </x-slot:event>
+            <x-ui.summary-lines>
+                <x-ui.summary-line label="Dauer" :amount="ucfirst($featuredEventFee->duration_type)" />
+            </x-ui.summary-lines>
+            <x-ui.summary-total label="Betrag" :amount="\App\Support\Ui::money($featuredEventFee->amount)" />
+        </x-ui.summary>
     </div>
 </x-layouts.app>

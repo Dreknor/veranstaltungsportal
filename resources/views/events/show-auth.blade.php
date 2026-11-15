@@ -1,3 +1,4 @@
+@use('App\Support\Ui')
 <x-layouts.public :title="$event->title">
     <!-- SEO & Social Media Meta Tags -->
     @push('meta')
@@ -12,573 +13,548 @@
         <x-meta-tags :event="$event" :breadcrumbs="$breadcrumbs" />
     @endpush
 
-    <div class="min-h-screen bg-gray-50">
-        <!-- Hero Section mit Featured Image -->
-        <div class="relative bg-gray-900">
-            @if($event->featured_image)
-                <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-96 object-cover opacity-60">
-                <div class="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
-            @else
-                <div class="h-96 bg-gradient-to-br from-blue-600 to-purple-700"></div>
-            @endif
+    @php
+        // Zustand der Veranstaltung – dieselbe Logik wie in der Listenzeile (<x-ui.event-row>)
+        $free = null;
+        if ($event->is_cancelled) {
+            $state = 'cancelled';
+        } elseif ($event->end_date->isPast()) {
+            $state = 'past';
+        } elseif ($event->isExternal()) {
+            $state = 'external';
+        } elseif ($event->hasAvailableTickets()) {
+            $state = 'bookable';
+            if ($event->max_attendees) {
+                $free = $event->availableTickets();
+            } else {
+                $onSale = $event->ticketTypes->filter(fn($t) => $t->isOnSale());
+                $free =
+                    $onSale->isNotEmpty() && $onSale->every(fn($t) => $t->quantity !== null)
+                        ? $onSale->sum(fn($t) => $t->availableQuantity())
+                        : null;
+            }
+        } else {
+            $soldOut =
+                ($event->max_attendees && $event->availableTickets() <= 0) ||
+                ($event->ticketTypes->isNotEmpty() &&
+                    $event->ticketTypes->every(fn($t) => $t->availableQuantity() === 0));
+            $state = $soldOut ? 'waitlist' : 'closed';
+        }
 
-            <div class="absolute bottom-0 left-0 right-0 p-8">
-                <div class="max-w-7xl mx-auto">
-                    <div class="flex items-center gap-2 mb-3 flex-wrap">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-                              style="background-color: {{ $event->category->color }}; color: white;">
-                            {{ $event->category->name }}
-                        </span>
-                        <x-event-type-badge :event="$event" size="md" class="!bg-white/90 !text-gray-800 !border-white" />
-                        @if($event->is_featured)
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-500 text-white">
-                                Featured
-                            </span>
-                        @endif
-                        @if($event->end_date->isPast())
-                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-500 text-white">
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Abgelaufen
-                            </span>
-                        @endif
-                    </div>
-                    <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">{{ $event->title }}</h1>
-                    <div class="flex items-center text-white text-lg">
-                        <x-icon.user class="w-5 h-5 mr-2" />
-                        Veranstalter: {{ $event->getOrganizerName() }}
-                    </div>
-                </div>
-            </div>
-        </div>
+        // Preis: niedrigster buchbarer Preis; "ab", wenn es mehrere Preise gibt
+        $priceText = null;
+        if (!$event->isExternal() && !in_array($state, ['cancelled', 'past'], true)) {
+            $minPrice = $event->getMinimumPrice() ?? $event->ticketTypes->min('price');
+            if ($minPrice !== null) {
+                $several = $event->ticketTypes->pluck('price')->map(fn($p) => (float) $p)->unique()->count() > 1;
+                $priceText = ($several && (float) $minPrice > 0 ? 'ab ' : '') . Ui::price($minPrice);
+            }
+        }
 
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Hauptinhalt -->
-                <div class="lg:col-span-2 space-y-6">
-                    @if($event->end_date->isPast())
-                        <!-- Abgelaufen-Hinweis -->
-                        <div class="bg-gray-50 border-2 border-gray-400 rounded-lg p-6">
-                            <div class="flex items-start gap-4">
-                                <div class="flex-shrink-0">
-                                    <svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="text-xl font-bold text-gray-800 mb-2">Diese Veranstaltung hat bereits stattgefunden</h3>
-                                    <p class="text-gray-600">
-                                        Die Veranstaltung endete am <strong>{{ $event->end_date->format('d.m.Y') }} um {{ $event->end_date->format('H:i') }} Uhr</strong>.
-                                        Eine Buchung ist nicht mehr möglich.
-                                    </p>
-                                </div>
-                            </div>
+        $multiDay = !$event->start_date->isSameDay($event->end_date);
+        $dates = $event->hasMultipleDates() ? $event->dates()->active()->orderBy('start_date')->get() : collect();
+        $hasVenue = filled($event->venue_name) || filled($event->venue_city);
+
+        $visibleTickets = $event->ticketTypes->where('is_available', true);
+        $showTickets =
+            in_array($state, ['bookable', 'waitlist', 'closed'], true) &&
+            ($visibleTickets->isNotEmpty() || $event->price_from !== null);
+
+        $approvedReviews = $event->reviews->where('is_approved', true);
+        $organization = $event->organization;
+        $showOrganization =
+            $organization &&
+            ($organization->description || $organization->email || $organization->phone || $organization->website);
+    @endphp
+
+    <div class="mx-auto max-w-page px-page pt-6 pb-16">
+        <div
+            class="grid items-start gap-y-8 lg:grid-cols-[minmax(0,760px)_minmax(0,368px)] lg:justify-between lg:gap-x-12">
+
+            {{-- Titelbereich --}}
+            <header class="flex min-w-0 flex-col gap-3 lg:col-start-1 lg:row-start-1">
+                <a href="{{ route('events.index') }}"
+                    class="mb-1 inline-flex min-h-11 items-center gap-2 self-start text-ui font-medium text-ink-soft no-underline underline-offset-[3px] hover:underline">
+                    <x-icon.arrow-left class="h-4 w-4" />
+                    Alle Veranstaltungen
+                </a>
+                @if ($event->category)
+                    <p class="m-0 text-small text-muted">{{ $event->category->name }}</p>
+                @endif
+                <h1 class="m-0 text-title text-ink">{{ $event->title }}</h1>
+                <p class="m-0 text-ui text-ink-soft">
+                    <x-event-type-badge :event="$event" size="md" />
+                    <span aria-hidden="true">·</span>
+                    Veranstalter: {{ $event->getOrganizerName() }}
+                </p>
+
+                @if ($event->is_cancelled)
+                    <x-ui.alert tone="danger" title="Diese Veranstaltung wurde abgesagt." size="base" class="mt-3">
+                        <p>Diese Veranstaltung findet nicht wie geplant statt.</p>
+                        @if ($event->cancellation_reason)
+                            <p><span class="font-medium">Grund:</span> {{ $event->cancellation_reason }}</p>
+                        @endif
+                        @if ($event->cancelled_at)
+                            <p class="text-small">Abgesagt am {{ $event->cancelled_at->format('d.m.Y, H:i') }} Uhr</p>
+                        @endif
+                    </x-ui.alert>
+                @elseif($event->end_date->isPast())
+                    <x-ui.alert tone="info" title="Diese Veranstaltung hat bereits stattgefunden." size="base"
+                        class="mt-3">
+                        Sie endete am {{ Ui::date($event->end_date) }} um {{ $event->end_date->format('H:i') }} Uhr.
+                        Eine Buchung ist nicht mehr möglich.
+                    </x-ui.alert>
+                @endif
+            </header>
+
+            {{-- Mitlaufender Kasten: unter 1024 px direkt nach dem Titelbereich --}}
+            <x-ui.summary title="Auf einen Blick" id="kasten-titel"
+                class="lg:col-start-2 lg:row-span-2 lg:row-start-1">
+                <dl class="m-0 flex flex-col gap-3 border-t border-line pt-4">
+                    <div class="flex flex-col gap-0.5">
+                        <dt class="text-small text-muted">Datum</dt>
+                        <dd class="m-0 text-ui font-medium tabular-nums">
+                            @if ($dates->isNotEmpty())
+                                {{ $dates->count() }} Termine, {{ Ui::date($dates->first()->start_date) }} bis
+                                {{ Ui::date($dates->last()->start_date) }}
+                                <a href="#termine"
+                                    class="mt-0.5 block text-small font-medium text-ink underline underline-offset-[3px]">Alle
+                                    Termine</a>
+                            @elseif ($multiDay)
+                                {{ Ui::date($event->start_date) }} – {{ Ui::date($event->end_date) }}
+                            @else
+                                {{ Ui::date($event->start_date) }}
+                            @endif
+                        </dd>
+                    </div>
+                    @if ($dates->isEmpty())
+                        <div class="flex flex-col gap-0.5">
+                            <dt class="text-small text-muted">Zeit</dt>
+                            <dd class="m-0 text-ui font-medium tabular-nums">
+                                @if ($multiDay)
+                                    Beginn {{ $event->start_date->format('H:i') }} Uhr, Ende
+                                    {{ $event->end_date->format('H:i') }} Uhr
+                                @else
+                                    {{ Ui::time($event->start_date, $event->end_date) }}
+                                @endif
+                            </dd>
                         </div>
                     @endif
+                    <div class="flex flex-col gap-0.5">
+                        <dt class="text-small text-muted">Format</dt>
+                        <dd class="m-0 text-ui font-medium">{{ Ui::format($event) }}</dd>
+                    </div>
+                    @if ($hasVenue)
+                        <div class="flex flex-col gap-0.5">
+                            <dt class="text-small text-muted">Ort</dt>
+                            <dd class="m-0 text-ui font-medium">
+                                {{ collect([$event->venue_name, $event->venue_city])->filter()->implode(', ') }}
+                            </dd>
+                        </div>
+                    @endif
+                </dl>
 
-                    <!-- Event Details -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Über die Veranstaltung</h2>
-                        <div class="prose max-w-none">
+                @if ($priceText)
+                    <x-ui.summary-total label="Preis" :amount="$priceText" />
+                @endif
+
+                <div class="flex flex-col gap-3">
+                    @switch($state)
+                        @case('bookable')
+                            <x-ui.status tone="free">{{ $free === null ? 'Plätze frei' : 'noch ' . $free . ' frei' }}</x-ui.status>
+                            <x-ui.button :href="route('bookings.create', $event)" size="lg" full>Buchen</x-ui.button>
+                        @break
+
+                        @case('waitlist')
+                            <x-ui.status tone="waitlist">Ausgebucht – Warteliste</x-ui.status>
+                            <x-ui.button href="#warteliste" size="lg" full>Auf die Warteliste</x-ui.button>
+                        @break
+
+                        @case('external')
+                            <x-ui.status tone="neutral">Anmeldung extern</x-ui.status>
+                            @if ($event->external_booking_url)
+                                <x-ui.button :href="$event->external_booking_url" target="_blank" rel="noopener noreferrer"
+                                    size="lg" full>
+                                    {{ $event->external_booking_button_text ?? 'Zur Anmeldung' }}
+                                    <x-icon.external-link class="h-4 w-4 shrink-0" />
+                                    <span class="sr-only">(öffnet eine externe Seite)</span>
+                                </x-ui.button>
+                            @endif
+                            <p class="m-0 text-small text-muted">Die Anmeldung erfolgt über die Webseite des
+                                Veranstalters.</p>
+                        @break
+
+                        @case('cancelled')
+                            <x-ui.status tone="danger">Abgesagt</x-ui.status>
+                            <p class="m-0 text-small text-ink-soft">Diese Veranstaltung findet nicht statt.</p>
+                        @break
+
+                        @case('past')
+                            <x-ui.status tone="neutral">Beendet</x-ui.status>
+                            <p class="m-0 text-small text-ink-soft">Eine Buchung ist nicht mehr möglich.</p>
+                        @break
+
+                        @default
+                            <x-ui.status tone="neutral">derzeit nicht buchbar</x-ui.status>
+                            <p class="m-0 text-small text-ink-soft">Der Ticketverkauf ist aktuell nicht geöffnet.</p>
+                    @endswitch
+
+                    @if (!in_array($state, ['cancelled', 'past'], true))
+                        <x-calendar-export :event="$event" />
+                    @endif
+
+                    @auth
+                        <x-ui.button variant="secondary" full onclick="toggleFavorite({{ $event->id }})"
+                            id="favorite-btn-{{ $event->id }}"
+                            aria-pressed="{{ auth()->user()->hasFavorited($event) ? 'true' : 'false' }}">
+                            <x-slot:icon>
+                                <x-icon.heart
+                                    fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
+                            </x-slot:icon>
+                            <span id="favorite-text-{{ $event->id }}">
+                                {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
+                            </span>
+                        </x-ui.button>
+                    @endauth
+                </div>
+            </x-ui.summary>
+
+            {{-- Hauptspalte --}}
+            <div
+                class="flex min-w-0 flex-col gap-10 lg:col-start-1 lg:row-start-2 [&>*+*]:border-t [&>*+*]:border-line [&>*+*]:pt-10">
+                <div class="flex flex-col gap-8">
+                    @if ($event->featured_image)
+                        <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}"
+                            class="aspect-video w-full rounded-box object-cover">
+                    @endif
+
+                    <x-ui.section title="Über die Veranstaltung" id="beschreibung">
+                        <div class="max-w-prose text-base text-ink">
                             {!! nl2br(e($event->description)) !!}
                         </div>
-                    </div>
-
-
-                    <!-- Bewertungen -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-4">Bewertungen</h2>
-
-                        @if($event->reviews->where('is_approved', true)->count() > 0)
-                            <div class="mb-6 flex items-center gap-4">
-                                <div class="text-4xl font-bold text-gray-900">
-                                    {{ number_format($event->averageRating(), 1) }}
-                                </div>
-                                <div>
-                                    <div class="flex text-yellow-400">
-                                        @for($i = 1; $i <= 5; $i++)
-                                            @if($i <= $event->averageRating())
-                                                <x-icon.star-filled class="w-5 h-5" />
-                                            @else
-                                                <x-icon.star class="w-5 h-5" />
-                                            @endif
-                                        @endfor
-                                    </div>
-                                    <p class="text-sm text-gray-600">{{ $event->reviews->where('is_approved', true)->count() }} Bewertungen</p>
-                                </div>
-                            </div>
-
-                            <div class="space-y-4 mb-6">
-                                @foreach($event->reviews->where('is_approved', true)->take(5) as $review)
-                                    <div class="border-b pb-4 last:border-b-0">
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <span class="font-medium">{{ $review->reviewerName() }}</span>
-                                            <div class="flex text-yellow-400">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    @if($i <= $review->rating)
-                                                        <x-icon.star-filled class="w-4 h-4" />
-                                                    @else
-                                                        <x-icon.star class="w-4 h-4" />
-                                                    @endif
-                                                @endfor
-                                            </div>
-                                            <span class="text-sm text-gray-500">{{ $review->created_at->diffForHumans() }}</span>
-                                        </div>
-                                        @if($review->comment)
-                                            <p class="text-gray-700">{{ $review->comment }}</p>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-gray-600 mb-6">Noch keine Bewertungen vorhanden.</p>
-                        @endif
-
-                        <!-- Review Form for Authenticated Users -->
-                        @auth
-                            @php
-                                $userReview = $event->reviews()->where('user_id', auth()->id())->first();
-                                $hasAttended = \App\Models\Booking::where('user_id', auth()->id())
-                                    ->where('event_id', $event->id)
-                                    ->where('status', 'confirmed')
-                                    ->exists();
-                            @endphp
-
-                            @if($hasAttended && !$userReview)
-                                <div class="mt-6 pt-6 border-t">
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Deine Bewertung</h3>
-                                    <form action="{{ route('events.reviews.store', $event) }}" method="POST" class="space-y-4">
-                                        @csrf
-
-                                        <!-- Star Rating -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">Bewertung *</label>
-                                            <div class="flex gap-2" x-data="{ rating: 0, hoverRating: 0 }">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    <button type="button"
-                                                            @click="rating = {{ $i }}"
-                                                            @mouseenter="hoverRating = {{ $i }}"
-                                                            @mouseleave="hoverRating = 0"
-                                                            class="text-3xl transition-colors"
-                                                            :class="(hoverRating >= {{ $i }} || (rating >= {{ $i }} && hoverRating === 0)) ? 'text-yellow-400' : 'text-gray-300'">
-                                                        ★
-                                                    </button>
-                                                @endfor
-                                                <input type="hidden" name="rating" x-model="rating" required>
-                                            </div>
-                                            @error('rating')
-                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <!-- Comment -->
-                                        <div>
-                                            <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">
-                                                Kommentar (optional)
-                                            </label>
-                                            <textarea name="comment" id="comment" rows="4"
-                                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                      placeholder="Teile deine Erfahrungen mit anderen Teilnehmern...">{{ old('comment') }}</textarea>
-                                            @error('comment')
-                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                            @enderror
-                                        </div>
-
-                                        <button type="submit"
-                                                class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
-                                            Bewertung abgeben
-                                        </button>
-                                    </form>
-                                </div>
-                            @elseif($userReview)
-                                <div class="mt-6 pt-6 border-t">
-                                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                        <div class="flex items-start gap-3">
-                                            <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                            <div>
-                                                <p class="text-sm font-medium text-blue-900">Deine Bewertung wurde eingereicht</p>
-                                                <p class="text-sm text-blue-700 mt-1">
-                                                    @if($userReview->is_approved)
-                                                        Deine Bewertung ist veröffentlicht.
-                                                    @else
-                                                        Deine Bewertung wird gerade überprüft und in Kürze veröffentlicht.
-                                                    @endif
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @elseif(!$hasAttended && $event->start_date->isPast())
-                                <div class="mt-6 pt-6 border-t">
-                                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                                        <p class="text-sm text-gray-600">
-                                            Nur Teilnehmer können eine Bewertung abgeben.
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
-                        @else
-                            <div class="mt-6 pt-6 border-t">
-                                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                                    <p class="text-sm text-gray-600 mb-3">
-                                        Melde dich an, um eine Bewertung abzugeben.
-                                    </p>
-                                    <a href="{{ route('login') }}"
-                                       class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold">
-                                        Jetzt anmelden
-                                    </a>
-                                </div>
-                            </div>
-                        @endauth
-                    </div>
-
-                    <!-- Ähnliche Events -->
-                    @if($relatedEvents->count() > 0)
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h2 class="text-2xl font-bold text-gray-900 mb-4">Ähnliche Veranstaltungen</h2>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                @foreach($relatedEvents as $relatedEvent)
-                                    <a href="{{ route('events.show', $relatedEvent->slug) }}" class="block group">
-                                        <div class="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg overflow-hidden mb-2">
-                                            @if($relatedEvent->featured_image)
-                                                <img src="{{ Storage::url($relatedEvent->featured_image) }}" alt="{{ $relatedEvent->title }}" class="w-full h-32 object-cover group-hover:scale-105 transition">
-                                            @else
-                                                <div class="w-full h-32 bg-gradient-to-br from-blue-400 to-purple-500"></div>
-                                            @endif
-                                        </div>
-                                        <h3 class="font-medium text-gray-900 group-hover:text-blue-600 line-clamp-2">{{ $relatedEvent->title }}</h3>
-                                        <p class="text-sm text-gray-600">{{ $relatedEvent->start_date->format('d.m.Y') }}</p>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
+                    </x-ui.section>
                 </div>
 
-                <!-- Sidebar -->
-                <div class="space-y-6">
-                    <!-- Datum & Zeit -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="font-bold text-gray-900 mb-4">Datum & Zeit</h3>
+                @if ($state === 'waitlist')
+                    <x-waitlist-join :event="$event" />
+                @endif
 
-                        @if($event->hasMultipleDates())
-                            {{-- Event with multiple dates --}}
-                            <div class="mb-3 pb-3 border-b">
-                                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    {{ $event->dates()->active()->count() }} Termine
-                                </div>
-                                <p class="text-sm text-gray-600 mt-2">
-                                    Diese Veranstaltung besteht aus mehreren Terminen. Die Buchung gilt für alle Termine.
-                                </p>
-                            </div>
+                @if ($dates->isNotEmpty())
+                    <x-ui.section title="Termine" id="termine"
+                        description="Diese Veranstaltung besteht aus {{ $dates->count() }} Terminen. Die Buchung gilt für alle Termine."
+                        class="scroll-mt-6">
+                        <x-ui.row-list>
+                            @foreach ($dates as $date)
+                                <x-ui.row :hover="false">
+                                    <x-slot:lead>
+                                        <x-ui.date-block :date="$date->start_date" />
+                                    </x-slot:lead>
+                                    <span @class([
+                                        'text-base font-semibold tabular-nums',
+                                        'text-muted' => $date->start_date->isPast(),
+                                    ])>{{ Ui::date($date->start_date) }}</span>
+                                    <span
+                                        class="text-small text-ink-soft tabular-nums">{{ Ui::time($date->start_date, $date->end_date) }}</span>
+                                    @if ($date->venue_name && $date->venue_name !== $event->venue_name)
+                                        <span class="inline-flex items-center gap-1.5 text-small text-ink-soft">
+                                            <x-icon.location class="h-4 w-4 flex-none text-muted" />
+                                            {{ $date->venue_name }}, {{ $date->venue_city }}
+                                        </span>
+                                    @endif
+                                    @if ($date->notes)
+                                        <span class="text-small text-muted">{{ $date->notes }}</span>
+                                    @endif
+                                    @if ($date->start_date->isPast())
+                                        <x-ui.status tone="neutral" class="mt-1">Bereits vorbei</x-ui.status>
+                                    @endif
+                                </x-ui.row>
+                            @endforeach
+                        </x-ui.row-list>
+                    </x-ui.section>
+                @endif
 
-                            <div class="space-y-2 max-h-96 overflow-y-auto">
-                                @foreach($event->dates()->active()->orderBy('start_date')->get() as $date)
-                                    <div class="flex items-start p-3 rounded-lg {{ $date->start_date->isPast() ? 'bg-gray-50' : 'bg-blue-50' }}">
-                                        <x-icon.calendar class="w-5 h-5 {{ $date->start_date->isPast() ? 'text-gray-400' : 'text-blue-500' }} mr-3 mt-0.5 flex-shrink-0" />
-                                        <div class="flex-1">
-                                            <div class="font-medium {{ $date->start_date->isPast() ? 'text-gray-700' : 'text-gray-900' }}">
-                                                {{ $date->start_date->format('d. F Y') }}
-                                            </div>
-                                            <div class="text-sm {{ $date->start_date->isPast() ? 'text-gray-500' : 'text-gray-600' }}">
-                                                {{ $date->start_date->format('H:i') }} - {{ $date->end_date->format('H:i') }} Uhr
-                                            </div>
-                                            @if($date->venue_name && $date->venue_name !== $event->venue_name)
-                                                <div class="text-sm text-gray-600 mt-1">
-                                                    <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                    </svg>
-                                                    {{ $date->venue_name }}, {{ $date->venue_city }}
-                                                </div>
-                                            @endif
-                                            @if($date->notes)
-                                                <div class="text-sm text-blue-700 mt-1 italic">
-                                                    {{ $date->notes }}
-                                                </div>
-                                            @endif
-                                            @if($date->start_date->isPast())
-                                                <span class="inline-block text-xs text-gray-500 mt-1">Bereits vorbei</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            {{-- Single date event --}}
-                            <div class="space-y-3">
-                                <div class="flex items-start">
-                                    <x-icon.calendar class="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
-                                    <div>
-                                        @if($event->start_date->isSameDay($event->end_date))
-                                            {{-- Same day event --}}
-                                            <div class="font-medium text-gray-900">{{ $event->start_date->format('d. F Y') }}</div>
-                                            <div class="text-sm text-gray-600">{{ $event->start_date->format('H:i') }} - {{ $event->end_date->format('H:i') }} Uhr</div>
-                                        @else
-                                            {{-- Multi-day event --}}
-                                            <div class="font-medium text-gray-900">
-                                                {{ $event->start_date->format('d. F Y') }} - {{ $event->end_date->format('d. F Y') }}
-                                            </div>
-                                            <div class="text-sm text-gray-600">
-                                                {{ $event->start_date->format('H:i') }} Uhr - {{ $event->end_date->format('H:i') }} Uhr
-                                            </div>
+                @if ($showTickets)
+                    <x-ui.section title="Tickets" id="tickets">
+                        <ul class="m-0 flex list-none flex-col divide-y divide-line border-t border-line p-0">
+                            @foreach ($visibleTickets as $ticket)
+                                <li class="flex flex-wrap items-start justify-between gap-x-6 gap-y-1 py-4">
+                                    <div class="flex min-w-0 flex-[1_1_240px] flex-col gap-1">
+                                        <span class="text-base font-semibold">{{ $ticket->name }}</span>
+                                        @if ($ticket->description)
+                                            <span class="text-small text-ink-soft">{{ $ticket->description }}</span>
                                         @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Veranstaltungsort -->
-                    <div class="bg-white rounded-lg shadow-md p-6">
-                        <h3 class="font-bold text-gray-900 mb-4">Veranstaltungsort</h3>
-                        <div class="space-y-3">
-                            <div>
-                                <div class="font-medium text-gray-900">{{ $event->venue_name }}</div>
-                                <div class="text-sm text-gray-600">{{ $event->venue_address }}</div>
-                                <div class="text-sm text-gray-600">{{ $event->venue_postal_code }} {{ $event->venue_city }}</div>
-                                <div class="text-sm text-gray-600">{{ $event->venue_country }}</div>
-                            </div>
-
-                            @if($event->directions)
-                                <div class="pt-3 border-t">
-                                    <p class="text-sm text-gray-700">{{ $event->directions }}</p>
-                                </div>
-                            @endif
-
-                            @if($event->venue_latitude && $event->venue_longitude)
-                                <a href="https://www.google.com/maps?q={{ $event->venue_latitude }},{{ $event->venue_longitude }}"
-                                   target="_blank"
-                                   class="block w-full text-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                                    <x-icon.location class="w-4 h-4 inline-block mr-2" />
-                                    Auf Karte anzeigen
-                                </a>
-                            @endif
-                        </div>
-                    </div>
-
-                    <!-- Tickets -->
-                    @if($event->end_date->isPast())
-                        <!-- Abgelaufen: kein Buchungs-Bereich -->
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <div class="text-center p-4 bg-gray-50 border border-gray-300 rounded-lg">
-                                <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <p class="font-medium text-gray-700">Veranstaltung abgelaufen</p>
-                                <p class="text-sm text-gray-500 mt-1">Eine Buchung ist nicht mehr möglich.</p>
-                            </div>
-                            @auth
-                                <button onclick="toggleFavorite({{ $event->id }})"
-                                        id="favorite-btn-{{ $event->id }}"
-                                        class="block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-4
-                                               {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
-                                    <x-icon.heart class="w-5 h-5 inline-block mr-2"
-                                                  fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
-                                    <span id="favorite-text-{{ $event->id }}">
-                                        {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
-                                    </span>
-                                </button>
-                            @endauth
-                        </div>
-                    @elseif($event->isExternal())
-                        {{-- External event: show link to external booking page --}}
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h3 class="font-bold text-gray-900 mb-4">Anmeldung</h3>
-                            <div class="text-center">
-                                <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800 mb-3">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                    </svg>
-                                    Externe Veranstaltung
-                                </div>
-                                <p class="text-sm text-gray-600 mb-4">
-                                    Die Anmeldung zu dieser Veranstaltung erfolgt über eine externe Plattform.
-                                </p>
-
-                                @if($event->external_booking_url)
-                                    <a href="{{ $event->external_booking_url }}" target="_blank" rel="noopener noreferrer"
-                                       class="block w-full text-center px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition font-semibold">
-                                        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                                        </svg>
-                                        {{ $event->external_booking_button_text ?? 'Zur Anmeldung' }}
-                                    </a>
-                                    <p class="text-xs text-gray-500 mt-2">
-                                        <svg class="w-3 h-3 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                        Öffnet eine externe Webseite
-                                    </p>
-                                @endif
-                            </div>
-
-                            @auth
-                                <button onclick="toggleFavorite({{ $event->id }})"
-                                        id="favorite-btn-{{ $event->id }}"
-                                        class="block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-4
-                                               {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
-                                    <x-icon.heart class="w-5 h-5 inline-block mr-2"
-                                                  fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
-                                    <span id="favorite-text-{{ $event->id }}">
-                                        {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
-                                    </span>
-                                </button>
-                            @endauth
-                        </div>
-                    @elseif($event->ticketTypes->where('is_available', true)->count() > 0)
-                        @php $visibleTickets = $event->ticketTypes->where('is_available', true); @endphp
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h3 class="font-bold text-gray-900 mb-4">Tickets</h3>
-                            <div class="space-y-3">
-                                @foreach($visibleTickets as $ticket)
-                                    <div class="border-b pb-3 last:border-b-0">
-                                        <div class="flex justify-between items-start mb-1">
-                                            <span class="font-medium text-gray-900">{{ $ticket->name }}</span>
-                                            <span class="font-bold text-blue-600">{{ number_format($ticket->price, 2, ',', '.') }} €</span>
-                                        </div>
-                                        @if($ticket->description)
-                                            <p class="text-sm text-gray-600">{{ $ticket->description }}</p>
-                                        @endif
-                                        @if(!$ticket->isOnSale())
-                                            @if($ticket->sale_start && now()->lt($ticket->sale_start))
-                                                <p class="text-xs text-orange-600 mt-1">Verkauf ab {{ $ticket->sale_start->format('d.m.Y') }}</p>
+                                        @if (!$ticket->isOnSale())
+                                            @if ($ticket->sale_start && now()->lt($ticket->sale_start))
+                                                <x-ui.status tone="neutral">
+                                                    Verkauf ab {{ $ticket->sale_start->format('d.m.Y') }}
+                                                    @if ($ticket->sale_start->format('H:i') !== '00:00')
+                                                        um {{ $ticket->sale_start->format('H:i') }} Uhr
+                                                    @endif
+                                                </x-ui.status>
                                             @elseif($ticket->sale_end && now()->gt($ticket->sale_end))
-                                                <p class="text-xs text-gray-500 mt-1">Verkauf beendet</p>
+                                                <x-ui.status tone="neutral">Verkauf beendet</x-ui.status>
                                             @endif
                                         @elseif($ticket->availableQuantity() === 0)
-                                            <p class="text-xs text-red-600 mt-1">Ausverkauft</p>
+                                            <x-ui.status tone="waitlist">Ausverkauft</x-ui.status>
                                         @elseif($ticket->quantity)
-                                            <p class="text-xs text-gray-500 mt-1">
-                                                Noch {{ $ticket->availableQuantity() }} verfügbar
-                                            </p>
+                                            <x-ui.status tone="free">noch {{ $ticket->availableQuantity() }}
+                                                verfügbar</x-ui.status>
                                         @else
-                                            <p class="text-xs text-green-600 mt-1">Verfügbar</p>
+                                            <x-ui.status tone="free">verfügbar</x-ui.status>
                                         @endif
                                     </div>
-                                @endforeach
-                            </div>
+                                    <span
+                                        class="text-base font-semibold whitespace-nowrap tabular-nums">{{ Ui::money($ticket->price) }}</span>
+                                </li>
+                            @endforeach
 
-                            <!-- Waitlist if sold out -->
-                            <x-waitlist-join :event="$event" />
-
-                            @php
-                                $hasAvailableTickets = $visibleTickets->some(fn($ticket) => $ticket->isOnSale() && $ticket->availableQuantity() > 0);
-                            @endphp
-
-                            @if($hasAvailableTickets)
-                                <a href="{{ route('bookings.create', $event) }}"
-                                   class="block w-full text-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold mt-4">
-                                    Jetzt Tickets buchen
-                                </a>
+                            @if ($event->price_from !== null && $visibleTickets->isEmpty())
+                                <li class="flex flex-wrap items-start justify-between gap-x-6 gap-y-1 py-4">
+                                    <div class="flex min-w-0 flex-[1_1_240px] flex-col gap-1">
+                                        <span class="text-base font-semibold">
+                                            {{ $event->price_from > 0 ? 'Standard-Ticket' : 'Kostenfreie Teilnahme' }}
+                                        </span>
+                                        <span class="text-small text-ink-soft">Regulärer Zugang zur Veranstaltung</span>
+                                    </div>
+                                    <span
+                                        class="text-base font-semibold whitespace-nowrap tabular-nums">{{ Ui::money($event->price_from) }}</span>
+                                </li>
                             @endif
+                        </ul>
+                    </x-ui.section>
+                @endif
 
-                            @auth
-                                <button onclick="toggleFavorite({{ $event->id }})"
-                                        id="favorite-btn-{{ $event->id }}"
-                                        class="block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-2
-                                               {{ auth()->user()->hasFavorited($event) ? 'border-red-500 text-red-600 bg-red-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50' }}">
-                                    <x-icon.heart class="w-5 h-5 inline-block mr-2"
-                                                  fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
-                                    <span id="favorite-text-{{ $event->id }}">
-                                        {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
-                                    </span>
-                                </button>
-                            @endauth
+                @if ($hasVenue)
+                    <x-ui.section title="Veranstaltungsort" id="ort">
+                        <address class="flex flex-col gap-0.5 text-base not-italic">
+                            @if ($event->venue_name)
+                                <span class="font-semibold">{{ $event->venue_name }}</span>
+                            @endif
+                            @if ($event->venue_address)
+                                <span>{{ $event->venue_address }}</span>
+                            @endif
+                            <span>{{ $event->venue_postal_code }} {{ $event->venue_city }}</span>
+                            @if ($event->venue_country)
+                                <span class="text-ink-soft">{{ $event->venue_country }}</span>
+                            @endif
+                        </address>
+
+                        @if ($event->directions)
+                            <p class="m-0 mt-4 max-w-prose text-base text-ink-soft">{{ $event->directions }}</p>
+                        @endif
+
+                        @if ($event->venue_latitude && $event->venue_longitude)
+                            <x-ui.button variant="secondary" class="mt-6"
+                                href="https://www.google.com/maps?q={{ $event->venue_latitude }},{{ $event->venue_longitude }}"
+                                target="_blank" rel="noopener noreferrer">
+                                <x-slot:icon>
+                                    <x-icon.location />
+                                </x-slot:icon>
+                                Auf Karte anzeigen
+                                <span class="sr-only">(öffnet eine externe Seite)</span>
+                            </x-ui.button>
+                        @endif
+                    </x-ui.section>
+                @endif
+
+                @if ($showOrganization)
+                    <x-ui.section title="Veranstalter" id="veranstalter">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center gap-4">
+                                @if ($organization->logo)
+                                    <img src="{{ Storage::url($organization->logo) }}"
+                                        alt="{{ $organization->name }} Logo"
+                                        class="h-16 w-16 flex-none rounded-control border border-line bg-surface object-contain p-2">
+                                @endif
+                                <p class="m-0 text-h3">{{ $organization->name }}</p>
+                            </div>
+                            @if ($organization->description)
+                                <p class="m-0 max-w-prose text-base text-ink-soft">{{ $organization->description }}</p>
+                            @endif
+                            @if ($organization->email || $organization->phone || $organization->website)
+                                <ul class="m-0 flex list-none flex-col gap-2 p-0 text-base">
+                                    @if ($organization->email)
+                                        <li class="flex items-center">
+                                            <x-protected-email :email="$organization->email" />
+                                        </li>
+                                    @endif
+                                    @if ($organization->phone)
+                                        <li class="flex items-center">
+                                            <x-protected-phone :phone="$organization->phone" />
+                                        </li>
+                                    @endif
+                                    @if ($organization->website)
+                                        <li class="flex items-center">
+                                            <x-protected-url :url="$organization->website" />
+                                        </li>
+                                    @endif
+                                </ul>
+                            @endif
                         </div>
-                    @endif
+                    </x-ui.section>
+                @endif
 
-                    <!-- Veranstalter Info -->
-                    @if($event->organization && ($event->organization->description || $event->organization->email || $event->organization->phone || $event->organization->website))
-                        <div class="bg-white rounded-lg shadow-md p-6">
-                            <h3 class="font-bold text-gray-900 mb-4">Veranstalter</h3>
-                            <div class="space-y-3">
-                                @if($event->organization->logo)
-                                    <div class="flex items-center gap-3 mb-3">
-                                        <img src="{{ Storage::url($event->organization->logo) }}"
-                                             alt="{{ $event->organization->name }} Logo"
-                                             class="h-16 w-16 object-contain rounded-lg border border-gray-200 bg-white p-2">
-                                        <p class="text-sm font-semibold text-gray-900">{{ $event->organization->name }}</p>
-                                    </div>
-                                @else
-                                    <p class="text-sm font-semibold text-gray-900">{{ $event->organization->name }}</p>
-                                @endif
-                                @if($event->organization->description)
-                                    <p class="text-sm text-gray-700">{{ $event->organization->description }}</p>
-                                @endif
-                                @if($event->organization->email)
-                                    <div class="flex items-center text-sm">
-                                        <x-icon.mail class="w-4 h-4 mr-2 text-blue-600" />
-                                        <x-protected-email :email="$event->organization->email" />
-                                    </div>
-                                @endif
-                                @if($event->organization->phone)
-                                    <div class="flex items-center text-sm">
-                                        <x-icon.phone class="w-4 h-4 mr-2 text-blue-600" />
-                                        <x-protected-phone :phone="$event->organization->phone" />
-                                    </div>
-                                @endif
-                                @if($event->organization->website)
-                                    <div class="flex items-center text-sm">
-                                        <x-icon.globe class="w-4 h-4 mr-2 text-blue-600" />
-                                        <x-protected-url :url="$event->organization->website" />
-                                    </div>
-                                @endif
+                <x-ui.section title="Bewertungen" id="bewertungen">
+                    @if ($approvedReviews->count() > 0)
+                        @php $average = $event->averageRating(); @endphp
+                        <div class="mb-6 flex items-center gap-4">
+                            <span class="text-h2 tabular-nums">{{ number_format($average, 1, ',', '.') }}</span>
+                            <div class="flex flex-col gap-1">
+                                <span class="flex text-ink" role="img"
+                                    aria-label="{{ number_format($average, 1, ',', '.') }} von 5 Sternen">
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        @if ($i <= $average)
+                                            <x-icon.star-filled class="h-5 w-5" />
+                                        @else
+                                            <x-icon.star class="h-5 w-5 text-line-strong" />
+                                        @endif
+                                    @endfor
+                                </span>
+                                <span class="text-small text-muted">{{ $approvedReviews->count() }} Bewertungen</span>
                             </div>
                         </div>
+
+                        <ul class="m-0 flex list-none flex-col divide-y divide-line border-t border-line p-0">
+                            @foreach ($approvedReviews->take(5) as $review)
+                                <li class="flex flex-col gap-2 py-4">
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                        <span class="text-ui font-medium">{{ $review->reviewerName() }}</span>
+                                        <span class="flex text-ink" role="img"
+                                            aria-label="{{ $review->rating }} von 5 Sternen">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $review->rating)
+                                                    <x-icon.star-filled class="h-4 w-4" />
+                                                @else
+                                                    <x-icon.star class="h-4 w-4 text-line-strong" />
+                                                @endif
+                                            @endfor
+                                        </span>
+                                        <span class="text-small text-muted">{{ $review->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    @if ($review->comment)
+                                        <p class="m-0 max-w-prose text-base text-ink-soft">{{ $review->comment }}</p>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="m-0 text-base text-muted">Noch keine Bewertungen vorhanden.</p>
                     @endif
 
-                    <!-- Social Share -->
-                    <x-social-share :event="$event" :shareUrls="$shareUrls" :shareableLink="$shareableLink" />
+                    <!-- Review Form for Authenticated Users -->
+                    @auth
+                        @php
+                            $userReview = $event->reviews()->where('user_id', auth()->id())->first();
+                            $hasAttended = \App\Models\Booking::where('user_id', auth()->id())
+                                ->where('event_id', $event->id)
+                                ->where('status', 'confirmed')
+                                ->exists();
+                        @endphp
 
-                    <!-- Calendar Export -->
-                    <x-calendar-export :event="$event" />
-                </div>
+                        @if ($hasAttended && !$userReview)
+                            <div class="mt-8 max-w-form">
+                                <h3 class="m-0 mb-4 text-h3">Ihre Bewertung</h3>
+                                <form action="{{ route('events.reviews.store', $event) }}" method="POST"
+                                    class="flex flex-col gap-y-5">
+                                    @csrf
+
+                                    <!-- Star Rating -->
+                                    <fieldset class="m-0 min-w-0 border-0 p-0">
+                                        <x-ui.label as="legend" required>Bewertung</x-ui.label>
+                                        <div class="flex gap-1" x-data="{ rating: 0, hoverRating: 0 }">
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <button type="button" @click="rating = {{ $i }}"
+                                                    @mouseenter="hoverRating = {{ $i }}"
+                                                    @mouseleave="hoverRating = 0"
+                                                    aria-label="{{ $i }} von 5 Sternen"
+                                                    :aria-pressed="(rating === {{ $i }}).toString()"
+                                                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control transition-colors duration-150 hover:bg-zone"
+                                                    :class="(hoverRating >= {{ $i }} || (rating >= {{ $i }} && hoverRating === 0)) ? 'text-ink' : 'text-line-strong'">
+                                                    <x-icon.star-filled class="h-6 w-6" />
+                                                </button>
+                                            @endfor
+                                            <input type="hidden" name="rating" x-model="rating" required>
+                                        </div>
+                                        <x-ui.field-error name="rating" />
+                                    </fieldset>
+
+                                    <!-- Comment -->
+                                    <x-ui.textarea label="Kommentar" name="comment" optional rows="4"
+                                        placeholder="Teilen Sie Ihre Erfahrungen mit anderen Teilnehmenden." />
+
+                                    <div>
+                                        <x-ui.button type="submit">Bewertung abgeben</x-ui.button>
+                                    </div>
+                                </form>
+                            </div>
+                        @elseif($userReview)
+                            <x-ui.alert tone="info" title="Ihre Bewertung wurde eingereicht." class="mt-6">
+                                @if ($userReview->is_approved)
+                                    Ihre Bewertung ist veröffentlicht.
+                                @else
+                                    Ihre Bewertung wird gerade geprüft und in Kürze veröffentlicht.
+                                @endif
+                            </x-ui.alert>
+                        @elseif(!$hasAttended && $event->start_date->isPast())
+                            <p class="m-0 mt-6 text-small text-muted">Nur Teilnehmende können eine Bewertung abgeben.</p>
+                        @endif
+                    @else
+                        <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
+                            <p class="m-0 text-base text-ink-soft">Melden Sie sich an, um eine Bewertung abzugeben.</p>
+                            <x-ui.button variant="secondary" :href="route('login')">Anmelden</x-ui.button>
+                        </div>
+                    @endauth
+                </x-ui.section>
+
+                <x-social-share :event="$event" :shareUrls="$shareUrls" :shareableLink="$shareableLink" />
             </div>
         </div>
+
+        @if ($relatedEvents->count() > 0)
+            <x-ui.section title="Ähnliche Veranstaltungen" id="aehnliche" class="mt-16 border-t border-line pt-12">
+                <x-ui.row-list>
+                    @foreach ($relatedEvents as $relatedEvent)
+                        <x-ui.event-row :event="$relatedEvent" />
+                    @endforeach
+                </x-ui.row-list>
+            </x-ui.section>
+        @endif
     </div>
 
     @auth
-    @push('scripts')
-    <script>
-        function toggleFavorite(eventId) {
-            const btn = document.getElementById(`favorite-btn-${eventId}`);
-            const text = document.getElementById(`favorite-text-${eventId}`);
-            const icon = btn.querySelector('svg');
+        @push('scripts')
+            <script>
+                function toggleFavorite(eventId) {
+                    const btn = document.getElementById(`favorite-btn-${eventId}`);
+                    const text = document.getElementById(`favorite-text-${eventId}`);
+                    const icon = btn.querySelector('svg');
 
-            fetch(`/events/${eventId}/favorite`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
+                    fetch(`/events/${eventId}/favorite`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.favorited) {
+                                btn.setAttribute('aria-pressed', 'true');
+                                text.textContent = 'Aus Favoriten entfernen';
+                                icon.setAttribute('fill', 'currentColor');
+                            } else {
+                                btn.setAttribute('aria-pressed', 'false');
+                                text.textContent = 'Zu Favoriten hinzufügen';
+                                icon.setAttribute('fill', 'none');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                        });
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.favorited) {
-                    btn.className = 'block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-2 border-red-500 text-red-600 bg-red-50';
-                    text.textContent = 'Aus Favoriten entfernen';
-                    icon.setAttribute('fill', 'currentColor');
-                } else {
-                    btn.className = 'block w-full text-center px-6 py-3 border-2 rounded-lg transition font-semibold mt-2 border-gray-300 text-gray-700 hover:bg-gray-50';
-                    text.textContent = 'Zu Favoriten hinzufügen';
-                    icon.setAttribute('fill', 'none');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
-            });
-        }
-    </script>
-    @endpush
+            </script>
+        @endpush
     @endauth
 </x-layouts.public>
-
