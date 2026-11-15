@@ -41,7 +41,7 @@
     ]) }}
 >
     <span class="sr-only">{{ $spoken }}</span>
-    <span aria-hidden="true" class="text-[13px] text-muted">{{ $weekday }}</span>
+    <span aria-hidden="true" class="text-caption leading-[1.1] text-muted">{{ $weekday }}</span>
     <span aria-hidden="true" @class(['font-semibold tracking-[-0.02em]', 'text-[24px]' => ! $multi, 'text-[22px]' => $multi])>{{ $day }}</span>
-    <span aria-hidden="true" class="text-[13px] font-medium whitespace-nowrap">{{ $month }}</span>
+    <span aria-hidden="true" class="text-caption leading-[1.1] font-medium whitespace-nowrap">{{ $month }}</span>
 </time>

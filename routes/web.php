@@ -390,6 +390,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('newsletter/interests', [\App\Http\Controllers\NewsletterController::class, 'updateInterests'])->name('newsletter.interests');
 });
 
+// Styleguide: Prüfvorlage des Design-Systems (docs/design/BAUSTEINE.md), nur für Admins
+Route::middleware(['auth', 'verified', 'admin'])
+    ->get('/styleguide', \App\Http\Controllers\StyleguideController::class)
+    ->name('styleguide');
+
 // Admin Routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
