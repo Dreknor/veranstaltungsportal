@@ -91,8 +91,7 @@
                                 <span class="flex min-w-0 flex-col">
                                     <span class="text-base font-medium break-words">{{ $category->name }}</span>
                                     <span class="text-small text-muted tabular-nums">
-                                        {{ $category->listed_events_count }}
-                                        {{ $category->listed_events_count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}
+                                        {{ $category->listed_events_count . ' ' . ($category->listed_events_count === 1 ? 'Veranstaltung' : 'Veranstaltungen') }}
                                     </span>
                                 </span>
                                 <x-icon.arrow-right class="h-4 w-4 flex-none text-muted" />

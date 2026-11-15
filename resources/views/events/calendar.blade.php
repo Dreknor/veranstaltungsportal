@@ -35,7 +35,13 @@
 
         @php
             $monthLabel = \Carbon\Carbon::create($year, $month)->locale('de')->isoFormat('MMMM YYYY');
-            $daysWithEvents = $eventsGroupedByDay->keys()->sort()->values();
+            // nur Tage dieses Monats (mehrtägige Termine können in den Folgemonat reichen)
+            $monthPrefix = sprintf('%04d-%02d-', $year, $month);
+            $daysWithEvents = $eventsGroupedByDay
+                ->keys()
+                ->filter(fn($key) => str_starts_with($key, $monthPrefix))
+                ->sort()
+                ->values();
         @endphp
 
         <section aria-labelledby="kalender-monat">
@@ -92,7 +98,9 @@
                                     'bg-primary text-on-primary' => $currentDate->isToday(),
                                     'text-ink' => !$currentDate->isToday(),
                                 ])>
-                                <span class="sr-only">{{ \App\Support\Ui::date(\Illuminate\Support\Carbon::instance($currentDate)) }}@if ($currentDate->isToday())
+                                <span
+                                    class="sr-only">{{ \App\Support\Ui::date(\Illuminate\Support\Carbon::instance($currentDate)) }}
+                                    @if ($currentDate->isToday())
                                         , heute
                                     @endif
                                 </span>

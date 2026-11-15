@@ -3,7 +3,7 @@
 namespace App\Support;
 
 use App\Models\Event;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface as Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
 

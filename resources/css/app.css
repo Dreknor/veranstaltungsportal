@@ -93,6 +93,11 @@
     --sidebar-ring: hsl(var(--sidebar-ring));
 }
 
+/* Lesetext 760 px. Tailwind erzeugt für max-w-prose zusätzlich 65ch danach – deshalb !important. */
+@utility max-w-prose {
+    max-width: var(--container-prose) !important;
+}
+
 /* Seitlicher Seitenrand (A4): px-page */
 @utility px-page {
     padding-inline: clamp(16px, 4vw, 32px);

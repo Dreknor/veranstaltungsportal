@@ -115,7 +115,7 @@
                         @php
                             $series = $itemData['item'];
                             $firstEvent = $series->events->first();
-                            // route('series.show') existiert nicht – Link auf den ersten Termin der Reihe
+                            // Eine eigene Seite für Reihen gibt es nicht – Link auf den ersten Termin der Reihe
                             $seriesUrl = $firstEvent ? route('events.show', $firstEvent->slug) : route('events.index');
                         @endphp
                         <x-ui.row>
