@@ -1,256 +1,138 @@
 <x-layouts.app :title="$user->fullName()">
-    <div class="min-h-screen bg-gray-50 py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Profile Header -->
-            <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
-                <div class="h-32 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                <div class="px-6 pb-6">
-                    <div class="flex items-end justify-between -mt-16">
-                        <div class="flex items-end">
-                            <img src="{{ $user->profilePhotoUrl() }}" alt="{{ $user->fullName() }}" class="w-32 h-32 rounded-full border-4 border-white">
-                            <div class="ml-6 mb-2">
-                                <h1 class="text-3xl font-bold text-gray-900">{{ $user->fullName() }}</h1>
-                                <p class="text-gray-600">{{ $user->userTypeLabel() }}</p>
-                            </div>
-                        </div>
+    <div class="mb-8 flex flex-col gap-6 sm:flex-row sm:items-start">
+        @if ($user->profile_photo)
+            <img src="{{ $user->profilePhotoUrl() }}" alt="" class="h-24 w-24 flex-none rounded-full border border-line object-cover">
+        @else
+            <span aria-hidden="true" class="flex h-24 w-24 flex-none items-center justify-center rounded-full border border-line bg-zone text-h2 text-ink-soft">{{ $user->initials() }}</span>
+        @endif
 
-                        @if(auth()->check() && auth()->id() !== $user->id)
-                            <div class="mb-2">
-                                @if($connectionStatus === 'following')
-                                    <div class="flex space-x-2">
-                                        <span class="px-4 py-2 border border-green-500 bg-green-50 rounded-md text-sm font-medium text-green-700 flex items-center">
-                                            <x-icon.check class="w-4 h-4 mr-2" />
-                                            Verbunden
-                                        </span>
-                                        <form action="{{ route('connections.remove', $user) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" onclick="return confirm('Verbindung wirklich entfernen?')">
-                                                Entfernen
-                                            </button>
-                                        </form>
-                                    </div>
-                                @elseif($connectionStatus === 'pending')
-                                    <div class="flex space-x-2">
-                                        @if($isPendingRequest)
-                                            <!-- User sent the request - can cancel -->
-                                            <span class="px-4 py-2 border border-yellow-500 bg-yellow-50 rounded-md text-sm font-medium text-yellow-700">
-                                                Anfrage gesendet
-                                            </span>
-                                            <form action="{{ route('connections.cancel', $user) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                                    Zurückziehen
-                                                </button>
-                                            </form>
-                                        @else
-                                            <!-- User received the request - can accept or decline -->
-                                            <span class="px-4 py-2 border border-blue-500 bg-blue-50 rounded-md text-sm font-medium text-blue-700">
-                                                Möchte sich verbinden
-                                            </span>
-                                            <form action="{{ route('connections.accept', $user) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-                                                    Zurückfolgen
-                                                </button>
-                                            </form>
-                                            <form action="{{ route('connections.decline', $user) }}" method="POST" class="inline">
-                                                @csrf
-                                                <button type="submit" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                                                    Ablehnen
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                @elseif($canSendConnectionRequest)
-                                    <form action="{{ route('connections.send', $user) }}" method="POST">
-                                        @csrf
-                                        <button type="submit" class="px-6 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
-                                            Verbinden
-                                        </button>
-                                    </form>
-                                @else
-                                    <span class="px-4 py-2 border border-gray-300 bg-gray-100 rounded-md text-sm font-medium text-gray-500">
-                                        Verbindungsanfragen deaktiviert
-                                    </span>
-                                @endif
-                            </div>
+        <x-ui.page-header class="mb-0 min-w-0 flex-1" :title="$user->fullName()" :subtitle="$user->userTypeLabel()">
+            @if (auth()->check() && auth()->id() !== $user->id)
+                <x-slot:actions>
+                    @if ($connectionStatus === 'following')
+                        <x-ui.status tone="success">Verbunden</x-ui.status>
+                        <form action="{{ route('connections.remove', $user) }}" method="POST" class="m-0">
+                            @csrf
+                            @method('DELETE')
+                            <x-ui.button type="submit" variant="secondary" onclick="return confirm('Verbindung wirklich entfernen?')">Entfernen</x-ui.button>
+                        </form>
+                    @elseif ($connectionStatus === 'pending')
+                        @if ($isPendingRequest)
+                            {{-- Anfrage wurde von diesem Nutzer gesendet: kann zurückgezogen werden --}}
+                            <x-ui.status tone="warning">Anfrage gesendet</x-ui.status>
+                            <form action="{{ route('connections.cancel', $user) }}" method="POST" class="m-0">
+                                @csrf
+                                <x-ui.button type="submit" variant="secondary">Zurückziehen</x-ui.button>
+                            </form>
+                        @else
+                            {{-- Anfrage wurde empfangen: annehmen oder ablehnen --}}
+                            <x-ui.status tone="info">Möchte sich verbinden</x-ui.status>
+                            <form action="{{ route('connections.decline', $user) }}" method="POST" class="m-0">
+                                @csrf
+                                <x-ui.button type="submit" variant="secondary">Ablehnen</x-ui.button>
+                            </form>
+                            <form action="{{ route('connections.accept', $user) }}" method="POST" class="m-0">
+                                @csrf
+                                <x-ui.button type="submit">Zurückfolgen</x-ui.button>
+                            </form>
                         @endif
-                    </div>
-
-                    <!-- Bio -->
-                    @if($user->bio)
-                        <div class="mt-6">
-                            <p class="text-gray-700">{{ $user->bio }}</p>
-                        </div>
+                    @elseif ($canSendConnectionRequest)
+                        <form action="{{ route('connections.send', $user) }}" method="POST" class="m-0">
+                            @csrf
+                            <x-ui.button type="submit">Verbinden</x-ui.button>
+                        </form>
+                    @else
+                        <x-ui.status tone="neutral">Verbindungsanfragen deaktiviert</x-ui.status>
                     @endif
+                </x-slot:actions>
+            @endif
+        </x-ui.page-header>
+    </div>
 
-                    <!-- Stats -->
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-gray-200">
-                        <div class="text-center">
-                            <p class="text-2xl font-bold text-gray-900">{{ $stats['events_attended'] }}</p>
-                            <p class="text-sm text-gray-600">Events besucht</p>
-                        </div>
-                        @if($user->isOrganizer())
-                            <div class="text-center">
-                                <p class="text-2xl font-bold text-gray-900">{{ $stats['events_organized'] }}</p>
-                                <p class="text-sm text-gray-600">Events organisiert</p>
-                            </div>
+    @if ($user->bio)
+        <p class="m-0 mb-8 max-w-prose text-base text-ink">{{ $user->bio }}</p>
+    @endif
+
+    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <x-ui.stat label="Veranstaltungen besucht" :value="$stats['events_attended']" />
+        @if ($user->isOrganizer())
+            <x-ui.stat label="Veranstaltungen organisiert" :value="$stats['events_organized']" />
+        @endif
+        <x-ui.stat label="Stunden Fortbildung" :value="$stats['total_hours']" />
+        <x-ui.stat label="Follower" :value="$stats['followers_count']" :href="route('users.followers', $user)" />
+        <x-ui.stat label="Folgt" :value="$stats['following_count']" :href="route('users.following', $user)" />
+    </div>
+
+    <div class="grid items-start gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,368px)]">
+        <div class="flex min-w-0 flex-col gap-12">
+            @if ($recentEvents->isNotEmpty())
+                <x-ui.section :title="$user->isOrganizer() ? 'Organisierte Veranstaltungen' : 'Besuchte Veranstaltungen'">
+                    <x-ui.row-list>
+                        @foreach ($recentEvents as $event)
+                            <x-ui.event-row :event="$event" :show-action="false" />
+                        @endforeach
+                    </x-ui.row-list>
+                </x-ui.section>
+            @endif
+
+            <x-ui.section title="Aktivität">
+                <ul class="m-0 flex list-none flex-col p-0 text-base text-ink">
+                    @if ($stats['events_attended'] > 0)
+                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_attended'] }}</span> Veranstaltung(en) besucht</li>
+                    @endif
+                    @if ($user->isOrganizer() && $stats['events_organized'] > 0)
+                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_organized'] }}</span> Veranstaltung(en) organisiert</li>
+                    @endif
+                    @if ($user->badges->isNotEmpty())
+                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $user->badges->count() }}</span> Abzeichen verdient</li>
+                    @endif
+                    @if ($stats['events_attended'] === 0 && $user->badges->isEmpty() && !($user->isOrganizer() && $stats['events_organized'] > 0))
+                        <li class="border-t border-line py-3 text-muted">Noch keine Aktivität.</li>
+                    @endif
+                </ul>
+            </x-ui.section>
+        </div>
+
+        <div class="flex min-w-0 flex-col gap-12">
+            @if (($user->email || $user->phone) && auth()->check())
+                <x-ui.section title="Kontakt" level="h3">
+                    <ul class="m-0 flex list-none flex-col gap-2 p-0 text-base">
+                        @if ($showEmail && $user->email)
+                            <li class="flex items-center gap-2">
+                                <x-icon.mail class="h-5 w-5 flex-none text-muted" />
+                                <a href="mailto:{{ $user->email }}" class="min-w-0 break-words font-medium text-ink underline underline-offset-[3px]">{{ $user->email }}</a>
+                            </li>
                         @endif
-                        <div class="text-center">
-                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_hours'] }}</p>
-                            <p class="text-sm text-gray-600">Stunden Fortbildung</p>
-                        </div>
-                        <div class="text-center">
-                            <a href="{{ route('users.followers', $user) }}" class="block hover:text-blue-600">
-                                <p class="text-2xl font-bold text-gray-900">{{ $stats['followers_count'] }}</p>
-                                <p class="text-sm text-gray-600">Follower</p>
-                            </a>
-                        </div>
-                        <div class="text-center">
-                            <a href="{{ route('users.following', $user) }}" class="block hover:text-blue-600">
-                                <p class="text-2xl font-bold text-gray-900">{{ $stats['following_count'] }}</p>
-                                <p class="text-sm text-gray-600">Folgt</p>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        @if ($showPhone && $user->phone)
+                            <li class="flex items-center gap-2">
+                                <x-icon.phone class="h-5 w-5 flex-none text-muted" />
+                                <a href="tel:{{ $user->phone }}" class="font-medium text-ink underline underline-offset-[3px]">{{ $user->phone }}</a>
+                            </li>
+                        @endif
+                        @if (!$showEmail && !$showPhone)
+                            <li class="text-small text-muted">Verbinden Sie sich, um Kontaktdaten zu sehen.</li>
+                        @endif
+                    </ul>
+                </x-ui.section>
+            @endif
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Left Column -->
-                <div class="lg:col-span-1 space-y-6">
-                    <!-- Contact Info -->
-                    @if(($user->email || $user->phone) && auth()->check())
-                        <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-bold text-gray-900 mb-4">Kontakt</h2>
-                            @if($showEmail && $user->email)
-                                <div class="flex items-center text-sm text-gray-600 mb-2">
-                                    <x-icon.mail class="w-5 h-5 mr-2" />
-                                    <a href="mailto:{{ $user->email }}" class="hover:text-blue-600">{{ $user->email }}</a>
-                                </div>
-                            @endif
-                            @if($showPhone && $user->phone)
-                                <div class="flex items-center text-sm text-gray-600">
-                                    <x-icon.phone class="w-5 h-5 mr-2" />
-                                    <a href="tel:{{ $user->phone }}" class="hover:text-blue-600">{{ $user->phone }}</a>
-                                </div>
-                            @endif
-                            @if(!$showEmail && !$showPhone)
-                                <p class="text-sm text-gray-500 italic">Verbinden Sie sich, um Kontaktdaten zu sehen</p>
-                            @endif
-                        </div>
+            @if ($user->badges->isNotEmpty())
+                <x-ui.section title="Abzeichen" level="h3">
+                    <ul class="m-0 flex list-none flex-col p-0">
+                        @foreach ($user->badges as $badge)
+                            <li class="border-t border-line">
+                                <a href="{{ route('badges.show', $badge) }}" class="flex min-h-14 items-center gap-4 py-3 text-ui font-medium text-ink no-underline underline-offset-[3px] hover:underline">
+                                    <x-badge-icon :badge="$badge" size="sm" />
+                                    <span class="min-w-0">{{ $badge->name }}</span>
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @if ($user->badges->count() > 6)
+                        <x-ui.button variant="link" :href="route('badges.index')" arrow>Alle Abzeichen ansehen</x-ui.button>
                     @endif
-
-                    <!-- Badges -->
-                    @if($user->badges->isNotEmpty())
-                        <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-bold text-gray-900 mb-4">Auszeichnungen</h2>
-                            <div class="grid grid-cols-2 gap-4">
-                                @foreach($user->badges as $badge)
-                                    <a href="{{ route('badges.show', $badge) }}" class="flex flex-col items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                                        <div class="text-4xl mb-2">{{ $badge->icon }}</div>
-                                        <p class="text-xs font-medium text-gray-900 text-center">{{ $badge->name }}</p>
-                                    </a>
-                                @endforeach
-                            </div>
-                            @if($user->badges->count() > 6)
-                                <div class="mt-4 text-center">
-                                    <a href="{{ route('badges.index') }}" class="text-sm text-blue-600 hover:text-blue-800">
-                                        Alle Badges ansehen →
-                                    </a>
-                                </div>
-                            @endif
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Right Column -->
-                <div class="lg:col-span-2 space-y-6">
-                    <!-- Recent Events -->
-                    @if($recentEvents->isNotEmpty())
-                        <div class="bg-white rounded-lg shadow-sm p-6">
-                            <h2 class="text-lg font-bold text-gray-900 mb-4">
-                                @if($user->isOrganizer())
-                                    Organisierte Veranstaltungen
-                                @else
-                                    Besuchte Veranstaltungen
-                                @endif
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                @foreach($recentEvents as $event)
-                                    <a href="{{ route('events.show', $event->slug) }}" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition">
-                                        @if($event->featured_image)
-                                            <img src="{{ asset('storage/' . $event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-32 object-cover rounded mb-3">
-                                        @endif
-                                        <h3 class="font-semibold text-gray-900 mb-1">{{ $event->title }}</h3>
-                                        <p class="text-sm text-gray-600">
-                                            <x-icon.calendar class="inline w-4 h-4 mr-1" />
-                                            @if($event->start_date->isSameDay($event->end_date))
-                                                {{ $event->start_date->format('d.m.Y') }}
-                                            @else
-                                                {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
-                                            @endif
-                                        </p>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Activity Feed -->
-                    <div class="bg-white rounded-lg shadow-sm p-6">
-                        <h2 class="text-lg font-bold text-gray-900 mb-4">Aktivität</h2>
-                        <div class="space-y-4">
-                            @if($stats['events_attended'] > 0)
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <x-icon.ticket class="w-5 h-5 text-blue-600" />
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="text-sm text-gray-900">
-                                            Hat <span class="font-semibold">{{ $stats['events_attended'] }}</span> Veranstaltung(en) besucht
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if($user->isOrganizer() && $stats['events_organized'] > 0)
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                            <x-icon.calendar class="w-5 h-5 text-green-600" />
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="text-sm text-gray-900">
-                                            Hat <span class="font-semibold">{{ $stats['events_organized'] }}</span> Veranstaltung(en) organisiert
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if($user->badges->isNotEmpty())
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                                            <span class="text-xl">🏆</span>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <p class="text-sm text-gray-900">
-                                            Hat <span class="font-semibold">{{ $user->badges->count() }}</span> Badge(s) verdient
-                                        </p>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </x-ui.section>
+            @endif
         </div>
     </div>
 </x-layouts.app>
-

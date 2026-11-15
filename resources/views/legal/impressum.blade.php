@@ -6,34 +6,20 @@
         <meta name="robots" content="noindex, follow">
     @endpush
 
-    <div class="min-h-screen bg-gray-50 py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-xl shadow-sm p-8 lg:p-12">
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ $page?->title ?? 'Impressum' }}</h1>
-                <p class="text-sm text-gray-500 mb-8">Angaben gemäß § 5 TMG</p>
+    <div class="mx-auto max-w-page px-page py-[clamp(32px,6vw,64px)]">
+        <x-ui.page-header :title="$page?->title ?? 'Impressum'" subtitle="Angaben gemäß § 5 TMG"
+            :back-href="route('home')" back-label="Zurück zur Startseite" />
 
-                <div class="prose prose-gray max-w-none">
-                    @if($page?->content)
-                        {!! $page->content !!}
-                    @else
-                        <p class="text-gray-500">Das Impressum wird gerade bearbeitet. Bitte schauen Sie später wieder vorbei.</p>
-                    @endif
-                </div>
+        <x-legal.prose>
+            @if ($page?->content)
+                {!! $page->content !!}
+            @else
+                <p class="text-muted">Das Impressum wird gerade bearbeitet. Bitte schauen Sie später wieder vorbei.</p>
+            @endif
+        </x-legal.prose>
 
-                @if($page?->last_updated_at)
-                    <p class="mt-8 text-xs text-gray-400">Zuletzt aktualisiert: {{ $page->last_updated_at->format('d.m.Y') }}</p>
-                @endif
-
-                <div class="mt-10 pt-6 border-t border-gray-200">
-                    <a href="{{ route('home') }}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                        </svg>
-                        Zurück zur Startseite
-                    </a>
-                </div>
-            </div>
-        </div>
+        @if ($page?->last_updated_at)
+            <p class="mt-8 mb-0 text-small text-muted">Zuletzt aktualisiert: {{ $page->last_updated_at->format('d.m.Y') }}</p>
+        @endif
     </div>
 </x-layouts.public>
-

@@ -1,49 +1,27 @@
 <x-layouts.public :title="__('Passwort zurücksetzen')">
-    <div class="min-h-[calc(100vh-12rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-md w-full">
-            <!-- Reset Password Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="p-6">
-                    <div class="text-center mb-6">
-                        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Passwort zurücksetzen') }}</h1>
-                        <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Geben Sie Ihre E-Mail-Adresse und Ihr neues Passwort ein.') }}
-                        </p>
-                    </div>
+    <div class="mx-auto max-w-page px-page py-[clamp(32px,6vw,64px)]">
+        <div class="mx-auto max-w-[440px]">
+            <x-ui.page-header :title="__('Passwort zurücksetzen')"
+                :subtitle="__('Geben Sie Ihre E-Mail-Adresse und Ihr neues Passwort ein.')" />
 
-                    <form method="POST" action="{{ route('password.store') }}">
-                        @csrf
-                        <input type="hidden" name="token" value="{{ request()->route('token') }}">
+            <form method="POST" action="{{ route('password.store') }}" class="flex flex-col gap-5">
+                @csrf
+                <input type="hidden" name="token" value="{{ request()->route('token') }}">
 
-                        <!-- Email Input -->
-                        <div class="mb-4">
-                            <x-forms.input name="email" type="email" label="E-Mail"
-                                value="{{ old('email', request('email')) }}" placeholder="ihre@email.de" />
-                        </div>
+                <x-ui.field label="E-Mail" name="email" type="email" :value="request('email')" autocomplete="email" />
 
-                        <!-- Password Input -->
-                        <div class="mb-4">
-                            <x-forms.input name="password" type="password" label="Passwort" placeholder="••••••••" />
-                        </div>
+                <x-ui.field label="Passwort" name="password" type="password" autocomplete="new-password" />
 
-                        <!-- Confirm Password Input -->
-                        <div class="mb-4">
-                            <x-forms.input name="password_confirmation" type="password" label="Passwort bestätigen"
-                                placeholder="••••••••" />
-                        </div>
+                <x-ui.field label="Passwort bestätigen" name="password_confirmation" type="password"
+                    autocomplete="new-password" />
 
-                        <!-- Reset Password Button -->
-                        <x-button type="primary" buttonType="submit" class="w-full">
-                            {{ __('Passwort zurücksetzen') }}
-                        </x-button>
-                    </form>
+                <x-ui.button type="submit" full>{{ __('Passwort zurücksetzen') }}</x-ui.button>
+            </form>
 
-                    <!-- Back to Login Link -->
-                    <div class="text-center mt-6">
-                        <a href="{{ route('login') }}"
-                            class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ __('Zurück zur Anmeldung') }}</a>
-                    </div>
-                </div>
-            </div>
+            <p class="mt-6 mb-0 text-small text-muted">
+                <a href="{{ route('login') }}"
+                    class="font-medium text-ink underline underline-offset-[3px]">{{ __('Zurück zur Anmeldung') }}</a>
+            </p>
         </div>
     </div>
 </x-layouts.public>

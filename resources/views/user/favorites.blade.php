@@ -1,110 +1,26 @@
 <x-layouts.app title="Meine Favoriten">
-    <div class="min-h-screen bg-gray-50 py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Header -->
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Meine Favoriten</h1>
-                <p class="text-gray-600 mt-2">Ihre gespeicherten Fortbildungen und Veranstaltungen</p>
-            </div>
+    <x-ui.page-header title="Meine Favoriten" subtitle="Ihre gespeicherten Fortbildungen und Veranstaltungen." />
 
-            @if($favoriteEvents->count() > 0)
-                <!-- Events Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($favoriteEvents as $event)
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group">
-                            @if($event->featured_image)
-                                <div class="h-48 overflow-hidden">
-                                    <img src="{{ Storage::url($event->featured_image) }}"
-                                         alt="{{ $event->title }}"
-                                         class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                                </div>
-                            @else
-                                <div class="h-48 bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                    <x-icon.academic class="w-20 h-20 text-white opacity-50" />
-                                </div>
-                            @endif
+    @if ($favoriteEvents->count() > 0)
+        <x-ui.row-list>
+            @foreach ($favoriteEvents as $event)
+                <x-ui.event-row :event="$event">
+                    <x-ui.button variant="link" size="sm" class="self-start" onclick="toggleFavorite({{ $event->id }})">
+                        <x-slot:icon><x-icon.heart class="h-4 w-4" /></x-slot:icon>
+                        Aus Favoriten entfernen
+                    </x-ui.button>
+                </x-ui.event-row>
+            @endforeach
+        </x-ui.row-list>
 
-                            <div class="p-6">
-                                <!-- Category Badge -->
-                                @if($event->category)
-                                    <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full mb-3"
-                                          style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
-                                        {{ $event->category->name }}
-                                    </span>
-                                @endif
-
-                                <h3 class="font-bold text-lg text-gray-900 mb-2 line-clamp-2">
-                                    {{ $event->title }}
-                                </h3>
-
-                                <p class="text-gray-600 text-sm mb-4 line-clamp-2">
-                                    {{ $event->description }}
-                                </p>
-
-                                <!-- Event Info -->
-                                <div class="space-y-2 mb-4">
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <x-icon.calendar class="w-4 h-4 mr-2" />
-                                        @if($event->start_date->isSameDay($event->end_date))
-                                            {{ $event->start_date->format('d.m.Y H:i') }} Uhr
-                                        @else
-                                            {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
-                                        @endif
-                                    </div>
-
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <x-icon.location class="w-4 h-4 mr-2" />
-                                        {{ $event->venue_city }}
-                                    </div>
-
-                                    @php
-                                        $minPrice = $event->getMinimumPrice();
-                                    @endphp
-                                    @if($minPrice)
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.currency class="w-4 h-4 mr-2" />
-                                            ab {{ number_format($minPrice, 2, ',', '.') }} €
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <!-- Actions -->
-                                <div class="flex gap-2">
-                                    <a href="{{ route('events.show', $event->slug) }}"
-                                       class="flex-1 px-4 py-2 bg-blue-600 text-white text-center rounded-lg hover:bg-blue-700 transition text-sm font-medium">
-                                        Details ansehen
-                                    </a>
-
-                                    <button onclick="toggleFavorite({{ $event->id }})"
-                                            class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition">
-                                        <x-icon.heart class="w-5 h-5" fill="currentColor" />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                <!-- Pagination -->
-                <div class="mt-8">
-                    {{ $favoriteEvents->links() }}
-                </div>
-            @else
-                <!-- Empty State -->
-                <div class="bg-white rounded-lg shadow-sm p-12 text-center">
-                    <x-icon.heart class="w-24 h-24 text-gray-300 mx-auto mb-4" />
-                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Noch keine Favoriten</h2>
-                    <p class="text-gray-600 mb-6">
-                        Entdecken Sie spannende Fortbildungen und speichern Sie Ihre Favoriten
-                    </p>
-                    <a href="{{ route('events.index') }}"
-                       class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                        Fortbildungen entdecken
-                    </a>
-                </div>
-            @endif
+        <div class="mt-8">
+            {{ $favoriteEvents->links() }}
         </div>
-    </div>
+    @else
+        <x-ui.empty title="Noch keine Favoriten" :action-href="route('events.index')" action-label="Fortbildungen entdecken" action-variant="primary">
+            Entdecken Sie Fortbildungen und speichern Sie Ihre Favoriten.
+        </x-ui.empty>
+    @endif
 
     @push('scripts')
     <script>
@@ -132,4 +48,3 @@
     </script>
     @endpush
 </x-layouts.app>
-

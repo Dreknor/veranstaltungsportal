@@ -1,4 +1,4 @@
-@props(['email', 'class' => 'text-blue-600 hover:text-blue-800'])
+@props(['email', 'class' => 'text-ink underline underline-offset-[3px]'])
 
 @php
     // Obfuskiere die E-Mail-Adresse mehrfach für Bot-Schutz
@@ -38,14 +38,12 @@
       data-contact="{{ $reversed }}"
       data-type="email"
       {{ $attributes->merge(['class' => $class]) }}>
-    <button type="button" class="inline-flex items-center gap-2 cursor-pointer hover:underline focus:outline-none"
+    <button type="button" class="inline-flex min-h-11 cursor-pointer items-center gap-2"
             onclick="revealContact(this)"
             aria-label="E-Mail-Adresse anzeigen">
-        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-        </svg>
+        <x-icon.mail class="h-4 w-4 flex-shrink-0" />
         <span class="contact-display">{{ $display }}</span>
-        <span class="text-xs text-gray-500 italic">(klicken zum Anzeigen)</span>
+        <span class="text-small text-muted">(klicken zum Anzeigen)</span>
     </button>
 </span>
 
