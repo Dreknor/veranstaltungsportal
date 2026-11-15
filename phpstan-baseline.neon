@@ -2425,12 +2425,6 @@ parameters:
 			path: app/Http/Controllers/Organizer/CertificateController.php
 
 		-
-			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Organizer/CertificateController.php
-
-		-
 			message: '#^Property App\\Http\\Controllers\\Organizer\\CertificateController\:\:\$certificateService has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
