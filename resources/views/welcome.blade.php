@@ -44,8 +44,8 @@
             <x-ui.search-bar :action="route('events.index')" class="max-w-[960px]">
                 <x-ui.search-cell label="Kategorie" name="category" wide :options="['' => 'Alle'] + $categories->pluck('name', 'id')->all()" />
                 <x-ui.search-cell label="Ort" name="city">
-                    <input id="city" name="city" type="text" placeholder="Beliebig" autocomplete="address-level2"
-                        class="ui-search-control">
+                    <input id="city" name="city" type="text" placeholder="Beliebig"
+                        autocomplete="address-level2" class="ui-search-control">
                 </x-ui.search-cell>
             </x-ui.search-bar>
         </div>
@@ -89,7 +89,8 @@
                             <a href="{{ route('events.index', ['category' => $category->id]) }}"
                                 class="flex min-h-15 items-center justify-between gap-4 border-t border-line px-2 text-base font-medium text-ink no-underline transition-colors duration-150 hover:bg-zone">
                                 <span class="min-w-0">{{ $category->name }}</span>
-                                <span class="flex flex-none items-center gap-3 text-small font-normal text-muted tabular-nums">
+                                <span
+                                    class="flex flex-none items-center gap-3 text-small font-normal text-muted tabular-nums">
                                     {{ $category->listed_events_count }}
                                     {{ $category->listed_events_count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}
                                     <x-icon.arrow-right class="h-4 w-4" />
@@ -163,7 +164,8 @@
                 <x-ui.box padding="none"
                     class="flex flex-wrap items-center justify-between gap-x-12 gap-y-6 px-[clamp(24px,4vw,48px)] py-[clamp(24px,3vw,32px)]">
                     <div class="flex flex-[1_1_320px] flex-col gap-1">
-                        <h2 id="veranstalter-titel" class="m-0 text-h2-form text-ink">Sie bieten selbst Fortbildungen an?</h2>
+                        <h2 id="veranstalter-titel" class="m-0 text-h2-form text-ink">Sie bieten selbst Fortbildungen
+                            an?</h2>
                         <p class="m-0 max-w-[600px] text-base text-muted">
                             Legen Sie Ihre Veranstaltung im Portal an und verwalten Sie Anmeldungen und Warteliste an
                             einem Ort.

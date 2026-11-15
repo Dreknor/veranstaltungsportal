@@ -21,13 +21,13 @@
             <!-- Tab Content: Für Teilnehmer -->
             <div x-show="activeTab === 'participants'" x-cloak class="faq-section border-t border-line">
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Wie kann ich mich für eine Veranstaltung anmelden?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Die Anmeldung ist einfach und unkompliziert:
@@ -44,13 +44,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Benötige ich ein Benutzerkonto?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     <strong>Nein, ein Benutzerkonto ist nicht erforderlich.</strong> Sie können Veranstaltungen auch ohne Anmeldung buchen. Allerdings bietet ein kostenloser Account mehrere Vorteile:
@@ -68,13 +68,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Wie erfolgt die Bezahlung?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Die Bezahlung erfolgt über Rechnung, falls die Veranstaltung kostenpflichtig ist. Nach der Buchung erhalten Sie eine Rechnung per E-Mail, die Sie bequem über die angegebene Zahlungsmethode begleichen können.
@@ -89,13 +89,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Wie erhalte ich die Tickets oder Zugangsinfos?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Die Art der Benachrichtigung hängt vom Veranstaltungstyp ab:
@@ -121,13 +121,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Kann ich meine Buchung stornieren oder ändern?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     <strong>Änderungen:</strong> Änderungen an Ihren persönlichen Daten (Name, E-Mail, etc.) können Sie nach einer Registrierung selbst vornehmen. Ansonsten kontaktieren Sie bitte den Veranstalter, um Änderungen an Ihrer Buchung zu besprechen.
@@ -139,13 +139,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Kann ich eine Bestätigung oder ein Zertifikat erhalten?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Ja! Nach erfolgter Veranstaltung können Sie Ihre Buchungsbestätigung und ggf. ein Teilnahmezertifikat von der Buchungsseite herunterladen.
@@ -160,13 +160,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Ich habe meine Buchungsnummer verloren – was kann ich tun?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Kein Problem! Sie können Ihre Buchungsdetails mit Ihrer E-Mail-Adresse und Veranstaltungsname wiederfinden.
@@ -184,13 +184,13 @@
             <!-- Tab Content: Für Veranstalter -->
             <div x-show="activeTab === 'organizers'" x-cloak class="faq-section border-t border-line">
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Ich möchte eine Veranstaltung veröffentlichen – wie geht das?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <x-ui.alert tone="info" class="mb-4"><strong>Wichtig:</strong> Veranstalter müssen sich direkt an die Betreiber des Portals wenden, um Veranstaltungen zu veröffentlichen.</x-ui.alert>                        <p>
                     Falls Sie eine Veranstaltung organisieren möchten, kontaktieren Sie bitte die Betreiber unter der angegebenen Kontaktadresse. Wir prüfen Ihre Anfrage und unterstützen Sie bei der Einrichtung.
@@ -205,13 +205,13 @@
             <!-- Tab Content: Technisches -->
             <div x-show="activeTab === 'technical'" x-cloak class="faq-section border-t border-line">
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Welche Browser werden unterstützt?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Das Portal funktioniert auf allen modernen Browsern:
@@ -229,13 +229,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Sind meine Daten auf dem Portal sicher?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Ja, wir nehmen den Datenschutz ernst:
@@ -254,13 +254,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Wird das Portal auf mobilen Geräten unterstützt?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Ja! Das Portal ist vollständig responsive und funktioniert auf:
@@ -277,13 +277,13 @@
                 </div>
 
                 <div class="faq-item border-b border-line" x-data="{ open: false }">
-                    <h3 class="m-0">
+                    <h2 class="m-0">
                         <button type="button" x-on:click="open = !open" :aria-expanded="open"
                             class="flex min-h-14 w-full cursor-pointer items-center justify-between gap-4 border-0 bg-transparent px-0 py-4 text-left text-base font-semibold text-ink">
                             <span>Ich habe ein technisches Problem – wie erhalte ich Hilfe?</span>
                             <x-icon.chevron-down class="h-5 w-5 flex-none text-muted" x-bind:class="open ? 'rotate-180' : ''" />
                         </button>
-                    </h3>
+                    </h2>
                     <x-legal.prose x-show="open" x-cloak class="pb-6">
                     <p>
                     Besuchen Sie unser Hilfecenter oder kontaktieren Sie die Betreiber mit folgenden Informationen:

@@ -64,8 +64,8 @@
                             <span class="line-clamp-2 text-small text-ink-soft">{{ $user->bio }}</span>
                         @endif
                         <x-slot:meta>
-                            <span class="text-ui font-medium tabular-nums">{{ $user->events_count }} Veranstaltungen</span>
-                            <span class="text-small text-muted tabular-nums">{{ $user->bookings_count }} Buchungen</span>
+                            <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
+                            <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen</span>
                         </x-slot:meta>
                         <x-slot:action>
                             <x-ui.button variant="secondary" :href="route('users.show', $user)" full>Profil</x-ui.button>
@@ -103,8 +103,8 @@
                             <span class="line-clamp-2 text-small text-ink-soft">{{ $user->bio }}</span>
                         @endif
                         <x-slot:meta>
-                            <span class="text-ui font-medium tabular-nums">{{ $user->events_count }} Veranstaltungen</span>
-                            <span class="text-small text-muted tabular-nums">{{ $user->bookings_count }} Buchungen</span>
+                            <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
+                            <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen</span>
                         </x-slot:meta>
                         <x-slot:action>
                             <x-ui.button variant="secondary" :href="route('users.show', $user)" full>Profil</x-ui.button>

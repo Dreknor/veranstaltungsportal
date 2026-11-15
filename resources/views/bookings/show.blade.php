@@ -1,14 +1,12 @@
-@if(auth()->check())
+@if (auth()->check())
+    {{-- Für eingeloggte Benutzer: App-Layout mit Seitenleiste (bringt Seitenbreite und Abstände mit) --}}
     <x-layouts.app :title="'Buchung ' . $booking->booking_number">
-        {{-- Für eingeloggte Benutzer: Nutzung des App-Layouts mit Sidebar/Header --}}
-        <div class="py-4 sm:py-8">
-            @include('bookings.partials.details')
-        </div>
+        @include('bookings.partials.details')
     </x-layouts.app>
 @else
     {{-- Für Gäste bleibt das öffentliche Layout inkl. öffentlicher Navigation --}}
     <x-layouts.public :title="'Buchung ' . $booking->booking_number">
-        <div class="min-h-screen bg-gray-50 dark:bg-gray-900 py-4 sm:py-8">
+        <div class="mx-auto max-w-page px-page pt-8 pb-[clamp(56px,7vw,96px)]">
             @include('bookings.partials.details')
         </div>
     </x-layouts.public>

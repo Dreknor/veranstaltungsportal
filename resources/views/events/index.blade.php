@@ -5,33 +5,46 @@
                 ['name' => 'Home', 'url' => route('home')],
                 ['name' => 'Veranstaltungen', 'url' => route('events.index')],
             ];
-            $description = 'Entdecken Sie Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Filter nach Kategorie, Ort und Datum.';
+            $description =
+                'Entdecken Sie Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Filter nach Kategorie, Ort und Datum.';
             // Canonical immer auf Seite 1 (ohne ?page=N) setzen
             $canonicalUrl = route('events.index');
             $isFilteredPage = request()->hasAny(['search', 'category', 'city', 'date_from', 'date_to', 'type', 'page']);
         @endphp
-        <x-meta-tags
-            :title="'Veranstaltungen - Fort- und Weiterbildungen entdecken'"
-            :description="$description"
-            :breadcrumbs="$breadcrumbs"
-            :canonical="$canonicalUrl"
-        />
-        @if($isFilteredPage)
+        <x-meta-tags :title="'Veranstaltungen - Fort- und Weiterbildungen entdecken'" :description="$description" :breadcrumbs="$breadcrumbs" :canonical="$canonicalUrl" />
+        @if ($isFilteredPage)
             <meta name="robots" content="noindex, follow">
         @endif
-        <link rel="alternate" type="application/atom+xml"
-              title="{{ config('app.name') }} – Veranstaltungen Feed"
-              href="{{ route('feed.atom') }}">
+        <link rel="alternate" type="application/atom+xml" title="{{ config('app.name') }} – Veranstaltungen Feed"
+            href="{{ route('feed.atom') }}">
     @endpush
 
     @php
-        $filterCount = collect(['city', 'date_from', 'date_to'])->filter(fn($key) => request()->filled($key))->count();
-        $activeCategory = request()->filled('category') ? $categories->firstWhere('id', (int) request('category')) : null;
+        $filterCount = collect(['date_from', 'date_to'])
+            ->filter(fn($key) => request()->filled($key))
+            ->count();
+        $activeCategory = request()->filled('category')
+            ? $categories->firstWhere('id', (int) request('category'))
+            : null;
         $activeFilters = array_filter([
             $activeCategory ? 'Kategorie: ' . $activeCategory->name : null,
             request()->filled('city') ? 'Ort: ' . request('city') : null,
-            request()->filled('date_from') ? 'ab ' . \Carbon\Carbon::parse(request('date_from'))->format('d.m.Y') : null,
-            request()->filled('date_to') ? 'bis ' . \Carbon\Carbon::parse(request('date_to'))->format('d.m.Y') : null,
+            request()->filled('date_from')
+                ? 'ab ' .
+                    rescue(
+                        fn() => \Carbon\Carbon::parse(request('date_from'))->format('d.m.Y'),
+                        request('date_from'),
+                        false,
+                    )
+                : null,
+            request()->filled('date_to')
+                ? 'bis ' .
+                    rescue(
+                        fn() => \Carbon\Carbon::parse(request('date_to'))->format('d.m.Y'),
+                        request('date_to'),
+                        false,
+                    )
+                : null,
         ]);
         $total = $items->total();
     @endphp
@@ -60,31 +73,37 @@
                 <fieldset class="m-0 min-w-0 border-0 p-0">
                     <legend class="mb-4 p-0 text-h3 text-ink">Zeitraum</legend>
                     <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                        <x-ui.field label="Von" name="date_from" type="date" :value="request('date_from')" :error="false" />
-                        <x-ui.field label="Bis" name="date_to" type="date" :value="request('date_to')" :error="false" />
+                        <x-ui.field label="Von" name="date_from" type="date" :value="request('date_from')"
+                            :error="false" />
+                        <x-ui.field label="Bis" name="date_to" type="date" :value="request('date_to')"
+                            :error="false" />
                     </div>
                 </fieldset>
             </x-slot:filters>
             @if ($activeFilters || request()->filled('search'))
                 <x-slot:active>
-                    {{ implode(' · ', $activeFilters) }}@if ($activeFilters) · @endif<a href="{{ route('events.index') }}"
+                    {{ implode(' · ', $activeFilters) }}@if ($activeFilters)
+                        ·
+                    @endif
+                    <a href="{{ route('events.index') }}"
                         class="font-medium text-ink underline underline-offset-[3px]">Filter zurücksetzen</a>
                 </x-slot:active>
             @endif
         </x-ui.search-bar>
 
-        <p class="mt-8 mb-4 text-base text-ink-soft" role="status">
-            @if ($total === 0)
-                Keine Veranstaltungen gefunden.
-            @elseif ($total === 1)
-                1 Veranstaltung gefunden.
-            @else
-                <span class="tabular-nums">{{ $total }}</span> Veranstaltungen gefunden.
-            @endif
-        </p>
+        @if ($total > 0)
+            <p class="mt-8 mb-4 text-base text-ink-soft">
+                @if ($total === 1)
+                    1 Veranstaltung gefunden.
+                @else
+                    <span class="tabular-nums">{{ $total }}</span> Veranstaltungen gefunden.
+                @endif
+            </p>
+        @endif
 
         @if ($items->isEmpty())
-            <x-ui.empty title="Keine Veranstaltungen gefunden" :action-href="route('events.index')" action-label="Filter zurücksetzen">
+            <x-ui.empty class="mt-8" title="Keine Veranstaltungen gefunden" :action-href="route('events.index')"
+                action-label="Filter zurücksetzen">
                 Passen Sie Ihre Suchkriterien an oder schauen Sie später wieder vorbei.
             </x-ui.empty>
         @else
@@ -105,12 +124,15 @@
                                     <x-ui.date-block :date="$firstEvent->start_date" />
                                 </x-slot:lead>
                             @endif
-                            <span class="text-small text-muted">Veranstaltungsreihe{{ $series->category ? ' · ' . $series->category->name : '' }}</span>
+                            <span
+                                class="text-small text-muted">Veranstaltungsreihe{{ $series->category ? ' · ' . $series->category->name : '' }}</span>
                             <h2 class="m-0 text-h3 text-ink">
-                                <a href="{{ $seriesUrl }}" class="text-ink no-underline underline-offset-[3px] hover:underline">{{ $series->title }}</a>
+                                <a href="{{ $seriesUrl }}"
+                                    class="text-ink no-underline underline-offset-[3px] hover:underline">{{ $series->title }}</a>
                             </h2>
                             <x-slot:meta>
-                                <span class="text-ui font-medium tabular-nums">{{ $series->events->count() }} Termine</span>
+                                <span class="text-ui font-medium tabular-nums">{{ $series->events->count() }}
+                                    Termine</span>
                                 @if ($firstEvent && $firstEvent->venue_city)
                                     <span class="text-small text-muted">{{ $firstEvent->venue_city }}</span>
                                 @endif
@@ -125,13 +147,13 @@
 
             <x-ui.pagination :paginator="$items" />
 
-                <!-- ItemList Schema for Events -->
-                @if($items->isNotEmpty())
+            <!-- ItemList Schema for Events -->
+            @if ($items->isNotEmpty())
                 @php
                     $itemListSchema = [
                         '@context' => 'https://schema.org',
                         '@type' => 'ItemList',
-                        'itemListElement' => []
+                        'itemListElement' => [],
                     ];
 
                     foreach ($items as $index => $itemData) {
@@ -149,8 +171,7 @@
                 <script type="application/ld+json">
                 {!! json_encode($itemListSchema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
                 </script>
-                @endif
+            @endif
         @endif
     </div>
 </x-layouts.public>
-

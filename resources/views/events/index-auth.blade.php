@@ -1,225 +1,145 @@
 <x-layouts.app title="Veranstaltungen">
     @push('meta')
-        <link rel="alternate" type="application/atom+xml"
-              title="{{ config('app.name') }} – Veranstaltungen Feed"
-              href="{{ route('feed.atom') }}">
+        <link rel="alternate" type="application/atom+xml" title="{{ config('app.name') }} – Veranstaltungen Feed"
+            href="{{ route('feed.atom') }}">
     @endpush
-    <div class="min-h-screen bg-gray-50">
-        <!-- Header mit Suche und Filter -->
-        <div class="bg-white shadow-sm border-b">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-gray-900">Veranstaltungen entdecken</h1>
-                    <a href="{{ route('favorites.index') }}" class="text-blue-600 hover:text-blue-800 font-medium">
-                        <x-icon.heart class="w-5 h-5 inline-block mr-1" />
-                        Meine Favoriten
-                    </a>
+    @php
+        $filterCount = collect(['date_from', 'date_to'])
+            ->filter(fn($key) => request()->filled($key))
+            ->count();
+        $activeCategory = request()->filled('category')
+            ? $categories->firstWhere('id', (int) request('category'))
+            : null;
+        $activeFilters = array_filter([
+            $activeCategory ? 'Kategorie: ' . $activeCategory->name : null,
+            request()->filled('city') ? 'Ort: ' . request('city') : null,
+            request()->filled('date_from')
+                ? 'ab ' .
+                    rescue(
+                        fn() => \Carbon\Carbon::parse(request('date_from'))->format('d.m.Y'),
+                        request('date_from'),
+                        false,
+                    )
+                : null,
+            request()->filled('date_to')
+                ? 'bis ' .
+                    rescue(
+                        fn() => \Carbon\Carbon::parse(request('date_to'))->format('d.m.Y'),
+                        request('date_to'),
+                        false,
+                    )
+                : null,
+        ]);
+        $total = $items->total();
+    @endphp
+
+    <x-ui.page-header title="Veranstaltungen entdecken">
+        <x-slot:actions>
+            <x-ui.button variant="secondary" :href="route('events.calendar')">
+                <x-slot:icon><x-icon.calendar /></x-slot:icon>
+                Zur Kalenderansicht
+            </x-ui.button>
+            <x-ui.button variant="link" :href="route('favorites.index')">
+                <x-slot:icon><x-icon.heart /></x-slot:icon>
+                Meine Favoriten
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <x-ui.search-bar :action="route('events.index')" :filter-count="$filterCount">
+        <x-ui.search-cell label="Kategorie" name="category" wide :options="['' => 'Alle Kategorien'] + $categories->pluck('name', 'id')->all()" />
+        <x-ui.search-cell label="Ort" name="city">
+            <input id="city" name="city" type="text" value="{{ request('city') }}" placeholder="Beliebig"
+                autocomplete="address-level2" class="ui-search-control">
+        </x-ui.search-cell>
+        <x-slot:filters>
+            <fieldset class="m-0 min-w-0 border-0 p-0">
+                <legend class="mb-4 p-0 text-h3 text-ink">Zeitraum</legend>
+                <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
+                    <x-ui.field label="Von" name="date_from" type="date" :value="request('date_from')" :error="false" />
+                    <x-ui.field label="Bis" name="date_to" type="date" :value="request('date_to')" :error="false" />
                 </div>
+            </fieldset>
+        </x-slot:filters>
+        @if ($activeFilters || request()->filled('search'))
+            <x-slot:active>
+                {{ implode(' · ', $activeFilters) }}@if ($activeFilters)
+                    ·
+                @endif
+                <a href="{{ route('events.index') }}"
+                    class="font-medium text-ink underline underline-offset-[3px]">Filter zurücksetzen</a>
+            </x-slot:active>
+        @endif
+    </x-ui.search-bar>
 
-                <form method="GET" action="{{ route('events.index') }}" class="space-y-4">
-                    <!-- Suchleiste -->
-                    <div class="flex gap-4">
-                        <div class="flex-1">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                   placeholder="Nach Events suchen..."
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                            <x-icon.search class="w-5 h-5 inline-block mr-2" />
-                            Suchen
-                        </button>
-                    </div>
-
-                    <!-- Filter -->
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
-                            <select name="category" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="">Alle Kategorien</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
-                            <input type="text" name="city" value="{{ request('city') }}"
-                                   placeholder="Stadt"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Von</label>
-                            <input type="date" name="date_from" value="{{ request('date_from') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Bis</label>
-                            <input type="date" name="date_to" value="{{ request('date_to') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <div class="flex gap-2">
-                            <a href="{{ route('events.index') }}" class="text-sm text-gray-600 hover:text-gray-900">Filter zurücksetzen</a>
-                        </div>
-                        <a href="{{ route('events.calendar') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                            <x-icon.calendar class="w-4 h-4 inline-block" />
-                            Zur Kalenderansicht
-                        </a>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Events Liste -->
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            @if($items->isEmpty())
-                <div class="text-center py-12">
-                    <div class="text-gray-400 mb-4">
-                        <x-icon.calendar class="w-16 h-16 mx-auto" />
-                    </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Keine Veranstaltungen gefunden</h3>
-                    <p class="text-gray-600">Passen Sie Ihre Suchkriterien an oder schauen Sie später wieder vorbei.</p>
-                </div>
+    @if ($total > 0)
+        <p class="mt-8 mb-4 text-base text-ink-soft">
+            @if ($total === 1)
+                1 Veranstaltung gefunden.
             @else
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($items as $itemData)
-                        @if($itemData['type'] === 'event')
-                            @php $event = $itemData['item']; @endphp
-                            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                                <!-- Event Bild -->
-                                <div class="relative aspect-w-16 aspect-h-9 bg-gray-200">
-                                    @if($event->featured_image)
-                                        <img src="{{ Storage::url($event->featured_image) }}" alt="{{ $event->title }}" class="w-full h-48 object-cover">
-                                    @else
-                                        <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                                            <x-icon.calendar class="w-16 h-16 text-white opacity-50" />
-                                        </div>
-                                    @endif
-
-                                    <!-- Featured Badge -->
-                                    @if($event->is_featured)
-                                        <span class="absolute top-2 left-2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                            Featured
-                                        </span>
-                                    @endif
-
-                                    <!-- Favorite Button -->
-                                    <div class="absolute top-2 right-2">
-                                        <button type="button"
-                                                onclick="toggleFavorite({{ $event->id }}, this)"
-                                                data-favorited="{{ auth()->user()->hasFavorited($event) ? 'true' : 'false' }}"
-                                                class="p-2 rounded-full {{ auth()->user()->hasFavorited($event) ? 'bg-red-500' : 'bg-white' }} shadow-lg hover:scale-110 transition">
-                                            <x-icon.heart class="w-5 h-5 {{ auth()->user()->hasFavorited($event) ? 'text-white' : 'text-gray-400' }}" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <!-- Event Details -->
-                                <div class="p-5">
-                                    <div class="flex items-center gap-2 mb-2 flex-wrap">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                              style="background-color: {{ $event->category->color }}20; color: {{ $event->category->color }}">
-                                            {{ $event->category->name }}
-                                        </span>
-                                        <x-event-type-badge :event="$event" />
-                                    </div>
-
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                        <a href="{{ route('events.show', $event->slug) }}" class="hover:text-blue-600">
-                                            {{ $event->title }}
-                                        </a>
-                                    </h3>
-
-                                    <div class="space-y-2 mb-4">
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.calendar class="w-4 h-4 mr-2" />
-                                            @if($event->start_date->isSameDay($event->end_date))
-                                                {{ $event->start_date->format('d.m.Y H:i') }} Uhr
-                                            @else
-                                                {{ $event->start_date->format('d.m.Y') }} - {{ $event->end_date->format('d.m.Y') }}
-                                            @endif
-                                        </div>
-
-                                        <div class="flex items-center text-sm text-gray-600">
-                                            <x-icon.location class="w-4 h-4 mr-2" />
-                                            {{ $event->venue_city }}
-                                        </div>
-
-                                        @php
-                                            $minPrice = $event->getMinimumPrice();
-                                        @endphp
-                                        @if($minPrice)
-                                            <div class="flex items-center text-sm text-gray-600">
-                                                <x-icon.ticket class="w-4 h-4 mr-2" />
-                                                ab {{ number_format($minPrice, 2, ',', '.') }} €
-                                            </div>
-                                        @endif
-                                    </div>
-
-                                    <div class="flex gap-2">
-                                        <a href="{{ route('events.show', $event->slug) }}"
-                                           class="flex-1 text-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                            Details ansehen
-                                        </a>
-                                        @if($event->hasAvailableTickets())
-                                            <a href="{{ route('bookings.create', $event) }}"
-                                               class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                                                <x-icon.ticket class="w-5 h-5" />
-                                            </a>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
-                    @endforeach
-                </div>
-
-                <!-- Pagination -->
-                <div class="mt-8">
-                    {{ $items->links() }}
-                </div>
+                <span class="tabular-nums">{{ $total }}</span> Veranstaltungen gefunden.
             @endif
-        </div>
-    </div>
+        </p>
+    @endif
+
+    @if ($items->isEmpty())
+        <x-ui.empty class="mt-8" title="Keine Veranstaltungen gefunden" :action-href="route('events.index')"
+            action-label="Filter zurücksetzen">
+            Passen Sie Ihre Suchkriterien an oder schauen Sie später wieder vorbei.
+        </x-ui.empty>
+    @else
+        <x-ui.row-list>
+            @foreach ($items as $itemData)
+                @if ($itemData['type'] === 'event')
+                    @php
+                        $event = $itemData['item'];
+                        $isFavorite = auth()->user()->hasFavorited($event);
+                    @endphp
+                    <x-ui.event-row :event="$event" heading="h2">
+                        <button type="button" onclick="toggleFavorite({{ $event->id }}, this)"
+                            data-favorited="{{ $isFavorite ? 'true' : 'false' }}"
+                            aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"
+                            class="group inline-flex min-h-11 cursor-pointer items-center gap-2 self-start rounded-control border-0 bg-transparent p-0 text-small font-medium text-ink-soft underline-offset-[3px] hover:underline">
+                            <x-icon.heart class="h-4 w-4 group-aria-pressed:fill-current" />
+                            <span class="group-aria-pressed:hidden">Merken</span>
+                            <span class="hidden group-aria-pressed:inline">Gemerkt</span>
+                            <span class="sr-only">: {{ $event->title }}</span>
+                        </button>
+                    </x-ui.event-row>
+                @endif
+            @endforeach
+        </x-ui.row-list>
+
+        <x-ui.pagination :paginator="$items" />
+    @endif
 
     @push('scripts')
-    <script>
-        function toggleFavorite(eventId, button) {
-            const icon = button.querySelector('svg');
-
-            fetch(`/events/${eventId}/favorite`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.favorited) {
-                    button.className = 'p-2 rounded-full bg-red-500 shadow-lg hover:scale-110 transition';
-                    icon.className = 'w-5 h-5 text-white';
-                    button.setAttribute('data-favorited', 'true');
-                } else {
-                    button.className = 'p-2 rounded-full bg-white shadow-lg hover:scale-110 transition';
-                    icon.className = 'w-5 h-5 text-gray-400';
-                    button.setAttribute('data-favorited', 'false');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
-            });
-        }
-    </script>
+        <script>
+            function toggleFavorite(eventId, button) {
+                fetch(`/events/${eventId}/favorite`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Darstellung (gefülltes Herz, „Gemerkt") folgt aria-pressed
+                        if (data.favorited) {
+                            button.setAttribute('data-favorited', 'true');
+                            button.setAttribute('aria-pressed', 'true');
+                        } else {
+                            button.setAttribute('data-favorited', 'false');
+                            button.setAttribute('aria-pressed', 'false');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                    });
+            }
+        </script>
     @endpush
 </x-layouts.app>
-

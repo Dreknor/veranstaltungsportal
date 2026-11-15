@@ -1,4 +1,6 @@
 @php
+    use App\Support\Ui;
+
     $event = $booking->event;
     $organization = $event->organization;
     $isExternalInvoicing = $organization?->hasExternalInvoicing() ?? false;
@@ -9,14 +11,16 @@
     $isReady = $booking->isReadyForParticipation();
     $eventPast = $event->end_date?->isPast() ?? false;
     $needsAttendees = $booking->canBePersonalized() && !$booking->tickets_personalized;
+    $isFree = $booking->isFree();
 
+    // [Text, Ton für <x-ui.status>]
     $statusBadge = match (true) {
-        $isCancelled => ['Storniert', 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200'],
-        $booking->status === 'completed' => ['Abgeschlossen', 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200'],
-        $booking->status === 'pending_approval' => ['Wartet auf Freigabe', 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200'],
-        $isReady => ['Bestätigt', 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200'],
-        !$booking->isPaymentComplete() && !$booking->isFree() => ['Zahlung offen', 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-200'],
-        default => [$booking->statusLabel(), 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'],
+        $isCancelled => ['Storniert', 'danger'],
+        $booking->status === 'completed' => ['Abgeschlossen', 'success'],
+        $booking->status === 'pending_approval' => ['Wartet auf Freigabe', 'warning'],
+        $isReady => ['Bestätigt', 'success'],
+        !$booking->isPaymentComplete() && !$isFree => ['Zahlung offen', 'warning'],
+        default => [$booking->statusLabel(), Ui::bookingTone($booking->status)],
     };
 
     $headline = match (true) {
@@ -27,408 +31,489 @@
     };
 @endphp
 
-<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 sm:pb-8">
-    {{-- Meldungen --}}
-    @foreach([
-        'success' => 'bg-green-50 border-green-300 text-green-800',
-        'info' => 'bg-blue-50 border-blue-300 text-blue-800',
-        'warning' => 'bg-yellow-50 border-yellow-300 text-yellow-800',
-        'error' => 'bg-red-50 border-red-300 text-red-800',
-    ] as $key => $classes)
-        @if(session($key))
-            <div class="{{ $classes }} border px-4 py-3 rounded-lg mb-4 text-sm" role="{{ $key === 'error' ? 'alert' : 'status' }}">
-                {{ session($key) }}
-            </div>
-        @endif
-    @endforeach
+{{-- Kopf mit Buchungsnummer, Status und Fortschritt --}}
+<x-ui.page-header :title="$headline" class="mb-6">
+    <x-slot:meta>
+        <span class="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <span class="tabular-nums">Buchungsnr. <span
+                    class="font-semibold text-ink select-all">{{ $booking->booking_number }}</span></span>
+            <x-ui.status :tone="$statusBadge[1]">{{ $statusBadge[0] }}</x-ui.status>
+        </span>
+    </x-slot:meta>
+</x-ui.page-header>
 
-    {{-- Kopf mit Status und Fortschritt --}}
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 mb-4">
-        <div class="flex flex-wrap items-start justify-between gap-2 mb-5">
-            <div class="min-w-0">
-                <h1 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $headline }}</h1>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    Buchungsnr. <span class="font-mono font-semibold select-all">{{ $booking->booking_number }}</span>
+<x-booking-progress :booking="$booking" class="mb-8" />
+
+{{-- Nächster Schritt: genau eine klare Handlungsaufforderung --}}
+@unless ($isCancelled)
+    <x-ui.box as="section" tone="zone" class="mb-8" aria-labelledby="naechster-schritt">
+        <h2 id="naechster-schritt" class="m-0 mb-2 text-small font-medium text-muted">Nächster Schritt</h2>
+
+        @if ($booking->status === 'pending_approval')
+            <p class="m-0 text-h3">Ihre Anmeldung wird vom Veranstalter geprüft.</p>
+            <p class="mt-1 mb-0 text-base text-ink-soft">
+                Sie müssen nichts weiter tun. Sobald Ihre Teilnahme bestätigt ist, erhalten Sie eine E-Mail
+                @if ($event->requiresOnlineInfo())
+                    mit den Zugangsdaten
+                @elseif($booking->hasTicketDocument())
+                    mit Ihren Tickets
+                @endif.
+            </p>
+        @elseif(!$booking->isPaymentComplete() && !$isFree && !$isReady)
+            @if ($booking->canRetryOnlinePayment())
+                <p class="m-0 text-h3">Bitte schließen Sie die Zahlung ab.</p>
+                <p class="mt-1 mb-0 text-base text-ink-soft">
+                    Ihre Plätze sind reserviert. Nach der Zahlung erhalten Sie sofort
+                    {{ $event->isOnline() ? 'die Zugangsdaten' : 'Ihre Tickets' }} per E-Mail.
+                    Nicht abgeschlossene Zahlungen werden nach 48 Stunden automatisch storniert.
                 </p>
-            </div>
-            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $statusBadge[1] }}">{{ $statusBadge[0] }}</span>
-        </div>
-        <x-booking-progress :booking="$booking" />
-    </div>
-
-    {{-- Nächster Schritt: genau eine klare Handlungsaufforderung --}}
-    @unless($isCancelled)
-        <div class="rounded-xl border-2 p-4 sm:p-5 mb-4
-            {{ $isReady && !$needsAttendees ? 'border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-800' : 'border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800' }}">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300 mb-2">Nächster Schritt</h2>
-
-            @if($booking->status === 'pending_approval')
-                <p class="text-gray-900 dark:text-gray-100 font-medium">Ihre Anmeldung wird vom Veranstalter geprüft.</p>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                    Sie müssen nichts weiter tun. Sobald Ihre Teilnahme bestätigt ist, erhalten Sie eine E-Mail
-                    @if($event->requiresOnlineInfo()) mit den Zugangsdaten @elseif($booking->hasTicketDocument()) mit Ihren Tickets @endif.
-                </p>
-
-            @elseif(!$booking->isPaymentComplete() && !$booking->isFree() && !$isReady)
-                @if($booking->canRetryOnlinePayment())
-                    <p class="text-gray-900 dark:text-gray-100 font-medium">Bitte schließen Sie die Zahlung ab.</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                        Ihre Plätze sind reserviert. Nach der Zahlung erhalten Sie sofort
-                        {{ $event->isOnline() ? 'die Zugangsdaten' : 'Ihre Tickets' }} per E-Mail.
-                        Nicht abgeschlossene Zahlungen werden nach 48 Stunden automatisch storniert.
-                    </p>
-                    <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                        <form method="POST" action="{{ route('bookings.pay', $booking->booking_number) }}">
-                            @csrf
-                            <button type="submit" class="w-full sm:w-auto px-5 py-3 bg-[#0070ba] text-white font-semibold rounded-lg hover:bg-[#005ea6] transition">
-                                Mit PayPal bezahlen ({{ number_format($booking->total, 2, ',', '.') }} €)
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('bookings.switch-to-invoice', $booking->booking_number) }}"
-                              onsubmit="return confirm('Möchten Sie stattdessen per Rechnung (Überweisung) bezahlen?')">
-                            @csrf
-                            <button type="submit" class="w-full sm:w-auto px-5 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                                Stattdessen per Rechnung zahlen
-                            </button>
-                        </form>
-                    </div>
-                @elseif($isExternalInvoicing)
-                    <p class="text-gray-900 dark:text-gray-100 font-medium">Sie erhalten eine Rechnung vom Veranstalter.</p>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                        Sobald die Rechnung gestellt ist, bestätigen wir Ihre Buchung und senden Ihnen
-                        {{ $event->isOnline() ? 'die Zugangsdaten' : ($booking->hasTicketDocument() ? 'Ihre Tickets' : 'alle Details') }} per E-Mail.
-                    </p>
-                @else
-                    <p class="text-gray-900 dark:text-gray-100 font-medium">Bitte überweisen Sie {{ number_format($booking->total, 2, ',', '.') }} €.</p>
-                    <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm bg-white/70 dark:bg-gray-900/40 rounded-lg p-3">
-                        <div><dt class="text-gray-500 dark:text-gray-400">Empfänger</dt><dd class="font-medium text-gray-900 dark:text-gray-100">{{ $bankAccount['account_holder'] ?? $organization?->name }}</dd></div>
-                        @if(!empty($bankAccount['iban']))
-                            <div><dt class="text-gray-500 dark:text-gray-400">IBAN</dt><dd class="font-mono font-medium text-gray-900 dark:text-gray-100 select-all break-all">{{ $bankAccount['iban'] }}</dd></div>
-                        @endif
-                        @if(!empty($bankAccount['bic']))
-                            <div><dt class="text-gray-500 dark:text-gray-400">BIC</dt><dd class="font-mono text-gray-900 dark:text-gray-100">{{ $bankAccount['bic'] }}</dd></div>
-                        @endif
-                        <div><dt class="text-gray-500 dark:text-gray-400">Verwendungszweck</dt><dd class="font-mono font-medium text-gray-900 dark:text-gray-100 select-all">{{ $booking->invoice_number ?? $booking->booking_number }}</dd></div>
-                    </dl>
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-3">
-                        Sobald die Zahlung verbucht ist, erhalten Sie automatisch
-                        {{ $event->isOnline() ? 'die Zugangsdaten' : ($booking->hasTicketDocument() ? 'Ihre Tickets' : 'Ihre Bestätigung') }} per E-Mail.
-                    </p>
-                    @if($booking->invoice_number)
-                        <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-blue-700 dark:text-blue-400 hover:underline">
-                            Rechnung herunterladen (PDF) →
-                        </a>
-                    @endif
-                @endif
-
-            @elseif($needsAttendees)
-                <p class="text-gray-900 dark:text-gray-100 font-medium">Bitte tragen Sie die Teilnehmenden ein.</p>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                    Sie haben {{ $booking->items->count() }} Plätze gebucht.
-                    @if($isReady) Danach senden wir Ihnen die personalisierten {{ $booking->hasTicketDocument() ? 'Tickets' : 'Bestätigungen' }} sofort per E-Mail.
-                    @else Die {{ $booking->hasTicketDocument() ? 'Tickets' : 'Zugangsdaten' }} erhalten Sie nach Bestätigung bzw. Zahlungseingang. @endif
-                </p>
-                <a href="{{ route('bookings.personalize', $booking->booking_number) }}"
-                   class="mt-4 inline-flex w-full sm:w-auto justify-center items-center px-5 py-3 bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition">
-                    Teilnehmende eintragen
-                </a>
-
-            @elseif($isReady && !$eventPast)
-                <p class="text-gray-900 dark:text-gray-100 font-medium">Alles erledigt – wir freuen uns auf Sie!</p>
-                @if($booking->ticketsReleasedBeforePayment())
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Die Rechnung erhalten Sie separat vom Veranstalter – gegebenenfalls auch erst nach der Veranstaltung.</p>
-                @endif
-                <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">
-                    @if($event->requiresOnlineInfo())
-                        Ihre Zugangsdaten finden Sie unten. Zusätzlich erhalten Sie sie 24 Stunden und 3 Stunden vor Beginn per E-Mail.
-                    @elseif($booking->hasTicketDocument())
-                        Bringen Sie Ihr Ticket (ausgedruckt oder auf dem Smartphone) mit. Wir erinnern Sie 24 Stunden vor Beginn per E-Mail.
-                    @else
-                        Ihre Buchungsnummer genügt als Nachweis. Wir erinnern Sie 24 Stunden vor Beginn per E-Mail.
-                    @endif
-                </p>
-                <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                    @if($booking->canAccessOnlineContent() && $event->online_url)
-                        <a href="{{ $event->online_url }}" target="_blank" rel="noopener"
-                           class="inline-flex justify-center items-center px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
-                            Zur Online-Veranstaltung
-                        </a>
-                    @endif
-                    @if($booking->hasTicketDocument() && $booking->canSendTickets())
-                        <a href="{{ route('bookings.ticket', $booking->booking_number) }}"
-                           class="inline-flex justify-center items-center px-5 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
-                            Ticket herunterladen (PDF)
-                        </a>
-                    @endif
-                    <a href="{{ route('bookings.ical', $booking->booking_number) }}"
-                       class="inline-flex justify-center items-center px-5 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
-                        In Kalender eintragen
-                    </a>
+                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                    <form method="POST" action="{{ route('bookings.pay', $booking->booking_number) }}" class="m-0">
+                        @csrf
+                        <x-ui.button type="submit" class="w-full sm:w-auto">
+                            Mit PayPal bezahlen ({{ Ui::money($booking->total) }})
+                        </x-ui.button>
+                    </form>
+                    <form method="POST" action="{{ route('bookings.switch-to-invoice', $booking->booking_number) }}"
+                        class="m-0"
+                        onsubmit="return confirm('Möchten Sie stattdessen per Rechnung (Überweisung) bezahlen?')">
+                        @csrf
+                        <x-ui.button type="submit" variant="secondary" class="w-full sm:w-auto">
+                            Stattdessen per Rechnung zahlen
+                        </x-ui.button>
+                    </form>
                 </div>
-
-            @elseif($eventPast)
-                <p class="text-gray-900 dark:text-gray-100 font-medium">Die Veranstaltung ist beendet. Vielen Dank für Ihre Teilnahme!</p>
-                @if($isReady)
-                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Teilnahmezertifikate erhalten eingecheckte Teilnehmende unten bei den Tickets.</p>
+            @elseif($isExternalInvoicing)
+                <p class="m-0 text-h3">Sie erhalten eine Rechnung vom Veranstalter.</p>
+                <p class="mt-1 mb-0 text-base text-ink-soft">
+                    Sobald die Rechnung gestellt ist, bestätigen wir Ihre Buchung und senden Ihnen
+                    {{ $event->isOnline() ? 'die Zugangsdaten' : ($booking->hasTicketDocument() ? 'Ihre Tickets' : 'alle Details') }}
+                    per E-Mail.
+                </p>
+            @else
+                <p class="m-0 text-h3 tabular-nums">Bitte überweisen Sie {{ Ui::money($booking->total) }}.</p>
+                <x-ui.dl layout="stack" class="mt-4">
+                    <x-ui.dl-item label="Empfänger">{{ $bankAccount['account_holder'] ?? $organization?->name }}</x-ui.dl-item>
+                    @if (!empty($bankAccount['iban']))
+                        <x-ui.dl-item label="IBAN" num><span
+                                class="break-all select-all">{{ $bankAccount['iban'] }}</span></x-ui.dl-item>
+                    @endif
+                    @if (!empty($bankAccount['bic']))
+                        <x-ui.dl-item label="BIC" num>{{ $bankAccount['bic'] }}</x-ui.dl-item>
+                    @endif
+                    <x-ui.dl-item label="Verwendungszweck" num><span
+                            class="select-all">{{ $booking->invoice_number ?? $booking->booking_number }}</span></x-ui.dl-item>
+                </x-ui.dl>
+                <p class="mt-4 mb-0 text-base text-ink-soft">
+                    Sobald die Zahlung verbucht ist, erhalten Sie automatisch
+                    {{ $event->isOnline() ? 'die Zugangsdaten' : ($booking->hasTicketDocument() ? 'Ihre Tickets' : 'Ihre Bestätigung') }}
+                    per E-Mail.
+                </p>
+                @if ($booking->invoice_number)
+                    <x-ui.button variant="link" :href="route('bookings.invoice', $booking->booking_number)" arrow class="mt-2">
+                        Rechnung herunterladen (PDF)
+                    </x-ui.button>
                 @endif
-            @else
-                <p class="text-gray-900 dark:text-gray-100 font-medium">Ihre Buchung wird bearbeitet.</p>
-                <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Sie erhalten eine E-Mail, sobald sich etwas ändert.</p>
             @endif
-        </div>
-    @endunless
-
-    {{-- Feedback nach der Veranstaltung --}}
-    @if($eventPast && $isReady)
-        <section id="feedback" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 mb-4">
-            @if($booking->review)
-                <p class="font-medium text-gray-900 dark:text-gray-100">Danke für Ihr Feedback!</p>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Ihre Bewertung: {{ str_repeat('★', $booking->review->rating) }}{{ str_repeat('☆', 5 - $booking->review->rating) }}</p>
-            @else
-                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Wie hat Ihnen die Veranstaltung gefallen?</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Ihr Feedback hilft dem Veranstalter, zukünftige Angebote zu verbessern.</p>
-                <form method="POST" action="{{ route('bookings.feedback', $booking->booking_number) }}" class="mt-4 space-y-3" x-data="{ rating: {{ (int) old('rating', 0) }} }">
-                    @csrf
-                    <fieldset>
-                        <legend class="sr-only">Bewertung</legend>
-                        <div class="flex gap-1">
-                            @for($i = 1; $i <= 5; $i++)
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="rating" value="{{ $i }}" class="sr-only" x-model.number="rating" @checked(old('rating') == $i)>
-                                    <span class="text-3xl leading-none transition" :class="rating >= {{ $i }} ? 'text-amber-400' : 'text-gray-300 dark:text-gray-600'" aria-hidden="true">★</span>
-                                    <span class="sr-only">{{ $i }} von 5 Sternen</span>
-                                </label>
-                            @endfor
-                        </div>
-                        @error('rating')<p class="text-sm text-red-600 mt-1">{{ $message }}</p>@enderror
-                    </fieldset>
-                    <label for="feedback-comment" class="sr-only">Kommentar</label>
-                    <textarea id="feedback-comment" name="comment" rows="3" maxlength="1000" placeholder="Was war besonders hilfreich? Was können wir verbessern? (optional)"
-                              class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm">{{ old('comment') }}</textarea>
-                    <button type="submit" class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">Feedback senden</button>
-                </form>
-            @endif
-        </section>
-    @endif
-
-    {{-- Hinweis Konto für Gäste --}}
-    @if(!auth()->check() && !$booking->user_id && session()->has('booking_access_' . $booking->id) && !$isCancelled)
-        @php $existingUser = \App\Models\User::where('email', $booking->customer_email)->exists(); @endphp
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-4">
-            <p class="flex-1 text-sm text-blue-900 dark:text-blue-100">
-                @if($existingUser)
-                    <strong>Mit Ihrem Konto verknüpfen:</strong> So finden Sie diese Buchung jederzeit unter „Meine Buchungen“.
+        @elseif($needsAttendees)
+            <p class="m-0 text-h3">Bitte tragen Sie die Teilnehmenden ein.</p>
+            <p class="mt-1 mb-0 text-base text-ink-soft">
+                Sie haben {{ $booking->items->count() }} Plätze gebucht.
+                @if ($isReady)
+                    Danach senden wir Ihnen die personalisierten
+                    {{ $booking->hasTicketDocument() ? 'Tickets' : 'Bestätigungen' }} sofort per E-Mail.
                 @else
-                    <strong>Tipp:</strong> Mit einem kostenlosen Konto haben Sie alle Buchungen, Tickets und Zertifikate an einem Ort.
+                    Die {{ $booking->hasTicketDocument() ? 'Tickets' : 'Zugangsdaten' }} erhalten Sie nach Bestätigung
+                    bzw. Zahlungseingang.
                 @endif
             </p>
-            <a href="{{ route('bookings.create-account', $booking->booking_number) }}"
-               class="inline-flex justify-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition">
+            <x-ui.button :href="route('bookings.personalize', $booking->booking_number)" class="mt-4 w-full sm:w-auto">
+                Teilnehmende eintragen
+            </x-ui.button>
+        @elseif($isReady && !$eventPast)
+            <p class="m-0 text-h3">Alles erledigt – wir freuen uns auf Sie.</p>
+            @if ($booking->ticketsReleasedBeforePayment())
+                <p class="mt-1 mb-0 text-base text-ink-soft">Die Rechnung erhalten Sie separat vom Veranstalter –
+                    gegebenenfalls auch erst nach der Veranstaltung.</p>
+            @endif
+            <p class="mt-1 mb-0 text-base text-ink-soft">
+                @if ($event->requiresOnlineInfo())
+                    Ihre Zugangsdaten finden Sie unten. Zusätzlich erhalten Sie sie 24 Stunden und 3 Stunden vor Beginn
+                    per E-Mail.
+                @elseif($booking->hasTicketDocument())
+                    Bringen Sie Ihr Ticket (ausgedruckt oder auf dem Smartphone) mit. Wir erinnern Sie 24 Stunden vor
+                    Beginn per E-Mail.
+                @else
+                    Ihre Buchungsnummer genügt als Nachweis. Wir erinnern Sie 24 Stunden vor Beginn per E-Mail.
+                @endif
+            </p>
+            <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                @if ($booking->canAccessOnlineContent() && $event->online_url)
+                    <x-ui.button :href="$event->online_url" target="_blank" rel="noopener">
+                        <x-slot:icon><x-icon.external-link /></x-slot:icon>
+                        Zur Online-Veranstaltung
+                    </x-ui.button>
+                @endif
+                @if ($booking->hasTicketDocument() && $booking->canSendTickets())
+                    <x-ui.button :href="route('bookings.ticket', $booking->booking_number)"
+                        :variant="$booking->canAccessOnlineContent() && $event->online_url ? 'secondary' : 'primary'">
+                        <x-slot:icon><x-icon.download /></x-slot:icon>
+                        Ticket herunterladen (PDF)
+                    </x-ui.button>
+                @endif
+                <x-ui.button variant="secondary" :href="route('bookings.ical', $booking->booking_number)">
+                    <x-slot:icon><x-icon.calendar /></x-slot:icon>
+                    In Kalender eintragen
+                </x-ui.button>
+            </div>
+        @elseif($eventPast)
+            <p class="m-0 text-h3">Die Veranstaltung ist beendet. Vielen Dank für Ihre Teilnahme.</p>
+            @if ($isReady)
+                <p class="mt-1 mb-0 text-base text-ink-soft">Teilnahmezertifikate erhalten eingecheckte Teilnehmende
+                    unten bei den Tickets.</p>
+            @endif
+        @else
+            <p class="m-0 text-h3">Ihre Buchung wird bearbeitet.</p>
+            <p class="mt-1 mb-0 text-base text-ink-soft">Sie erhalten eine E-Mail, sobald sich etwas ändert.</p>
+        @endif
+    </x-ui.box>
+@endunless
+
+{{-- Hinweis Konto für Gäste --}}
+@if (!auth()->check() && !$booking->user_id && session()->has('booking_access_' . $booking->id) && !$isCancelled)
+    @php $existingUser = \App\Models\User::where('email', $booking->customer_email)->exists(); @endphp
+    <x-ui.alert tone="info" class="mb-8">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+                @if ($existingUser)
+                    <strong class="font-semibold">Mit Ihrem Konto verknüpfen:</strong> So finden Sie diese Buchung
+                    jederzeit unter „Meine Buchungen“.
+                @else
+                    <strong class="font-semibold">Tipp:</strong> Mit einem kostenlosen Konto haben Sie alle Buchungen,
+                    Tickets und Zertifikate an einem Ort.
+                @endif
+            </p>
+            <x-ui.button variant="secondary" size="sm" :href="route('bookings.create-account', $booking->booking_number)"
+                class="self-start no-underline! sm:self-auto">
                 {{ $existingUser ? 'Jetzt verknüpfen' : 'Konto erstellen' }}
-            </a>
+            </x-ui.button>
         </div>
-    @endif
+    </x-ui.alert>
+@endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 space-y-4">
-            {{-- Veranstaltung --}}
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Veranstaltung</h2>
-                <div class="flex gap-4">
-                    @if($event->featured_image)
-                        <img src="{{ Storage::url($event->featured_image) }}" alt="" class="hidden sm:block w-28 h-28 object-cover rounded-lg border border-gray-200 dark:border-gray-700 shrink-0">
+<div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,368px)] lg:gap-x-12">
+    <div class="flex min-w-0 flex-col gap-10">
+        {{-- Veranstaltung --}}
+        <x-ui.section title="Veranstaltung" id="abschnitt-veranstaltung" class="[&>div:first-child]:mb-4">
+            <div class="flex items-center gap-x-5 gap-y-4">
+                <x-ui.date-block :date="$event->start_date" :end="$event->end_date" />
+                <div class="flex min-w-0 flex-col gap-1">
+                    @if ($event->category)
+                        <span class="text-small text-muted">{{ $event->category->name }}</span>
                     @endif
-                    <div class="min-w-0 flex-1">
-                        <h3 class="font-semibold text-gray-900 dark:text-gray-100">{{ $event->title }}</h3>
-                        <ul class="mt-2 space-y-1.5 text-sm text-gray-700 dark:text-gray-300">
-                            <li class="flex items-start gap-2">
-                                <x-icon.calendar class="w-4 h-4 mt-0.5 shrink-0" />
-                                <span>{{ $event->start_date->translatedFormat('D, d.m.Y · H:i') }} Uhr
-                                    @if($event->end_date) – {{ $event->end_date->isSameDay($event->start_date) ? $event->end_date->format('H:i') : $event->end_date->format('d.m.Y H:i') }} Uhr @endif
-                                </span>
-                            </li>
-                            @if($event->requiresVenue() && ($event->venue_name || $event->location))
-                                <li class="flex items-start gap-2">
-                                    <x-icon.location class="w-4 h-4 mt-0.5 shrink-0" />
-                                    <span>
-                                        {{ $event->venue_name }}@if($event->venue_address), {{ $event->venue_address }}@endif
-                                        @if($event->venue_city), {{ trim($event->venue_postal_code . ' ' . $event->venue_city) }}@endif
-                                    </span>
-                                </li>
-                            @endif
-                            <li class="flex items-center gap-2">
-                                <x-event-type-badge :event="$event" />
-                            </li>
-                        </ul>
-                        <a href="{{ route('events.show', $event->slug) }}" class="text-blue-600 dark:text-blue-400 hover:underline text-sm mt-3 inline-block">Veranstaltungsdetails →</a>
-                    </div>
+                    <a href="{{ route('events.show', $event->slug) }}"
+                        class="text-h3 text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
+                    <span class="flex flex-wrap gap-x-4 gap-y-0.5 text-small text-ink-soft tabular-nums">
+                        <span>{{ Ui::dateTime($event->start_date, $event->end_date) }}</span>
+                        <span>{{ Ui::formatAndPlace($event) }}</span>
+                    </span>
                 </div>
+            </div>
+            @if ($event->requiresVenue() && ($event->venue_name || $event->location))
+                <p class="mt-4 mb-0 flex items-start gap-2 text-base">
+                    <x-icon.location class="mt-1 h-4 w-4 flex-none text-muted" />
+                    <span>
+                        {{ $event->venue_name }}@if ($event->venue_address)
+                            , {{ $event->venue_address }}
+                        @endif
+                        @if ($event->venue_city)
+                            , {{ trim($event->venue_postal_code . ' ' . $event->venue_city) }}
+                        @endif
+                    </span>
+                </p>
+            @endif
 
-                {{-- Online-Zugang (Online & Hybrid) --}}
-                @if($event->requiresOnlineInfo() && !$isCancelled)
-                    @if($booking->canAccessOnlineContent() && $event->online_url)
-                        <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                            <p class="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">Online-Zugang</p>
-                            <a href="{{ $event->online_url }}" target="_blank" rel="noopener" class="text-sm text-blue-700 dark:text-blue-300 underline break-all">{{ $event->online_url }}</a>
-                            @if($event->online_access_code)
-                                <p class="mt-2 text-sm text-blue-900 dark:text-blue-100">Zugangscode:
-                                    <code class="bg-white dark:bg-gray-900 px-2 py-0.5 rounded border border-blue-300 dark:border-blue-700 font-mono select-all">{{ $event->online_access_code }}</code>
-                                </p>
+            {{-- Online-Zugang (Online & Hybrid) --}}
+            @if ($event->requiresOnlineInfo() && !$isCancelled)
+                @if ($booking->canAccessOnlineContent() && $event->online_url)
+                    <x-ui.alert tone="info" title="Online-Zugang" class="mt-4">
+                        <p><a href="{{ $event->online_url }}" target="_blank" rel="noopener"
+                                class="break-all">{{ $event->online_url }}</a></p>
+                        @if ($event->online_access_code)
+                            <p class="mt-1">Zugangscode:
+                                <code
+                                    class="rounded-[4px] border border-line bg-surface px-2 py-0.5 tabular-nums select-all">{{ $event->online_access_code }}</code>
+                            </p>
+                        @endif
+                    </x-ui.alert>
+                @else
+                    <x-ui.alert tone="info" class="mt-4">
+                        Die Online-Zugangsdaten werden hier und per E-Mail freigeschaltet, sobald Ihre Buchung
+                        {{ $booking->status === 'pending_approval' ? 'bestätigt' : 'bestätigt und bezahlt' }} ist.
+                    </x-ui.alert>
+                @endif
+            @endif
+
+            @if ($event->ticket_notes && $isReady)
+                <x-ui.alert tone="warning" title="Hinweise des Veranstalters" class="mt-4">
+                    <p>{!! nl2br(e($event->ticket_notes)) !!}</p>
+                </x-ui.alert>
+            @endif
+
+            <x-ui.button variant="link" :href="route('events.show', $event->slug)" arrow class="mt-2">
+                Veranstaltungsdetails
+            </x-ui.button>
+        </x-ui.section>
+
+        {{-- Tickets / Teilnehmende --}}
+        <x-ui.section :title="$booking->items->count() > 1 ? 'Plätze & Teilnehmende' : 'Ihr Platz'" id="abschnitt-plaetze"
+            class="[&>div:first-child]:mb-4">
+            @if ($booking->canBePersonalized())
+                <x-slot:actions>
+                    <x-ui.button variant="secondary" size="sm"
+                        :href="route('bookings.personalize', $booking->booking_number)">
+                        {{ $booking->tickets_personalized ? 'Teilnehmende ändern' : 'Teilnehmende eintragen' }}
+                    </x-ui.button>
+                </x-slot:actions>
+            @endif
+            <x-ui.table label="Gebuchte Plätze">
+                <thead>
+                    <tr>
+                        <th scope="col">Ticket</th>
+                        <th scope="col">Teilnehmer:in</th>
+                        @unless ($isFree)
+                            <th scope="col" class="num">Preis</th>
+                        @endunless
+                        @if ($eventPast)
+                            <th scope="col" class="actions"><span class="sr-only">Zertifikat</span></th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($booking->items as $item)
+                        <tr>
+                            <th scope="row">
+                                {{ $item->ticketType?->name ?? 'Ticket' }}
+                                <span
+                                    class="block text-caption font-normal text-muted tabular-nums">{{ $item->ticket_number }}</span>
+                            </th>
+                            <td>
+                                @if ($item->attendee_name)
+                                    {{ $item->attendee_name }}
+                                    @if ($item->attendee_email)
+                                        <span class="block text-small break-all text-muted">{{ $item->attendee_email }}</span>
+                                    @endif
+                                @else
+                                    <x-ui.status tone="warning">Teilnehmer:in noch nicht eingetragen</x-ui.status>
+                                @endif
+                                @if ($item->checked_in && $item->checked_in_at)
+                                    <x-ui.status tone="success" class="mt-1 flex">Eingecheckt am
+                                        {{ $item->checked_in_at->format('d.m.Y H:i') }} Uhr</x-ui.status>
+                                @endif
+                            </td>
+                            @unless ($isFree)
+                                <td class="num">{{ Ui::money($item->price) }}</td>
+                            @endunless
+                            @if ($eventPast)
+                                <td class="actions">
+                                    @if ($item->checked_in)
+                                        <x-ui.button variant="link" size="sm"
+                                            :href="route('bookings.certificate.individual', ['bookingNumber' => $booking->booking_number, 'itemId' => $item->id])">
+                                            Zertifikat
+                                        </x-ui.button>
+                                    @endif
+                                </td>
                             @endif
-                        </div>
-                    @else
-                        <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-300">
-                            🔒 Die Online-Zugangsdaten werden hier und per E-Mail freigeschaltet, sobald Ihre Buchung
-                            {{ $booking->status === 'pending_approval' ? 'bestätigt' : 'bestätigt und bezahlt' }} ist.
-                        </div>
-                    @endif
-                @endif
-
-                @if($event->ticket_notes && $isReady)
-                    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg text-sm text-gray-800 dark:text-gray-200">
-                        <p class="font-semibold mb-1">Hinweise des Veranstalters</p>
-                        {!! nl2br(e($event->ticket_notes)) !!}
-                    </div>
-                @endif
-            </section>
-
-            {{-- Tickets / Teilnehmende --}}
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">
-                        {{ $booking->items->count() > 1 ? 'Plätze & Teilnehmende' : 'Ihr Platz' }}
-                    </h2>
-                    @if($booking->canBePersonalized())
-                        <a href="{{ route('bookings.personalize', $booking->booking_number) }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                            {{ $booking->tickets_personalized ? 'Teilnehmende ändern' : 'Teilnehmende eintragen' }}
-                        </a>
-                    @endif
-                </div>
-                <ul class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @foreach($booking->items as $item)
-                        <li class="py-3 flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ $item->ticketType?->name ?? 'Ticket' }}</p>
-                                <p class="text-sm {{ $item->attendee_name ? 'text-gray-700 dark:text-gray-300' : 'text-amber-700 dark:text-amber-400' }}">
-                                    {{ $item->attendee_name ?? 'Teilnehmer:in noch nicht eingetragen' }}
-                                    @if($item->attendee_email)<span class="text-gray-500 dark:text-gray-400 break-all"> · {{ $item->attendee_email }}</span>@endif
-                                </p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ $item->ticket_number }}</p>
-                                @if($item->checked_in && $item->checked_in_at)
-                                    <p class="text-xs text-green-700 dark:text-green-400 mt-1">✓ Eingecheckt am {{ $item->checked_in_at->format('d.m.Y H:i') }} Uhr</p>
-                                @endif
-                            </div>
-                            <div class="text-right shrink-0">
-                                @if(!$booking->isFree())
-                                    <p class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($item->price, 2, ',', '.') }} €</p>
-                                @endif
-                                @if($item->checked_in && $eventPast)
-                                    <a href="{{ route('bookings.certificate.individual', ['bookingNumber' => $booking->booking_number, 'itemId' => $item->id]) }}"
-                                       class="inline-block text-xs text-purple-700 dark:text-purple-400 hover:underline mt-1">Zertifikat</a>
-                                @endif
-                            </div>
-                        </li>
+                        </tr>
                     @endforeach
-                </ul>
-            </section>
+                </tbody>
+            </x-ui.table>
+        </x-ui.section>
 
-            {{-- Kundendaten --}}
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Ihre Angaben</h2>
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    <div><dt class="text-gray-500 dark:text-gray-400">Name</dt><dd class="text-gray-900 dark:text-gray-100">{{ $booking->customer_name }}</dd></div>
-                    <div><dt class="text-gray-500 dark:text-gray-400">E-Mail</dt><dd class="text-gray-900 dark:text-gray-100 break-all">{{ $booking->customer_email }}</dd></div>
-                    @if($booking->customer_phone)
-                        <div><dt class="text-gray-500 dark:text-gray-400">Telefon</dt><dd class="text-gray-900 dark:text-gray-100">{{ $booking->customer_phone }}</dd></div>
-                    @endif
-                    @if($booking->customer_organization)
-                        <div><dt class="text-gray-500 dark:text-gray-400">Einrichtung</dt><dd class="text-gray-900 dark:text-gray-100">{{ $booking->customer_organization }}</dd></div>
-                    @endif
-                    @if($booking->billing_company)
-                        <div><dt class="text-gray-500 dark:text-gray-400">Firma (Rechnung)</dt><dd class="text-gray-900 dark:text-gray-100">{{ $booking->billing_company }}</dd></div>
-                    @endif
-                    @if($booking->billing_vat_id)
-                        <div><dt class="text-gray-500 dark:text-gray-400">USt-IdNr.</dt><dd class="text-gray-900 dark:text-gray-100">{{ $booking->billing_vat_id }}</dd></div>
-                    @endif
-                </dl>
-            </section>
-        </div>
+        {{-- Kundendaten --}}
+        <x-ui.section title="Ihre Angaben" id="abschnitt-angaben" class="[&>div:first-child]:mb-4">
+            <x-ui.dl>
+                <x-ui.dl-item label="Name">{{ $booking->customer_name }}</x-ui.dl-item>
+                <x-ui.dl-item label="E-Mail"><span class="break-all">{{ $booking->customer_email }}</span></x-ui.dl-item>
+                @if ($booking->customer_phone)
+                    <x-ui.dl-item label="Telefon" num>{{ $booking->customer_phone }}</x-ui.dl-item>
+                @endif
+                @if ($booking->customer_organization)
+                    <x-ui.dl-item label="Einrichtung">{{ $booking->customer_organization }}</x-ui.dl-item>
+                @endif
+                @if ($booking->billing_company)
+                    <x-ui.dl-item label="Firma (Rechnung)">{{ $booking->billing_company }}</x-ui.dl-item>
+                @endif
+                @if ($booking->billing_vat_id)
+                    <x-ui.dl-item label="USt-IdNr.">{{ $booking->billing_vat_id }}</x-ui.dl-item>
+                @endif
+            </x-ui.dl>
+        </x-ui.section>
 
-        {{-- Seitenleiste --}}
-        <aside class="space-y-4">
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Zusammenfassung</h2>
-                <dl class="space-y-2 text-sm">
-                    <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Plätze</dt><dd class="font-medium text-gray-900 dark:text-gray-100">{{ $booking->items->count() }}</dd></div>
-                    @if($booking->isFree())
-                        <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Kosten</dt><dd class="font-medium text-green-700 dark:text-green-400">kostenfrei</dd></div>
-                    @else
-                        <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Zwischensumme</dt><dd class="text-gray-900 dark:text-gray-100">{{ number_format($booking->subtotal, 2, ',', '.') }} €</dd></div>
-                        @if($booking->discount > 0)
-                            <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Rabatt</dt><dd class="text-green-700 dark:text-green-400">−{{ number_format($booking->discount, 2, ',', '.') }} €</dd></div>
-                        @endif
-                        <div class="flex justify-between border-t border-gray-100 dark:border-gray-700 pt-2 text-base font-bold text-gray-900 dark:text-gray-100"><dt>Gesamt</dt><dd>{{ number_format($booking->total, 2, ',', '.') }} €</dd></div>
-                        <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Zahlart</dt><dd class="text-gray-900 dark:text-gray-100">{{ $booking->payment_method === 'paypal' ? 'PayPal' : 'Rechnung' }}</dd></div>
-                        @if($booking->ticketsReleasedBeforePayment())
-                            <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Rechnung</dt><dd class="text-gray-900 dark:text-gray-100">folgt separat</dd></div>
-                        @elseif($booking->payment_status !== 'extern')
-                            <div class="flex justify-between"><dt class="text-gray-600 dark:text-gray-400">Zahlung</dt><dd class="font-medium {{ $booking->isPaymentComplete() ? 'text-green-700 dark:text-green-400' : 'text-yellow-700 dark:text-yellow-400' }}">{{ $booking->paymentStatusLabel() }}</dd></div>
-                        @endif
-                    @endif
-                </dl>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">Gebucht am {{ $booking->created_at->format('d.m.Y H:i') }} Uhr</p>
-            </section>
-
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6">
-                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">Dokumente & Aktionen</h2>
-                <div class="space-y-2">
-                    @if($booking->hasTicketDocument() && $isReady && $booking->canSendTickets())
-                        <a href="{{ route('bookings.ticket', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium">Ticket (PDF)</a>
-                    @endif
-                    @if(!$booking->isFree() && !$isCancelled && !$isExternalInvoicing && $booking->invoice_number)
-                        <a href="{{ route('bookings.invoice', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm font-medium">Rechnung herunterladen (PDF)</a>
-                    @elseif(!$booking->isFree() && $isExternalInvoicing)
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Die Rechnung erhalten Sie separat vom Veranstalter.</p>
-                    @endif
-                    @if($isReady && $eventPast)
-                        <a href="{{ route('bookings.certificate', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm font-medium">Teilnahmezertifikat</a>
-                    @endif
-                    @if(!$isCancelled && !$eventPast)
-                        <a href="{{ route('bookings.ical', $booking->booking_number) }}" class="block w-full px-4 py-2.5 text-center bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition text-sm font-medium">Kalendereintrag (.ics)</a>
-                    @endif
-                    <button type="button" onclick="window.print()" class="hidden sm:block w-full px-4 py-2.5 text-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 text-sm">Seite drucken</button>
-
-                    @if($booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture())
-                        <div class="pt-3 mt-2 border-t border-gray-100 dark:border-gray-700">
-                            @if($event->canCancelBooking())
-                                <form method="POST" action="{{ route('bookings.cancel', $booking->booking_number) }}"
-                                      onsubmit="return confirm('Möchten Sie diese Buchung wirklich stornieren? Dies kann nicht rückgängig gemacht werden.')">
-                                    @csrf
-                                    <button type="submit" class="w-full px-4 py-2.5 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition text-sm font-medium">Buchung stornieren</button>
-                                </form>
-                                @if($event->cancellation_days_before !== null)
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Kostenfrei möglich bis {{ $event->start_date->copy()->subDays($event->cancellation_days_before)->format('d.m.Y') }}</p>
+        {{-- Feedback nach der Veranstaltung --}}
+        @if ($eventPast && $isReady)
+            <section id="feedback" aria-labelledby="feedback-titel" class="border-t border-line pt-8">
+                @if ($booking->review)
+                    <h2 id="feedback-titel" class="m-0 text-h3">Danke für Ihr Feedback</h2>
+                    <p class="mt-2 mb-0 flex items-center gap-2 text-base text-ink-soft">
+                        Ihre Bewertung:
+                        <span class="flex gap-0.5 text-ink" aria-hidden="true">
+                            @for ($i = 1; $i <= 5; $i++)
+                                @if ($i <= $booking->review->rating)
+                                    <x-icon.star-filled class="h-5 w-5" />
+                                @else
+                                    <x-icon.star class="h-5 w-5 text-line-strong" />
                                 @endif
-                            @elseif($event->cancellation_allowed && $event->cancellation_days_before !== null)
-                                <p class="text-xs text-gray-600 dark:text-gray-400">Die Stornierungsfrist ist abgelaufen (bis {{ $event->cancellation_days_before }} Tag(e) vor Beginn). Bitte wenden Sie sich an den Veranstalter.</p>
-                            @else
-                                <p class="text-xs text-gray-600 dark:text-gray-400">Eine Online-Stornierung ist für diese Veranstaltung nicht möglich. Bitte wenden Sie sich an den Veranstalter.</p>
-                            @endif
+                            @endfor
+                        </span>
+                        <span class="sr-only">{{ $booking->review->rating }} von 5 Sternen</span>
+                    </p>
+                @else
+                    <h2 id="feedback-titel" class="m-0 text-h2">Wie hat Ihnen die Veranstaltung gefallen?</h2>
+                    <p class="mt-1 mb-0 text-base text-muted">Ihr Feedback hilft dem Veranstalter, zukünftige Angebote zu
+                        verbessern.</p>
+                    <form method="POST" action="{{ route('bookings.feedback', $booking->booking_number) }}"
+                        class="mt-6 flex max-w-form flex-col gap-5" x-data="{ rating: {{ (int) old('rating', 0) }} }">
+                        @csrf
+                        <fieldset class="m-0 min-w-0 border-0 p-0">
+                            <x-ui.label as="legend" required>Bewertung</x-ui.label>
+                            <div class="flex gap-1">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <label
+                                        class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink">
+                                        <input type="radio" name="rating" value="{{ $i }}" class="sr-only"
+                                            x-model.number="rating" @checked(old('rating') == $i)>
+                                        <span aria-hidden="true" :class="rating >= {{ $i }} ? 'text-ink' : 'text-line-strong'"
+                                            class="text-line-strong transition-colors duration-150">
+                                            <x-icon.star-filled class="h-7 w-7" />
+                                        </span>
+                                        <span class="sr-only">{{ $i }} von 5 Sternen</span>
+                                    </label>
+                                @endfor
+                            </div>
+                            <x-ui.field-error name="rating" />
+                        </fieldset>
+                        <x-ui.textarea label="Kommentar" name="comment" id="feedback-comment" optional rows="3"
+                            maxlength="1000" placeholder="Was war besonders hilfreich? Was können wir verbessern?" />
+                        <div>
+                            <x-ui.button type="submit">Feedback senden</x-ui.button>
                         </div>
+                    </form>
+                @endif
+            </section>
+        @endif
+    </div>
+
+    {{-- Seitenleiste --}}
+    <div class="flex min-w-0 flex-col gap-8">
+        <x-ui.summary :sticky="false" id="buchung-zusammenfassung">
+            <div class="flex flex-col gap-2">
+                <x-ui.summary-line label="Plätze" :amount="$booking->items->count()" />
+                @if ($isFree)
+                    <x-ui.summary-line label="Kosten" amount="kostenfrei" />
+                @else
+                    <x-ui.summary-line label="Zwischensumme" :amount="Ui::money($booking->subtotal)" />
+                    @if ($booking->discount > 0)
+                        <x-ui.summary-line label="Rabatt" :amount="'−' . Ui::money($booking->discount)" muted />
+                    @endif
+                @endif
+            </div>
+            @unless ($isFree)
+                <x-ui.summary-total :amount="Ui::money($booking->total)" />
+                <div class="flex flex-col gap-2">
+                    <x-ui.summary-line label="Zahlart"
+                        :amount="$booking->payment_method === 'paypal' ? 'PayPal' : 'Rechnung'" />
+                    @if ($booking->ticketsReleasedBeforePayment())
+                        <x-ui.summary-line label="Rechnung" amount="folgt separat" />
+                    @elseif($booking->payment_status !== 'extern')
+                        <x-ui.summary-line label="Zahlung">
+                            <x-ui.status :tone="Ui::paymentTone($booking->payment_status)">{{ $booking->paymentStatusLabel() }}</x-ui.status>
+                        </x-ui.summary-line>
                     @endif
                 </div>
-            </section>
+            @endunless
+            <p class="m-0 text-small text-muted tabular-nums">Gebucht am {{ $booking->created_at->format('d.m.Y H:i') }}
+                Uhr</p>
+        </x-ui.summary>
 
-            <section class="bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                <h3 class="font-semibold text-gray-900 dark:text-gray-100 mb-1">Fragen zur Buchung?</h3>
-                <p class="text-sm text-gray-700 dark:text-gray-300">{{ $event->getOrganizerName() }}</p>
-                @if($organizerEmail)
-                    <a href="mailto:{{ $organizerEmail }}?subject={{ rawurlencode('Buchung ' . $booking->booking_number) }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline break-all">{{ $organizerEmail }}</a>
-                @endif
-                @if($organizerPhone)
-                    <p><a href="tel:{{ preg_replace('/[^0-9+]/', '', $organizerPhone) }}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">{{ $organizerPhone }}</a></p>
-                @endif
-            </section>
-        </aside>
+        <section aria-labelledby="dokumente-titel" class="flex flex-col gap-3">
+            <h2 id="dokumente-titel" class="m-0 mb-1 text-h3">Dokumente &amp; Aktionen</h2>
+            @if ($booking->hasTicketDocument() && $isReady && $booking->canSendTickets())
+                <x-ui.button :href="route('bookings.ticket', $booking->booking_number)" full>
+                    <x-slot:icon><x-icon.ticket /></x-slot:icon>
+                    Ticket (PDF)
+                </x-ui.button>
+            @endif
+            @if (!$isFree && !$isCancelled && !$isExternalInvoicing && $booking->invoice_number)
+                <x-ui.button variant="secondary" :href="route('bookings.invoice', $booking->booking_number)" full>
+                    <x-slot:icon><x-icon.receipt /></x-slot:icon>
+                    Rechnung herunterladen (PDF)
+                </x-ui.button>
+            @elseif(!$isFree && $isExternalInvoicing)
+                <p class="m-0 text-small text-muted">Die Rechnung erhalten Sie separat vom Veranstalter.</p>
+            @endif
+            @if ($isReady && $eventPast)
+                <x-ui.button variant="secondary" :href="route('bookings.certificate', $booking->booking_number)" full>
+                    <x-slot:icon><x-icon.medal /></x-slot:icon>
+                    Teilnahmezertifikat
+                </x-ui.button>
+            @endif
+            @if (!$isCancelled && !$eventPast)
+                <x-ui.button variant="secondary" :href="route('bookings.ical', $booking->booking_number)" full>
+                    <x-slot:icon><x-icon.calendar /></x-slot:icon>
+                    Kalendereintrag (.ics)
+                </x-ui.button>
+            @endif
+            <x-ui.button variant="link" onclick="window.print()" class="hidden self-start sm:inline-flex">Seite
+                drucken</x-ui.button>
+
+            @if ($booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture())
+                <div class="mt-2 flex flex-col gap-2 border-t border-line pt-4">
+                    @if ($event->canCancelBooking())
+                        <x-ui.modal name="cancel-booking" title="Buchung stornieren?">
+                            <x-slot:trigger>
+                                <x-ui.button variant="secondary" full>Buchung stornieren</x-ui.button>
+                            </x-slot:trigger>
+                            <p class="m-0">Möchten Sie diese Buchung wirklich stornieren? Dies kann nicht rückgängig
+                                gemacht werden.</p>
+                            <form id="cancel-booking-form" method="POST"
+                                action="{{ route('bookings.cancel', $booking->booking_number) }}" class="hidden">
+                                @csrf
+                            </form>
+                            <x-slot:footer>
+                                <x-ui.button variant="secondary" x-on:click="close()">Abbrechen</x-ui.button>
+                                <x-ui.button variant="danger" type="submit" form="cancel-booking-form">Buchung
+                                    stornieren</x-ui.button>
+                            </x-slot:footer>
+                        </x-ui.modal>
+                        @if ($event->cancellation_days_before !== null)
+                            <p class="m-0 text-center text-small text-muted tabular-nums">Kostenfrei möglich bis
+                                {{ $event->start_date->copy()->subDays($event->cancellation_days_before)->format('d.m.Y') }}
+                            </p>
+                        @endif
+                    @elseif($event->cancellation_allowed && $event->cancellation_days_before !== null)
+                        <p class="m-0 text-small text-muted">Die Stornierungsfrist ist abgelaufen (bis
+                            {{ $event->cancellation_days_before }} Tag(e) vor Beginn). Bitte wenden Sie sich an den
+                            Veranstalter.</p>
+                    @else
+                        <p class="m-0 text-small text-muted">Eine Online-Stornierung ist für diese Veranstaltung nicht
+                            möglich. Bitte wenden Sie sich an den Veranstalter.</p>
+                    @endif
+                </div>
+            @endif
+        </section>
+
+        <section aria-labelledby="fragen-titel" class="flex flex-col gap-1 border-t border-line pt-6">
+            <h2 id="fragen-titel" class="m-0 mb-1 text-h3">Fragen zur Buchung?</h2>
+            <p class="m-0 text-base">{{ $event->getOrganizerName() }}</p>
+            @if ($organizerEmail)
+                <a href="mailto:{{ $organizerEmail }}?subject={{ rawurlencode('Buchung ' . $booking->booking_number) }}"
+                    class="text-base font-medium break-all text-ink underline underline-offset-[3px]">{{ $organizerEmail }}</a>
+            @endif
+            @if ($organizerPhone)
+                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $organizerPhone) }}"
+                    class="text-base font-medium text-ink underline underline-offset-[3px] tabular-nums">{{ $organizerPhone }}</a>
+            @endif
+        </section>
     </div>
 </div>

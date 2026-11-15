@@ -36,8 +36,8 @@
                         <span class="text-small text-ink-soft">{{ Str::limit($user->bio, 100) }}</span>
                     @endif
                     <x-slot:meta>
-                        <span class="text-ui font-medium tabular-nums">{{ $user->events_count }} Veranstaltungen</span>
-                        <span class="text-small text-muted tabular-nums">{{ $user->bookings_count }} Buchungen · {{ $user->followers_count }} Follower</span>
+                        <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
+                        <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen · {{ $user->followers_count ?? 0 }} Follower</span>
                     </x-slot:meta>
                     <x-slot:action>
                         @if (auth()->user()->isFollowing($user))
