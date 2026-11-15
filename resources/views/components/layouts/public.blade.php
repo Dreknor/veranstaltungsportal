@@ -1,5 +1,12 @@
+{{--
+    Öffentliches Seitengerüst (B4): öffentliche Seiten, Anmeldung, Buchung, Rechtliches.
+    Kopf <x-public-nav>, Session-Meldungen einmal über dem Inhalt, Fuß <x-footer>.
+    Seiten geben ihren Inhalt selbst auf die Seitenbreite (max-w-page px-page).
+--}}
+@props(['title' => null, 'description' => null])
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,86 +16,28 @@
     <meta name="description" content="{{ $description ?? 'Veranstaltungsportal für Fort- und Weiterbildungen' }}">
     @stack('meta')
 
-    <!-- Font Awesome (lokal via Vite-Build, kein CDN) -->
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    @if(config('recaptcha.enabled') && config('recaptcha.site_key'))
+    @if (config('recaptcha.enabled') && config('recaptcha.site_key'))
         <meta name="recaptcha-site-key" content="{{ config('recaptcha.site_key') }}">
     @endif
-
-    <script>
-        function applyTheme() {
-            const userPref = localStorage.getItem('darkMode');
-            const systemPref = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (userPref === 'true' || (userPref === null && systemPref)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
-        }
-        applyTheme();
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (!('darkMode' in localStorage)) {
-                applyTheme();
-            }
-        });
-    </script>
 </head>
-<body class="bg-gray-50 dark:bg-gray-900 antialiased" x-data="{
-    darkMode: localStorage.getItem('darkMode') === 'true',
-    toggleDarkMode() {
-        this.darkMode = !this.darkMode;
-        localStorage.setItem('darkMode', this.darkMode);
-    }
-}" :class="{ 'dark': darkMode }">
-    <!-- Public Navigation -->
+
+<body class="flex min-h-screen flex-col bg-surface font-sans text-base text-ink antialiased">
+    <a href="#inhalt"
+        class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[60] focus:rounded-control focus:bg-surface focus:px-4 focus:py-3 focus:text-ui focus:font-medium focus:text-ink">Zum
+        Inhalt springen</a>
+
     <x-public-nav />
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-            <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 dark:border-green-400 p-4 rounded-md">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-green-500 dark:text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-green-700 dark:text-green-300">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-            <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 dark:border-red-400 p-4 rounded-md">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-500 dark:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700 dark:text-red-300">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-
-    <!-- Main Content -->
-    <main>
+    <main id="inhalt" class="flex-1">
+        <x-ui.flash class="mx-auto mt-6 mb-6 max-w-page px-page" />
         {{ $slot }}
     </main>
 
-    <!-- Footer -->
     <x-footer />
 
     @stack('scripts')
 </body>
-</html>
 
+</html>

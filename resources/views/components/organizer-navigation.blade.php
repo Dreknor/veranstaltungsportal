@@ -1,94 +1,93 @@
-@if(auth()->check() && (auth()->user()->isOrganizer() || auth()->user()->activeOrganizations()->count() > 0))
+{{--
+    Leiste des Veranstalter-Bereichs unter dem Kopf (nur auf organizer.*-Routen): aktuelle Organisation
+    und die wichtigsten Bereiche. Ab 768 px als Linkzeile mit Menü „Mehr", darunter aufklappbar.
+    Der Organisationswechsler sitzt im Kopf (B4).
+--}}
+@if (auth()->check() && (auth()->user()->isOrganizer() || auth()->user()->activeOrganizations()->count() > 0))
     @php($currentOrg = auth()->user()->currentOrganization())
-    <div class="bg-white border-b shadow-sm">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <!-- Organization Info -->
-                <div class="flex items-center gap-4">
-                    @if($currentOrg)
-                        <div class="flex items-center gap-3">
-                            @if($currentOrg->logo)
-                                <img src="{{ asset('storage/'.$currentOrg->logo) }}" class="h-10 w-10 rounded object-cover" alt="{{ $currentOrg->name }}">
-                            @else
-                                <div class="h-10 w-10 rounded bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-white font-bold text-sm">
-                                    {{ $currentOrg->initials() }}
-                                </div>
-                            @endif
-                            <div>
-                                <div class="font-semibold text-gray-900">{{ $currentOrg->name }}</div>
-                                <div class="text-xs text-gray-500">{{ ucfirst(auth()->user()->getRoleInOrganization($currentOrg)) }}</div>
-                            </div>
-                        </div>
+    <div class="border-b border-line bg-surface" x-data="{ mobileOpen: false }">
+        <div class="mx-auto flex max-w-page flex-wrap items-center gap-x-6 gap-y-2 px-page py-2 lg:px-8">
+            <div class="flex min-w-0 items-center gap-3">
+                @if ($currentOrg)
+                    @if ($currentOrg->logo)
+                        <img src="{{ asset('storage/' . $currentOrg->logo) }}"
+                            class="h-9 w-9 flex-none rounded-control border border-line object-cover" alt="">
                     @else
-                        <span class="text-gray-500">Keine Organisation ausgewählt</span>
+                        <span aria-hidden="true"
+                            class="inline-flex h-9 w-9 flex-none items-center justify-center rounded-control border border-line bg-zone text-small font-semibold text-ink">
+                            {{ $currentOrg->initials() }}
+                        </span>
                     @endif
-                </div>
-
-                <!-- Navigation Menu -->
-                <nav class="hidden md:flex items-center gap-6">
-                    <a href="{{ route('organizer.dashboard') }}" class="text-gray-700 hover:text-primary-600 {{ request()->routeIs('organizer.dashboard') ? 'font-semibold text-primary-600' : '' }}">
-                        Dashboard
-                    </a>
-                    <a href="{{ route('organizer.events.index') }}" class="text-gray-700 hover:text-primary-600 {{ request()->routeIs('organizer.events.*') ? 'font-semibold text-primary-600' : '' }}">
-                        Events
-                    </a>
-                    <a href="{{ route('organizer.bookings.index') }}" class="text-gray-700 hover:text-primary-600 {{ request()->routeIs('organizer.bookings.*') ? 'font-semibold text-primary-600' : '' }}">
-                        Buchungen
-                    </a>
-                    <a href="{{ route('organizer.statistics.index') }}" class="text-gray-700 hover:text-primary-600 {{ request()->routeIs('organizer.statistics.*') ? 'font-semibold text-primary-600' : '' }}">
-                        Statistiken
-                    </a>
-
-                    <!-- Dropdown Menu -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="flex items-center gap-2 text-gray-700 hover:text-primary-600">
-                            <span>Mehr</span>
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                            </svg>
-                        </button>
-                        <div x-show="open" @click.away="open = false" x-cloak class="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg py-1 z-50">
-                            <a href="{{ route('organizer.reviews.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Bewertungen</a>
-                            <a href="{{ route('organizer.invoices.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rechnungen</a>
-                            <a href="{{ route('organizer.settings.invoice.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rechnungseinstellungen</a>
-                            <a href="{{ route('organizer.featured-events.history') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Hervorgehobene Events</a>
-                            <div class="border-t border-gray-100"></div>
-                            <a href="{{ route('organizer.organization.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Einstellungen</a>
-                            <a href="{{ route('organizer.team.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Team</a>
-                            <a href="{{ route('organizer.bank-account.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Rechnungsdaten</a>
-                        </div>
+                    <div class="min-w-0">
+                        <p class="m-0 truncate text-ui font-semibold text-ink">{{ $currentOrg->name }}</p>
+                        <p class="m-0 text-caption text-muted">
+                            {{ ucfirst(auth()->user()->getRoleInOrganization($currentOrg)) }}</p>
                     </div>
-                </nav>
-
-                <!-- Organization Switcher -->
-                @include('components.organization-switcher')
+                @else
+                    <p class="m-0 text-ui text-muted">Keine Organisation ausgewählt</p>
+                @endif
             </div>
-        </div>
-    </div>
 
-    <!-- Mobile Menu (optional) -->
-    <div class="md:hidden bg-white border-b" x-data="{ mobileOpen: false }">
-        <button @click="mobileOpen = !mobileOpen" class="w-full px-4 py-3 text-left flex items-center justify-between">
-            <span class="font-medium">Menü</span>
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-        </button>
-        <div x-show="mobileOpen" x-cloak class="px-4 pb-4 space-y-2">
-            <a href="{{ route('organizer.dashboard') }}" class="block py-2 text-gray-700">Dashboard</a>
-            <a href="{{ route('organizer.events.index') }}" class="block py-2 text-gray-700">Events</a>
-            <a href="{{ route('organizer.bookings.index') }}" class="block py-2 text-gray-700">Buchungen</a>
-            <a href="{{ route('organizer.statistics.index') }}" class="block py-2 text-gray-700">Statistiken</a>
-            @if(Route::has('organizer.series.index'))
-            <a href="{{ route('organizer.series.index') }}" class="block py-2 text-gray-700">Serien</a>
-            @endif
-            <a href="{{ route('organizer.reviews.index') }}" class="block py-2 text-gray-700">Bewertungen</a>
-            <a href="{{ route('organizer.invoices.index') }}" class="block py-2 text-gray-700">Rechnungen</a>
-            <a href="{{ route('organizer.settings.invoice.index') }}" class="block py-2 text-gray-700">Rechnungseinstellungen</a>
-            <a href="{{ route('organizer.featured-events.history') }}" class="block py-2 text-gray-700">Hervorgehobene Events</a>
-            <a href="{{ route('organizer.organization.edit') }}" class="block py-2 text-gray-700">Einstellungen</a>
-            <a href="{{ route('organizer.team.index') }}" class="block py-2 text-gray-700">Team</a>
-            <a href="{{ route('organizer.bank-account.index') }}" class="block py-2 text-gray-700">Rechnungsdaten</a>
+            <nav aria-label="Veranstalter-Bereich" class="ml-auto hidden items-center gap-1 md:flex">
+                <x-ui.nav-link :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">
+                    Dashboard
+                </x-ui.nav-link>
+                <x-ui.nav-link :href="route('organizer.events.index')" :active="request()->routeIs('organizer.events.*')">
+                    Veranstaltungen
+                </x-ui.nav-link>
+                <x-ui.nav-link :href="route('organizer.bookings.index')" :active="request()->routeIs('organizer.bookings.*')">
+                    Buchungen
+                </x-ui.nav-link>
+                <x-ui.nav-link :href="route('organizer.statistics.index')" :active="request()->routeIs('organizer.statistics.*')">
+                    Statistiken
+                </x-ui.nav-link>
+
+                <x-ui.dropdown width="w-64">
+                    <x-slot:trigger>
+                        <button type="button" x-ref="button" x-on:click="toggle()"
+                            x-bind:aria-expanded="open.toString()" aria-expanded="false"
+                            class="inline-flex min-h-11 cursor-pointer items-center gap-1 border-0 bg-transparent px-3 text-ui font-medium text-ink underline-offset-[3px] hover:underline">
+                            Mehr
+                            <x-icon.chevron-down class="h-4 w-4 transition-transform duration-150"
+                                x-bind:class="open && 'rotate-180'" />
+                        </button>
+                    </x-slot:trigger>
+                    <x-ui.dropdown-item :href="route('organizer.reviews.index')">Bewertungen</x-ui.dropdown-item>
+                    <x-ui.dropdown-item :href="route('organizer.invoices.index')">Rechnungen</x-ui.dropdown-item>
+                    <x-ui.dropdown-item :href="route('organizer.settings.invoice.index')">Rechnungseinstellungen</x-ui.dropdown-item>
+                    <x-ui.dropdown-item :href="route('organizer.featured-events.history')">Hervorgehobene Veranstaltungen</x-ui.dropdown-item>
+                    <div class="my-1 border-t border-line"></div>
+                    <x-ui.dropdown-item :href="route('organizer.organization.edit')">Einstellungen</x-ui.dropdown-item>
+                    <x-ui.dropdown-item :href="route('organizer.team.index')">Team</x-ui.dropdown-item>
+                    <x-ui.dropdown-item :href="route('organizer.bank-account.index')">Rechnungsdaten</x-ui.dropdown-item>
+                </x-ui.dropdown>
+            </nav>
+
+            <button type="button" x-on:click="mobileOpen = !mobileOpen" x-bind:aria-expanded="mobileOpen.toString()"
+                aria-expanded="false" aria-controls="organizer-mobile-menu"
+                class="ml-auto inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-line-strong bg-surface px-3 text-ui font-medium text-ink transition-colors duration-150 hover:border-ink hover:bg-zone md:hidden">
+                Menü
+                <x-icon.chevron-down class="h-4 w-4 transition-transform duration-150"
+                    x-bind:class="mobileOpen && 'rotate-180'" />
+            </button>
         </div>
+
+        <nav id="organizer-mobile-menu" aria-label="Veranstalter-Bereich" x-show="mobileOpen" x-cloak
+            class="border-t border-line px-page py-2 md:hidden">
+            <x-ui.nav-link block :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">Dashboard</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.events.index')" :active="request()->routeIs('organizer.events.*')">Veranstaltungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.bookings.index')" :active="request()->routeIs('organizer.bookings.*')">Buchungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.statistics.index')" :active="request()->routeIs('organizer.statistics.*')">Statistiken</x-ui.nav-link>
+            @if (Route::has('organizer.series.index'))
+                <x-ui.nav-link block :href="route('organizer.series.index')" :active="request()->routeIs('organizer.series.*')">Serien</x-ui.nav-link>
+            @endif
+            <x-ui.nav-link block :href="route('organizer.reviews.index')">Bewertungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.invoices.index')">Rechnungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.settings.invoice.index')">Rechnungseinstellungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.featured-events.history')">Hervorgehobene Veranstaltungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.organization.edit')">Einstellungen</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.team.index')">Team</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.bank-account.index')">Rechnungsdaten</x-ui.nav-link>
+        </nav>
     </div>
 @endif

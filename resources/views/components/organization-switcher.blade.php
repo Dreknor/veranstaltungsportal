@@ -1,34 +1,44 @@
+{{--
+    Organisationswechsler im Kopf des angemeldeten Bereichs (B4). Aufklappmenü über <x-ui.dropdown>:
+    Escape und Klick daneben schließen, der Fokus kehrt zum Button zurück.
+    Unter 640 px richtet sich das Menü am Kopf aus, damit es nicht über den Rand läuft.
+--}}
 @php($org = isset($currentOrganization) ? $currentOrganization : auth()->user()->currentOrganization())
-<div class="relative">
-    <button type="button" class="inline-flex items-center gap-2 px-3 py-2 rounded bg-gray-100 hover:bg-gray-200" onclick="document.getElementById('orgMenu').classList.toggle('hidden')">
-        @if($org)
-            <span class="font-medium">{{ $org->name }}</span>
-        @else
-            <span class="text-gray-500">Keine Organisation</span>
-        @endif
-        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-    </button>
-    <div id="orgMenu" class="absolute right-0 mt-2 w-64 bg-white border rounded shadow hidden z-50">
-        <div class="p-3 border-b flex justify-between items-center">
-            <span class="text-sm font-semibold">Organisation wechseln</span>
-            <button class="text-gray-400 hover:text-gray-600" onclick="document.getElementById('orgMenu').classList.add('hidden')">×</button>
-        </div>
-        <div class="max-h-60 overflow-y-auto">
-            @foreach(auth()->user()->activeOrganizations as $o)
-                <form method="POST" action="{{ route('organizer.organizations.switch', $o) }}" class="block">
-                    @csrf
-                    <button class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 {{ $org && $org->id === $o->id ? 'bg-gray-50 font-medium' : '' }}">
-                        {{ $o->name }}
-                        @if($org && $org->id === $o->id)
-                            <span class="text-xs text-primary-600">(aktiv)</span>
-                        @endif
-                    </button>
-                </form>
-            @endforeach
-        </div>
-        <div class="p-3 border-t">
-            <a href="{{ route('organizer.organizations.create') }}" class="btn btn-sm btn-outline-primary w-full">Neue Organisation</a>
-        </div>
-    </div>
-</div>
+<x-ui.dropdown width="w-[calc(100vw-32px)] mr-4 sm:mr-0 sm:w-72" class="flex-none max-sm:static">
+    <x-slot:trigger>
+        <button type="button" x-ref="button" x-on:click="toggle()" x-bind:aria-expanded="open.toString()"
+            aria-expanded="false"
+            class="inline-flex h-11 max-w-[240px] cursor-pointer items-center gap-2 rounded-control border border-line-strong bg-surface px-3 text-ui font-medium text-ink transition-colors duration-150 hover:border-ink hover:bg-zone">
+            <x-icon.building-office class="h-4 w-4 flex-none text-muted [&_*]:[stroke-width:1.6]" aria-hidden="true" />
+            <span class="sr-only">Organisation: {{ $org ? $org->name : 'Keine Organisation' }}</span>
+            @if ($org)
+                <span class="hidden truncate sm:inline" aria-hidden="true">{{ $org->name }}</span>
+            @else
+                <span class="hidden truncate text-muted sm:inline" aria-hidden="true">Keine Organisation</span>
+            @endif
+            <x-icon.chevron-down class="h-4 w-4 flex-none text-muted" />
+        </button>
+    </x-slot:trigger>
 
+    <p class="m-0 px-4 pt-2 pb-1 text-caption text-muted">Organisation wechseln</p>
+    <div class="max-h-60 overflow-y-auto">
+        @foreach (auth()->user()->activeOrganizations as $o)
+            <form method="POST" action="{{ route('organizer.organizations.switch', $o) }}" class="m-0">
+                @csrf
+                <x-ui.dropdown-item type="submit" :aria-current="$org && $org->id === $o->id ? 'true' : null">
+                    <span class="min-w-0 flex-1 truncate">{{ $o->name }}</span>
+                    @if ($org && $org->id === $o->id)
+                        <x-icon.check class="h-4 w-4 flex-none" />
+                        <span class="sr-only">(aktiv)</span>
+                    @endif
+                </x-ui.dropdown-item>
+            </form>
+        @endforeach
+    </div>
+    <div class="mt-1 border-t border-line pt-1">
+        <x-ui.dropdown-item :href="route('organizer.organizations.create')">
+            <x-slot:icon><x-icon.plus /></x-slot:icon>
+            Neue Organisation
+        </x-ui.dropdown-item>
+    </div>
+</x-ui.dropdown>

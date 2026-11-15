@@ -1,61 +1,32 @@
+{{--
+    Hinweis auf ein neu erhaltenes Abzeichen (unten rechts, schließt sich nach 5 Sekunden).
+    Die Farbe des Abzeichens ist Inhalt und bleibt auf das Abzeichen-Icon beschränkt (A2).
+--}}
 @props(['badge'])
 
-<div x-data="{ show: true }"
-     x-show="show"
-     x-transition:enter="transition ease-out duration-300"
-     x-transition:enter-start="opacity-0 transform scale-90 translate-y-4"
-     x-transition:enter-end="opacity-100 transform scale-100 translate-y-0"
-     x-transition:leave="transition ease-in duration-200"
-     x-transition:leave-start="opacity-100"
-     x-transition:leave-end="opacity-0"
-     class="fixed bottom-4 right-4 z-50 max-w-sm w-full bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden border-2"
-     style="border-color: {{ $badge->color }};">
-
-    <div class="p-4">
-        <div class="flex items-start">
-            <div class="flex-shrink-0">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center animate-bounce"
-                     style="background-color: {{ $badge->color }}20;">
-                    <i class="fas fa-medal text-4xl" style="color: {{ $badge->color }};"></i>
-                </div>
+<div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" role="status"
+    class="fixed right-4 bottom-4 z-50 w-[calc(100%-32px)] max-w-sm rounded-box border border-line bg-surface p-4 text-ink shadow-overlay">
+    <div class="flex items-start gap-4">
+        <span class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-control border border-line bg-zone"
+            style="color: {{ $badge->color }};">
+            <x-icon.medal class="h-6 w-6" />
+        </span>
+        <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-2">
+                <p class="m-0 pt-0.5 text-h3">Neues Abzeichen</p>
+                <button type="button" @click="show = false" aria-label="Hinweis schließen"
+                    class="-mt-2 -mr-2 inline-flex h-11 w-11 flex-none cursor-pointer items-center justify-center rounded-control border-0 bg-transparent text-ink transition-colors duration-150 hover:bg-zone">
+                    <x-icon.x class="h-4 w-4" />
+                </button>
             </div>
-            <div class="ml-4 flex-1">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                        🎉 Neues Abzeichen!
-                    </h3>
-                    <button @click="show = false"
-                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <p class="mt-1 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                    {{ $badge->name }}
-                </p>
-                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    {{ $badge->description }}
-                </p>
-                <div class="mt-2 flex items-center text-xs text-gray-500 dark:text-gray-400">
-                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
-                        <i class="fas fa-star mr-1"></i> +{{ $badge->points }} Punkte
-                    </span>
-                </div>
-                <div class="mt-3">
-                    <a href="{{ route('badges.index') }}"
-                       class="text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                        Alle Abzeichen ansehen <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Progress bar -->
-    <div class="h-1 bg-gray-200 dark:bg-gray-700">
-        <div class="h-full transition-all duration-[5000ms] ease-linear"
-             style="background-color: {{ $badge->color }}; width: 0%"
-             x-init="setTimeout(() => $el.style.width = '100%', 100); setTimeout(() => show = false, 5000)">
+            <p class="m-0 mt-1 text-small font-semibold">{{ $badge->name }}</p>
+            <p class="m-0 mt-1 text-small text-muted">{{ $badge->description }}</p>
+            <p class="m-0 mt-2 text-small text-ink-soft tabular-nums">+{{ $badge->points }} Punkte</p>
+            <a href="{{ route('badges.index') }}"
+                class="mt-1 inline-flex min-h-11 items-center gap-2 text-small font-medium text-ink underline-offset-[3px] hover:underline">
+                Alle Abzeichen ansehen
+                <x-icon.arrow-right class="h-4 w-4" />
+            </a>
         </div>
     </div>
 </div>
-
