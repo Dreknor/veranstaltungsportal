@@ -27,7 +27,7 @@
             <!-- Veranstalter -->
             <section aria-labelledby="kontotyp-organisator" class="border-t border-line pt-6">
                 <h2 id="kontotyp-organisator" class="m-0 mb-1 text-h2">Veranstalter</h2>
-                <p class="m-0 mb-6 text-base text-muted">Für Veranstalter von Veranstaltungen</p>
+                <p class="m-0 mb-6 text-base text-muted">Für alle, die Veranstaltungen anbieten</p>
 
                 <ul class="m-0 flex list-none flex-col gap-3 p-0 text-base">
                     @foreach (['Alle Teilnehmer-Funktionen', 'Veranstaltungen erstellen und verwalten', 'Ticketarten konfigurieren', 'Rabattcodes erstellen', 'Buchungen verwalten', 'Statistiken und Berichte'] as $feature)

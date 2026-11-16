@@ -23,7 +23,7 @@ class EventController extends Controller
 
         // Filter nach Stadt (nur für Events)
         if ($request->filled('city')) {
-            $eventsQuery->where('venue_city', 'LIKE', '%' . $request->city . '%');
+            $eventsQuery->where('venue_city', 'LIKE', '%'.$request->city.'%');
         }
 
         // Suche
@@ -72,7 +72,7 @@ class EventController extends Controller
             $events->map(function ($event) {
                 return [
                     'type' => 'event',
-                    'item' => $event
+                    'item' => $event,
                 ];
             }),
             $events->total(),
@@ -122,16 +122,15 @@ class EventController extends Controller
         // Increment view count
         $event->incrementViews();
 
-
         // Prüfe ob Event privat ist und Access Code benötigt
-        if ($event->is_private && !session()->has('event_access_' . $event->id)) {
+        if ($event->is_private && ! session()->has('event_access_'.$event->id)) {
             return redirect()->route('events.access', $event->slug);
         }
 
         // Prüfe ob Event veröffentlicht ist
-        if (!$event->is_published) {
+        if (! $event->is_published) {
             // Allow owners of the organization to view unpublished events
-            if (!auth()->check() || !$event->organization->users()->where('user_id', auth()->id())->wherePivot('role', 'owner')->exists()) {
+            if (! auth()->check() || ! $event->organization->users()->where('user_id', auth()->id())->wherePivot('role', 'owner')->exists()) {
                 abort(404);
             }
         }
@@ -159,7 +158,7 @@ class EventController extends Controller
     {
         $event = Event::where('slug', $slug)->firstOrFail();
 
-        if (!$event->is_private) {
+        if (! $event->is_private) {
             return redirect()->route('events.show', $slug);
         }
 
@@ -175,7 +174,8 @@ class EventController extends Controller
         ]);
 
         if ($request->access_code === $event->access_code) {
-            session()->put('event_access_' . $event->id, true);
+            session()->put('event_access_'.$event->id, true);
+
             return redirect()->route('events.show', $slug)
                 ->with('success', 'Zugriff gewährt!');
         }
@@ -188,12 +188,12 @@ class EventController extends Controller
         $event = Event::where('slug', $slug)->firstOrFail();
 
         // Check if event is private and access is granted
-        if ($event->is_private && !session()->has('event_access_' . $event->id) && !auth()->user()?->can('view', $event)) {
+        if ($event->is_private && ! session()->has('event_access_'.$event->id) && ! auth()->user()?->can('view', $event)) {
             abort(403, 'Kein Zugriff auf dieses Event');
         }
 
         $calendarService = app(\App\Services\CalendarService::class);
+
         return $calendarService->downloadEventIcal($event);
     }
 }
-

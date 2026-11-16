@@ -278,18 +278,17 @@ class ReportingController extends Controller
     }
 
     /**
-     * Trichter für Veranstaltungen, die im Zeitraum stattfinden: Aufrufe → Buchungen → bestätigt.
-     * Alle drei Stufen beziehen sich auf dieselben Veranstaltungen, die Quoten sind auf 100 % begrenzt.
+     * Trichter für den Zeitraum: Aufrufe der Veranstaltungen, die im Zeitraum gebucht wurden
+     * → Buchungen im Zeitraum → bezahlte bzw. extern fakturierte Buchungen (kostenlose zählen als bezahlt).
+     * Die Quoten sind auf 100 % begrenzt, weil Aufrufe nur einmal je Sitzung gezählt werden.
      */
     private function getConversionFunnel($startDate, $endDate)
     {
-        $eventIds = Event::whereBetween('start_date', [$startDate, $endDate])->pluck('id');
+        $bookings = Booking::whereBetween('created_at', [$startDate, $endDate]);
 
-        $eventViews = (int) Event::whereIn('id', $eventIds)->sum('views');
-        $bookingsStarted = Booking::whereIn('event_id', $eventIds)->count();
-        $bookingsCompleted = Booking::whereIn('event_id', $eventIds)
-            ->whereIn('status', ['confirmed', 'completed'])
-            ->count();
+        $eventViews = (int) Event::whereIn('id', (clone $bookings)->select('event_id'))->sum('views');
+        $bookingsStarted = (clone $bookings)->count();
+        $bookingsCompleted = (clone $bookings)->whereIn('payment_status', ['paid', 'extern'])->count();
 
         $rate = fn (int $part, int $whole) => $whole > 0 ? min(100, ($part / $whole) * 100) : 0;
 

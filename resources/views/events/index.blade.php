@@ -10,7 +10,17 @@
                 'Entdecken Sie Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Filter nach Kategorie, Ort und Datum.';
             // Canonical immer auf Seite 1 (ohne ?page=N) setzen
             $canonicalUrl = route('events.index');
-            $isFilteredPage = request()->hasAny(['search', 'category', 'city', 'date_from', 'date_to', 'type', 'page']);
+            $isFilteredPage = request()->hasAny([
+                'search',
+                'format',
+                'zeitraum',
+                'category',
+                'city',
+                'date_from',
+                'date_to',
+                'type',
+                'page',
+            ]);
         @endphp
         <x-meta-tags :title="'Veranstaltungen - Fort- und Weiterbildungen entdecken'" :description="$description" :breadcrumbs="$breadcrumbs" :canonical="$canonicalUrl" />
         @if ($isFilteredPage)
@@ -21,32 +31,6 @@
     @endpush
 
     @php
-        $filterCount = collect(['date_from', 'date_to'])
-            ->filter(fn($key) => request()->filled($key))
-            ->count();
-        $activeCategory = request()->filled('category')
-            ? $categories->firstWhere('id', (int) request('category'))
-            : null;
-        $activeFilters = array_filter([
-            $activeCategory ? 'Kategorie: ' . $activeCategory->name : null,
-            request()->filled('city') ? 'Ort: ' . request('city') : null,
-            request()->filled('date_from')
-                ? 'ab ' .
-                    rescue(
-                        fn() => \Carbon\Carbon::parse(request('date_from'))->format('d.m.Y'),
-                        request('date_from'),
-                        false,
-                    )
-                : null,
-            request()->filled('date_to')
-                ? 'bis ' .
-                    rescue(
-                        fn() => \Carbon\Carbon::parse(request('date_to'))->format('d.m.Y'),
-                        request('date_to'),
-                        false,
-                    )
-                : null,
-        ]);
         $total = $items->total();
     @endphp
 
@@ -64,33 +48,11 @@
             </x-slot:actions>
         </x-ui.page-header>
 
-        <x-ui.search-bar :action="route('events.index')" :filter-count="$filterCount">
-            <x-ui.search-cell label="Kategorie" name="category" wide :options="['' => 'Alle Kategorien'] + $categories->pluck('name', 'id')->all()" />
-            <x-ui.search-cell label="Ort" name="city">
-                <input id="city" name="city" type="text" value="{{ request('city') }}" placeholder="Beliebig"
-                    autocomplete="address-level2" class="ui-search-control">
-            </x-ui.search-cell>
-            <x-slot:filters>
-                <fieldset class="m-0 min-w-0 border-0 p-0">
-                    <legend class="mb-4 p-0 text-h3 text-ink">Zeitraum</legend>
-                    <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                        <x-ui.field label="Von" name="date_from" type="date" :value="request('date_from')"
-                            :error="false" />
-                        <x-ui.field label="Bis" name="date_to" type="date" :value="request('date_to')"
-                            :error="false" />
-                    </div>
-                </fieldset>
-            </x-slot:filters>
-            @if ($activeFilters || request()->filled('search'))
-                <x-slot:active>
-                    {{ implode(' · ', $activeFilters) }}@if ($activeFilters)
-                        ·
-                    @endif
-                    <a href="{{ route('events.index') }}"
-                        class="font-medium text-ink underline underline-offset-[3px]">Filter zurücksetzen</a>
-                </x-slot:active>
-            @endif
-        </x-ui.search-bar>
+        @include('events.partials.search-bar', [
+            'categoryOptions' => $categories->pluck('name', 'id'),
+            'activeFormat' => $activeFormat ?? null,
+            'activePeriod' => $activePeriod ?? null,
+        ])
 
         @if ($total > 0)
             <p class="mt-8 mb-4 text-base text-ink-soft">

@@ -30,7 +30,7 @@ it('caps the admin conversion funnel at 100 percent', function () {
     $admin->assignRole('admin');
 
     $event = Event::factory()->create(['start_date' => now()->subDays(3), 'end_date' => now()->subDays(3)->addHours(2), 'views' => 1]);
-    Booking::factory()->count(3)->create(['event_id' => $event->id, 'status' => 'confirmed']);
+    Booking::factory()->count(3)->create(['event_id' => $event->id, 'payment_status' => 'paid']);
 
     $response = $this->actingAs($admin)->get(route('admin.reporting.index'));
 

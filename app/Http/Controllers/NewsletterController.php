@@ -81,7 +81,7 @@ class NewsletterController extends Controller
     /**
      * Public confirmation page for the signed unsubscribe link from the newsletter mail
      */
-    public function showUnsubscribe(Request $request, User $user)
+    public function showUnsubscribe(Request $request, User $user): \Illuminate\Contracts\View\View|\Illuminate\Http\Response
     {
         if (! $request->hasValidSignature()) {
             return response()->view('newsletter.unsubscribe-invalid', [], 403);
@@ -96,7 +96,7 @@ class NewsletterController extends Controller
     /**
      * Unsubscribe via signed link and show confirmation
      */
-    public function unsubscribeSigned(Request $request, User $user)
+    public function unsubscribeSigned(Request $request, User $user): \Illuminate\Contracts\View\View|\Illuminate\Http\Response
     {
         if (! $request->hasValidSignature()) {
             return response()->view('newsletter.unsubscribe-invalid', [], 403);

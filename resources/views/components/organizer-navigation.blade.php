@@ -78,9 +78,6 @@
             <x-ui.nav-link block :href="route('organizer.events.index')" :active="request()->routeIs('organizer.events.*')">Veranstaltungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.bookings.index')" :active="request()->routeIs('organizer.bookings.*')">Buchungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.statistics.index')" :active="request()->routeIs('organizer.statistics.*')">Statistiken</x-ui.nav-link>
-            @if (Route::has('organizer.series.index'))
-                <x-ui.nav-link block :href="route('organizer.series.index')" :active="request()->routeIs('organizer.series.*')">Serien</x-ui.nav-link>
-            @endif
             <x-ui.nav-link block :href="route('organizer.reviews.index')">Bewertungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.invoices.index')">Rechnungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.settings.invoice.index')">Rechnungseinstellungen</x-ui.nav-link>

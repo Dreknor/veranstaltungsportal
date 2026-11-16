@@ -2,31 +2,6 @@
     $pageTitle = config('app.name') . ' - Fort- und Weiterbildungen für Bildungseinrichtungen';
     $pageDescription =
         'Das zentrale Portal für Fort- und Weiterbildungen an evangelischen Schulen. Entdecken Sie Angebote im Rahmen der Aktion Hauptfach Mensch und weitere pädagogische Veranstaltungen.';
-
-    // Nur kommende Veranstaltungen zählen (entspricht der Liste hinter dem Kategorie-Link)
-    $categories = \App\Models\EventCategory::where('is_active', true)
-        ->withCount(['events as listed_events_count' => fn($q) => $q->listed()])
-        ->get();
-
-    $featuredEvents = \App\Models\Event::listed()
-        ->featured()
-        ->with(['category', 'ticketTypes'])
-        ->orderBy('start_date')
-        ->limit(3)
-        ->get();
-
-    $upcomingEvents = \App\Models\Event::published()
-        ->where('start_date', '>=', now())
-        ->orderBy('start_date')
-        ->with(['category', 'ticketTypes'])
-        ->limit(6)
-        ->get();
-
-    // Schwerpunkt: Link auf die Kategorie „Hauptfach Mensch", sonst auf die Suche danach
-    $focusCategory = $categories->firstWhere('name', 'Hauptfach Mensch');
-    $focusHref = $focusCategory
-        ? route('events.index', ['category' => $focusCategory->id])
-        : route('events.index', ['search' => 'Hauptfach Mensch']);
 @endphp
 
 <x-layouts.public :title="$pageTitle" :description="$pageDescription">
@@ -41,13 +16,10 @@
                 Fortbildungen für Menschen, die Schule gestalten.
             </h1>
 
-            <x-ui.search-bar :action="route('events.index')" class="max-w-[960px]">
-                <x-ui.search-cell label="Kategorie" name="category" wide :options="['' => 'Alle'] + $categories->pluck('name', 'id')->all()" />
-                <x-ui.search-cell label="Ort" name="city">
-                    <input id="city" name="city" type="text" placeholder="Beliebig"
-                        autocomplete="address-level2" class="ui-search-control">
-                </x-ui.search-cell>
-            </x-ui.search-bar>
+            @include('events.partials.search-bar', [
+                'categoryOptions' => $allCategories,
+                'searchClass' => 'max-w-[960px]',
+            ])
         </div>
     </x-ui.zone>
 
@@ -79,10 +51,13 @@
             @endif
         </x-ui.section>
 
-        {{-- Kategorien --}}
+        {{-- Kategorien: die acht mit den meisten kommenden Veranstaltungen --}}
         @if ($categories->isNotEmpty())
             <section aria-labelledby="kategorien-titel" class="pt-[clamp(48px,6vw,80px)]">
-                <h2 id="kategorien-titel" class="m-0 mb-4 text-h2 text-ink">Kategorien</h2>
+                <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+                    <h2 id="kategorien-titel" class="m-0 text-h2 text-ink">Kategorien</h2>
+                    <x-ui.button variant="link" :href="route('events.index')" arrow>Alle Kategorien</x-ui.button>
+                </div>
                 <ul class="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-8 p-0">
                     @foreach ($categories as $category)
                         <li>

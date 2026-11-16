@@ -24,7 +24,7 @@
             sub="+{{ \App\Support\Ui::money($metrics['period_revenue']) }} im Zeitraum" />
     </div>
 
-    <x-ui.section title="Konversions-Trichter" description="Veranstaltungen, die im gewählten Zeitraum stattfinden"
+    <x-ui.section title="Konversions-Trichter" description="Buchungen im gewählten Zeitraum"
         class="mb-12">
         <ul class="m-0 flex list-none flex-col gap-5 p-0">
             <li>
@@ -46,7 +46,7 @@
             </li>
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">
-                    <span class="font-medium">Bestätigte Buchungen</span>
+                    <span class="font-medium">Bezahlte Buchungen</span>
                     <span
                         class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_completed'], 0, ',', '.') }}
                         ({{ number_format($conversionFunnel['completion_rate'], 1, ',', '.') }} %)</span>
