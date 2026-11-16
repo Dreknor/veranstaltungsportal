@@ -32,9 +32,10 @@ class EventDateCancelledNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        /** @var \App\Models\User $notifiable */
         $mail = (new MailMessage)
             ->subject('Termin abgesagt: '.$this->event->title)
-            ->greeting('Hallo '.($notifiable->fullName() ?? '').',')
+            ->greeting('Hallo '.$notifiable->fullName().',')
             ->line('leider müssen wir Ihnen mitteilen, dass ein Termin der folgenden Veranstaltung abgesagt wurde:')
             ->line('**'.$this->event->title.'**')
             ->line('Abgesagter Termin: '.$this->eventDate->start_date->format('d.m.Y H:i').' Uhr');

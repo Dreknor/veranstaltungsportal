@@ -41,7 +41,7 @@
         <thead>
             <tr>
                 <th scope="col">Veranstaltung</th>
-                <th scope="col" class="max-xl:hidden">Benutzer</th>
+                <th scope="col" class="max-2xl:hidden">Benutzer</th>
                 <th scope="col" class="max-sm:hidden">Bewertung</th>
                 <th scope="col" class="max-sm:hidden">Kommentar</th>
                 <th scope="col" class="max-sm:hidden">Status</th>
@@ -55,7 +55,7 @@
                         <a href="{{ route('organizer.events.edit', $review->event) }}"
                             class="text-ink underline underline-offset-[3px]">{{ $review->event->title }}</a>
                         <span class="block text-small text-muted tabular-nums">
-                            <span class="xl:hidden">{{ $review->reviewerName() }} ·
+                            <span class="2xl:hidden">{{ $review->reviewerName() }} ·
                             </span>{{ $review->created_at->format('d.m.Y') }}
                         </span>
                         <span class="mt-1 block text-small text-muted tabular-nums sm:hidden">
@@ -72,7 +72,7 @@
                             @endif
                         </span>
                     </td>
-                    <td class="max-xl:hidden">
+                    <td class="max-2xl:hidden">
                         {{ $review->reviewerName() }}
                         <span class="block text-small text-muted">{{ $review->reviewerEmail() }}</span>
                     </td>

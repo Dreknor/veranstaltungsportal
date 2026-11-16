@@ -3517,13 +3517,13 @@ parameters:
 			path: app/Models/Booking.php
 
 		-
-			message: '#^Offset ''cancelled''\|''completed''\|''confirmed''\|''pending''\|''pending_approval'' on array\{pending\: ''Zahlung ausstehend'', pending_approval\: ''Wartet auf Freigabe'', confirmed\: ''Bestätigt'', completed\: ''Abgeschlossen'', cancelled\: ''Storniert''\} on left side of \?\? always exists and is not nullable\.$#'
+			message: '#^Offset ''cancelled''\|''completed''\|''confirmed''\|''pending''\|''pending_approval'' on array\{pending\: ''Zahlung offen'', pending_approval\: ''Wartet auf Freigabe'', confirmed\: ''Bestätigt'', completed\: ''Abgeschlossen'', cancelled\: ''Storniert''\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Models/Booking.php
 
 		-
-			message: '#^Offset ''extern''\|''failed''\|''paid''\|''pending''\|''refunded'' on array\{pending\: ''Ausstehend'', paid\: ''Bezahlt'', extern\: ''Extern fakturiert'', refunded\: ''Erstattet'', failed\: ''Fehlgeschlagen''\} on left side of \?\? always exists and is not nullable\.$#'
+			message: '#^Offset ''extern''\|''failed''\|''paid''\|''pending''\|''refunded'' on array\{pending\: ''Offen'', paid\: ''Bezahlt'', extern\: ''Extern fakturiert'', refunded\: ''Erstattet'', failed\: ''Fehlgeschlagen''\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
 			count: 1
 			path: app/Models/Booking.php

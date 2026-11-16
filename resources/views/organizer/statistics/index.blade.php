@@ -74,7 +74,7 @@
             <tbody>
                 @forelse ($monthlyBookings as $month)
                     <tr>
-                        <th scope="row" class="whitespace-nowrap">
+                        <th scope="row" class="sm:whitespace-nowrap">
                             {{ \Carbon\Carbon::parse($month->month . '-01')->translatedFormat('F Y') }}</th>
                         <td class="num">{{ $month->count }}</td>
                         <td class="hidden md:table-cell">

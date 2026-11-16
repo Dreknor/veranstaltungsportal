@@ -160,7 +160,7 @@ class Event extends Model implements HasMedia
     {
         $end = $this->end_date ?? $this->start_date;
 
-        return $end !== null && $end->isPast();
+        return $end->isPast();
     }
 
     /**

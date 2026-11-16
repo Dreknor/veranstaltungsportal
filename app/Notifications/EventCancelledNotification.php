@@ -27,6 +27,7 @@ class EventCancelledNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        /** @var \App\Models\User $notifiable */
         return (new MailMessage)
             ->subject('Veranstaltung abgesagt: '.$this->event->title)
             ->greeting('Hallo '.$notifiable->fullName().',')

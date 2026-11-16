@@ -33,6 +33,7 @@ class NewReviewNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): MailMessage
     {
+        /** @var \App\Models\User $notifiable */
         $event = $this->review->event;
 
         return (new MailMessage)
