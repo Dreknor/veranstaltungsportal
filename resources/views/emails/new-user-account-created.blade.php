@@ -7,7 +7,7 @@ Hallo {{ $user->first_name ?? $user->name }},
 
 ## Ihre Zugangsdaten
 
-**E-Mail:** {{ $user->email }}
+**E-Mail:** {{ $user->email }}<br>
 **Temporäres Passwort:** `{{ $temporaryPassword }}`
 
 @php
@@ -48,6 +48,6 @@ Registrierung rückgängig machen
 
 <small>Dieser Link ist 7 Tage gültig.</small>
 
-Mit freundlichen Grüßen,
+Mit freundlichen Grüßen<br>
 Ihr {{ config('app.name') }}-Team
 @endcomponent

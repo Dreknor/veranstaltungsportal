@@ -54,15 +54,7 @@
         @else
             <x-ui.row-list>
                 @foreach ($following as $user)
-                    <x-ui.row>
-                        <x-slot:lead>
-                            <img src="{{ $user->profilePhotoUrl() }}" alt="" class="h-14 w-14 rounded-full border border-line object-cover">
-                        </x-slot:lead>
-                        <a href="{{ route('users.show', $user) }}" class="text-h3 text-ink no-underline hover:underline">{{ $user->fullName() }}</a>
-                        <span class="text-small text-muted">{{ $user->userTypeLabel() }}</span>
-                        @if ($user->bio)
-                            <span class="line-clamp-2 text-small text-ink-soft">{{ $user->bio }}</span>
-                        @endif
+                    <x-ui.person-row :user="$user">
                         <x-slot:meta>
                             <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
                             <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen</span>
@@ -76,7 +68,7 @@
                                     onclick="return confirm('Verbindung wirklich entfernen?')">Entfernen</x-ui.button>
                             </form>
                         </x-slot:action>
-                    </x-ui.row>
+                    </x-ui.person-row>
                 @endforeach
             </x-ui.row-list>
 
@@ -93,15 +85,7 @@
         @else
             <x-ui.row-list>
                 @foreach ($followers as $user)
-                    <x-ui.row>
-                        <x-slot:lead>
-                            <img src="{{ $user->profilePhotoUrl() }}" alt="" class="h-14 w-14 rounded-full border border-line object-cover">
-                        </x-slot:lead>
-                        <a href="{{ route('users.show', $user) }}" class="text-h3 text-ink no-underline hover:underline">{{ $user->fullName() }}</a>
-                        <span class="text-small text-muted">{{ $user->userTypeLabel() }}</span>
-                        @if ($user->bio)
-                            <span class="line-clamp-2 text-small text-ink-soft">{{ $user->bio }}</span>
-                        @endif
+                    <x-ui.person-row :user="$user">
                         <x-slot:meta>
                             <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
                             <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen</span>
@@ -121,7 +105,7 @@
                                 </form>
                             @endif
                         </x-slot:action>
-                    </x-ui.row>
+                    </x-ui.person-row>
                 @endforeach
             </x-ui.row-list>
 

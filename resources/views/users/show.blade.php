@@ -1,10 +1,6 @@
 <x-layouts.app :title="$user->fullName()">
     <div class="mb-8 flex flex-col gap-6 sm:flex-row sm:items-start">
-        @if ($user->profile_photo)
-            <img src="{{ $user->profilePhotoUrl() }}" alt="" class="h-24 w-24 flex-none rounded-full border border-line object-cover">
-        @else
-            <span aria-hidden="true" class="flex h-24 w-24 flex-none items-center justify-center rounded-full border border-line bg-zone text-h2 text-ink-soft">{{ $user->initials() }}</span>
-        @endif
+        <x-ui.avatar :user="$user" size="lg" />
 
         <x-ui.page-header class="mb-0 min-w-0 flex-1" :title="$user->fullName()" :subtitle="$user->userTypeLabel()">
             @if (auth()->check() && auth()->id() !== $user->id)

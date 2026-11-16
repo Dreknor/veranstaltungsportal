@@ -33,15 +33,7 @@
         @else
             <x-ui.row-list>
                 @foreach ($received as $request)
-                    <x-ui.row>
-                        <x-slot:lead>
-                            <img src="{{ $request->follower->profilePhotoUrl() }}" alt="" class="h-14 w-14 rounded-full border border-line object-cover">
-                        </x-slot:lead>
-                        <a href="{{ route('users.show', $request->follower) }}" class="text-h3 text-ink no-underline hover:underline">{{ $request->follower->fullName() }}</a>
-                        <span class="text-small text-muted">{{ $request->follower->userTypeLabel() }}</span>
-                        @if ($request->follower->bio)
-                            <span class="text-small text-ink-soft">{{ Str::limit($request->follower->bio, 100) }}</span>
-                        @endif
+                    <x-ui.person-row :user="$request->follower">
                         <x-slot:meta>
                             <span class="text-small text-muted">{{ $request->created_at->diffForHumans() }}</span>
                         </x-slot:meta>
@@ -55,7 +47,7 @@
                                 <x-ui.button type="submit" variant="secondary" full>Ablehnen</x-ui.button>
                             </form>
                         </x-slot:action>
-                    </x-ui.row>
+                    </x-ui.person-row>
                 @endforeach
             </x-ui.row-list>
 
@@ -74,15 +66,7 @@
         @else
             <x-ui.row-list>
                 @foreach ($sent as $request)
-                    <x-ui.row>
-                        <x-slot:lead>
-                            <img src="{{ $request->following->profilePhotoUrl() }}" alt="" class="h-14 w-14 rounded-full border border-line object-cover">
-                        </x-slot:lead>
-                        <a href="{{ route('users.show', $request->following) }}" class="text-h3 text-ink no-underline hover:underline">{{ $request->following->fullName() }}</a>
-                        <span class="text-small text-muted">{{ $request->following->userTypeLabel() }}</span>
-                        @if ($request->following->bio)
-                            <span class="text-small text-ink-soft">{{ Str::limit($request->following->bio, 100) }}</span>
-                        @endif
+                    <x-ui.person-row :user="$request->following">
                         <x-slot:meta>
                             <span class="text-small text-muted">Gesendet {{ $request->created_at->diffForHumans() }}</span>
                         </x-slot:meta>
@@ -93,7 +77,7 @@
                                     onclick="return confirm('Anfrage wirklich zurückziehen?')">Zurückziehen</x-ui.button>
                             </form>
                         </x-slot:action>
-                    </x-ui.row>
+                    </x-ui.person-row>
                 @endforeach
             </x-ui.row-list>
 

@@ -253,28 +253,28 @@
                 </p>
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                     <tr>
-                        <td style="{{ $label }}">Empfänger:</td>
-                        <td style="{{ $value }} font-weight: 600;">{{ $bankAccount['account_holder'] ?? $organizerName }}</td>
+                        <td style="{{ $label }} width: 110px;">Empfänger:</td>
+                        <td style="{{ $value }} font-weight: 600; word-break: break-word;">{{ $bankAccount['account_holder'] ?? $organizerName }}</td>
                     </tr>
                     @if(!empty($bankAccount['bank_name']))
                         <tr>
-                            <td style="{{ $label }}">Bank:</td>
-                            <td style="{{ $value }} font-weight: 600;">{{ $bankAccount['bank_name'] }}</td>
+                            <td style="{{ $label }} width: 110px;">Bank:</td>
+                            <td style="{{ $value }} font-weight: 600; word-break: break-word;">{{ $bankAccount['bank_name'] }}</td>
                         </tr>
                     @endif
                     <tr>
-                        <td style="{{ $label }}">IBAN:</td>
-                        <td style="{{ $value }} font-weight: 600;">{{ $bankAccount['iban'] ?? 'Wird noch bekannt gegeben' }}</td>
+                        <td style="{{ $label }} width: 110px;">IBAN:</td>
+                        <td style="{{ $value }} font-weight: 600; word-break: break-all;">{{ $bankAccount['iban'] ?? 'Wird noch bekannt gegeben' }}</td>
                     </tr>
                     @if(!empty($bankAccount['bic']))
                         <tr>
-                            <td style="{{ $label }}">BIC:</td>
-                            <td style="{{ $value }} font-weight: 600;">{{ $bankAccount['bic'] }}</td>
+                            <td style="{{ $label }} width: 110px;">BIC:</td>
+                            <td style="{{ $value }} font-weight: 600; word-break: break-word;">{{ $bankAccount['bic'] }}</td>
                         </tr>
                     @endif
                     <tr>
-                        <td style="{{ $label }}">Verwendungszweck:</td>
-                        <td style="{{ $value }} font-weight: 600;">{{ $booking->booking_number }}</td>
+                        <td style="{{ $label }} width: 110px;">Verwendungszweck:</td>
+                        <td style="{{ $value }} font-weight: 600; word-break: break-all;">{{ $booking->booking_number }}</td>
                     </tr>
                 </table>
                 <p style="margin: 12px 0 0 0; font-size: 14px; color: #55676A;">

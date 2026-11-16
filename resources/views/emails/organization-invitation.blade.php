@@ -27,7 +27,7 @@ Zur Organisation
 {{ $organization->description }}
 @endif
 
-Mit freundlichen Grüßen,
+Mit freundlichen Grüßen<br>
 Ihr {{ config('app.name') }}-Team
 @endcomponent
 

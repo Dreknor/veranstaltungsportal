@@ -6,19 +6,7 @@
     @else
         <x-ui.row-list>
             @foreach ($followers as $follower)
-                <x-ui.row>
-                    <x-slot:lead>
-                        @if ($follower->profile_photo)
-                            <img src="{{ $follower->profilePhotoUrl() }}" alt="" class="h-14 w-14 rounded-full border border-line object-cover">
-                        @else
-                            <span aria-hidden="true" class="flex h-14 w-14 items-center justify-center rounded-full border border-line bg-zone text-h3 text-ink-soft">{{ $follower->initials() }}</span>
-                        @endif
-                    </x-slot:lead>
-                    <span class="text-small text-muted">{{ $follower->userTypeLabel() }}</span>
-                    <a href="{{ route('users.show', $follower) }}" class="text-h3 text-ink no-underline hover:underline">{{ $follower->fullName() }}</a>
-                    @if ($follower->bio)
-                        <p class="m-0 line-clamp-2 text-small text-muted">{{ $follower->bio }}</p>
-                    @endif
+                <x-ui.person-row :user="$follower">
                     <x-slot:meta>
                         <span class="text-ui font-medium tabular-nums">{{ $follower->events_count }} Veranstaltungen</span>
                         <span class="text-small text-muted tabular-nums">{{ $follower->bookings_count }} Buchungen</span>
@@ -26,7 +14,7 @@
                     <x-slot:action>
                         <x-ui.button variant="secondary" :href="route('users.show', $follower)" full>Profil ansehen</x-ui.button>
                     </x-slot:action>
-                </x-ui.row>
+                </x-ui.person-row>
             @endforeach
         </x-ui.row-list>
 

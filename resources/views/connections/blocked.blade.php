@@ -7,12 +7,7 @@
     @else
         <x-ui.row-list>
             @foreach ($blockedUsers as $connection)
-                <x-ui.row>
-                    <x-slot:lead>
-                        <img src="{{ $connection->following->profilePhotoUrl() }}" alt="" class="h-14 w-14 rounded-full border border-line object-cover">
-                    </x-slot:lead>
-                    <span class="text-h3 text-ink">{{ $connection->following->fullName() }}</span>
-                    <span class="text-small text-muted">{{ $connection->following->userTypeLabel() }}</span>
+                <x-ui.person-row :user="$connection->following" :href="false" :show-bio="false">
                     <x-slot:meta>
                         <span class="text-small text-muted">Blockiert {{ $connection->created_at->diffForHumans() }}</span>
                     </x-slot:meta>
@@ -24,7 +19,7 @@
                                 onclick="return confirm('Nutzer wirklich entsperren?')">Entsperren</x-ui.button>
                         </form>
                     </x-slot:action>
-                </x-ui.row>
+                </x-ui.person-row>
             @endforeach
         </x-ui.row-list>
 

@@ -8,7 +8,7 @@ Ihre Rolle in der Organisation **{{ $organization->name }}** wurde geändert.
 @php
 $roleLabels = ['owner' => 'Eigentümer', 'admin' => 'Administrator', 'member' => 'Mitglied'];
 @endphp
-**Vorherige Rolle:** {{ $roleLabels[$oldRole] ?? ucfirst($oldRole) }}
+**Vorherige Rolle:** {{ $roleLabels[$oldRole] ?? ucfirst($oldRole) }}<br>
 **Neue Rolle:** {{ $roleLabels[$newRole] ?? ucfirst($newRole) }}
 
 @if($newRole === 'owner')
@@ -25,7 +25,7 @@ Diese Änderung wurde von **{{ $changedBy->fullName() }}** durchgeführt.
 Zum Dashboard
 @endcomponent
 
-Mit freundlichen Grüßen,
+Mit freundlichen Grüßen<br>
 Ihr {{ config('app.name') }}-Team
 @endcomponent
 
