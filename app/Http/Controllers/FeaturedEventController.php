@@ -102,7 +102,7 @@ class FeaturedEventController extends Controller
         }
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:stripe,paypal,invoice,bank_transfer',
+            'payment_method' => 'required|in:paypal,invoice,bank_transfer',
             'payment_reference' => 'nullable|string',
         ]);
 

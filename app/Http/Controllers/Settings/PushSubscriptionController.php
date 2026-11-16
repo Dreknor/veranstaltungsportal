@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\Channels\SafeWebPushChannel;
+use App\Notifications\PushTestNotification;
 use App\Support\PushNotifications;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Minishlink\WebPush\ContentEncoding;
+use Minishlink\WebPush\MessageSentReport;
 use NotificationChannels\WebPush\PushSubscription;
 
 /**
@@ -76,6 +79,33 @@ class PushSubscriptionController extends Controller
         }
 
         return back()->with('success', 'Push-Benachrichtigungen wurden auf allen Geräten ausgeschaltet.');
+    }
+
+    /**
+     * Testnachricht an alle angemeldeten Browser der Person – nur per Push.
+     */
+    public function test(Request $request, SafeWebPushChannel $channel): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if (! PushNotifications::configured()) {
+            return response()->json(['message' => 'Push-Benachrichtigungen sind für dieses Portal nicht eingerichtet.'], 422);
+        }
+
+        if (! $user->pushSubscriptions()->exists()) {
+            return response()->json(['message' => 'Für Ihr Konto ist kein Browser für Push angemeldet. Bitte schalten Sie Push zuerst ein.'], 422);
+        }
+
+        // Direkt über den Kanal, damit das Ergebnis der Push-Dienste zurückgemeldet werden kann
+        $reports = $channel->send($user, new PushTestNotification);
+        $sent = collect($reports)->contains(fn ($report) => $report instanceof MessageSentReport && $report->isSuccess());
+
+        if (! $sent) {
+            return response()->json(['message' => 'Die Testnachricht konnte nicht zugestellt werden. Bitte versuchen Sie es später erneut.'], 502);
+        }
+
+        return response()->json(['message' => 'Testnachricht wurde gesendet. Sie sollte in wenigen Sekunden erscheinen.']);
     }
 
     private function setPreference(User $user, bool $enabled): void

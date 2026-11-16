@@ -10,7 +10,6 @@
             <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
             <x-ui.select label="Zahlungsmethode" name="payment_method" required :options="[
-                'stripe' => 'Kreditkarte (Stripe)',
                 'paypal' => 'PayPal',
                 'invoice' => 'Rechnung',
                 'bank_transfer' => 'Banküberweisung',

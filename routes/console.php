@@ -86,3 +86,10 @@ if (config('queue.worker_mode', 'cronjob') === 'cronjob') {
 Schedule::call(fn () => \Illuminate\Support\Facades\Cache::forever('scheduler:last_run', now()->toIso8601String()))
     ->everyMinute()
     ->name('scheduler-heartbeat');
+
+// Abzeichen täglich prüfen und vergeben (bisher nur bei Buchungen geprüft)
+Schedule::command('badges:check-and-award --all')
+    ->dailyAt('03:30')
+    ->timezone('Europe/Berlin')
+    ->withoutOverlapping()
+    ->description('Abzeichen prüfen und vergeben');

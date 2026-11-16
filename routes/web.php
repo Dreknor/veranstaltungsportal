@@ -380,6 +380,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('settings/notifications', [Settings\NotificationController::class, 'update'])->name('settings.notifications.update');
     Route::post('settings/notifications/push', [Settings\PushSubscriptionController::class, 'store'])->name('settings.notifications.push.store');
     Route::delete('settings/notifications/push', [Settings\PushSubscriptionController::class, 'destroy'])->name('settings.notifications.push.destroy');
+    Route::post('settings/notifications/push/test', [Settings\PushSubscriptionController::class, 'test'])->middleware('throttle:5,1')->name('settings.notifications.push.test');
     Route::get('settings/privacy', [Settings\PrivacyController::class, 'edit'])->name('settings.privacy.edit');
     Route::put('settings/privacy', [Settings\PrivacyController::class, 'update'])->name('settings.privacy.update');
 
