@@ -1,5 +1,5 @@
 @component('mail::message')
-# 🎉 Tickets verfügbar!
+# Tickets verfügbar
 
 Hallo {{ $waitlistEntry->name }},
 
@@ -8,14 +8,14 @@ gute Nachrichten! Für die Veranstaltung, auf deren Warteliste Sie stehen, sind 
 **{{ $waitlistEntry->event->title }}**
 
 @if($waitlistEntry->event->start_date)
-📅 {{ $waitlistEntry->event->start_date->format('d.m.Y H:i') }} Uhr
+**Termin:** {{ $waitlistEntry->event->start_date->format('d.m.Y H:i') }} Uhr
 @endif
 
 @if($waitlistEntry->event->location)
-📍 {{ $waitlistEntry->event->location }}
+**Ort:** {{ $waitlistEntry->event->location }}
 @endif
 
-## ⏰ Wichtig: Zeitlich begrenzt!
+## Wichtig: zeitlich begrenzt
 
 Wir haben **{{ $waitlistEntry->quantity }} {{ $waitlistEntry->quantity === 1 ? 'Platz' : 'Plätze' }} für Sie reserviert** – bis **{{ $waitlistEntry->expires_at->format('d.m.Y H:i') }} Uhr**. In dieser Zeit kann niemand sonst diese Plätze buchen.
 

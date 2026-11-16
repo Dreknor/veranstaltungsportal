@@ -28,7 +28,7 @@ Jetzt anmelden
 @endcomponent
 
 <x-mail::panel>
-⚠️ **Wichtig:** Bitte ändern Sie Ihr Passwort nach der ersten Anmeldung in den Profileinstellungen.
+**Wichtig:** Bitte ändern Sie Ihr Passwort nach der ersten Anmeldung in den Profileinstellungen.
 </x-mail::panel>
 
 @if($organization->description)

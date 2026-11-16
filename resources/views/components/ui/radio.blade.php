@@ -1,6 +1,7 @@
 {{--
     Radio mit klickbarem Label (Zeile mindestens 44 px). Mehrere Radios gleichen Namens gehören in ein
-    <fieldset> mit <x-ui.label as="legend">. class landet am äußeren <div>, alles Übrige am <input>.
+    <fieldset> mit <x-ui.label as="legend">. class landet am äußeren <div>, alles Übrige (data-*, x-model …) am <input>;
+    Klassen fürs <input> selbst: input-class.
 --}}
 @props([
     'name' => null,
@@ -11,6 +12,7 @@
     'hint' => null,
     'required' => false,
     'old' => true,
+    'inputClass' => '', // zusätzliche Klassen am <input> (z. B. JS-Selektor)
 ])
 
 @php
@@ -24,7 +26,7 @@
         <input type="radio" @if ($name) name="{{ $name }}" @endif id="{{ $id }}"
             value="{{ $value }}" @checked($isChecked) @required($required)
             @if ($hint) aria-describedby="{{ $id }}-hint" @endif
-            {{ $attributes->except('class')->class('ui-radio') }}>
+            {{ $attributes->except('class')->class(['ui-radio', $inputClass]) }}>
         <span class="min-w-0">
             {{ $label ?? $slot }}
             @if ($hint)

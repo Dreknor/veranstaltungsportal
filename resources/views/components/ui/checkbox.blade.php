@@ -1,6 +1,7 @@
 {{--
     Checkbox mit klickbarem Label (Zeile mindestens 44 px). Beschriftung über label oder den Slot
-    (Slot erlaubt Links). class landet am äußeren <div>, alle übrigen Attribute am <input>.
+    (Slot erlaubt Links). class landet am äußeren <div>, alle übrigen Attribute (data-*, x-model,
+    @change, form …) am <input>. Klassen fürs <input> selbst: input-class.
 --}}
 @props([
     'name' => null,
@@ -14,6 +15,7 @@
     'old' => true,
     'bag' => 'default',
     'size' => 'ui', // ui (15 px) | small (14 px, z. B. Zustimmung in der Zusammenfassung)
+    'inputClass' => '', // zusätzliche Klassen am <input> (z. B. JS-Selektor)
 ])
 
 @php
@@ -33,7 +35,7 @@
             id="{{ $id }}" value="{{ $value }}" @checked($isChecked) @required($required)
             @if ($error) aria-invalid="true" @endif
             @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
-            {{ $attributes->except('class')->class('ui-checkbox') }}>
+            {{ $attributes->except('class')->class(['ui-checkbox', $inputClass]) }}>
         <span class="min-w-0">
             {{ $label ?? $slot }}
             @if ($required)

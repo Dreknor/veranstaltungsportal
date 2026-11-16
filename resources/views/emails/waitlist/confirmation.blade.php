@@ -8,11 +8,11 @@ Sie wurden erfolgreich zur Warteliste für die folgende Veranstaltung hinzugefü
 **{{ $waitlistEntry->event->title }}**
 
 @if($waitlistEntry->event->start_date)
-📅 {{ $waitlistEntry->event->start_date->format('d.m.Y H:i') }} Uhr
+**Termin:** {{ $waitlistEntry->event->start_date->format('d.m.Y H:i') }} Uhr
 @endif
 
 @if($waitlistEntry->event->location)
-📍 {{ $waitlistEntry->event->location }}
+**Ort:** {{ $waitlistEntry->event->location }}
 @endif
 
 ## Ihre Anfrage
@@ -34,7 +34,7 @@ Mit freundlichen Grüßen,<br>
 ---
 
 <small>
-Sie möchten sich von der Warteliste abmelden? Besuchen Sie die Veranstaltungsseite und klicken Sie auf "Von Warteliste entfernen".
+Sie möchten sich von der Warteliste abmelden? Besuchen Sie die Veranstaltungsseite und klicken Sie auf „Von Warteliste entfernen“.
 </small>
 @endcomponent
 
