@@ -3,12 +3,7 @@
         :back-href="route('admin.audit-logs.index')" back-label="Zurück zur Übersicht" />
 
     @php
-        $actionTone = match (true) {
-            str_contains($auditLog->action, 'created') => 'success',
-            str_contains($auditLog->action, 'updated') => 'info',
-            str_contains($auditLog->action, 'deleted') => 'danger',
-            default => 'neutral',
-        };
+        $actionTone = \App\Support\Ui::auditActionTone($auditLog->action);
         $changes = $auditLog->getChangesSummary();
     @endphp
 

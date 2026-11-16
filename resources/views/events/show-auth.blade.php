@@ -1,5 +1,6 @@
 @use('App\Support\Ui')
-<x-layouts.public :title="$event->title">
+<x-layouts.public :title="$event->title"
+    :description="\Illuminate\Support\Str::limit(strip_tags($event->description ?? ''), 160) ?: null">
     <!-- SEO & Social Media Meta Tags -->
     @push('meta')
         @php

@@ -1,4 +1,5 @@
-<x-layouts.public title="Veranstaltungen - Fort- und Weiterbildungen entdecken">
+<x-layouts.public title="Veranstaltungen - Fort- und Weiterbildungen entdecken"
+    description="Entdecken Sie Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Filter nach Kategorie, Ort und Datum.">
     @push('meta')
         @php
             $breadcrumbs = [

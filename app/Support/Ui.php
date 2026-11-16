@@ -423,4 +423,28 @@ class Ui
             default => 'neutral',
         };
     }
+
+    /** Ton für <x-ui.status> zur Stufe eines System-Logs ("ERROR", "WARNING", "INFO" …). */
+    public static function logLevelTone(?string $level): string
+    {
+        return match (strtoupper((string) $level)) {
+            'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY' => 'danger',
+            'WARNING' => 'warning',
+            'INFO', 'NOTICE' => 'info',
+            default => 'neutral',
+        };
+    }
+
+    /** Ton für <x-ui.status> zur Aktion eines Audit-Logs ("event.created", "user.deleted" …). */
+    public static function auditActionTone(?string $action): string
+    {
+        $action = (string) $action;
+
+        return match (true) {
+            str_contains($action, 'created') => 'success',
+            str_contains($action, 'updated') => 'info',
+            str_contains($action, 'deleted') => 'danger',
+            default => 'neutral',
+        };
+    }
 }

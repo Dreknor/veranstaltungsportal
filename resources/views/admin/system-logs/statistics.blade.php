@@ -22,12 +22,7 @@
                 @forelse ($stats['by_level'] as $level)
                     @php
                         $percentage = $stats['total'] > 0 ? ($level->count / $stats['total']) * 100 : 0;
-                        $levelTone = match (true) {
-                            in_array($level->level_name, ['ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY']) => 'danger',
-                            $level->level_name === 'WARNING' => 'warning',
-                            in_array($level->level_name, ['INFO', 'NOTICE']) => 'info',
-                            default => 'neutral',
-                        };
+                        $levelTone = \App\Support\Ui::logLevelTone($level->level_name);
                     @endphp
                     <tr>
                         <th scope="row"><x-ui.status :tone="$levelTone">{{ $level->level_name }}</x-ui.status></th>

@@ -3,12 +3,7 @@
         :back-href="route('admin.system-logs.index')" back-label="Zurück zur Übersicht" />
 
     @php
-        $levelTone = match (true) {
-            in_array($log->level_name, ['ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY']) => 'danger',
-            $log->level_name === 'WARNING' => 'warning',
-            in_array($log->level_name, ['INFO', 'NOTICE']) => 'info',
-            default => 'neutral',
-        };
+        $levelTone = \App\Support\Ui::logLevelTone($log->level_name);
     @endphp
 
     <x-ui.dl>

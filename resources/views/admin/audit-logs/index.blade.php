@@ -49,12 +49,7 @@
         <tbody>
             @forelse ($logs as $log)
                 @php
-                    $actionTone = match (true) {
-                        str_contains($log->action, 'created') => 'success',
-                        str_contains($log->action, 'updated') => 'info',
-                        str_contains($log->action, 'deleted') => 'danger',
-                        default => 'neutral',
-                    };
+                    $actionTone = \App\Support\Ui::auditActionTone($log->action);
                 @endphp
                 <tr>
                     <td class="tabular-nums whitespace-nowrap">{{ $log->created_at->format('d.m.Y H:i') }}</td>

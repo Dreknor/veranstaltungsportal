@@ -1,4 +1,8 @@
-<!-- SEO & Social Media Meta Tags Component -->
+{{--
+    SEO- und Social-Media-Angaben (Open Graph, Twitter, Schema.org, canonical) für @push('meta').
+    <meta name="description"> und viewport setzt das Layout (layouts.public, Prop description) –
+    hier nicht noch einmal, damit jede Seite genau eine Beschreibung hat.
+--}}
 @props(['event' => null, 'title' => null, 'description' => null, 'image' => null, 'breadcrumbs' => null, 'canonical' => null])
 
 @php
@@ -17,9 +21,8 @@
 
 <!-- Primary Meta Tags -->
 <meta name="title" content="{{ $pageTitle }}">
-<meta name="description" content="{{ $pageDescription }}">
 @php
-    $keywords = ['Fortbildung', 'Weiterbildung', 'Bildung', 'Event', 'Veranstaltung', 'Pädagogik', 'Lehrkräfte', 'evangelische Schulen', 'Hauptfach Mensch'];
+    $keywords = ['Fortbildung', 'Weiterbildung', 'Bildung', 'Veranstaltung', 'Pädagogik', 'Lehrkräfte', 'evangelische Schulen', 'Hauptfach Mensch'];
     if ($event) {
         if ($event->category) {
             $keywords[] = $event->category->name;
@@ -27,14 +30,13 @@
         if ($event->venue_city) {
             $keywords[] = $event->venue_city;
         }
-        $keywords[] = $event->event_type === 'online' ? 'Online-Event' : 'Präsenz-Event';
+        $keywords[] = $event->event_type === 'online' ? 'Online-Veranstaltung' : 'Präsenzveranstaltung';
     }
     $keywordString = implode(', ', array_unique($keywords));
 @endphp
 <meta name="keywords" content="{{ $keywordString }}">
 <meta name="author" content="{{ config('app.name') }}">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#4F46E5">
+<meta name="theme-color" content="#2B4347">
 <meta name="language" content="de">
 <meta name="geo.region" content="DE">
 @if($event && $event->venue_city)
@@ -103,7 +105,7 @@
     $schemaData = [
         '@context' => 'https://schema.org',
         '@type' => 'Event',
-        'name' => $event->title ?? 'Event',
+        'name' => $event->title ?? 'Veranstaltung',
         'description' => $pageDescription,
         'startDate' => $event->start_date ? $event->start_date->toIso8601String() : now()->toIso8601String(),
         'endDate' => $event->end_date ? $event->end_date->toIso8601String() : now()->addHours(2)->toIso8601String(),
