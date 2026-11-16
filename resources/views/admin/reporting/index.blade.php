@@ -27,27 +27,21 @@
                     <span class="font-medium">Aufrufe der Veranstaltungen</span>
                     <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['event_views']) }}</span>
                 </div>
-                <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                    <span class="block h-2 rounded-full bg-primary" style="width: 100%"></span>
-                </span>
+                <x-ui.progress :value="100" decorative />
             </li>
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">
                     <span class="font-medium">Buchungen gestartet</span>
                     <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_started']) }} ({{ number_format($conversionFunnel['start_rate'], 1) }} %)</span>
                 </div>
-                <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                    <span class="block h-2 rounded-full bg-primary" style="width: {{ min((float) $conversionFunnel['start_rate'], 100) }}%"></span>
-                </span>
+                <x-ui.progress :value="$conversionFunnel['start_rate']" decorative />
             </li>
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">
                     <span class="font-medium">Buchungen abgeschlossen</span>
                     <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_completed']) }} ({{ number_format($conversionFunnel['completion_rate'], 1) }} %)</span>
                 </div>
-                <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                    <span class="block h-2 rounded-full bg-primary" style="width: {{ min((float) $conversionFunnel['completion_rate'], 100) }}%"></span>
-                </span>
+                <x-ui.progress :value="$conversionFunnel['completion_rate']" decorative />
             </li>
         </ul>
     </x-ui.section>

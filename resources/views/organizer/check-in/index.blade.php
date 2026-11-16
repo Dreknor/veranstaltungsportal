@@ -38,10 +38,7 @@
             <span class="font-medium text-ink" id="checkin-progress-label">Check-in-Fortschritt</span>
             <span class="text-muted tabular-nums">{{ $progress }} %</span>
         </div>
-        <div class="h-2 w-full overflow-hidden rounded-full bg-line" role="progressbar" aria-labelledby="checkin-progress-label"
-            aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ $progress }}">
-            <div class="h-2 rounded-full bg-primary" style="width: {{ $progress }}%"></div>
-        </div>
+        <x-ui.progress :value="$progress" aria-labelledby="checkin-progress-label" />
     </div>
 
     {{-- Suche, Filter und QR-Scanner --}}

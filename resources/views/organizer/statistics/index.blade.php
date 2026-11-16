@@ -20,9 +20,7 @@
     <div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
         <x-ui.section title="Konversionsrate">
             <x-ui.stat label="Bestätigte Buchungen von gesamt" value="{{ number_format((float) $conversionRate, 1, ',', '.') }} %" />
-            <span class="mt-3 block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                <span class="block h-2 rounded-full bg-primary" style="width: {{ min((float) $conversionRate, 100) }}%"></span>
-            </span>
+            <x-ui.progress :value="$conversionRate" label="Konversionsrate" class="mt-3" />
         </x-ui.section>
 
         <x-ui.section title="Zahlungsstatus">
@@ -74,9 +72,7 @@
                         <th scope="row" class="whitespace-nowrap">{{ \Carbon\Carbon::parse($month->month . '-01')->translatedFormat('F Y') }}</th>
                         <td class="num">{{ $month->count }}</td>
                         <td class="hidden md:table-cell">
-                            <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                                <span class="block h-2 rounded-full bg-primary" style="width: {{ round($month->count / $maxMonthly * 100) }}%"></span>
-                            </span>
+                            <x-ui.progress :value="$month->count" :max="$maxMonthly" decorative />
                         </td>
                         <td class="num">{{ \App\Support\Ui::money($month->revenue) }}</td>
                     </tr>

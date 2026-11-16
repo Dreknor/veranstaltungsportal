@@ -33,9 +33,7 @@
                         <th scope="row"><x-ui.status :tone="$levelTone">{{ $level->level_name }}</x-ui.status></th>
                         <td class="num">{{ number_format($level->count) }}</td>
                         <td class="hidden md:table-cell">
-                            <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                                <span class="block h-2 rounded-full bg-primary" style="width: {{ min($percentage, 100) }}%"></span>
-                            </span>
+                            <x-ui.progress :value="$percentage" decorative />
                         </td>
                         <td class="num">{{ number_format($percentage, 1) }} %</td>
                     </tr>

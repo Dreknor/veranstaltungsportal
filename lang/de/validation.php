@@ -257,6 +257,7 @@ return [
         'billing_postal_code' => 'PLZ',
         'billing_city' => 'Ort',
         'billing_country' => 'Land',
+        'billing_state' => 'Bundesland',
         'billing_data' => 'Rechnungsdaten',
         'vat_id' => 'USt-IdNr.',
         'tax_id' => 'Steuernummer',

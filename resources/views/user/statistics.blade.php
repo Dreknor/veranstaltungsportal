@@ -43,9 +43,7 @@
                             <span class="text-small font-medium text-ink">{{ $category ?: 'Ohne Kategorie' }}</span>
                             <span class="text-small text-muted tabular-nums">{{ $count }} {{ $count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}</span>
                         </div>
-                        <div class="h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                            <div class="h-2 rounded-full bg-primary" style="width: {{ ($count / $categoryTotal) * 100 }}%"></div>
-                        </div>
+                        <x-ui.progress :value="$count" :max="$categoryTotal" decorative />
                     </li>
                 @endforeach
             </ul>

@@ -92,10 +92,7 @@
                                     <span>Fortschritt</span>
                                     <span>{{ $firstProgress['percentage'] }}%</span>
                                 </div>
-                                <div class="h-2 w-full rounded-full bg-line">
-                                    <div class="h-2 rounded-full bg-primary"
-                                        style="width: {{ $firstProgress['percentage'] }}%"></div>
-                                </div>
+                                <x-ui.progress :value="$firstProgress['percentage']" decorative />
                                 <div class="mt-1 text-small text-muted tabular-nums">
                                     {{ $firstProgress['current'] }} / {{ $firstProgress['required'] }}
                                 </div>

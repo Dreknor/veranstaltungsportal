@@ -84,9 +84,7 @@
                                     <span class="ml-2 font-medium text-ink">{{ $data['percentage'] }}%</span>
                                 </span>
                             </div>
-                            <div class="h-3 w-full rounded-full bg-line">
-                                <div class="h-3 rounded-full bg-primary" style="width: {{ $data['percentage'] }}%"></div>
-                            </div>
+                            <x-ui.progress :value="$data['percentage']" size="lg" decorative />
                             @if ($data['completed'])
                                 <div class="mt-1 text-small text-success">Erfüllt!</div>
                             @endif

@@ -14,9 +14,7 @@
             @if ($event->max_attendees)
                 <span class="mt-2 flex flex-col gap-1 text-small font-normal tracking-normal text-ink-soft">
                     <span class="flex justify-between gap-2"><span>Auslastung</span><span class="tabular-nums">{{ number_format((float) $capacityPercentage, 1, ',', '.') }} %</span></span>
-                    <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                        <span class="block h-2 rounded-full bg-primary" style="width: {{ min($capacityPercentage, 100) }}%"></span>
-                    </span>
+                    <x-ui.progress :value="$capacityPercentage" decorative />
                 </span>
             @endif
         </x-ui.stat>
@@ -67,9 +65,7 @@
                         <th scope="row" class="tabular-nums whitespace-nowrap">{{ \App\Support\Ui::date(\Carbon\Carbon::parse($day->date)) }}</th>
                         <td class="num">{{ $day->count }}</td>
                         <td class="hidden md:table-cell">
-                            <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
-                                <span class="block h-2 rounded-full bg-primary" style="width: {{ round($day->count / $maxDaily * 100) }}%"></span>
-                            </span>
+                            <x-ui.progress :value="$day->count" :max="$maxDaily" decorative />
                         </td>
                         <td class="num">{{ \App\Support\Ui::money($day->revenue) }}</td>
                     </tr>
