@@ -1,212 +1,119 @@
-<x-layouts.app>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Neuen Badge erstellen
-            </h2>
-            <a href="{{ route('admin.badges.index') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Zurück zur Übersicht
-            </a>
-        </div>
-    </x-slot>
+<x-layouts.app title="Neues Abzeichen anlegen">
+    <x-ui.page-header title="Neues Abzeichen anlegen" :back-href="route('admin.badges.index')" back-label="Zur Übersicht der Abzeichen" />
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
-                <form method="POST" action="{{ route('admin.badges.store') }}" enctype="multipart/form-data" class="p-6 space-y-6">
-                    @csrf
+    <form method="POST" action="{{ route('admin.badges.store') }}" enctype="multipart/form-data" class="max-w-form">
+        @csrf
 
-                    <!-- Name -->
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Badge Name <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="input" required>
-                        @error('name')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
+        {{-- Standardwert der gespeicherten Icon-Bezeichnung (unverändert gegenüber dem bisherigen Wert) --}}
+        @php $defaultIcon = 'fas' . ' fa-medal'; @endphp
 
-                    <!-- Description -->
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Beschreibung <span class="text-red-500">*</span>
-                        </label>
-                        <textarea name="description" id="description" rows="3" class="input" required>{{ old('description') }}</textarea>
-                        @error('description')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
+        <p class="m-0 mb-6 text-small text-muted">* Pflichtfeld</p>
 
-                    <!-- Type -->
-                    <div>
-                        <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Badge Typ <span class="text-red-500">*</span>
-                        </label>
-                        <select name="type" id="type" class="input" required>
-                            <option value="">Typ auswählen...</option>
-                            <option value="attendance" {{ old('type') === 'attendance' ? 'selected' : '' }}>Teilnahme</option>
-                            <option value="achievement" {{ old('type') === 'achievement' ? 'selected' : '' }}>Erfolge</option>
-                            <option value="special" {{ old('type') === 'special' ? 'selected' : '' }}>Spezial</option>
-                        </select>
-                        @error('type')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Icon -->
-                    <div>
-                        <label for="icon" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Icon (Font Awesome Klasse) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="icon" id="icon" value="{{ old('icon', 'fas fa-medal') }}" class="input" required placeholder="fas fa-medal">
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Beispiele: fas fa-medal, fas fa-trophy, fas fa-star, fas fa-crown
-                        </p>
-                        @error('icon')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Badge Image (Optional) -->
-                    <div>
-                        <label for="image" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Badge-Bild (optional)
-                        </label>
-                        <div class="space-y-3">
-                            <input type="file"
-                                   name="image"
-                                   id="image"
-                                   accept="image/*"
-                                   class="block w-full text-sm text-gray-500 dark:text-gray-400
-                                          file:mr-4 file:py-2 file:px-4
-                                          file:rounded-lg file:border-0
-                                          file:text-sm file:font-semibold
-                                          file:bg-blue-50 file:text-blue-700
-                                          hover:file:bg-blue-100
-                                          dark:file:bg-blue-900 dark:file:text-blue-300
-                                          dark:hover:file:bg-blue-800
-                                          cursor-pointer">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Empfohlen: PNG oder SVG, 200x200px oder größer. Max. 2MB
-                            </p>
-
-                            <!-- Image Preview -->
-                            <div id="imagePreview" class="hidden mt-3">
-                                <img src="" alt="Vorschau" class="w-32 h-32 rounded-full object-cover border-4 border-gray-200 dark:border-gray-700">
-                            </div>
-                        </div>
-                        @error('image')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Color -->
-                    <div>
-                        <label for="color" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Farbe (Hex-Code) <span class="text-red-500">*</span>
-                        </label>
-                        <div class="flex gap-2">
-                            <input type="color" name="color" id="color" value="{{ old('color', '#3B82F6') }}" class="h-10 w-20 rounded border border-gray-300 dark:border-gray-600">
-                            <input type="text" id="colorText" value="{{ old('color', '#3B82F6') }}" class="input" placeholder="#3B82F6">
-                        </div>
-                        @error('color')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Points -->
-                    <div>
-                        <label for="points" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Punkte <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" name="points" id="points" value="{{ old('points', 10) }}" min="0" max="1000" class="input" required>
-                        @error('points')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Requirement Type -->
-                    <div>
-                        <label for="requirement_type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Anforderungstyp <span class="text-red-500">*</span>
-                        </label>
-                        <select name="requirement_type" id="requirement_type" class="input" required>
-                            <option value="">Typ auswählen...</option>
-                            @foreach(\App\Models\Badge::REQUIREMENT_TYPES as $value => $label)
-                                <option value="{{ $value }}" @selected(\App\Models\Badge::normalizeRequirement((string) old('requirement_type')) === $value)>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        @error('requirement_type')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Requirement Value -->
-                    <div>
-                        <label for="requirement_value" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Anforderungswert <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" name="requirement_value" id="requirement_value" value="{{ old('requirement_value', 1) }}" min="1" class="input" required>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                            Anzahl, die erreicht werden muss, um den Badge zu erhalten
-                        </p>
-                        @error('requirement_value')
-                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex gap-4">
-                        <button type="submit" class="btn-primary">
-                            <i class="fas fa-save mr-2"></i>
-                            Badge erstellen
-                        </button>
-                        <a href="{{ route('admin.badges.index') }}" class="btn-secondary">
-                            Abbrechen
-                        </a>
-                    </div>
-                </form>
+        <x-ui.section title="Grunddaten" class="border-t border-line py-8">
+            <div class="flex flex-col gap-y-5">
+                <x-ui.field label="Name des Abzeichens" name="name" required />
+                <x-ui.textarea label="Beschreibung" name="description" rows="3" required />
+                <x-ui.select label="Typ" name="type" placeholder="Typ auswählen..." required
+                    :options="['attendance' => 'Teilnahme', 'achievement' => 'Erfolge', 'special' => 'Spezial']" />
             </div>
+        </x-ui.section>
+
+        <x-ui.section title="Darstellung" class="border-t border-line py-8">
+            <div class="flex flex-col gap-y-5">
+                <x-ui.field label="Icon" name="icon" :value="$defaultIcon" :placeholder="$defaultIcon" required
+                    hint="Gespeicherte Bezeichnung des Symbols. In der Oberfläche zeigt jedes Abzeichen ohne eigenes Bild die Medaille." />
+
+                <div>
+                    <x-ui.label for="image" optional>Bild des Abzeichens</x-ui.label>
+                    <x-ui.input type="file" name="image" id="image" accept="image/*" aria-describedby="image-hint image-error" />
+                    <x-ui.hint id="image-hint">Empfohlen: PNG oder SVG, 200 × 200 px oder größer, höchstens 2 MB.</x-ui.hint>
+                    <x-ui.field-error name="image" id="image-error" />
+
+                    <!-- Image Preview -->
+                    <div id="imagePreview" class="mt-3 hidden">
+                        <img src="" alt="Vorschau"
+                            class="h-32 w-32 rounded-full border-4 border-line object-cover">
+                    </div>
+                </div>
+
+                <div>
+                    <x-ui.label for="color" required>Farbe (Hex-Code)</x-ui.label>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <input type="color" name="color" id="color" value="{{ old('color', '#3B82F6') }}"
+                            class="h-12 w-20 cursor-pointer rounded-control border border-line-strong bg-surface p-1">
+                        <x-ui.input id="colorText" value="{{ old('color', '#3B82F6') }}" placeholder="#3B82F6"
+                            aria-label="Hex-Code der Farbe" :old="false" class="min-w-0 max-w-48 flex-1" />
+                        <span id="colorPreview"
+                            class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full"
+                            style="background-color: {{ old('color', '#3B82F6') }}20; color: {{ old('color', '#3B82F6') }}"
+                            title="Vorschau des Abzeichens">
+                            <x-icon.medal class="h-6 w-6" />
+                        </span>
+                    </div>
+                    <x-ui.field-error name="color" />
+                </div>
+            </div>
+        </x-ui.section>
+
+        <x-ui.section title="Vergabe" class="border-t border-line py-8">
+            <div class="flex flex-col gap-y-5">
+                <x-ui.field label="Punkte" name="points" type="number" value="10" min="0" max="1000" required />
+                <x-ui.select label="Anforderungstyp" name="requirement_type" placeholder="Typ auswählen..." required
+                    :old="false" :options="\App\Models\Badge::REQUIREMENT_TYPES"
+                    :selected="\App\Models\Badge::normalizeRequirement((string) old('requirement_type'))" />
+                <x-ui.field label="Anforderungswert" name="requirement_value" type="number" value="1" min="1" required
+                    hint="Anzahl, die erreicht werden muss, um das Abzeichen zu erhalten." />
+            </div>
+        </x-ui.section>
+
+        <div class="flex flex-wrap gap-3 border-t border-line pt-8">
+            <x-ui.button type="submit">Abzeichen anlegen</x-ui.button>
+            <x-ui.button variant="secondary" :href="route('admin.badges.index')">Abbrechen</x-ui.button>
         </div>
-    </div>
+    </form>
 
     @push('scripts')
-    <script>
-        // Color picker synchronization
-        const colorPicker = document.getElementById('color');
-        const colorText = document.getElementById('colorText');
+        <script>
+            // Color picker synchronization
+            const colorPicker = document.getElementById('color');
+            const colorText = document.getElementById('colorText');
+            const colorPreview = document.getElementById('colorPreview');
 
-        colorPicker.addEventListener('input', function() {
-            colorText.value = this.value;
-        });
-
-        colorText.addEventListener('input', function() {
-            if (/^#[0-9A-F]{6}$/i.test(this.value)) {
-                colorPicker.value = this.value;
+            function updateColorPreview(value) {
+                colorPreview.style.backgroundColor = value + '20';
+                colorPreview.style.color = value;
             }
-        });
 
-        // Image preview
-        const imageInput = document.getElementById('image');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImg = imagePreview.querySelector('img');
+            colorPicker.addEventListener('input', function() {
+                colorText.value = this.value;
+                updateColorPreview(this.value);
+            });
 
-        imageInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.classList.remove('hidden');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.classList.add('hidden');
-            }
-        });
-    </script>
+            colorText.addEventListener('input', function() {
+                if (/^#[0-9A-F]{6}$/i.test(this.value)) {
+                    colorPicker.value = this.value;
+                    updateColorPreview(this.value);
+                }
+            });
+
+            // Image preview
+            const imageInput = document.getElementById('image');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = imagePreview.querySelector('img');
+
+            imageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        imagePreview.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    imagePreview.classList.add('hidden');
+                }
+            });
+        </script>
     @endpush
 </x-layouts.app>
-

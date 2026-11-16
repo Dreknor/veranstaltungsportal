@@ -1,169 +1,119 @@
-<x-layouts.app title="Statistiken: {{ $event->title }}">
-<div class="container mx-auto px-4 py-8">
-    <div class="mb-8 flex items-center justify-between">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Statistiken: {{ $event->title }}</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-2">Detaillierte Auswertung für diese Veranstaltung</p>
-        </div>
-        <a href="{{ route('organizer.statistics.index') }}"
-           class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-            ← Zurück zur Übersicht
-        </a>
-    </div>
+<x-layouts.app title="Statistik: {{ $event->title }}">
+    <x-ui.page-header :title="'Statistik: ' . $event->title" subtitle="Detaillierte Auswertung für diese Veranstaltung"
+        :back-href="route('organizer.statistics.index')" back-label="Zur Übersicht">
+        <x-slot:actions>
+            <x-ui.button variant="secondary" :href="route('organizer.events.edit', $event)">Veranstaltung bearbeiten</x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
-    <div class="space-y-6">
-
-            <!-- Overview Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Total Bookings -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Gesamt Buchungen</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $totalBookings }}</p>
-                    <div class="mt-4 flex gap-2 text-xs">
-                        <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded">{{ $confirmedBookings }} bestätigt</span>
-                        <span class="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded">{{ $pendingBookings }} ausstehend</span>
-                    </div>
-                </div>
-
-                <!-- Total Revenue -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Gesamt Umsatz</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{{ number_format($totalRevenue, 2, ',', '.') }} €</p>
-                    <div class="mt-4 text-xs text-gray-600 dark:text-gray-400">
-                        {{ number_format($confirmedRevenue, 2, ',', '.') }} € bestätigt
-                    </div>
-                </div>
-
-                <!-- Tickets Sold -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Verkaufte Tickets</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $ticketsSold }}</p>
-                    @if($event->max_attendees)
-                        <div class="mt-4">
-                            <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                <span>Auslastung</span>
-                                <span>{{ $capacityPercentage }}%</span>
-                            </div>
-                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ min($capacityPercentage, 100) }}%"></div>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Check-in Rate -->
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Check-in Rate</p>
-                    <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-gray-100">{{ $checkInRate }}%</p>
-                    <div class="mt-4 text-xs text-gray-600 dark:text-gray-400">
-                        {{ $checkedInCount }} von {{ $ticketsSold }} eingecheckt
-                    </div>
-                </div>
-            </div>
-
-            <!-- Ticket Type Distribution -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Verkäufe nach Ticket-Typ</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ticket-Typ</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Verkauft</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Umsatz</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($ticketTypeStats as $stat)
-                                <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $stat->name }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $stat->quantity_sold }}</td>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{{ number_format($stat->revenue, 2, ',', '.') }} €</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Keine Daten verfügbar</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Daily Booking Trend -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Buchungen pro Tag</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Datum</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Buchungen</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Umsatz</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($dailyBookings as $day)
-                                <tr>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ \Carbon\Carbon::parse($day->date)->format('d.m.Y') }}</td>
-                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $day->count }}</td>
-                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">{{ number_format($day->revenue, 2, ',', '.') }} €</td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500 dark:text-gray-400">Keine Daten verfügbar</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Discount Code Usage -->
-            @if($discountCodeStats->isNotEmpty())
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Rabattcode Nutzung</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Verwendungen</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Gesamt Rabatt</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                @foreach($discountCodeStats as $stat)
-                                    <tr>
-                                        <td class="px-6 py-4 text-sm font-mono text-gray-900 dark:text-gray-100">{{ $stat->discountCode->code ?? 'N/A' }}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">{{ $stat->usage_count }}</td>
-                                        <td class="px-6 py-4 text-sm font-medium text-red-600 dark:text-red-400">-{{ number_format($stat->total_discount, 2, ',', '.') }} €</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <x-ui.stat label="Buchungen gesamt" :value="$totalBookings" sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} ausstehend" />
+        <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)" sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
+        <x-ui.stat label="Verkaufte Tickets">
+            {{ $ticketsSold }}
+            @if ($event->max_attendees)
+                <span class="mt-2 flex flex-col gap-1 text-small font-normal tracking-normal text-ink-soft">
+                    <span class="flex justify-between gap-2"><span>Auslastung</span><span class="tabular-nums">{{ $capacityPercentage }} %</span></span>
+                    <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
+                        <span class="block h-2 rounded-full bg-primary" style="width: {{ min($capacityPercentage, 100) }}%"></span>
+                    </span>
+                </span>
             @endif
-
-            <!-- Actions -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Export & Aktionen</h3>
-                <div class="flex flex-wrap gap-4">
-                    <a href="{{ route('organizer.bookings.export', ['event_id' => $event->id]) }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                        Teilnehmerliste exportieren (CSV)
-                    </a>
-                    <a href="{{ route('organizer.events.edit', $event) }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                        Event bearbeiten
-                    </a>
-                    <a href="{{ route('organizer.bookings.index', ['event_id' => $event->id]) }}" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
-                        Alle Buchungen anzeigen
-                    </a>
-                </div>
-            </div>
-
-        </div>
+        </x-ui.stat>
+        <x-ui.stat label="Check-in-Quote" value="{{ $checkInRate }} %" sub="{{ $checkedInCount }} von {{ $ticketsSold }} eingecheckt" />
     </div>
 
-</x-layouts.app>
+    <x-ui.section title="Verkäufe nach Ticketart" class="mb-12">
+        <x-ui.table label="Verkäufe nach Ticketart">
+            <thead>
+                <tr>
+                    <th scope="col">Ticketart</th>
+                    <th scope="col" class="num">Verkauft</th>
+                    <th scope="col" class="num">Umsatz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($ticketTypeStats as $stat)
+                    <tr>
+                        <th scope="row">{{ $stat->name }}</th>
+                        <td class="num">{{ $stat->quantity_sold }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($stat->revenue) }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="3" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten verfügbar.</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
 
+    <x-ui.section title="Buchungen pro Tag" class="mb-12">
+        @php $maxDaily = max(1, (int) $dailyBookings->max('count')); @endphp
+        <x-ui.table label="Buchungen pro Tag">
+            <thead>
+                <tr>
+                    <th scope="col">Datum</th>
+                    <th scope="col" class="num">Buchungen</th>
+                    <th scope="col" class="hidden w-1/3 md:table-cell"><span class="sr-only">Verlauf</span></th>
+                    <th scope="col" class="num">Umsatz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($dailyBookings as $day)
+                    <tr>
+                        <th scope="row" class="tabular-nums whitespace-nowrap">{{ \App\Support\Ui::date(\Carbon\Carbon::parse($day->date)) }}</th>
+                        <td class="num">{{ $day->count }}</td>
+                        <td class="hidden md:table-cell">
+                            <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
+                                <span class="block h-2 rounded-full bg-primary" style="width: {{ round($day->count / $maxDaily * 100) }}%"></span>
+                            </span>
+                        </td>
+                        <td class="num">{{ \App\Support\Ui::money($day->revenue) }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="4" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten verfügbar.</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
+
+    @if ($discountCodeStats->isNotEmpty())
+        <x-ui.section title="Nutzung der Rabattcodes" class="mb-12">
+            <x-ui.table label="Nutzung der Rabattcodes">
+                <thead>
+                    <tr>
+                        <th scope="col">Code</th>
+                        <th scope="col" class="num">Verwendungen</th>
+                        <th scope="col" class="num">Rabatt gesamt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($discountCodeStats as $stat)
+                        <tr>
+                            <th scope="row" class="font-mono">{{ $stat->discountCode->code ?? 'N/A' }}</th>
+                            <td class="num">{{ $stat->usage_count }}</td>
+                            <td class="num">−{{ \App\Support\Ui::money($stat->total_discount) }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </x-ui.table>
+        </x-ui.section>
+    @endif
+
+    <x-ui.section title="Export und Aktionen">
+        <div class="flex flex-wrap gap-3">
+            <x-ui.button variant="secondary" :href="route('organizer.bookings.export', ['event_id' => $event->id])">
+                <x-slot:icon><x-icon.download /></x-slot:icon>
+                Teilnehmerliste exportieren (CSV)
+            </x-ui.button>
+            <x-ui.button variant="secondary" :href="route('organizer.bookings.index', ['event_id' => $event->id])">Alle Buchungen anzeigen</x-ui.button>
+        </div>
+    </x-ui.section>
+</x-layouts.app>

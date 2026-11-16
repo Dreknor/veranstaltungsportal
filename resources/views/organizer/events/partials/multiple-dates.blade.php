@@ -1,392 +1,265 @@
-{{-- Partial for managing multiple event dates --}}
-@if($event->has_multiple_dates)
-<div class="bg-white rounded-lg shadow-md p-6 mt-6">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-900">Termine</h2>
-        <button type="button"
-                onclick="document.getElementById('add-date-modal').classList.remove('hidden')"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Termin hinzufügen
-        </button>
-    </div>
+{{--
+    Termine einer Veranstaltung mit mehreren Terminen verwalten (Bearbeitungsseite).
+    Liegt außerhalb des Hauptformulars: eigene Formulare für Hinzufügen, Bearbeiten, Absagen,
+    Reaktivieren und Löschen. Erwartet: $event. Dialoge über <x-ui.modal> (add-date, edit-date, cancel-date).
+--}}
+@if ($event->has_multiple_dates)
+    <section aria-labelledby="termine-titel" class="border-t border-line py-8">
+        <div class="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+            <h2 id="termine-titel" class="m-0 text-h2-form text-ink">Termine</h2>
+            <x-ui.button variant="secondary"
+                onclick="window.dispatchEvent(new CustomEvent('open-modal', { detail: 'add-date' }))">
+                <x-slot:icon><x-icon.plus /></x-slot:icon>
+                Termin hinzufügen
+            </x-ui.button>
+        </div>
 
-    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded mb-4">
-        <p class="text-sm text-blue-700">
-            <strong>Wichtig:</strong> Teilnehmer buchen immer alle Termine gemeinsam. Die Kapazität ({{ $event->max_attendees ?? 'unbegrenzt' }}) gilt für die gesamte Serie.
-        </p>
-    </div>
+        <x-ui.alert tone="info" class="mb-6">
+            <strong class="font-semibold">Wichtig:</strong> Teilnehmer buchen immer alle Termine gemeinsam. Die
+            Kapazität ({{ $event->max_attendees ?? 'unbegrenzt' }}) gilt für die gesamte Serie.
+        </x-ui.alert>
 
-    @if($event->dates->isEmpty())
-        <p class="text-gray-500 text-center py-8">Noch keine Termine hinzugefügt.</p>
-    @else
-        <div class="space-y-3">
-            @foreach($event->dates()->orderBy('start_date')->get() as $date)
-                <div class="border rounded-lg p-4 {{ $date->is_cancelled ? 'bg-red-50 border-red-200' : 'bg-gray-50' }}">
-                    <div class="flex items-start justify-between">
-                        <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
-                                <div class="flex items-center text-gray-900 font-medium">
-                                    <svg class="w-5 h-5 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    @if($date->start_date->day === $date->end_date->day)
-                                        {{ $date->start_date->format('d.m.Y') }}, {{ $date->start_date->format('H:i') }} - {{ $date->end_date->format('H:i') }} Uhr
+        @if ($event->dates->isEmpty())
+            <x-ui.empty>Noch keine Termine hinzugefügt.</x-ui.empty>
+        @else
+            <ul class="m-0 list-none divide-y divide-line rounded-box border border-line p-0">
+                @foreach ($event->dates()->orderBy('start_date')->get() as $date)
+                    <li class="flex flex-col gap-3 p-4">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <span class="inline-flex items-center gap-2 text-ui font-medium text-ink tabular-nums">
+                                    <x-icon.calendar class="h-4 w-4 shrink-0 text-muted" />
+                                    @if ($date->start_date->isSameDay($date->end_date))
+                                        {{ \App\Support\Ui::dateTime($date->start_date, $date->end_date) }}
                                     @else
-                                        {{ $date->start_date->format('d.m.Y, H:i') }} - {{ $date->end_date->format('d.m.Y H:i') }} Uhr
+                                        {{ \App\Support\Ui::date($date->start_date) }}, {{ $date->start_date->format('H:i') }} Uhr
+                                        – {{ \App\Support\Ui::date($date->end_date) }}, {{ $date->end_date->format('H:i') }} Uhr
                                     @endif
-                                </div>
-                                @if($date->is_cancelled)
-                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
-                                        ABGESAGT
-                                    </span>
+                                </span>
+                                @if ($date->is_cancelled)
+                                    <x-ui.status tone="danger">Abgesagt</x-ui.status>
                                 @endif
                             </div>
 
-                            @if($date->venue_name && $date->venue_name !== $event->venue_name)
-                                <div class="flex items-center text-sm text-gray-600 mb-1">
-                                    <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
+                            @if ($date->venue_name && $date->venue_name !== $event->venue_name)
+                                <span class="inline-flex items-center gap-2 text-small text-muted">
+                                    <x-icon.location class="h-4 w-4 shrink-0" />
                                     {{ $date->venue_name }}, {{ $date->venue_city }}
-                                </div>
+                                </span>
                             @endif
 
-                            @if($date->notes)
-                                <p class="text-sm text-gray-600 italic mt-2">{{ $date->notes }}</p>
+                            @if ($date->notes)
+                                <p class="m-0 text-small text-muted">{{ $date->notes }}</p>
                             @endif
 
-                            @if($date->is_cancelled && $date->cancellation_reason)
-                                <div class="mt-2 text-sm text-red-700">
-                                    <strong>Absagegrund:</strong> {{ $date->cancellation_reason }}
-                                </div>
+                            @if ($date->is_cancelled && $date->cancellation_reason)
+                                <p class="m-0 text-small text-danger">
+                                    <span class="font-medium">Absagegrund:</span> {{ $date->cancellation_reason }}
+                                </p>
                             @endif
                         </div>
 
-                        <div class="flex items-center gap-2 ml-4">
-                            @if(!$date->is_cancelled)
-                                <button type="button"
-                                        onclick="editDate({{ $date->id }})"
-                                        class="p-2 text-blue-600 hover:bg-blue-100 rounded transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                </button>
-                                <button type="button"
-                                        onclick="cancelDate({{ $date->id }})"
-                                        class="p-2 text-orange-600 hover:bg-orange-100 rounded transition">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            @if (!$date->is_cancelled)
+                                <x-ui.button variant="secondary" size="sm" onclick="editDate({{ $date->id }})">
+                                    <x-slot:icon><x-icon.edit /></x-slot:icon>
+                                    Bearbeiten
+                                </x-ui.button>
+                                <x-ui.button variant="secondary" size="sm" onclick="cancelDate({{ $date->id }})">
+                                    <x-slot:icon><x-icon.x /></x-slot:icon>
+                                    Absagen
+                                </x-ui.button>
                             @else
-                                <form method="POST" action="{{ route('organizer.events.dates.reactivate', [$event->slug, $date]) }}" class="inline">
+                                <form method="POST"
+                                    action="{{ route('organizer.events.dates.reactivate', [$event->slug, $date]) }}"
+                                    class="m-0">
                                     @csrf
-                                    <button type="submit"
-                                            class="p-2 text-green-600 hover:bg-green-100 rounded transition"
-                                            onclick="return confirm('Möchten Sie diesen Termin wirklich reaktivieren?')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </button>
+                                    <x-ui.button type="submit" variant="secondary" size="sm"
+                                        onclick="return confirm('Möchten Sie diesen Termin wirklich reaktivieren?')">
+                                        <x-slot:icon><x-icon.check-circle /></x-slot:icon>
+                                        Reaktivieren
+                                    </x-ui.button>
                                 </form>
                             @endif
 
-                            @if($event->dates()->count() > 1)
-                                <form method="POST" action="{{ route('organizer.events.dates.destroy', [$event->slug, $date]) }}" class="inline">
+                            @if ($event->dates()->count() > 1)
+                                <form method="POST"
+                                    action="{{ route('organizer.events.dates.destroy', [$event->slug, $date]) }}"
+                                    class="m-0">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit"
-                                            class="p-2 text-red-600 hover:bg-red-100 rounded transition"
-                                            onclick="return confirm('Möchten Sie diesen Termin wirklich löschen?')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                        </svg>
-                                    </button>
+                                    <x-ui.button type="submit" variant="secondary" size="sm"
+                                        onclick="return confirm('Möchten Sie diesen Termin wirklich löschen?')">
+                                        <x-slot:icon><x-icon.trash /></x-slot:icon>
+                                        Löschen
+                                    </x-ui.button>
                                 </form>
                             @endif
                         </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    @endif
-</div>
+                    </li>
+                @endforeach
+            </ul>
+        @endif
+    </section>
 
-{{-- Add Date Modal --}}
-<div id="add-date-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Neuer Termin</h3>
-                <button type="button" onclick="document.getElementById('add-date-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+    {{-- Termin hinzufügen --}}
+    <x-ui.modal name="add-date" title="Neuer Termin" max-width="640px" id="add-date-modal">
+        <form id="add-date-form" method="POST" action="{{ route('organizer.events.dates.store', $event->slug) }}"
+            class="m-0 flex flex-col gap-y-5">
+            @csrf
+
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-x-4 gap-y-5">
+                <x-ui.field label="Startdatum" name="start_date" id="add_start_date" type="datetime-local" required
+                    :old="false" :error="false" />
+                <x-ui.field label="Enddatum" name="end_date" id="add_end_date" type="datetime-local" required
+                    :old="false" :error="false" />
             </div>
 
-            <form id="add-date-form" method="POST" action="{{ route('organizer.events.dates.store', $event->slug) }}" class="space-y-4">
-                @csrf
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Startdatum *</label>
-                        <input type="datetime-local" name="start_date" required
-                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enddatum *</label>
-                        <input type="datetime-local" name="end_date" required
-                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
+            <fieldset class="m-0 flex min-w-0 flex-col gap-y-5 border-0 border-t border-line p-0 pt-5">
+                <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort (optional)</legend>
+                <x-ui.field label="Veranstaltungsort" name="venue_name" id="add_venue_name" :old="false" :error="false"
+                    placeholder="{{ $event->venue_name }}"
+                    hint="Standard: {{ $event->venue_name ?? 'Nicht angegeben' }}" />
+                <x-ui.field label="Adresse" name="venue_address" id="add_venue_address" :old="false" :error="false"
+                    placeholder="{{ $event->venue_address }}"
+                    hint="Standard: {{ $event->venue_address ?? 'Nicht angegeben' }}" />
+                <div class="flex flex-wrap gap-x-4 gap-y-5">
+                    <x-ui.field label="Stadt" name="venue_city" id="add_venue_city" :old="false" :error="false"
+                        placeholder="{{ $event->venue_city }}"
+                        hint="Standard: {{ $event->venue_city ?? 'Nicht angegeben' }}" class="min-w-0 flex-[3_1_200px]" />
+                    <x-ui.field label="PLZ" name="venue_postal_code" id="add_venue_postal_code" :old="false"
+                        :error="false" placeholder="{{ $event->venue_postal_code }}"
+                        hint="Standard: {{ $event->venue_postal_code ?? 'Nicht angegeben' }}"
+                        class="min-w-0 flex-[1_1_140px]" />
                 </div>
+            </fieldset>
 
-                <div class="border-t pt-4">
-                    <p class="text-sm text-gray-600 mb-3">Abweichender Veranstaltungsort (optional)</p>
+            <x-ui.textarea label="Hinweise zu diesem Termin" name="notes" id="add_notes" rows="3" optional
+                :old="false" :error="false" placeholder="z.B. 'Dieser Termin findet online statt'" />
+        </form>
 
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Veranstaltungsort</label>
-                            <input type="text" name="venue_name" placeholder="{{ $event->venue_name }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_name ?? 'Nicht angegeben' }}</p>
-                        </div>
+        <x-slot:footer>
+            <x-ui.button variant="secondary" x-on:click="close()">Abbrechen</x-ui.button>
+            <x-ui.button type="submit" form="add-date-form">Termin hinzufügen</x-ui.button>
+        </x-slot:footer>
+    </x-ui.modal>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                            <input type="text" name="venue_address" placeholder="{{ $event->venue_address }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_address ?? 'Nicht angegeben' }}</p>
-                        </div>
+    {{-- Termin absagen --}}
+    <x-ui.modal name="cancel-date" title="Termin absagen" id="cancel-date-modal">
+        <form id="cancel-date-form" method="POST" class="m-0 flex flex-col gap-y-5">
+            @csrf
 
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
-                                <input type="text" name="venue_city" placeholder="{{ $event->venue_city }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_city ?? 'Nicht angegeben' }}</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
-                                <input type="text" name="venue_postal_code" placeholder="{{ $event->venue_postal_code }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <p class="mt-1 text-xs text-gray-500">Standard: {{ $event->venue_postal_code ?? 'Nicht angegeben' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <x-ui.textarea label="Grund für die Absage" name="cancellation_reason" id="cancel_cancellation_reason"
+                rows="3" required :old="false" :error="false" placeholder="z.B. 'Dozent erkrankt'" />
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Hinweise zu diesem Termin</label>
-                    <textarea name="notes" rows="3"
-                              class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                              placeholder="z.B. 'Dieser Termin findet online statt'"></textarea>
-                </div>
+            <x-ui.alert tone="warning">Teilnehmer werden per E-Mail über die Absage informiert.</x-ui.alert>
+        </form>
 
-                <div class="flex justify-end gap-3 pt-4 border-t">
-                    <button type="button"
-                            onclick="document.getElementById('add-date-modal').classList.add('hidden')"
-                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                        Abbrechen
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        Termin hinzufügen
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        <x-slot:footer>
+            <x-ui.button variant="secondary" x-on:click="close()">Abbrechen</x-ui.button>
+            <x-ui.button type="submit" variant="danger" form="cancel-date-form">Termin absagen</x-ui.button>
+        </x-slot:footer>
+    </x-ui.modal>
 
-{{-- Cancel Date Modal --}}
-<div id="cancel-date-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Termin absagen</h3>
-                <button type="button" onclick="document.getElementById('cancel-date-modal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+    {{-- Termin bearbeiten --}}
+    <x-ui.modal name="edit-date" title="Termin bearbeiten" max-width="640px" id="edit-date-modal">
+        <form id="edit-date-form" method="POST" class="m-0 flex flex-col gap-y-5">
+            @csrf
+            @method('PUT')
+
+            <div class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-x-4 gap-y-5">
+                <x-ui.field label="Startdatum" name="start_date" id="edit_start_date" type="datetime-local" required
+                    :old="false" :error="false" />
+                <x-ui.field label="Enddatum" name="end_date" id="edit_end_date" type="datetime-local" required
+                    :old="false" :error="false" />
             </div>
 
-            <form id="cancel-date-form" method="POST" class="space-y-4">
-                @csrf
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Grund für die Absage *</label>
-                    <textarea name="cancellation_reason" rows="3" required
-                              class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                              placeholder="z.B. 'Dozent erkrankt'"></textarea>
+            <fieldset class="m-0 flex min-w-0 flex-col gap-y-5 border-0 border-t border-line p-0 pt-5">
+                <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort (optional)</legend>
+                <x-ui.field label="Veranstaltungsort" name="venue_name" id="edit_venue_name" :old="false"
+                    :error="false" placeholder="{{ $event->venue_name }}" />
+                <x-ui.field label="Adresse" name="venue_address" id="edit_venue_address" :old="false" :error="false"
+                    placeholder="{{ $event->venue_address }}" />
+                <div class="flex flex-wrap gap-x-4 gap-y-5">
+                    <x-ui.field label="Stadt" name="venue_city" id="edit_venue_city" :old="false" :error="false"
+                        placeholder="{{ $event->venue_city }}" class="min-w-0 flex-[3_1_200px]" />
+                    <x-ui.field label="PLZ" name="venue_postal_code" id="edit_venue_postal_code" :old="false"
+                        :error="false" placeholder="{{ $event->venue_postal_code }}" class="min-w-0 flex-[1_1_140px]" />
                 </div>
+            </fieldset>
 
-                <div class="bg-yellow-50 border border-yellow-200 rounded p-3">
-                    <p class="text-sm text-yellow-800">
-                        Teilnehmer werden per E-Mail über die Absage informiert.
-                    </p>
-                </div>
+            <x-ui.textarea label="Hinweise zu diesem Termin" name="notes" id="edit_notes" rows="3" optional
+                :old="false" :error="false" placeholder="z.B. 'Dieser Termin findet online statt'" />
+        </form>
 
-                <div class="flex justify-end gap-3 pt-4 border-t">
-                    <button type="button"
-                            onclick="document.getElementById('cancel-date-modal').classList.add('hidden')"
-                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                        Abbrechen
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                        Termin absagen
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+        <x-slot:footer>
+            <x-ui.button variant="secondary" onclick="closeEditDateModal()">Abbrechen</x-ui.button>
+            <x-ui.button type="submit" form="edit-date-form">Änderungen speichern</x-ui.button>
+        </x-slot:footer>
+    </x-ui.modal>
 
-{{-- Edit Date Modal --}}
-<div id="edit-date-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-900">Termin bearbeiten</h3>
-                <button type="button" onclick="closeEditDateModal()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <form id="edit-date-form" method="POST" class="space-y-4">
-                @csrf
-                @method('PUT')
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Startdatum *</label>
-                        <input type="datetime-local" id="edit_start_date" name="start_date" required
-                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Enddatum *</label>
-                        <input type="datetime-local" id="edit_end_date" name="end_date" required
-                               class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                </div>
-
-                <div class="border-t pt-4">
-                    <p class="text-sm text-gray-600 mb-3">Abweichender Veranstaltungsort (optional)</p>
-
-                    <div class="space-y-3">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Veranstaltungsort</label>
-                            <input type="text" id="edit_venue_name" name="venue_name" placeholder="{{ $event->venue_name }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                            <input type="text" id="edit_venue_address" name="venue_address" placeholder="{{ $event->venue_address }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Stadt</label>
-                                <input type="text" id="edit_venue_city" name="venue_city" placeholder="{{ $event->venue_city }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
-                                <input type="text" id="edit_venue_postal_code" name="venue_postal_code" placeholder="{{ $event->venue_postal_code }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Hinweise zu diesem Termin</label>
-                    <textarea id="edit_notes" name="notes" rows="3"
-                              class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                              placeholder="z.B. 'Dieser Termin findet online statt'"></textarea>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-4 border-t">
-                    <button type="button"
-                            onclick="closeEditDateModal()"
-                            class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">
-                        Abbrechen
-                    </button>
-                    <button type="submit"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        Änderungen speichern
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-function cancelDate(dateId) {
-    const form = document.getElementById('cancel-date-form');
-    form.action = '{{ route('organizer.events.dates.cancel', [$event->slug, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
-    document.getElementById('cancel-date-modal').classList.remove('hidden');
-}
-
-function editDate(dateId) {
-    // Lade die Termin-Daten - Sicher mit Try-Catch
-    try {
-        const datesData = {!! json_encode($event->dates->keyBy('id')) !!};
-        const date = datesData[dateId];
-
-        if (!date) {
-            console.error('Termin nicht gefunden:', dateId);
-            alert('Termin konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
-            return;
+    <script>
+        function cancelDate(dateId) {
+            const form = document.getElementById('cancel-date-form');
+            form.action = '{{ route('organizer.events.dates.cancel', [$event->slug, '__DATE_ID__']) }}'.replace('__DATE_ID__',
+                dateId);
+            window.dispatchEvent(new CustomEvent('open-modal', {
+                detail: 'cancel-date'
+            }));
         }
 
-        // Fülle das Formular mit den aktuellen Daten
-        document.getElementById('edit_start_date').value = formatDateTimeForInput(date.start_date);
-        document.getElementById('edit_end_date').value = formatDateTimeForInput(date.end_date);
-        document.getElementById('edit_venue_name').value = date.venue_name || '';
-        document.getElementById('edit_venue_address').value = date.venue_address || '';
-        document.getElementById('edit_venue_city').value = date.venue_city || '';
-        document.getElementById('edit_venue_postal_code').value = date.venue_postal_code || '';
-        document.getElementById('edit_notes').value = date.notes || '';
+        function editDate(dateId) {
+            // Lade die Termin-Daten - Sicher mit Try-Catch
+            try {
+                const datesData = {!! json_encode($event->dates->keyBy('id')) !!};
+                const date = datesData[dateId];
 
-        // Setze die Form-Action
-        const form = document.getElementById('edit-date-form');
-        form.action = '{{ route('organizer.events.dates.update', [$event->slug, '__DATE_ID__']) }}'.replace('__DATE_ID__', dateId);
+                if (!date) {
+                    console.error('Termin nicht gefunden:', dateId);
+                    alert('Termin konnte nicht geladen werden. Bitte laden Sie die Seite neu.');
+                    return;
+                }
 
-        // Zeige das Modal
-        document.getElementById('edit-date-modal').classList.remove('hidden');
-    } catch (error) {
-        console.error('Fehler beim Laden der Termin-Daten:', error);
-        alert('Fehler beim Laden der Termin-Daten. Bitte laden Sie die Seite neu.');
-    }
-}
+                // Fülle das Formular mit den aktuellen Daten
+                document.getElementById('edit_start_date').value = formatDateTimeForInput(date.start_date);
+                document.getElementById('edit_end_date').value = formatDateTimeForInput(date.end_date);
+                document.getElementById('edit_venue_name').value = date.venue_name || '';
+                document.getElementById('edit_venue_address').value = date.venue_address || '';
+                document.getElementById('edit_venue_city').value = date.venue_city || '';
+                document.getElementById('edit_venue_postal_code').value = date.venue_postal_code || '';
+                document.getElementById('edit_notes').value = date.notes || '';
 
-function closeEditDateModal() {
-    document.getElementById('edit-date-modal').classList.add('hidden');
-}
+                // Setze die Form-Action
+                const form = document.getElementById('edit-date-form');
+                form.action = '{{ route('organizer.events.dates.update', [$event->slug, '__DATE_ID__']) }}'.replace(
+                    '__DATE_ID__', dateId);
 
-function formatDateTimeForInput(dateString) {
-    // Konvertiere das Datum in das datetime-local Format (YYYY-MM-DDTHH:MM)
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+                // Zeige den Dialog
+                window.dispatchEvent(new CustomEvent('open-modal', {
+                    detail: 'edit-date'
+                }));
+            } catch (error) {
+                console.error('Fehler beim Laden der Termin-Daten:', error);
+                alert('Fehler beim Laden der Termin-Daten. Bitte laden Sie die Seite neu.');
+            }
+        }
 
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-}
-</script>
+        function closeEditDateModal() {
+            window.dispatchEvent(new CustomEvent('close-modal', {
+                detail: 'edit-date'
+            }));
+        }
+
+        function formatDateTimeForInput(dateString) {
+            // Konvertiere das Datum in das datetime-local Format (YYYY-MM-DDTHH:MM)
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    </script>
 @endif
-
