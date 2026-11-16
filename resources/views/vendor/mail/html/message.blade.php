@@ -21,7 +21,8 @@
 {{-- Footer --}}
 <x-slot:footer>
 <x-mail::footer>
-© {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}
+© {{ date('Y') }} {{ config('app.name') }} · Ein Angebot der [ESdi GmbH](https://www.esdigmbh.de/)<br>
+[{{ rtrim(preg_replace('#^https?://(www\.)?#', '', config('app.url')), '/') }}]({{ config('app.url') }})
 </x-mail::footer>
 </x-slot:footer>
 </x-mail::layout>
