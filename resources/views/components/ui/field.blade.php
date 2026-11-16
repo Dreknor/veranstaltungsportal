@@ -12,7 +12,7 @@
     'value' => null,
     'required' => false,
     'optional' => false,
-    'hint' => null,
+    'hint' => null, // Text; HTML über <x-slot:hint>
     'error' => null, // null = automatisch aus $errors
     'size' => 'md',
     'old' => true,
@@ -23,7 +23,9 @@
 @php
     $id ??= \App\Support\Ui::id($name) ?? 'feld-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(6));
     $error ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
-    $describedBy = trim(($hint ? $id . '-hint ' : '') . ($error ? $id . '-error' : ''));
+    // Hinweis als Prop (Text) oder als Slot <x-slot:hint> (HTML, z. B. mit Link)
+    $hasHint = $hint instanceof \Illuminate\View\ComponentSlot ? $hint->hasActualContent() : filled($hint);
+    $describedBy = trim(($hasHint ? $id . '-hint ' : '') . ($error ? $id . '-error' : ''));
 @endphp
 
 <div {{ $attributes->only('class') }}>
@@ -39,7 +41,7 @@
             {{ $attributes->except('class') }} />
     @endif
 
-    @if ($hint)
+    @if ($hasHint)
         <x-ui.hint :id="$id . '-hint'">{{ $hint }}</x-ui.hint>
     @endif
     <x-ui.field-error :message="$error" :id="$id . '-error'" />

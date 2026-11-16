@@ -1,97 +1,94 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rechnung {{ $invoice->invoice_number }}</title>
-</head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background-color: #2563eb; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-        <h1 style="margin: 0;">Plattformgebühren-Rechnung</h1>
-        <p style="margin: 10px 0 0 0; font-size: 18px;">{{ $invoice->invoice_number }}</p>
-    </div>
+@extends('emails.layout')
 
-    <div style="background-color: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-top: none;">
-        <p>Sehr geehrte/r {{ $invoice->recipient_name }},</p>
+@php
+    $label = 'padding: 8px 16px 8px 0; width: 170px; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 14px; line-height: 1.5; color: #55676A;';
+    $value = 'padding: 8px 0; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 15px; line-height: 1.5; color: #1E3135; font-variant-numeric: tabular-nums;';
+    $amount = 'padding: 8px 0; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 15px; line-height: 1.5; color: #1E3135; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums;';
+    $h2 = 'margin: 32px 0 8px 0; font-size: 18px; line-height: 1.3; font-weight: 600; color: #1E3135;';
+@endphp
 
-        <p>vielen Dank für die Nutzung unserer Veranstaltungsplattform. Anbei erhalten Sie die Rechnung für die angefallenen Plattformgebühren.</p>
+@section('title')
+    Rechnung {{ $invoice->invoice_number }}
+@endsection
 
-        <h2 style="color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Rechnungsdetails</h2>
+@section('heading', 'Plattformgebühren-Rechnung')
 
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+@section('subheading')
+    {{ $invoice->invoice_number }}
+@endsection
+
+@section('content')
+    <p style="margin: 0 0 16px 0;">Sehr geehrte/r {{ $invoice->recipient_name }},</p>
+
+    <p style="margin: 0;">vielen Dank für die Nutzung unserer Veranstaltungsplattform. Anbei erhalten Sie die Rechnung für die angefallenen Plattformgebühren.</p>
+
+    <h2 style="{{ $h2 }}">Rechnungsdetails</h2>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #DCE3E2;">
+        <tr>
+            <td style="{{ $label }}">Rechnungsnummer</td>
+            <td style="{{ $value }}">{{ $invoice->invoice_number }}</td>
+        </tr>
+        <tr>
+            <td style="{{ $label }}">Rechnungsdatum</td>
+            <td style="{{ $value }}">{{ $invoice->invoice_date->format('d.m.Y') }}</td>
+        </tr>
+        <tr>
+            <td style="{{ $label }}">Fälligkeitsdatum</td>
+            <td style="{{ $value }}">{{ $invoice->due_date->format('d.m.Y') }}</td>
+        </tr>
+        @if($invoice->event)
             <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Rechnungsnummer:</td>
-                <td style="padding: 8px 0;">{{ $invoice->invoice_number }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Rechnungsdatum:</td>
-                <td style="padding: 8px 0;">{{ $invoice->invoice_date->format('d.m.Y') }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Fälligkeitsdatum:</td>
-                <td style="padding: 8px 0;">{{ $invoice->due_date->format('d.m.Y') }}</td>
-            </tr>
-            @if($invoice->event)
-            <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Veranstaltung:</td>
-                <td style="padding: 8px 0;">{{ $invoice->event->title }}</td>
-            </tr>
-            <tr>
-                <td style="padding: 8px 0; font-weight: bold;">Veranstaltungsdatum:</td>
-                <td style="padding: 8px 0;">{{ $invoice->event->start_date->format('d.m.Y') }}</td>
-            </tr>
-            @endif
-        </table>
-
-        <h2 style="color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Rechnungsbetrag</h2>
-
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-            <tr style="background-color: #f3f4f6;">
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">Zwischensumme (netto)</td>
-                <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: right;">€{{ number_format($invoice->amount, 2, ',', '.') }}</td>
+                <td style="{{ $label }}">Veranstaltung</td>
+                <td style="{{ $value }}">{{ $invoice->event->title }}</td>
             </tr>
             <tr>
-                <td style="padding: 10px; border: 1px solid #e5e7eb;">MwSt. ({{ number_format($invoice->tax_rate, 1) }}%)</td>
-                <td style="padding: 10px; border: 1px solid #e5e7eb; text-align: right;">€{{ number_format($invoice->tax_amount, 2, ',', '.') }}</td>
+                <td style="{{ $label }}">Veranstaltungsdatum</td>
+                <td style="{{ $value }}">{{ $invoice->event->start_date->format('d.m.Y') }}</td>
             </tr>
-            <tr style="background-color: #2563eb; color: white; font-weight: bold; font-size: 18px;">
-                <td style="padding: 15px; border: 1px solid #1e40af;">Gesamtbetrag (brutto)</td>
-                <td style="padding: 15px; border: 1px solid #1e40af; text-align: right;">€{{ number_format($invoice->total_amount, 2, ',', '.') }}</td>
-            </tr>
-        </table>
-
-        @if($invoice->status !== 'paid' && isset($invoice->billing_data['platform']))
-            @php $platform = $invoice->billing_data['platform']; @endphp
-            <div style="background-color: #dbeafe; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
-                <h3 style="margin-top: 0; color: #1e40af;">Zahlungsinformationen</h3>
-                @if(!empty($platform['bank_name']))
-                    <p style="margin: 5px 0;"><strong>Bank:</strong> {{ $platform['bank_name'] }}</p>
-                @endif
-                @if(!empty($platform['iban']))
-                    <p style="margin: 5px 0;"><strong>IBAN:</strong> {{ $platform['iban'] }}</p>
-                @endif
-                @if(!empty($platform['bic']))
-                    <p style="margin: 5px 0;"><strong>BIC:</strong> {{ $platform['bic'] }}</p>
-                @endif
-                <p style="margin: 5px 0;"><strong>Verwendungszweck:</strong> {{ $invoice->invoice_number }}</p>
-                <p style="margin: 15px 0 5px 0;"><strong>Bitte überweisen Sie den Betrag bis zum {{ $invoice->due_date->format('d.m.Y') }}.</strong></p>
-            </div>
         @endif
+    </table>
 
-        <p style="margin-top: 30px;">Die detaillierte Rechnung finden Sie im Anhang dieser E-Mail als PDF.</p>
+    <h2 style="{{ $h2 }}">Rechnungsbetrag</h2>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #DCE3E2;">
+        <tr>
+            <td style="{{ $value }}">Zwischensumme (netto)</td>
+            <td style="{{ $amount }}">{{ number_format($invoice->amount, 2, ',', '.') }} €</td>
+        </tr>
+        <tr>
+            <td style="{{ $value }}">MwSt. ({{ number_format($invoice->tax_rate, 1) }}%)</td>
+            <td style="{{ $amount }}">{{ number_format($invoice->tax_amount, 2, ',', '.') }} €</td>
+        </tr>
+        <tr>
+            <td style="{{ $value }} font-size: 16px; font-weight: 600;">Gesamtbetrag (brutto)</td>
+            <td style="{{ $amount }} font-size: 16px; font-weight: 600;">{{ number_format($invoice->total_amount, 2, ',', '.') }} €</td>
+        </tr>
+    </table>
 
-        <p>Sie können Ihre Rechnungen auch jederzeit in Ihrem Dashboard unter <a href="{{ route('organizer.invoices.index') }}" style="color: #2563eb;">Rechnungen</a> einsehen.</p>
+    @if($invoice->status !== 'paid' && isset($invoice->billing_data['platform']))
+        @php $platform = $invoice->billing_data['platform']; @endphp
+        @component('emails.partials.notice', ['type' => 'info', 'title' => 'Zahlungsinformationen', 'margin' => '32px 0 24px 0'])
+            @if(!empty($platform['bank_name']))
+                <p style="margin: 0 0 4px 0;"><strong>Bank:</strong> {{ $platform['bank_name'] }}</p>
+            @endif
+            @if(!empty($platform['iban']))
+                <p style="margin: 0 0 4px 0;"><strong>IBAN:</strong> {{ $platform['iban'] }}</p>
+            @endif
+            @if(!empty($platform['bic']))
+                <p style="margin: 0 0 4px 0;"><strong>BIC:</strong> {{ $platform['bic'] }}</p>
+            @endif
+            <p style="margin: 0 0 4px 0;"><strong>Verwendungszweck:</strong> {{ $invoice->invoice_number }}</p>
+            <p style="margin: 12px 0 0 0;"><strong>Bitte überweisen Sie den Betrag bis zum {{ $invoice->due_date->format('d.m.Y') }}.</strong></p>
+        @endcomponent
+    @endif
 
-        <p style="margin-top: 30px;">Bei Fragen zu dieser Rechnung stehen wir Ihnen gerne zur Verfügung.</p>
+    <p style="margin: 24px 0 16px 0;">Die detaillierte Rechnung finden Sie im Anhang dieser E-Mail als PDF.</p>
 
-        <p>Mit freundlichen Grüßen<br>
-        <strong>Ihr {{ config('app.name') }}-Team</strong></p>
-    </div>
+    <p style="margin: 0 0 16px 0;">Sie können Ihre Rechnungen auch jederzeit in Ihrem Dashboard unter <a href="{{ route('organizer.invoices.index') }}" style="color: #1E3135; text-decoration: underline;">Rechnungen</a> einsehen.</p>
 
-    <div style="background-color: #f3f4f6; padding: 15px; text-align: center; font-size: 12px; color: #6b7280; border-radius: 0 0 5px 5px;">
-        <p style="margin: 5px 0;">Diese E-Mail wurde automatisch generiert.</p>
-        <p style="margin: 5px 0;">© {{ date('Y') }} {{ config('app.name') }} - Alle Rechte vorbehalten</p>
-    </div>
-</body>
-</html>
+    <p style="margin: 0 0 16px 0;">Bei Fragen zu dieser Rechnung stehen wir Ihnen gerne zur Verfügung.</p>
 
+    <p style="margin: 0;">Mit freundlichen Grüßen<br>
+        Ihr {{ config('app.name') }}-Team</p>
+@endsection
+
+@section('footer_note', 'Diese E-Mail wurde automatisch generiert.')

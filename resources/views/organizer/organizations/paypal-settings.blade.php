@@ -31,34 +31,27 @@
                         <option value="live" @selected(old('paypal_mode', $organization->paypal_mode) === 'live')>Live (Produktiv)</option>
                     </x-ui.select>
 
-                    <div>
-                        <x-ui.label for="paypal_client_id" :required="! $organization->paypal_client_id">Client ID</x-ui.label>
-                        <x-ui.input name="paypal_client_id" id="paypal_client_id"
-                            :required="! $organization->paypal_client_id" aria-describedby="paypal_client_id-hint"
-                            placeholder="{{ $organization->paypal_client_id ? 'Leer lassen, um beizubehalten' : 'Ihre PayPal Client ID' }}" />
-                        <x-ui.hint id="paypal_client_id-hint">
+                    <x-ui.field label="Client ID" name="paypal_client_id"
+                        :required="! $organization->paypal_client_id"
+                        placeholder="{{ $organization->paypal_client_id ? 'Leer lassen, um beizubehalten' : 'Ihre PayPal Client ID' }}">
+                        <x-slot:hint>
                             @if ($organization->paypal_client_id && ! old('paypal_client_id'))
                                 Aktuell gespeichert: ••••••••. Lassen Sie das Feld leer, um den gespeicherten Wert zu behalten.
                             @endif
                             Erhältlich im <a href="https://developer.paypal.com/dashboard/" target="_blank" rel="noopener" class="font-medium text-ink underline underline-offset-[3px]">PayPal Developer Dashboard</a>.
-                        </x-ui.hint>
-                        <x-ui.field-error name="paypal_client_id" />
-                    </div>
+                        </x-slot:hint>
+                    </x-ui.field>
 
-                    <div>
-                        <x-ui.label for="paypal_client_secret" :required="! $organization->paypal_client_secret">Client Secret</x-ui.label>
-                        <x-ui.input type="password" name="paypal_client_secret" id="paypal_client_secret"
-                            :required="! $organization->paypal_client_secret" autocomplete="off"
-                            aria-describedby="paypal_client_secret-hint"
-                            placeholder="{{ $organization->paypal_client_secret ? 'Leer lassen, um beizubehalten' : 'Ihr PayPal Client Secret' }}" />
-                        <x-ui.hint id="paypal_client_secret-hint">
+                    <x-ui.field type="password" label="Client Secret" name="paypal_client_secret"
+                        :required="! $organization->paypal_client_secret" autocomplete="off"
+                        placeholder="{{ $organization->paypal_client_secret ? 'Leer lassen, um beizubehalten' : 'Ihr PayPal Client Secret' }}">
+                        <x-slot:hint>
                             @if ($organization->paypal_client_secret && ! old('paypal_client_secret'))
                                 Aktuell gespeichert: ••••••••. Lassen Sie das Feld leer, um den gespeicherten Wert zu behalten.
                             @endif
                             Wird verschlüsselt gespeichert.
-                        </x-ui.hint>
-                        <x-ui.field-error name="paypal_client_secret" />
-                    </div>
+                        </x-slot:hint>
+                    </x-ui.field>
 
                     <x-ui.field label="Webhook ID" name="paypal_webhook_id" :value="$organization->paypal_webhook_id"
                         optional placeholder="Ihre PayPal Webhook ID"

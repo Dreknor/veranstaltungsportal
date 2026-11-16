@@ -11,6 +11,7 @@
 </head>
 <body>
     <div class="certificate-frame">
+        <div class="certificate-inner">
         <table class="certificate-table">
             <tr>
                 <td class="certificate-top">
@@ -35,7 +36,7 @@
                     <div class="event-info">
                         <strong>Datum:</strong> {{ $event_date->format('d. F Y') }}
                         <br>
-                        <strong>Dauer:</strong> {{ $duration }}
+                        <strong>Dauer:</strong> {{ $duration }} Stunden
                         @if($event->venue_city)
                             <br>
                             <strong>Ort:</strong> {{ $event->venue_city }}
@@ -64,6 +65,7 @@
                 </td>
             </tr>
         </table>
+        </div>
     </div>
 </body>
 </html>

@@ -10,6 +10,7 @@
     'full' => false,
     'disabled' => false,
     'arrow' => false, // Pfeil hinter dem Text (v. a. variant="link")
+    'wrap' => false, // mehrzeilige Beschriftung: Höhe wächst mit, Mindesthöhe wie size
     'icon' => null, // Slot: Icon vor dem Text
 ])
 
@@ -22,18 +23,32 @@
         'w-full' => $full,
 
         // Flächen-Buttons
-        'rounded-control border whitespace-nowrap' => !$isLink,
+        'rounded-control border' => !$isLink,
+        'whitespace-nowrap' => !$isLink && !$wrap,
+        // wrap: Text darf umbrechen, Höhe wächst mit; ohne volle Breite linksbündig lesbar
+        'max-w-full whitespace-normal py-2' => !$isLink && $wrap,
+        'text-left' => !$isLink && $wrap && !$full,
+        'text-center' => !$isLink && $wrap && $full,
         'disabled:border-line disabled:bg-zone disabled:text-disabled aria-disabled:border-line aria-disabled:bg-zone aria-disabled:text-disabled' => !$isLink,
-        'h-9 px-3 text-small' => !$isLink && $size === 'sm',
-        'h-11 px-4 text-ui' => !$isLink && $size === 'md',
-        'h-12 px-5 text-base' => !$isLink && $size === 'lg',
-        'h-13 px-5 text-base font-semibold' => !$isLink && $size === 'xl',
+        'px-3 text-small' => !$isLink && $size === 'sm',
+        'px-4 text-ui' => !$isLink && $size === 'md',
+        'px-5 text-base' => !$isLink && $size === 'lg',
+        'px-5 text-base font-semibold' => !$isLink && $size === 'xl',
+        'h-9' => !$isLink && !$wrap && $size === 'sm',
+        'h-11' => !$isLink && !$wrap && $size === 'md',
+        'h-12' => !$isLink && !$wrap && $size === 'lg',
+        'h-13' => !$isLink && !$wrap && $size === 'xl',
+        'min-h-9' => !$isLink && $wrap && $size === 'sm',
+        'min-h-11' => !$isLink && $wrap && $size === 'md',
+        'min-h-12' => !$isLink && $wrap && $size === 'lg',
+        'min-h-13' => !$isLink && $wrap && $size === 'xl',
         'border-primary bg-primary text-on-primary hover:border-ink hover:bg-ink' => $variant === 'primary',
         'border-line-strong bg-surface text-ink hover:border-ink hover:bg-zone' => $variant === 'secondary',
         'border-danger bg-danger text-on-primary hover:border-danger-hover hover:bg-danger-hover' =>
             $variant === 'danger',
 
         // Textlink
+        'text-left' => $isLink && $wrap,
         'text-ink underline-offset-[3px] hover:underline disabled:text-disabled disabled:no-underline aria-disabled:text-disabled aria-disabled:no-underline' => $isLink,
         'min-h-9 text-small' => $isLink && $size === 'sm',
         'min-h-11 text-ui' => $isLink && $size === 'md',

@@ -11,6 +11,7 @@
 </head>
 <body>
     <div class="certificate-frame">
+        <div class="certificate-inner">
         <table class="certificate-table">
             <tr>
                 <td class="certificate-top">
@@ -84,6 +85,7 @@
                 </td>
             </tr>
         </table>
+        </div>
     </div>
 </body>
 </html>

@@ -8,14 +8,16 @@ body {
 }
 .certificate-frame {
     margin: 28px;
-    height: 690px;
+    height: 660px;
     border: 2px solid #2B4347;
     padding: 6px;
 }
+.certificate-inner {
+    height: 644px;
+    border: 1px solid #DCE3E2;
+}
 .certificate-table {
     width: 100%;
-    height: 676px;
-    border: 1px solid #DCE3E2;
     border-collapse: collapse;
     text-align: center;
 }
