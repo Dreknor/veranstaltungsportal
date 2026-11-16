@@ -35,13 +35,21 @@ class EventFilters
         'naechste-3-monate' => 'Nächste 3 Monate',
     ];
 
-    /** Optionen für die Zelle „Format" (leer = alle) */
+    /**
+     * Optionen für die Zelle „Format" (leer = alle)
+     *
+     * @return array<string, string>
+     */
     public static function formatOptions(): array
     {
         return ['' => 'Alle'] + self::FORMAT_LABELS;
     }
 
-    /** Optionen für die Zelle „Zeitraum" (leer = beliebig) */
+    /**
+     * Optionen für die Zelle „Zeitraum" (leer = beliebig)
+     *
+     * @return array<string, string>
+     */
     public static function periodOptions(): array
     {
         return ['' => 'Beliebig'] + self::PERIOD_LABELS;
@@ -87,6 +95,7 @@ class EventFilters
             'diese-woche' => $now->endOfWeek(CarbonImmutable::SUNDAY),
             'dieser-monat' => $now->endOfMonth(),
             'naechste-3-monate' => $now->addMonthsNoOverflow(3)->endOfDay(),
+            default => throw new \InvalidArgumentException("Unbekannter Zeitraum: {$period}"),
         };
 
         return [$start, $end];
