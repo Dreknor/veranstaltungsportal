@@ -11,7 +11,6 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
-        "blade-ui-kit/blade-icons": "^1.8",
         "danielme85/laravel-log-to-db": "^4.1",
         "horstoeko/zugferd": "^1.0",
         "josiasmontag/laravel-recaptchav3": "^1.0",
@@ -20,7 +19,6 @@
         "laravel/tinker": "^2.10.1",
         "maennchen/zipstream-php": "3.1.1",
         "owen-it/laravel-auditing": "^14.0",
-        "owenvoke/blade-fontawesome": "^2.9",
         "sentry/sentry-laravel": "^4.20",
         "simplesoftwareio/simple-qrcode": "^4.2",
         "socialiteproviders/github": "^4.1",

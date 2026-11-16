@@ -1,8 +1,6 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/geist';
 @import 'vanilla-cookieconsent/dist/cookieconsent.css';
-/* ALT – entfällt in Phase 7 */
-@import '@fortawesome/fontawesome-free/css/all.min.css';
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -84,13 +82,6 @@
     /* Einzige erlaubte Ebene mit Schatten: Dialoge und Aufklappmenüs (A4) */
     --shadow-overlay: 0 8px 24px rgba(30, 49, 53, 0.12);
 
-    /* ALT – entfällt in Phase 7 */
-    --sidebar-background: hsl(var(--sidebar-background));
-    --sidebar-foreground: hsl(var(--sidebar-foreground));
-    --sidebar-accent: hsl(var(--sidebar-accent));
-    --sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
-    --sidebar-border: hsl(var(--sidebar-border));
-    --sidebar-ring: hsl(var(--sidebar-ring));
 }
 
 /* Lesetext 760 px. Tailwind erzeugt für max-w-prose zusätzlich 65ch danach – deshalb !important. */
@@ -589,67 +580,9 @@
 }
 
 /* ================================================================== */
-/* ALT – entfällt in Phase 7                                           */
-/* Alles ab hier gehört zum bisherigen Design und bleibt nur stehen,   */
-/* bis die letzte View umgestellt ist.                                 */
+/* Basis für rohe Formularfelder ohne Baustein (z. B. Tabellenfilter)   */
 /* ================================================================== */
-
-@custom-variant dark (&:where(.dark, .dark *));
-
-@layer components {
-    .bg-sidebar {
-        background-color: hsl(var(--sidebar-background));
-    }
-
-    .bg-sidebar-accent {
-        background-color: hsl(var(--sidebar-accent));
-    }
-
-    .text-sidebar-accent-foreground {
-        color: hsl(var(--sidebar-accent-foreground));
-    }
-
-    .hover\:bg-sidebar-accent:hover {
-        background-color: hsl(var(--sidebar-accent));
-    }
-
-    .hover\:text-sidebar-accent-foreground:hover {
-        color: hsl(var(--sidebar-accent-foreground));
-    }
-
-    .animate-fadeIn {
-        animation: fadeIn 0.3s ease-in;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-}
-
 @layer base {
-    :root {
-        --sidebar-background: 0 0% 100%;
-        --sidebar-foreground: 222 47% 11%;
-        --sidebar-accent: 217 91% 60%;
-        --sidebar-accent-foreground: 0 0% 100%;
-        --sidebar-border: 214 32% 91%;
-    }
-
-    /*
-     * Formularfelder: sichtbarer Rahmen, ausreichende Tippfläche und IMMER lesbare Farben als Standard.
-     * - Viele Views setzen nur "border-gray-300" ohne "border" – seit Tailwind v4 bleibt der Rahmen dann unsichtbar.
-     * - Ohne eigene Farbe erben Felder die Schriftfarbe der Seite. Im Dark Mode (System-Einstellung auf dem
-     *   Handy) ist das hellgrau – auf weißen Karten war der eingegebene Text dann nicht lesbar.
-     *   Deshalb bekommen Felder ein festes Paar aus hellem Hintergrund und dunkler Schrift.
-     * Utility-Klassen (z. B. dark:bg-gray-900 dark:text-gray-100, border-0, px-6) überschreiben diese Basis weiterhin.
-     */
     input:where(
             :not(
                 [type='checkbox'],
@@ -666,197 +599,25 @@
         ),
     select,
     textarea {
-        border-width: 1px;
-        border-color: var(--color-gray-300, #d1d5db);
+        border: 1px solid var(--color-line-strong);
+        border-radius: var(--radius-control);
         padding: 0.5rem 0.75rem;
-        min-height: 2.5rem;
-        background-color: #ffffff;
-        color: var(--color-gray-900, #111827);
+        min-height: 2.75rem;
+        background-color: var(--color-surface);
+        color: var(--color-ink);
     }
 
     input::placeholder,
     textarea::placeholder {
-        color: var(--color-gray-500, #6b7280);
+        color: var(--color-muted);
         opacity: 1;
     }
 
-    /* Deaktivierte/schreibgeschützte Felder erkennbar, aber lesbar */
     input:disabled,
     select:disabled,
     textarea:disabled {
-        background-color: var(--color-gray-100, #f3f4f6);
-        color: var(--color-gray-600, #4b5563);
+        background-color: var(--color-zone);
+        color: var(--color-muted);
         cursor: not-allowed;
     }
-
-    input[type='checkbox'],
-    input[type='radio'] {
-        border-width: 1px;
-        border-color: var(--color-gray-300, #d1d5db);
-    }
-}
-
-.dark {
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 213 31% 91%;
-    --sidebar-accent: 217 91% 60%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 223 47% 16%;
-    --sidebar-ring: 217 91% 60%;
-}
-
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-@layer utilities {
-    /* Modern Card Styles */
-    .card {
-        @apply rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-200 dark:border-gray-700 dark:bg-gray-800;
-    }
-
-    .card-hover {
-        @apply hover:scale-[1.02] hover:border-blue-300 hover:shadow-lg dark:hover:border-blue-700;
-    }
-
-    /* Modern Button Styles */
-    .btn-primary {
-        @apply rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 font-medium text-white shadow-md shadow-blue-500/30 transition-all duration-200 hover:scale-105 hover:from-blue-700 hover:to-blue-800 hover:shadow-lg hover:shadow-blue-500/40 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none;
-    }
-
-    .btn-secondary {
-        @apply rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-200 hover:shadow-md focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
-    }
-
-    .btn-success {
-        @apply rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 font-medium text-white shadow-md shadow-green-500/30 transition-all duration-200 hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg hover:shadow-green-500/40;
-    }
-
-    .btn-danger {
-        @apply rounded-lg bg-gradient-to-r from-red-600 to-rose-600 px-4 py-2 font-medium text-white shadow-md shadow-red-500/30 transition-all duration-200 hover:scale-105 hover:from-red-700 hover:to-rose-700 hover:shadow-lg hover:shadow-red-500/40;
-    }
-
-    /* Input Styles */
-    .input-modern {
-        @apply w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-gray-900 placeholder-gray-500 transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400;
-    }
-
-    /* Badge Styles */
-    .badge {
-        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-all duration-200;
-    }
-
-    .badge-primary {
-        @apply bg-blue-100 text-blue-800 ring-1 ring-blue-600/20 dark:bg-blue-900/30 dark:text-blue-300;
-    }
-
-    .badge-success {
-        @apply bg-green-100 text-green-800 ring-1 ring-green-600/20 dark:bg-green-900/30 dark:text-green-300;
-    }
-
-    .badge-warning {
-        @apply bg-yellow-100 text-yellow-800 ring-1 ring-yellow-600/20 dark:bg-yellow-900/30 dark:text-yellow-300;
-    }
-
-    .badge-danger {
-        @apply bg-red-100 text-red-800 ring-1 ring-red-600/20 dark:bg-red-900/30 dark:text-red-300;
-    }
-
-    /* Glassmorphism Effect */
-    .glass {
-        @apply border border-gray-200/50 bg-white/70 backdrop-blur-lg dark:border-gray-700/50 dark:bg-gray-800/70;
-    }
-
-    /* Modern Shadow Styles */
-    .shadow-soft {
-        box-shadow:
-            0 2px 8px -2px rgba(0, 0, 0, 0.1),
-            0 6px 20px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    .shadow-glow-blue {
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
-    }
-
-    .shadow-glow-purple {
-        box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
-    }
-
-    /* Transition Utilities */
-    .transition-smooth {
-        @apply transition-all duration-300 ease-in-out;
-    }
-
-    /* Gradient Text */
-    .gradient-text {
-        @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-purple-400;
-    }
-}
-
-/* Custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.5);
-    border-radius: 3px;
-}
-
-/* Sidebar width transitions */
-.sidebar-transition {
-    transition:
-        width 0.3s ease,
-        transform 0.3s ease,
-        margin-left 0.3s ease,
-        display 0.3s ease;
-}
-
-.content-transition {
-    transition:
-        margin-left 0.3s ease,
-        width 0.3s ease;
-}
-
-/* Custom file input */
-.custom-file-input::-webkit-file-upload-button {
-    visibility: hidden;
-}
-
-.custom-file-input::before {
-    content: 'Select files';
-    display: inline-block;
-    background: #f9fafb;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    outline: none;
-    white-space: nowrap;
-    cursor: pointer;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-.dark .custom-file-input::before {
-    background: #374151;
-    border-color: #4b5563;
-    color: #e5e7eb;
-}
-
-.custom-file-input:hover::before {
-    border-color: #9ca3af;
-}
-
-.custom-file-input:active::before {
-    background: #e5e7eb;
-}
-
-.dark .custom-file-input:active::before {
-    background: #4b5563;
 }
