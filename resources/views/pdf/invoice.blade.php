@@ -109,10 +109,7 @@
             <tr>
                 <td>Veranstaltung:</td>
                 <td>
-                    <strong>{{ $event->title }}</strong> am {{ \Carbon\Carbon::parse($event->start_date)->format('d.m.Y H:i') }} Uhr
-                    @if($event->location)
-                        , {{ $event->location }}
-                    @endif
+                    <strong>{{ $event->title }}</strong> am {{ \Carbon\Carbon::parse($event->start_date)->format('d.m.Y H:i') }} Uhr@if($event->location), {{ $event->location }}@endif
                 </td>
             </tr>
         </table>

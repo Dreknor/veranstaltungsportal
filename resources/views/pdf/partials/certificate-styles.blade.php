@@ -8,7 +8,7 @@ body {
 }
 .certificate-frame {
     margin: 28px;
-    height: 515px;
+    height: 690px;
     border: 2px solid #2B4347;
     padding: 6px;
 }

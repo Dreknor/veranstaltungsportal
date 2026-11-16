@@ -1,6 +1,6 @@
 {{--
     Rahmen eines Hilfeartikels (Muster siehe Kommentar oben in help/HELP_ARTICLE_TEMPLATE.blade.php).
-    Bringt das Seitengerüst <x-layouts.app> selbst mit – Artikel dürfen nicht zusätzlich darin stehen.
+    Bringt das Seitengerüst (Layout app) selbst mit – Artikel dürfen nicht zusätzlich darin stehen.
     Seitenkopf mit Zurück-Link und H1, Lesetext höchstens 760 px mit Schriftregeln für h2/h3, Absätze,
     Listen, Links und <details>, darunter optional eine Linkliste "Weiterführende Artikel".
     Der Artikel schreibt nur schlichtes HTML (section, h2, h3, p, ul, ol, details) und Bausteine.
@@ -11,7 +11,7 @@
     'subtitle' => null,
     'backHref' => null, // Standard: Hilfe-Übersicht
     'backLabel' => 'Zur Hilfe-Übersicht',
-    'related' => null, // Slot: Linkliste mit <x-ui.button variant="link" arrow>
+    'related' => null, // Slot: Linkliste verwandter Artikel
     'relatedTitle' => 'Weiterführende Artikel',
 ])
 

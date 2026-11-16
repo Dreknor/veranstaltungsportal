@@ -51,8 +51,8 @@ body {
     line-height: 1.2;
 }
 .header {
-    margin-bottom: 22px;
-    padding-bottom: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
     border-bottom: 1px solid #DCE3E2;
 }
 .header .logo {
@@ -78,7 +78,7 @@ body {
 
 /* Abschnitte und Informationsraster */
 .section {
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 .section-title {
     font-size: 10pt;
@@ -98,13 +98,13 @@ body {
 .info-label {
     display: table-cell;
     color: #55676A;
-    padding: 5px 15px 5px 0;
+    padding: 3px 15px 3px 0;
     width: 32%;
     vertical-align: top;
 }
 .info-value {
     display: table-cell;
-    padding: 5px 0;
+    padding: 3px 0;
     color: #1E3135;
     vertical-align: top;
 }
@@ -120,7 +120,8 @@ body {
 .qr-section,
 .attendee-highlight,
 .zone {
-    margin: 18px 0;
+    page-break-inside: avoid;
+    margin: 12px 0;
     padding: 14px 16px;
     background: #F3F6F5;
     border: 1px solid #DCE3E2;
@@ -133,8 +134,8 @@ body {
     margin: 10px auto;
 }
 .qr-code img {
-    width: 180px;
-    height: 180px;
+    width: 150px;
+    height: 150px;
 }
 .qr-hint {
     font-size: 8pt;
@@ -192,7 +193,8 @@ body {
 /* Meldungen: Fläche, Kontur, Text */
 .note,
 .important-info {
-    margin: 16px 0;
+    page-break-inside: avoid;
+    margin: 12px 0;
     padding: 10px 14px;
     background: #F3F6F5;
     border: 1px solid #DCE3E2;
