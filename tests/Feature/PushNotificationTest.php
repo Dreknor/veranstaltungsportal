@@ -333,3 +333,87 @@ test('Einstellungsseite bietet mit VAPID-Schlüsseln das Einschalten an', functi
         ->assertDontSee($user->pushSubscriptions->first()->endpoint)
         ->assertDontSee('noch nicht eingerichtet');
 });
+
+// --- Testnachricht ---
+
+function pushReport(bool $success): \Minishlink\WebPush\MessageSentReport
+{
+    return new \Minishlink\WebPush\MessageSentReport(
+        new \GuzzleHttp\Psr7\Request('POST', 'https://push.example.test/send/1'), null, $success, $success ? 'OK' : 'Gone'
+    );
+}
+
+test('Gäste können keine Testnachricht senden', function () {
+    pushConfigure();
+
+    $this->postJson(route('settings.notifications.push.test'))->assertUnauthorized();
+});
+
+test('Testnachricht ohne VAPID-Schlüssel wird mit 422 abgelehnt', function () {
+    $this->actingAs(pushUser())
+        ->postJson(route('settings.notifications.push.test'))
+        ->assertStatus(422)
+        ->assertJson(['message' => 'Push-Benachrichtigungen sind für dieses Portal nicht eingerichtet.']);
+});
+
+test('Testnachricht ohne angemeldeten Browser wird mit 422 abgelehnt', function () {
+    pushConfigure();
+
+    $this->actingAs(pushUser(true, false))
+        ->postJson(route('settings.notifications.push.test'))
+        ->assertStatus(422)
+        ->assertJsonPath('message', fn (string $message) => str_contains($message, 'kein Browser'));
+});
+
+test('Testnachricht geht nur über den Push-Kanal', function () {
+    pushConfigure();
+    \Illuminate\Support\Facades\Mail::fake();
+    $user = pushUser();
+
+    $this->mock(WebPushChannel::class, function ($mock) use ($user) {
+        $mock->shouldReceive('send')->once()
+            ->withArgs(fn ($notifiable, $notification) => $notifiable->is($user) && $notification instanceof \App\Notifications\PushTestNotification)
+            ->andReturn([pushReport(true)]);
+    });
+
+    $this->actingAs($user)
+        ->postJson(route('settings.notifications.push.test'))
+        ->assertOk()
+        ->assertJsonPath('message', fn (string $message) => str_contains($message, 'gesendet'));
+
+    expect($user->notifications()->count())->toBe(0);
+    \Illuminate\Support\Facades\Mail::assertNothingOutgoing();
+});
+
+test('Testnachricht: Kanäle und Inhalt', function () {
+    $user = pushUser();
+    $notification = new \App\Notifications\PushTestNotification;
+    $payload = $notification->toWebPush($user)->toArray();
+
+    expect($notification->via($user))->toBe([SafeWebPushChannel::class])
+        ->and($payload['title'])->toBe('Testnachricht')
+        ->and($payload['body'])->toBe('Push-Benachrichtigungen funktionieren auf diesem Gerät.')
+        ->and($payload['data']['url'])->toBe(route('settings.notifications.edit'));
+});
+
+test('Testnachricht meldet einen Fehler, wenn kein Push-Dienst sie annimmt', function () {
+    pushConfigure();
+    $user = pushUser();
+    $this->mock(WebPushChannel::class, fn ($mock) => $mock->shouldReceive('send')->once()->andReturn([pushReport(false)]));
+
+    $this->actingAs($user)
+        ->postJson(route('settings.notifications.push.test'))
+        ->assertStatus(502)
+        ->assertJsonPath('message', fn (string $message) => str_contains($message, 'nicht zugestellt'));
+});
+
+test('Einstellungsseite enthält die Testnachricht nur in der eingerichteten Fassung', function () {
+    $user = pushUser();
+    $this->actingAs($user)->get(route('settings.notifications.edit'))->assertDontSee('Testnachricht senden');
+
+    pushConfigure();
+    $this->actingAs($user)->get(route('settings.notifications.edit'))
+        ->assertSee('Testnachricht senden')
+        ->assertSee('\u0022testUrl\u0022', false)
+        ->assertSee('E-Mail-Benachrichtigungen');
+});
