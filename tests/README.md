@@ -119,7 +119,7 @@ In `tests/Pest.php` sind hilfreiche Funktionen definiert:
 createUser()         // Erstellt einen Test-User
 createEvent()        // Erstellt ein Test-Event
 createBooking()      // Erstellt eine Test-Buchung
-createOrganizer()    // Erstellt einen Organisator
+createOrganizer()    // Erstellt einen Veranstalter
 createAdmin()        // Erstellt einen Admin
 ```
 

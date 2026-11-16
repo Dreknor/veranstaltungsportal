@@ -2,7 +2,8 @@
     <x-ui.page-header title="Reporting und Auswertungen" subtitle="Übersicht über System-Statistiken und Reports" />
 
     <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
-        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()" class="w-full max-w-64">
+        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()"
+            class="w-full max-w-64">
             <option value="7days" @selected($period === '7days')>Letzte 7 Tage</option>
             <option value="30days" @selected($period === '30days')>Letzte 30 Tage</option>
             <option value="90days" @selected($period === '90days')>Letzte 90 Tage</option>
@@ -15,31 +16,40 @@
 
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat label="Benutzer (gesamt)" :value="number_format($metrics['total_users'])" sub="+{{ number_format($metrics['new_users']) }} neu" />
-        <x-ui.stat label="Veranstaltungen (gesamt)" :value="number_format($metrics['total_events'])" sub="+{{ number_format($metrics['new_events']) }} neu" />
-        <x-ui.stat label="Buchungen (gesamt)" :value="number_format($metrics['total_bookings'])" sub="+{{ number_format($metrics['new_bookings']) }} neu" />
-        <x-ui.stat label="Umsatz (gesamt)" :value="\App\Support\Ui::money($metrics['total_revenue'])" sub="+{{ \App\Support\Ui::money($metrics['period_revenue']) }} im Zeitraum" />
+        <x-ui.stat label="Veranstaltungen (gesamt)" :value="number_format($metrics['total_events'])"
+            sub="+{{ number_format($metrics['new_events']) }} neu" />
+        <x-ui.stat label="Buchungen (gesamt)" :value="number_format($metrics['total_bookings'])"
+            sub="+{{ number_format($metrics['new_bookings']) }} neu" />
+        <x-ui.stat label="Umsatz (gesamt)" :value="\App\Support\Ui::money($metrics['total_revenue'])"
+            sub="+{{ \App\Support\Ui::money($metrics['period_revenue']) }} im Zeitraum" />
     </div>
 
-    <x-ui.section title="Conversion-Funnel" class="mb-12">
+    <x-ui.section title="Konversions-Trichter" description="Veranstaltungen, die im gewählten Zeitraum stattfinden"
+        class="mb-12">
         <ul class="m-0 flex list-none flex-col gap-5 p-0">
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">
                     <span class="font-medium">Aufrufe der Veranstaltungen</span>
-                    <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['event_views']) }}</span>
+                    <span
+                        class="text-muted tabular-nums">{{ number_format($conversionFunnel['event_views'], 0, ',', '.') }}</span>
                 </div>
                 <x-ui.progress :value="100" decorative />
             </li>
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">
-                    <span class="font-medium">Buchungen gestartet</span>
-                    <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_started']) }} ({{ number_format($conversionFunnel['start_rate'], 1) }} %)</span>
+                    <span class="font-medium">Buchungen</span>
+                    <span
+                        class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_started'], 0, ',', '.') }}
+                        ({{ number_format($conversionFunnel['start_rate'], 1, ',', '.') }} %)</span>
                 </div>
                 <x-ui.progress :value="$conversionFunnel['start_rate']" decorative />
             </li>
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">
-                    <span class="font-medium">Buchungen abgeschlossen</span>
-                    <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_completed']) }} ({{ number_format($conversionFunnel['completion_rate'], 1) }} %)</span>
+                    <span class="font-medium">Bestätigte Buchungen</span>
+                    <span
+                        class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_completed'], 0, ',', '.') }}
+                        ({{ number_format($conversionFunnel['completion_rate'], 1, ',', '.') }} %)</span>
                 </div>
                 <x-ui.progress :value="$conversionFunnel['completion_rate']" decorative />
             </li>
@@ -65,7 +75,8 @@
                 @forelse ($topEvents as $event)
                     <tr>
                         <th scope="row">
-                            <a href="{{ route('events.show', $event->slug) }}" class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
+                            <a href="{{ route('events.show', $event->slug) }}"
+                                class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
                         </th>
                         <td class="num">{{ $event->bookings_count }}</td>
                         <td class="num">{{ \App\Support\Ui::money($event->bookings_sum_total ?? 0) }}</td>
@@ -95,7 +106,8 @@
                     <tr>
                         <th scope="row">{{ $organizer->name }}</th>
                         <td class="num">{{ $organizer->events_count }}</td>
-                        <td class="num">{{ \App\Support\Ui::money($organizer->events_bookings_sum_total ?? 0) }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($organizer->events_bookings_sum_total ?? 0) }}
+                        </td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">

@@ -220,7 +220,7 @@ class UserManagementController extends Controller
     public function promoteToOrganizer(User $user)
     {
         if ($user->hasRole('organizer')) {
-            return back()->with('error', 'Benutzer ist bereits Organisator.');
+            return back()->with('error', 'Benutzer ist bereits Veranstalter.');
         }
 
         $user->assignRole('organizer');
@@ -231,7 +231,7 @@ class UserManagementController extends Controller
             Notification::send($admins, new NewOrganizerRegisteredNotification($user));
         }
 
-        return back()->with('success', 'Benutzer erfolgreich zum Organisator befördert.');
+        return back()->with('success', 'Benutzer erfolgreich zum Veranstalter befördert.');
     }
 
     /**
@@ -245,7 +245,7 @@ class UserManagementController extends Controller
         }
 
         if (!$user->hasRole('organizer')) {
-            return back()->with('error', 'Benutzer ist kein Organisator.');
+            return back()->with('error', 'Benutzer ist kein Veranstalter.');
         }
 
         $user->removeRole('organizer');

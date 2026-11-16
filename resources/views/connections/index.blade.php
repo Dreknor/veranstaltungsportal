@@ -1,5 +1,5 @@
 <x-layouts.app title="Meine Verbindungen">
-    <x-ui.page-header title="Meine Verbindungen" subtitle="Vernetzen Sie sich mit anderen Pädagogen und Organisatoren" />
+    <x-ui.page-header title="Meine Verbindungen" subtitle="Vernetzen Sie sich mit anderen Pädagogen und Veranstalter" />
 
     <!-- Stats -->
     <div class="mb-12 grid gap-4 sm:grid-cols-3">

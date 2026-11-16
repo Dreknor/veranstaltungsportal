@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CertificateMail;
 use App\Models\Booking;
 use App\Models\Event;
 use App\Services\CertificateService;
@@ -141,7 +142,7 @@ class CertificateController extends Controller
 
         try {
             // Generate certificate if not exists
-            if (!$booking->certificate_path) {
+            if (!$booking->certificate_path || !Storage::exists($booking->certificate_path)) {
                 $certificatePath = $this->certificateService->saveCertificate($booking);
                 $booking->update([
                     'certificate_generated_at' => now(),
@@ -149,8 +150,7 @@ class CertificateController extends Controller
                 ]);
             }
 
-            // Send email with certificate
-            // Mail::to($booking->customer_email)->send(new CertificateMail($booking));
+            Mail::to($booking->customer_email)->send(new CertificateMail($booking->fresh()));
 
             return back()->with('success', 'Zertifikat erfolgreich per E-Mail versendet.');
         } catch (\Exception $e) {

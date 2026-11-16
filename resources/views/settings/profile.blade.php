@@ -45,7 +45,7 @@
                 <div>
                     <x-ui.label as="span">{{ __('Account Type') }}</x-ui.label>
                     <p class="m-0 text-base font-medium text-ink">
-                        {{ $user->isOrganizer() ? __('Organisator') : __('Teilnehmer') }}
+                        {{ $user->isOrganizer() ? __('Veranstalter') : __('Teilnehmer') }}
                     </p>
                     <x-ui.hint>{{ __('Contact support to change your account type') }}</x-ui.hint>
                 </div>

@@ -24,7 +24,7 @@ class EnsureUserIsOrganizer
         $hasOrganizerRole = method_exists($user, 'hasRole') && ($user->hasRole('organizer') || $user->hasRole('admin'));
 
         if (!($hasOrgMembership || $hasOrganizerRole)) {
-            abort(403, 'Nur Organisatoren haben Zugriff auf diesen Bereich.');
+            abort(403, 'Nur Veranstalter haben Zugriff auf diesen Bereich.');
         }
 
         if (!$user->hasVerifiedEmail()) {

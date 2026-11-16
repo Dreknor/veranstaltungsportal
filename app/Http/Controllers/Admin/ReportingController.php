@@ -277,20 +277,28 @@ class ReportingController extends Controller
             ->values();
     }
 
+    /**
+     * Trichter für Veranstaltungen, die im Zeitraum stattfinden: Aufrufe → Buchungen → bestätigt.
+     * Alle drei Stufen beziehen sich auf dieselben Veranstaltungen, die Quoten sind auf 100 % begrenzt.
+     */
     private function getConversionFunnel($startDate, $endDate)
     {
-        $eventViews = Event::whereBetween('created_at', [$startDate, $endDate])->count();
-        $bookingsStarted = Booking::whereBetween('created_at', [$startDate, $endDate])->count();
-        $bookingsCompleted = Booking::where('payment_status', 'paid')
-            ->whereBetween('created_at', [$startDate, $endDate])
+        $eventIds = Event::whereBetween('start_date', [$startDate, $endDate])->pluck('id');
+
+        $eventViews = (int) Event::whereIn('id', $eventIds)->sum('views');
+        $bookingsStarted = Booking::whereIn('event_id', $eventIds)->count();
+        $bookingsCompleted = Booking::whereIn('event_id', $eventIds)
+            ->whereIn('status', ['confirmed', 'completed'])
             ->count();
+
+        $rate = fn (int $part, int $whole) => $whole > 0 ? min(100, ($part / $whole) * 100) : 0;
 
         return [
             'event_views' => $eventViews,
             'bookings_started' => $bookingsStarted,
             'bookings_completed' => $bookingsCompleted,
-            'start_rate' => $eventViews > 0 ? ($bookingsStarted / $eventViews) * 100 : 0,
-            'completion_rate' => $bookingsStarted > 0 ? ($bookingsCompleted / $bookingsStarted) * 100 : 0,
+            'start_rate' => $rate($bookingsStarted, $eventViews),
+            'completion_rate' => $rate($bookingsCompleted, $bookingsStarted),
         ];
     }
 

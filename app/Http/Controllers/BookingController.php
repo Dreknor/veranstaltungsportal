@@ -9,7 +9,6 @@ use App\Models\Event;
 use App\Models\TicketType;
 use App\Models\User;
 use App\Services\BookingWorkflowService;
-use App\Services\InvoiceService;
 use App\Services\PayPalService;
 use App\Services\TicketPdfService;
 use Illuminate\Http\Request;
@@ -27,6 +26,7 @@ class BookingController extends Controller
             if ($event->external_booking_url) {
                 return redirect()->away($event->external_booking_url);
             }
+
             return redirect()->route('events.show', $event->slug)
                 ->with('error', 'Diese Veranstaltung wird extern verwaltet.');
         }
@@ -39,7 +39,7 @@ class BookingController extends Controller
 
         // Wartelisten-Nachrücker: persönlicher Link mit reservierten Plätzen
         $waitlistClaim = app(\App\Services\WaitlistService::class)->findClaim($event, $request->query('waitlist'));
-        if ($request->filled('waitlist') && !$waitlistClaim) {
+        if ($request->filled('waitlist') && ! $waitlistClaim) {
             session()->flash('warning', 'Ihre Reservierung von der Warteliste ist abgelaufen oder bereits eingelöst.');
         }
         if ($waitlistClaim) {
@@ -53,7 +53,6 @@ class BookingController extends Controller
             ->filter(function ($ticket) {
                 return $ticket->isOnSale() && $ticket->availableQuantity() > 0;
             });
-
 
         if ($ticketTypes->isEmpty() && $event->ticketTypes()->count() === 0 && $event->price_from !== null) {
             $price = $event->price_from;
@@ -82,9 +81,9 @@ class BookingController extends Controller
             $reasons = [];
 
             foreach ($allTickets as $ticket) {
-                if (!$ticket->is_available) {
+                if (! $ticket->is_available) {
                     $reasons[] = "{$ticket->name}: Nicht verfügbar";
-                } elseif (!$ticket->isOnSale()) {
+                } elseif (! $ticket->isOnSale()) {
                     if ($ticket->sale_start && now()->lt($ticket->sale_start)) {
                         $reasons[] = "{$ticket->name}: Verkauf beginnt am {$ticket->sale_start->format('d.m.Y')}";
                     } elseif ($ticket->sale_end && now()->gt($ticket->sale_end)) {
@@ -96,8 +95,8 @@ class BookingController extends Controller
             }
 
             $message = 'Keine Tickets verfügbar.';
-            if (!empty($reasons)) {
-                $message .= ' Gründe: ' . implode(' | ', $reasons);
+            if (! empty($reasons)) {
+                $message .= ' Gründe: '.implode(' | ', $reasons);
             }
 
             return redirect()->route('events.show', $event->slug)
@@ -138,7 +137,7 @@ class BookingController extends Controller
         $organizationRule = match ($event->organization_field_mode) {
             'required' => 'required|string|max:255',
             'optional' => 'nullable|string|max:255',
-            default    => 'nullable|string|max:255',
+            default => 'nullable|string|max:255',
         };
 
         // Rechnungsadresse nur erforderlich, wenn kostenpflichtige Tickets gewählt wurden
@@ -147,7 +146,7 @@ class BookingController extends Controller
             ->filter()
             ->unique()
             ->toArray();
-        $hasPaidTickets = !empty($selectedTicketIds)
+        $hasPaidTickets = ! empty($selectedTicketIds)
             && TicketType::whereIn('id', $selectedTicketIds)->where('price', '>', 0)->exists();
         $billingRule = $hasPaidTickets ? 'required' : 'nullable';
 
@@ -158,10 +157,10 @@ class BookingController extends Controller
             'customer_organization' => $organizationRule,
             'billing_company' => 'nullable|string|max:255',
             'billing_vat_id' => 'nullable|string|max:50',
-            'billing_address' => $billingRule . '|string|max:255',
-            'billing_postal_code' => $billingRule . '|string|max:20',
-            'billing_city' => $billingRule . '|string|max:255',
-            'billing_country' => $billingRule . '|string|max:100',
+            'billing_address' => $billingRule.'|string|max:255',
+            'billing_postal_code' => $billingRule.'|string|max:20',
+            'billing_city' => $billingRule.'|string|max:255',
+            'billing_country' => $billingRule.'|string|max:100',
             'tickets' => 'required|array|min:1',
             'tickets.*.ticket_type_id' => 'required|exists:ticket_types,id',
             'tickets.*.quantity' => 'required|integer|min:0',
@@ -180,7 +179,7 @@ class BookingController extends Controller
                 return back()->withInput()
                     ->with('error', 'PayPal ist bei externer Rechnungsstellung nicht verfügbar.');
             }
-            if (!$event->organization?->hasPayPalConfigured()) {
+            if (! $event->organization?->hasPayPalConfigured()) {
                 return back()->withInput()
                     ->with('error', 'PayPal ist für diesen Veranstalter nicht verfügbar.');
             }
@@ -191,24 +190,26 @@ class BookingController extends Controller
                 $subtotal = 0;
                 $ticketData = [];
 
-
                 // Validiere und berechne Tickets
                 foreach ($request->tickets as $index => $ticketInput) {
                     // Überspringe wenn ticketInput null ist
-                    if ($ticketInput === null || !is_array($ticketInput)) {
+                    if ($ticketInput === null || ! is_array($ticketInput)) {
                         Log::warning('Skipping invalid ticket input', ['index' => $index, 'value' => $ticketInput]);
+
                         continue;
                     }
 
                     // Überspringe wenn quantity nicht gesetzt ist oder 0 ist
-                    if (!isset($ticketInput['quantity']) || $ticketInput['quantity'] < 1) {
+                    if (! isset($ticketInput['quantity']) || $ticketInput['quantity'] < 1) {
                         Log::debug('Skipping ticket with zero quantity', ['index' => $index, 'ticket' => $ticketInput]);
+
                         continue;
                     }
 
                     // Überspringe wenn ticket_type_id nicht gesetzt ist oder null ist
-                    if (!isset($ticketInput['ticket_type_id']) || $ticketInput['ticket_type_id'] === null) {
+                    if (! isset($ticketInput['ticket_type_id']) || $ticketInput['ticket_type_id'] === null) {
                         Log::warning('Skipping ticket with null ticket_type_id', ['index' => $index, 'ticket' => $ticketInput]);
+
                         continue;
                     }
 
@@ -221,13 +222,13 @@ class BookingController extends Controller
                     } catch (\Exception $e) {
                         Log::error('Ticket type not found', [
                             'ticket_type_id' => $ticketInput['ticket_type_id'],
-                            'error' => $e->getMessage()
+                            'error' => $e->getMessage(),
                         ]);
-                        throw new \Exception("Ungültiger Ticket-Typ ausgewählt.");
+                        throw new \Exception('Ungültiger Ticket-Typ ausgewählt.');
                     }
 
                     // Prüfe ob Ticket aktiv und im Verkaufszeitraum ist
-                    if (!$ticketType->isOnSale()) {
+                    if (! $ticketType->isOnSale()) {
                         throw new \Exception("Das Ticket \"{$ticketType->name}\" ist nicht verfügbar oder außerhalb des Verkaufszeitraums.");
                     }
 
@@ -257,7 +258,7 @@ class BookingController extends Controller
 
                 // Prüfe ob mindestens ein Ticket ausgewählt wurde
                 if (empty($ticketData)) {
-                    throw new \Exception("Bitte wählen Sie mindestens ein Ticket aus.");
+                    throw new \Exception('Bitte wählen Sie mindestens ein Ticket aus.');
                 }
 
                 // Prüfe die Gesamtanzahl gegen max_attendees der Veranstaltung
@@ -292,7 +293,7 @@ class BookingController extends Controller
 
                 // Generiere E-Mail-Verifizierungs-Token für Gäste (ohne Account)
                 $emailVerificationToken = null;
-                if (!auth()->check()) {
+                if (! auth()->check()) {
                     $emailVerificationToken = \Illuminate\Support\Str::random(60);
                 }
 
@@ -382,11 +383,11 @@ class BookingController extends Controller
                 $booking->load([
                     'items.ticketType',
                     'event.organization.users',
-                    'event.category'
+                    'event.category',
                 ]);
 
                 // PayPal-Zahlung: Weiterleitung zu PayPal (E-Mails erst nach erfolgreicher Zahlung)
-                if (!$isFree && $request->payment_method === 'paypal') {
+                if (! $isFree && $request->payment_method === 'paypal') {
                     return ['paypal', $booking];
                 }
 
@@ -400,14 +401,15 @@ class BookingController extends Controller
                 'line' => $e->getLine(),
                 'request_data' => $request->except(['_token']),
             ]);
+
             return back()->withInput()
-                ->with('error', 'Fehler beim Erstellen der Buchung: ' . $e->getMessage());
+                ->with('error', 'Fehler beim Erstellen der Buchung: '.$e->getMessage());
         }
 
         [$outcome, $booking] = $result;
 
         // Wer gerade gebucht hat, darf die Buchung in dieser Sitzung ohne erneute Verifizierung sehen
-        session()->put('booking_access_' . $booking->id, true);
+        session()->put('booking_access_'.$booking->id, true);
 
         if ($outcome === 'paypal') {
             $waitlistClaim?->markAsConverted();
@@ -418,7 +420,7 @@ class BookingController extends Controller
 
             return redirect()->route('bookings.show', $booking->booking_number)
                 ->with('warning', 'Die Verbindung zu PayPal konnte nicht hergestellt werden. Ihre Plätze sind reserviert – '
-                    . 'bitte versuchen Sie die Zahlung erneut oder wählen Sie die Zahlung per Rechnung.');
+                    .'bitte versuchen Sie die Zahlung erneut oder wählen Sie die Zahlung per Rechnung.');
         }
 
         // Genau eine E-Mail an den Kunden – abhängig vom Buchungsweg (nach dem Speichern, damit ein
@@ -496,14 +498,14 @@ class BookingController extends Controller
             $booking->loadMissing(['event.organization', 'items.ticketType']);
             $paypalService = $this->paypalFor($booking->event->organization);
 
-            if (!$paypalService->isAvailable()) {
+            if (! $paypalService->isAvailable()) {
                 throw new \Exception('PayPal ist für diesen Veranstalter nicht konfiguriert.');
             }
 
             $paypalOrder = $paypalService->createOrder($booking);
             $approvalUrl = collect($paypalOrder['links'] ?? [])->firstWhere('rel', 'approve')['href'] ?? null;
 
-            if (!$paypalOrder || !isset($paypalOrder['id']) || !$approvalUrl) {
+            if (! $paypalOrder || ! isset($paypalOrder['id']) || ! $approvalUrl) {
                 throw new \Exception('PayPal-Bestellung konnte nicht erstellt werden.');
             }
 
@@ -533,11 +535,11 @@ class BookingController extends Controller
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        if (!$this->hasBookingAccess($booking)) {
+        if (! $this->hasBookingAccess($booking)) {
             abort(403, 'Nicht berechtigt.');
         }
 
-        if (!$booking->canRetryOnlinePayment()) {
+        if (! $booking->canRetryOnlinePayment()) {
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('error', 'Für diese Buchung ist keine Online-Zahlung (mehr) möglich.');
         }
@@ -560,11 +562,11 @@ class BookingController extends Controller
             ->with(['event', 'review'])
             ->firstOrFail();
 
-        if (!$this->hasBookingAccess($booking)) {
+        if (! $this->hasBookingAccess($booking)) {
             abort(403, 'Nicht berechtigt.');
         }
 
-        if (!$booking->isReadyForParticipation() || !$booking->event->end_date?->isPast()) {
+        if (! $booking->isReadyForParticipation() || ! $booking->event->end_date?->isPast()) {
             return back()->with('error', 'Feedback ist nach der Veranstaltung möglich.');
         }
 
@@ -592,7 +594,7 @@ class BookingController extends Controller
 
         app(BookingWorkflowService::class)->notifyOrganizers($booking, new \App\Notifications\NewReviewNotification($review));
 
-        return redirect()->to(route('bookings.show', $bookingNumber) . '#feedback')
+        return redirect()->to(route('bookings.show', $bookingNumber).'#feedback')
             ->with('success', 'Vielen Dank für Ihr Feedback! Es wird nach kurzer Prüfung veröffentlicht.');
     }
 
@@ -605,11 +607,11 @@ class BookingController extends Controller
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        if (!$this->hasBookingAccess($booking)) {
+        if (! $this->hasBookingAccess($booking)) {
             abort(403, 'Nicht berechtigt.');
         }
 
-        if (!$booking->canRetryOnlinePayment()) {
+        if (! $booking->canRetryOnlinePayment()) {
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('error', 'Die Zahlungsart dieser Buchung kann nicht mehr geändert werden.');
         }
@@ -640,13 +642,19 @@ class BookingController extends Controller
                 ->with(['event.organization', 'items.ticketType'])
                 ->firstOrFail();
 
-            // Eingeloggte User dürfen nur ihre eigenen Buchungen sehen
+            // Eingeloggte User sehen ihre eigenen Buchungen
             if (auth()->id() === $booking->user_id) {
                 return view('bookings.show', compact('booking'));
             }
 
             // Eingeloggte User mit Session-Zugriff (z. B. nach Gast-Verifizierung)
-            if (session()->has('booking_access_' . $booking->id)) {
+            if (session()->has('booking_access_'.$booking->id)) {
+                return view('bookings.show', compact('booking'));
+            }
+
+            // Administration und Veranstalter-Team der Organisation (nur lesend, gleiche Regel
+            // wie in der Buchungsverwaltung); Aktionen bleiben dem Buchenden vorbehalten.
+            if (auth()->user()->can('view', $booking)) {
                 return view('bookings.show', compact('booking'));
             }
 
@@ -659,7 +667,7 @@ class BookingController extends Controller
             ->with(['event.organization', 'items.ticketType'])
             ->firstOrFail();
 
-        if (session()->has('booking_access_' . $booking->id)) {
+        if (session()->has('booking_access_'.$booking->id)) {
             return view('bookings.show', compact('booking'));
         }
 
@@ -672,6 +680,7 @@ class BookingController extends Controller
     public function verify($bookingNumber)
     {
         $booking = Booking::where('booking_number', $bookingNumber)->firstOrFail();
+
         return view('bookings.verify', compact('booking'));
     }
 
@@ -685,7 +694,8 @@ class BookingController extends Controller
 
         // Timing-sicherer Vergleich, um Timing-Angriffe zu vermeiden
         if (hash_equals($booking->customer_email, $request->email)) {
-            session()->put('booking_access_' . $booking->id, true);
+            session()->put('booking_access_'.$booking->id, true);
+
             return redirect()->route('bookings.show', $bookingNumber);
         }
 
@@ -704,20 +714,21 @@ class BookingController extends Controller
 
         // Nur der Bucher (Konto oder verifizierte Sitzung) darf stornieren –
         // die Buchungsnummer allein reicht nicht aus.
-        if (!$this->hasBookingAccess($booking)) {
+        if (! $this->hasBookingAccess($booking)) {
             abort(403, 'Sie sind nicht berechtigt, diese Buchung zu stornieren.');
         }
 
-        if (!$booking->isActive() || $booking->status === 'completed') {
+        if (! $booking->isActive() || $booking->status === 'completed') {
             return back()->with('error', 'Diese Buchung kann nicht mehr storniert werden.');
         }
 
         // Prüfe ob Stornierung gemäß Veranstaltungsrichtlinie erlaubt ist
-        if (!$booking->event->canCancelBooking()) {
-            if (!$booking->event->cancellation_allowed) {
+        if (! $booking->event->canCancelBooking()) {
+            if (! $booking->event->cancellation_allowed) {
                 return back()->with('error', 'Eine Stornierung durch den Teilnehmer ist für diese Veranstaltung nicht möglich.');
             }
-            return back()->with('error', 'Die Stornierungsfrist ist abgelaufen. Eine Stornierung war bis ' . $booking->event->cancellation_days_before . ' Tag(e) vor Veranstaltungsbeginn möglich.');
+
+            return back()->with('error', 'Die Stornierungsfrist ist abgelaufen. Eine Stornierung war bis '.$booking->event->cancellation_days_before.' Tag(e) vor Veranstaltungsbeginn möglich.');
         }
 
         // Storno inkl. Kontingent-Freigabe, Stornobestätigung und Veranstalter-Info.
@@ -742,14 +753,14 @@ class BookingController extends Controller
             })
             ->first();
 
-        if (!$discountCode) {
+        if (! $discountCode) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Ungültiger Rabattcode',
             ], 404);
         }
 
-        if (!$discountCode->isValid()) {
+        if (! $discountCode->isValid()) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Dieser Rabattcode ist nicht mehr gültig.',
@@ -761,7 +772,7 @@ class BookingController extends Controller
         return response()->json([
             'valid' => true,
             'discount' => $discount,
-            'discount_formatted' => number_format($discount, 2, ',', '.') . ' €',
+            'discount_formatted' => number_format($discount, 2, ',', '.').' €',
             'type' => $discountCode->discount_type,
             'value' => $discountCode->discount_value,
         ]);
@@ -782,6 +793,7 @@ class BookingController extends Controller
         $this->authorize('download', $booking);
 
         $pdfService = app(TicketPdfService::class);
+
         return $pdfService->downloadInvoice($booking);
     }
 
@@ -801,7 +813,7 @@ class BookingController extends Controller
             ? in_array($booking->status, ['confirmed', 'completed'])
             : $booking->isReadyForParticipation();
 
-        if (!$allowed) {
+        if (! $allowed) {
             abort(403, 'Tickets stehen zur Verfügung, sobald Ihre Buchung bestätigt und bezahlt ist.');
         }
 
@@ -809,9 +821,10 @@ class BookingController extends Controller
 
         // Verwende individuelle Tickets für alle Buchungen
         $filename = "Tickets_{$booking->booking_number}.pdf";
+
         return response($pdfService->getAllIndividualTicketsContent($booking), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ]);
     }
 
@@ -827,7 +840,7 @@ class BookingController extends Controller
         $certificateService = app(\App\Services\CertificateService::class);
 
         // Check if certificate can be generated
-        if (!$certificateService->canGenerateCertificate($booking)) {
+        if (! $certificateService->canGenerateCertificate($booking)) {
             return back()->with('error', 'Zertifikat kann nur für bestätigte und abgeschlossene Veranstaltungen heruntergeladen werden.');
         }
 
@@ -852,7 +865,7 @@ class BookingController extends Controller
         $certificateService = app(\App\Services\CertificateService::class);
 
         // Check if certificate can be generated for this item
-        if (!$certificateService->canGenerateIndividualCertificate($item)) {
+        if (! $certificateService->canGenerateIndividualCertificate($item)) {
             return back()->with('error', 'Zertifikat kann nur für eingecheckte Teilnehmer nach Ende der Veranstaltung heruntergeladen werden.');
         }
 
@@ -872,6 +885,7 @@ class BookingController extends Controller
         $this->authorize('download', $booking);
 
         $calendarService = app(\App\Services\CalendarService::class);
+
         return $calendarService->downloadBookingIcal($booking);
     }
 
@@ -885,7 +899,7 @@ class BookingController extends Controller
             ->firstOrFail();
 
         // Der Link bleibt als persönlicher Zugang zur Buchung gültig (wird in allen Buchungs-E-Mails verwendet)
-        session()->put('booking_access_' . $booking->id, true);
+        session()->put('booking_access_'.$booking->id, true);
 
         if ($booking->email_verified_at) {
             return redirect()->route('bookings.show', $booking->booking_number);
@@ -907,13 +921,13 @@ class BookingController extends Controller
             ->firstOrFail();
 
         // Check access
-        if (!$this->hasBookingAccess($booking)) {
+        if (! $this->hasBookingAccess($booking)) {
             return redirect()->route('bookings.verify', $bookingNumber)
                 ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
         }
 
         // Personalisierung ist ab Buchung bis Veranstaltungsbeginn möglich (auch nachträgliche Korrekturen)
-        if (!$booking->canBePersonalized()) {
+        if (! $booking->canBePersonalized()) {
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('info', 'Für diese Buchung ist keine Personalisierung (mehr) möglich.');
         }
@@ -931,11 +945,11 @@ class BookingController extends Controller
             ->firstOrFail();
 
         // Check access
-        if (!$this->hasBookingAccess($booking)) {
+        if (! $this->hasBookingAccess($booking)) {
             abort(403, 'Nicht berechtigt.');
         }
 
-        if (!$booking->canBePersonalized()) {
+        if (! $booking->canBePersonalized()) {
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('error', 'Für diese Buchung ist keine Personalisierung (mehr) möglich.');
         }
@@ -988,7 +1002,7 @@ class BookingController extends Controller
                 $message = ($booking->hasTicketDocument()
                     ? 'Teilnehmende gespeichert! Die personalisierten Tickets wurden per E-Mail versendet.'
                     : 'Teilnehmende gespeichert! Die Bestätigung mit allen Details wurde per E-Mail versendet.')
-                    . ' Eingetragene Personen mit eigener E-Mail-Adresse erhalten ihr Ticket bzw. ihre Zugangsdaten direkt.';
+                    .' Eingetragene Personen mit eigener E-Mail-Adresse erhalten ihr Ticket bzw. ihre Zugangsdaten direkt.';
             } else {
                 $message = 'Teilnehmende gespeichert! Tickets bzw. Zugangsdaten erhalten Sie automatisch, sobald Ihre Buchung bestätigt und bezahlt ist.';
             }
@@ -1002,7 +1016,7 @@ class BookingController extends Controller
             ]);
 
             return back()->withInput()
-                ->with('error', 'Fehler beim Speichern: ' . $e->getMessage());
+                ->with('error', 'Fehler beim Speichern: '.$e->getMessage());
         }
     }
 
@@ -1017,7 +1031,7 @@ class BookingController extends Controller
         }
 
         // Guest with session access (after email verification)
-        if (session()->has('booking_access_' . $booking->id)) {
+        if (session()->has('booking_access_'.$booking->id)) {
             return true;
         }
 
@@ -1034,7 +1048,7 @@ class BookingController extends Controller
             ->firstOrFail();
 
         // Check access
-        if (!session()->has('booking_access_' . $booking->id)) {
+        if (! session()->has('booking_access_'.$booking->id)) {
             return redirect()->route('bookings.verify', $bookingNumber)
                 ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
         }
@@ -1055,7 +1069,7 @@ class BookingController extends Controller
             ->firstOrFail();
 
         // Check access
-        if (!session()->has('booking_access_' . $booking->id)) {
+        if (! session()->has('booking_access_'.$booking->id)) {
             return redirect()->route('bookings.verify', $bookingNumber)
                 ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
         }
@@ -1091,7 +1105,7 @@ class BookingController extends Controller
             auth()->login($user);
 
             // Clear session access
-            session()->forget('booking_access_' . $booking->id);
+            session()->forget('booking_access_'.$booking->id);
 
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('success', 'Ihr Benutzerkonto wurde erfolgreich erstellt und mit Ihrer Buchung verknüpft!');
@@ -1104,7 +1118,7 @@ class BookingController extends Controller
             ]);
 
             return back()->withInput()
-                ->with('error', 'Fehler beim Erstellen des Kontos: ' . $e->getMessage());
+                ->with('error', 'Fehler beim Erstellen des Kontos: '.$e->getMessage());
         }
     }
 
@@ -1118,7 +1132,7 @@ class BookingController extends Controller
             ->firstOrFail();
 
         // Check access
-        if (!session()->has('booking_access_' . $booking->id)) {
+        if (! session()->has('booking_access_'.$booking->id)) {
             return redirect()->route('bookings.verify', $bookingNumber)
                 ->with('error', 'Bitte verifizieren Sie Ihre E-Mail-Adresse.');
         }
@@ -1130,12 +1144,12 @@ class BookingController extends Controller
         // Find user by email
         $user = User::where('email', $booking->customer_email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return back()->withErrors(['password' => 'Kein Konto mit dieser E-Mail-Adresse gefunden.']);
         }
 
         // Verify password
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             return back()->withErrors(['password' => 'Falsches Passwort.']);
         }
 
@@ -1153,12 +1167,12 @@ class BookingController extends Controller
             DB::commit();
 
             // Log the user in if not already
-            if (!auth()->check()) {
+            if (! auth()->check()) {
                 auth()->login($user);
             }
 
             // Clear session access
-            session()->forget('booking_access_' . $booking->id);
+            session()->forget('booking_access_'.$booking->id);
 
             return redirect()->route('bookings.show', $bookingNumber)
                 ->with('success', 'Ihre Buchung wurde erfolgreich mit Ihrem Konto verknüpft!');
@@ -1170,7 +1184,7 @@ class BookingController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return back()->with('error', 'Fehler beim Verknüpfen: ' . $e->getMessage());
+            return back()->with('error', 'Fehler beim Verknüpfen: '.$e->getMessage());
         }
     }
 }

@@ -61,7 +61,7 @@
                 <x-ui.field label="Zahlungsfrist (Tage)" name="payment_deadline_days" type="number" required
                     min="1" max="90" :old="false"
                     :value="old('payment_deadline_days', $settings['payment_deadline_days'])"
-                    hint="Anzahl der Tage, die Organisatoren Zeit haben, die Plattformgebühr zu zahlen." />
+                    hint="Anzahl der Tage, die Veranstalter Zeit haben, die Plattformgebühr zu zahlen." />
             </div>
         </x-ui.section>
 

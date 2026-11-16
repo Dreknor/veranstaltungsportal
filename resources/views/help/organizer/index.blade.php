@@ -2,7 +2,7 @@
     $topics = [
         [
             'getting-started',
-            'Erste Schritte als Organisator',
+            'Erste Schritte als Veranstalter',
             'Organisation anlegen, Einstellungen, Team und erste Veranstaltung.',
         ],
         [

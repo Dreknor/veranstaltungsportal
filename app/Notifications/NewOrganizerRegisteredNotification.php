@@ -35,15 +35,15 @@ class NewOrganizerRegisteredNotification extends Notification implements ShouldQ
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Neuer Organisator registriert: ' . $this->organizer->fullName())
+            ->subject('Neuer Veranstalter registriert: ' . $this->organizer->fullName())
             ->greeting('Hallo ' . $notifiable->fullName() . ',')
-            ->line('Ein neuer Organisator hat sich auf der Plattform registriert.')
+            ->line('Ein neuer Veranstalter hat sich auf der Plattform registriert.')
             ->line('**Name:** ' . $this->organizer->fullName())
             ->line('**E-Mail:** ' . $this->organizer->email)
             ->line('**Organisation:** ' . ($this->organizer->organization_name ?? 'Keine Angabe'))
             ->line('**Registriert am:** ' . $this->organizer->created_at->format('d.m.Y H:i') . ' Uhr')
-            ->action('Organisator ansehen', route('admin.users.edit', $this->organizer))
-            ->line('Bitte überprüfen Sie den neuen Organisator und nehmen Sie bei Bedarf Kontakt auf.');
+            ->action('Veranstalter ansehen', route('admin.users.edit', $this->organizer))
+            ->line('Bitte überprüfen Sie den neuen Veranstalter und nehmen Sie bei Bedarf Kontakt auf.');
     }
 
     /**
@@ -54,8 +54,8 @@ class NewOrganizerRegisteredNotification extends Notification implements ShouldQ
     public function toArray(object $notifiable): array
     {
         return [
-            'title' => 'Neuer Organisator registriert',
-            'message' => $this->organizer->fullName() . ' hat sich als Organisator auf der Plattform registriert',
+            'title' => 'Neuer Veranstalter registriert',
+            'message' => $this->organizer->fullName() . ' hat sich als Veranstalter auf der Plattform registriert',
             'organizer_id' => $this->organizer->id,
             'organizer_name' => $this->organizer->fullName(),
             'organizer_email' => $this->organizer->email,

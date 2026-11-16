@@ -105,7 +105,7 @@ it('notification contains correct organizer data', function () {
 
     // Test toMail
     $mail = $notification->toMail($admin);
-    expect($mail->subject)->toContain('Neuer Organisator registriert');
+    expect($mail->subject)->toContain('Neuer Veranstalter registriert');
     expect($mail->subject)->toContain('John Doe');
 });
 

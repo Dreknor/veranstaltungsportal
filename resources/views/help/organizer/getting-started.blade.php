@@ -1,4 +1,4 @@
-<x-help.article title="Erste Schritte als Organisator"
+<x-help.article title="Erste Schritte als Veranstalter"
     subtitle="So richten Sie Ihre Organisation ein und starten mit dem Erstellen von Veranstaltungen." :back-href="route('help.category', 'organizer')"
     back-label="Zur Veranstalter-Hilfe">
     <section>

@@ -28,7 +28,7 @@ class EnsureHasOrganizationContext
 
         // Check if user is organizer or has organizations
         if (!$user->isOrganizer() && $user->activeOrganizations()->count() === 0) {
-            abort(403, 'Sie haben keine Berechtigung für den Organisator-Bereich. Bitte erstellen Sie zuerst eine Organisation.');
+            abort(403, 'Sie haben keine Berechtigung für den Veranstalter-Bereich. Bitte erstellen Sie zuerst eine Organisation.');
         }
 
         // Ensure user has a current organization selected

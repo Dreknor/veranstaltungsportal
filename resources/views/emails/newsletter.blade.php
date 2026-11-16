@@ -89,5 +89,5 @@
     Sie erhalten diese E-Mail, weil Sie unseren Newsletter abonniert haben.<br>
     <a href="{{ route('settings.interests.edit') }}" style="color: #55676A; text-decoration: underline;">Interessen
         verwalten</a> ·
-    <a href="{{ route('newsletter.unsubscribe') }}" style="color: #55676A; text-decoration: underline;">Abmelden</a>
+    <a href="{{ $subscriber->exists ? \Illuminate\Support\Facades\URL::signedRoute('newsletter.unsubscribe.show', ['user' => $subscriber->id]) : route('settings.interests.edit') }}" style="color: #55676A; text-decoration: underline;">Abmelden</a>
 @endsection

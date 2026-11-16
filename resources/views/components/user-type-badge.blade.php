@@ -1,3 +1,3 @@
 @props(['user'])
 
-<x-ui.status tone="neutral" {{ $attributes }}>{{ $user->isOrganizer() ? __('Organisator') : __('Teilnehmer') }}</x-ui.status>
+<x-ui.status tone="neutral" {{ $attributes }}>{{ $user->isOrganizer() ? __('Veranstalter') : __('Teilnehmer') }}</x-ui.status>

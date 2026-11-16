@@ -419,7 +419,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         if ($this->hasRole('organizer')) {
-            return 'Organisator';
+            return 'Veranstalter';
         }
 
         return 'Teilnehmer';

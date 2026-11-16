@@ -10,9 +10,13 @@
     $isCancelled = $booking->status === 'cancelled';
     $isReady = $booking->isReadyForParticipation();
     $eventPast = $event->end_date?->isPast() ?? false;
-    $needsAttendees = $booking->canBePersonalized() && !$booking->tickets_personalized;
+    // Veranstalter-Team und Administration sehen die Kundenansicht nur lesend.
+    $readOnly = auth()->check()
+        && auth()->id() !== $booking->user_id
+        && !session()->has('booking_access_' . $booking->id);
+    $needsAttendees = !$readOnly && $booking->canBePersonalized() && !$booking->tickets_personalized;
     $isFree = $booking->isFree();
-    $canCancelOnline = $booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture();
+    $canCancelOnline = !$readOnly && $booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture();
 
     // [Text, Ton für <x-ui.status>]
     $statusBadge = match (true) {
@@ -68,6 +72,7 @@
                     {{ $event->isOnline() ? 'die Zugangsdaten' : 'Ihre Tickets' }} per E-Mail.
                     Nicht abgeschlossene Zahlungen werden nach 48 Stunden automatisch storniert.
                 </p>
+                @unless ($readOnly)
                 <div class="mt-4 flex flex-col gap-3 sm:flex-row">
                     <form method="POST" action="{{ route('bookings.pay', $booking->booking_number) }}" class="m-0">
                         @csrf
@@ -84,6 +89,7 @@
                         </x-ui.button>
                     </form>
                 </div>
+                @endunless
             @elseif($isExternalInvoicing)
                 <p class="m-0 text-h3">Sie erhalten eine Rechnung vom Veranstalter.</p>
                 <p class="mt-1 mb-0 text-base text-ink-soft">
@@ -262,7 +268,7 @@
         {{-- Tickets / Teilnehmende --}}
         <x-ui.section :title="$booking->items->count() > 1 ? 'Plätze & Teilnehmende' : 'Ihr Platz'" id="abschnitt-plaetze"
             class="[&>div:first-child]:mb-4">
-            @if ($booking->canBePersonalized())
+            @if ($booking->canBePersonalized() && !$readOnly)
                 <x-slot:actions>
                     <x-ui.button variant="secondary" size="sm"
                         :href="route('bookings.personalize', $booking->booking_number)">
@@ -345,7 +351,7 @@
         </x-ui.section>
 
         {{-- Feedback nach der Veranstaltung --}}
-        @if ($eventPast && $isReady)
+        @if ($eventPast && $isReady && (!$readOnly || $booking->review))
             <section id="feedback" aria-labelledby="feedback-titel" class="border-t border-line pt-8">
                 @if ($booking->review)
                     <h2 id="feedback-titel" class="m-0 text-h3">Danke für Ihr Feedback</h2>

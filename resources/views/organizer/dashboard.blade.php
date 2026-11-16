@@ -116,7 +116,7 @@
         <h2 id="hilfe-heading" class="m-0 mb-6 text-h2">Hilfe und Ressourcen</h2>
         @php
             $helpLinks = [
-                ['getting-started', 'Erste Schritte als Organisator'],
+                ['getting-started', 'Erste Schritte als Veranstalter'],
                 ['creating-events', 'Veranstaltungen erstellen und verwalten'],
                 ['managing-bookings', 'Buchungen und Teilnehmende verwalten'],
                 ['tickets-pricing', 'Tickets und Preisgestaltung'],

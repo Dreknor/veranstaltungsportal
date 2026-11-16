@@ -1,7 +1,7 @@
 <x-layouts.app title="Plattform-Rechnungsdaten">
     @php $d = $billingData; @endphp
 
-    <x-ui.page-header title="Plattform-Rechnungsdaten" subtitle="Firmendaten für Rechnungen an Organisatoren." />
+    <x-ui.page-header title="Plattform-Rechnungsdaten" subtitle="Firmendaten für Rechnungen an Veranstalter." />
 
     <x-ui.tabs label="Bereiche der Monetarisierung" class="mb-8">
         <x-ui.tab :href="route('admin.monetization.index')">Gebühren-Einstellungen</x-ui.tab>
@@ -53,6 +53,6 @@
     </form>
 
     <x-ui.alert tone="info" title="Verwendung der Rechnungsdaten" class="mt-8 max-w-form">
-        Diese Daten werden als Absender auf allen Rechnungen über Plattformgebühren an Organisatoren angezeigt. Die Bankverbindung ist für die Zahlung der Gebühren erforderlich.
+        Diese Daten werden als Absender auf allen Rechnungen über Plattformgebühren an Veranstalter angezeigt. Die Bankverbindung ist für die Zahlung der Gebühren erforderlich.
     </x-ui.alert>
 </x-layouts.app>

@@ -2,11 +2,10 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\Attributes\Test;
-use App\Models\User;
 use App\Models\EventCategory;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class NewsletterSubscriptionTest extends TestCase
@@ -244,7 +243,58 @@ class NewsletterSubscriptionTest extends TestCase
 
         $this->assertEquals(0, $user->fresh()->newsletter_subscribed);
     }
+
+    #[Test]
+    public function signed_unsubscribe_page_is_shown_without_login()
+    {
+        $user = User::factory()->create(['newsletter_subscribed' => true]);
+
+        $url = \Illuminate\Support\Facades\URL::signedRoute('newsletter.unsubscribe.show', ['user' => $user->id]);
+
+        $this->get($url)
+            ->assertOk()
+            ->assertSee('Vom Newsletter abmelden');
+
+        $this->assertEquals(1, $user->fresh()->newsletter_subscribed);
+    }
+
+    #[Test]
+    public function signed_unsubscribe_post_unsubscribes_and_confirms()
+    {
+        $user = User::factory()->create(['newsletter_subscribed' => true]);
+
+        $url = \Illuminate\Support\Facades\URL::signedRoute('newsletter.unsubscribe.signed', ['user' => $user->id]);
+
+        $this->post($url)
+            ->assertOk()
+            ->assertSee('Sie sind abgemeldet');
+
+        $this->assertEquals(0, $user->fresh()->newsletter_subscribed);
+    }
+
+    #[Test]
+    public function unsubscribe_with_invalid_signature_shows_friendly_403()
+    {
+        $user = User::factory()->create(['newsletter_subscribed' => true]);
+
+        $this->get(route('newsletter.unsubscribe.show', ['user' => $user->id]))
+            ->assertForbidden()
+            ->assertSee('Dieser Link ist ungültig');
+
+        $this->post(route('newsletter.unsubscribe.signed', ['user' => $user->id]))
+            ->assertForbidden();
+
+        $this->assertEquals(1, $user->fresh()->newsletter_subscribed);
+    }
+
+    #[Test]
+    public function newsletter_mail_links_to_signed_unsubscribe_page()
+    {
+        $user = User::factory()->create(['newsletter_subscribed' => true]);
+
+        $html = (new \App\Mail\NewsletterMail($user, collect(), collect(), collect()))->render();
+
+        $this->assertStringContainsString('newsletter/abmelden/'.$user->id, $html);
+        $this->assertStringContainsString('signature=', $html);
+    }
 }
-
-
-

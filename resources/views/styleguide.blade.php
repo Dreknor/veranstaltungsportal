@@ -503,7 +503,7 @@
                         sichtbar</span>
                 </div>
                 <x-ui.row-list>
-                    <x-ui.person-row name="Maria Muster" type="Organisator" href="#personen"
+                    <x-ui.person-row name="Maria Muster" type="Veranstalter" href="#personen"
                         bio="Lehrerin für Deutsch und Ethik, Fachberaterin für Schulentwicklung. Interessiert an Formaten, die Beziehung vor Stoff stellen und Kollegien stärken.">
                         <x-slot:meta>
                             <span class="text-ui font-medium tabular-nums">12 Veranstaltungen</span>

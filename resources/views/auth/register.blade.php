@@ -17,7 +17,7 @@
                         :description="__('Ich möchte Events besuchen')" checked x-model="userType" />
 
                     @if ($allowOrganizerRegistration)
-                        <x-ui.choice name="account_type" value="organizer" :title="__('Organisator')"
+                        <x-ui.choice name="account_type" value="organizer" :title="__('Veranstalter')"
                             :description="__('Ich möchte Events erstellen')" x-model="userType" />
                     @endif
                 </div>

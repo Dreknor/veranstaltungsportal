@@ -25,7 +25,7 @@ class UserRegistrationCancellationController extends Controller
         if ($registrationToken->isExpired()) {
             $registrationToken->delete();
             return view('user.registration-cancel-error', [
-                'message' => 'Dieser Link ist abgelaufen. Bitte kontaktieren Sie den Organisator.',
+                'message' => 'Dieser Link ist abgelaufen. Bitte kontaktieren Sie den Veranstalter.',
             ]);
         }
 

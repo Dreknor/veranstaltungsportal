@@ -88,7 +88,7 @@
                                 <form id="promote-{{ $user->id }}" action="{{ route('admin.users.promote-organizer', $user) }}" method="POST" class="hidden">@csrf</form>
                             @elseif ($user->hasRole('organizer') && !$user->hasRole('admin'))
                                 <form id="demote-{{ $user->id }}" action="{{ route('admin.users.demote-participant', $user) }}" method="POST"
-                                    onsubmit="return confirm('Organisator-Rechte wirklich entfernen?');" class="hidden">@csrf</form>
+                                    onsubmit="return confirm('Veranstalter-Rechte wirklich entfernen?');" class="hidden">@csrf</form>
                             @endif
                             <form id="toggle-admin-{{ $user->id }}" action="{{ route('admin.users.toggle-admin', $user) }}" method="POST" class="hidden">@csrf</form>
                             <form id="destroy-{{ $user->id }}" action="{{ route('admin.users.destroy', $user) }}" method="POST"

@@ -46,7 +46,7 @@ class ConnectionRequestNotification extends Notification implements ShouldQueue
             ->subject('Neue Verbindungsanfrage')
             ->greeting('Hallo ' . $notifiable->fullName() . '!')
             ->line($this->follower->fullName() . ' möchte sich mit Ihnen vernetzen.')
-            ->line('Vernetzen Sie sich mit anderen Teilnehmern und Organisatoren, um gemeinsam zu lernen und sich auszutauschen.')
+            ->line('Vernetzen Sie sich mit anderen Teilnehmern und Veranstalter, um gemeinsam zu lernen und sich auszutauschen.')
             ->action('Anfrage ansehen', url('/connections/requests'))
             ->line('Vielen Dank für Ihre Teilnahme am Bildungsportal!');
     }

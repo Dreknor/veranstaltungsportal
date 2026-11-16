@@ -133,7 +133,7 @@ class RegistrationTest extends TestCase
         $response = $this->get('/register');
 
         $response->assertStatus(200);
-        $response->assertSee('Organisator');
+        $response->assertSee('Veranstalter');
         $response->assertSee('Ich möchte Events erstellen');
     }
 
@@ -148,6 +148,6 @@ class RegistrationTest extends TestCase
         // Should only see participant option
         $response->assertSee('Teilnehmer');
         // Should not see organizer text
-        $response->assertDontSee('Organisator');
+        $response->assertDontSee('Veranstalter');
     }
 }

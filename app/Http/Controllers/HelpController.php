@@ -273,7 +273,7 @@ class HelpController extends Controller
                 [
                     'category' => 'organizer',
                     'slug' => 'getting-started',
-                    'title' => 'Erste Schritte als Organisator',
+                    'title' => 'Erste Schritte als Veranstalter',
                     'description' => 'Organisation anlegen, Rechnungs- und Bankdaten, Team einladen, erstes Event erstellen',
                     'keywords' => ['organisator', 'organisation', 'rechnung', 'bank', 'team', 'event erstellen'],
                 ],

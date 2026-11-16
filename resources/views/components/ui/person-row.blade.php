@@ -3,7 +3,7 @@
     Avatar (56 px) | Typ, Name, Bio, Standard-Slot | meta | aside | action.
     In <x-ui.row-list> setzen.
 
-    user:      App\Models\User – liefert Avatar, Name, Typ ("Organisator") und Bio.
+    user:      App\Models\User – liefert Avatar, Name, Typ ("Veranstalter") und Bio.
                Alternativ einzeln: name, type, bio, avatar (Foto-URL), initials.
     href:      Ziel des Namens. Standard bei user: Profil (users.show). false: Name ohne Link.
     bio-lines: Zeilen der Bio, danach abgeschnitten (2 | 3). show-bio="false" blendet sie aus.

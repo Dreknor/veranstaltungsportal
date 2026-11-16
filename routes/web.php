@@ -1,14 +1,12 @@
 <?php
 
-use App\Http\Controllers\EventController;
+use App\Http\Controllers\AtomFeedController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\Organizer;
 use App\Http\Controllers\Settings;
-use App\Http\Controllers\FeaturedEventController;
-use App\Http\Controllers\UserRegistrationCancellationController;
-use App\Http\Controllers\AtomFeedController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -85,7 +83,6 @@ Route::post('/events/{slug}/access', [EventController::class, 'verifyAccess'])
     ->middleware(['recaptcha:access_code', 'throttle:10,1'])
     ->name('events.verify-access');
 
-
 // Waitlist Routes
 Route::post('/events/{event}/waitlist/join', [\App\Http\Controllers\WaitlistController::class, 'join'])
     ->middleware('throttle:10,1')
@@ -138,7 +135,6 @@ Route::post('/bookings/{bookingNumber}/create-account', [BookingController::clas
 Route::post('/bookings/{bookingNumber}/link-account', [BookingController::class, 'linkAccount'])
     ->middleware('throttle:5,1')
     ->name('bookings.link-account');
-
 
 // PayPal Routes
 Route::get('/paypal/success/{booking}', [\App\Http\Controllers\PayPalController::class, 'success'])->name('paypal.success');
@@ -323,7 +319,6 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::post('/events/{event}/certificates/{booking}/email', [Organizer\CertificateController::class, 'sendEmail'])->name('events.certificates.email');
         Route::delete('/events/{event}/certificates/{booking}', [Organizer\CertificateController::class, 'destroy'])->name('events.certificates.destroy');
 
-
         // Bank & Billing
         Route::get('/bank-account', [Organizer\BankAccountController::class, 'index'])->name('bank-account.index');
         Route::put('/bank-account', [Organizer\BankAccountController::class, 'update'])->name('bank-account.update');
@@ -389,6 +384,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('newsletter/unsubscribe', [\App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
     Route::post('newsletter/interests', [\App\Http\Controllers\NewsletterController::class, 'updateInterests'])->name('newsletter.interests');
 });
+// Newsletter-Abmeldung per signiertem Link aus der E-Mail (ohne Anmeldung)
+Route::get('newsletter/abmelden/{user}', [\App\Http\Controllers\NewsletterController::class, 'showUnsubscribe'])->name('newsletter.unsubscribe.show');
+Route::post('newsletter/abmelden/{user}', [\App\Http\Controllers\NewsletterController::class, 'unsubscribeSigned'])->name('newsletter.unsubscribe.signed');
 
 // Styleguide: Prüfvorlage des Design-Systems (docs/design/BAUSTEINE.md), nur für Admins
 Route::middleware(['auth', 'verified', 'admin'])
@@ -416,21 +414,21 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
 
     // Role & Permission Management
     // WICHTIG: statische Segmente (matrix, create) vor {role} damit Laravel sie nicht als Parameter interpretiert
-    Route::get('/roles',                [\App\Http\Controllers\Admin\RoleManagementController::class, 'index'])->name('roles.index');
-    Route::get('/roles/matrix',         [\App\Http\Controllers\Admin\RoleManagementController::class, 'matrix'])->name('roles.matrix');
-    Route::get('/roles/create',         [\App\Http\Controllers\Admin\RoleManagementController::class, 'create'])->name('roles.create');
-    Route::post('/roles',               [\App\Http\Controllers\Admin\RoleManagementController::class, 'store'])->name('roles.store');
-    Route::get('/roles/{role}/edit',    [\App\Http\Controllers\Admin\RoleManagementController::class, 'edit'])->name('roles.edit');
-    Route::put('/roles/{role}',         [\App\Http\Controllers\Admin\RoleManagementController::class, 'update'])->name('roles.update');
-    Route::delete('/roles/{role}',      [\App\Http\Controllers\Admin\RoleManagementController::class, 'destroy'])->name('roles.destroy');
+    Route::get('/roles', [\App\Http\Controllers\Admin\RoleManagementController::class, 'index'])->name('roles.index');
+    Route::get('/roles/matrix', [\App\Http\Controllers\Admin\RoleManagementController::class, 'matrix'])->name('roles.matrix');
+    Route::get('/roles/create', [\App\Http\Controllers\Admin\RoleManagementController::class, 'create'])->name('roles.create');
+    Route::post('/roles', [\App\Http\Controllers\Admin\RoleManagementController::class, 'store'])->name('roles.store');
+    Route::get('/roles/{role}/edit', [\App\Http\Controllers\Admin\RoleManagementController::class, 'edit'])->name('roles.edit');
+    Route::put('/roles/{role}', [\App\Http\Controllers\Admin\RoleManagementController::class, 'update'])->name('roles.update');
+    Route::delete('/roles/{role}', [\App\Http\Controllers\Admin\RoleManagementController::class, 'destroy'])->name('roles.destroy');
 
     // Permission Management (eigenständige Routen)
-    Route::get('/permissions',                       [\App\Http\Controllers\Admin\PermissionManagementController::class, 'index'])->name('permissions.index');
-    Route::get('/permissions/create',                [\App\Http\Controllers\Admin\PermissionManagementController::class, 'create'])->name('permissions.create');
-    Route::post('/permissions',                      [\App\Http\Controllers\Admin\PermissionManagementController::class, 'store'])->name('permissions.store');
-    Route::get('/permissions/{permission}/edit',     [\App\Http\Controllers\Admin\PermissionManagementController::class, 'edit'])->name('permissions.edit');
-    Route::put('/permissions/{permission}',          [\App\Http\Controllers\Admin\PermissionManagementController::class, 'update'])->name('permissions.update');
-    Route::delete('/permissions/{permission}',       [\App\Http\Controllers\Admin\PermissionManagementController::class, 'destroy'])->name('permissions.destroy');
+    Route::get('/permissions', [\App\Http\Controllers\Admin\PermissionManagementController::class, 'index'])->name('permissions.index');
+    Route::get('/permissions/create', [\App\Http\Controllers\Admin\PermissionManagementController::class, 'create'])->name('permissions.create');
+    Route::post('/permissions', [\App\Http\Controllers\Admin\PermissionManagementController::class, 'store'])->name('permissions.store');
+    Route::get('/permissions/{permission}/edit', [\App\Http\Controllers\Admin\PermissionManagementController::class, 'edit'])->name('permissions.edit');
+    Route::put('/permissions/{permission}', [\App\Http\Controllers\Admin\PermissionManagementController::class, 'update'])->name('permissions.update');
+    Route::delete('/permissions/{permission}', [\App\Http\Controllers\Admin\PermissionManagementController::class, 'destroy'])->name('permissions.destroy');
 
     // Event Management
     Route::get('/events', [\App\Http\Controllers\Admin\EventManagementController::class, 'index'])->name('events.index');
@@ -594,7 +592,6 @@ Route::middleware(['auth', 'verified'])->prefix('data-privacy')->name('data-priv
     Route::put('/settings', [\App\Http\Controllers\DataPrivacyController::class, 'updateSettings'])->name('settings.update');
 });
 
-
 require __DIR__.'/auth.php';
 
 // Notifications (für eingeloggte Benutzer)
@@ -607,4 +604,3 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications/read/all', [\App\Http\Controllers\NotificationController::class, 'deleteRead'])->name('notifications.delete-read');
 });
-

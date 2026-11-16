@@ -1,5 +1,5 @@
 <x-layouts.app title="Nutzer suchen">
-    <x-ui.page-header title="Nutzer suchen" subtitle="Finden Sie Pädagogen und Organisatoren"
+    <x-ui.page-header title="Nutzer suchen" subtitle="Finden Sie Pädagogen und Veranstalter"
         :back-href="route('connections.index')" back-label="Zurück zu Verbindungen" />
 
     <!-- Search Form -->
