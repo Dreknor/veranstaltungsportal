@@ -81,9 +81,8 @@
                         </div>
                     </div>
 
-                    <div x-show="state === 'on'" x-cloak class="mt-4 flex flex-col items-start gap-2">
-                        <x-ui.button variant="secondary" size="sm" x-on:click="sendTest()"
-                            x-bind:disabled="busy">
+                    <div x-show="state === 'on'" x-cloak class="mt-2 flex flex-col items-start gap-1">
+                        <x-ui.button variant="link" x-on:click="sendTest()" x-bind:disabled="busy">
                             Testnachricht senden
                         </x-ui.button>
                         <p x-show="testMessage" x-text="testMessage" x-cloak role="status"
