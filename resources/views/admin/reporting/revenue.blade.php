@@ -1,9 +1,10 @@
 <x-layouts.app title="Umsatz-Report" :header="false">
-    <x-ui.page-header title="Umsatz-Report" subtitle="Finanzielle Übersicht und Umsatzanalyse"
-        :back-href="route('admin.reporting.index', ['period' => $period])" back-label="Zurück zur Übersicht" />
+    <x-ui.page-header title="Umsatz-Report" subtitle="Finanzielle Übersicht und Umsatzanalyse" :back-href="route('admin.reporting.index', ['period' => $period])"
+        back-label="Zurück zur Übersicht" />
 
     <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
-        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()" class="w-full max-w-64">
+        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()"
+            class="w-full max-w-64">
             <option value="7days" @selected($period === '7days')>Letzte 7 Tage</option>
             <option value="30days" @selected($period === '30days')>Letzte 30 Tage</option>
             <option value="90days" @selected($period === '90days')>Letzte 90 Tage</option>
@@ -14,7 +15,8 @@
     </form>
 
     <div class="mb-12">
-        <x-ui.stat label="Gesamte Platform-Gebühren (Featured-Veranstaltungen)" :value="\App\Support\Ui::money($data['platform_fees'])" class="p-6" />
+        <x-ui.stat label="Gesamte Plattformgebühren (hervorgehobene Veranstaltungen)" :value="\App\Support\Ui::money($data['platform_fees'])"
+            class="p-6" />
     </div>
 
     <div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
@@ -33,11 +35,14 @@
                             $paymentTone = match ($status->payment_status) {
                                 'paid' => 'success',
                                 'pending' => 'warning',
+                                'refunded' => 'neutral',
                                 default => 'danger',
                             };
                         @endphp
                         <tr>
-                            <th scope="row"><x-ui.status :tone="$paymentTone">{{ ucfirst($status->payment_status) }}</x-ui.status></th>
+                            <th scope="row"><x-ui.status
+                                    :tone="$paymentTone">{{ \App\Support\AdminLabels::paymentStatus($status->payment_status) }}</x-ui.status>
+                            </th>
                             <td class="num">{{ number_format($status->count) }}</td>
                             <td class="num">{{ \App\Support\Ui::money($status->total) }}</td>
                         </tr>
@@ -64,7 +69,8 @@
                 <tbody>
                     @forelse ($data['payment_methods'] as $method)
                         <tr>
-                            <th scope="row">{{ ucfirst($method->payment_method ?? 'Nicht angegeben') }}</th>
+                            <th scope="row">{{ \App\Support\AdminLabels::paymentMethod($method->payment_method) }}
+                            </th>
                             <td class="num">{{ number_format($method->count) }}</td>
                             <td class="num">{{ \App\Support\Ui::money($method->total) }}</td>
                         </tr>

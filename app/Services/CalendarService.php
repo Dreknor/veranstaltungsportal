@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\Booking;
+use App\Support\Ui;
 use Illuminate\Support\Str;
 
 class CalendarService
@@ -75,7 +76,7 @@ class CalendarService
     {
         $uid = $this->generateUid($event->id, 'event');
         $summary = $this->escapeString($event->title);
-        $description = $this->escapeString(strip_tags($event->description));
+        $description = $this->escapeString(Ui::plainText($event->description, null, true));
         $location = $this->escapeString($this->formatLocation($event));
         $url = route('events.show', $event->slug);
 
@@ -121,7 +122,7 @@ class CalendarService
         $uid = $this->generateUid($booking->id, 'booking');
         $summary = $this->escapeString($event->title . ' - ' . $booking->booking_number);
         $description = $this->escapeString(
-            strip_tags($event->description) . "\n\n" .
+            Ui::plainText($event->description, null, true) . "\n\n" .
             "Buchungsnummer: {$booking->booking_number}\n" .
             "Teilnehmer: {$booking->customer_name}"
         );
@@ -165,7 +166,7 @@ class CalendarService
             $event->venue_name,
             $event->venue_address,
             $event->venue_postal_code . ' ' . $event->venue_city,
-            $event->venue_country,
+            Ui::country($event->venue_country),
         ]);
 
         return implode(', ', $parts);
@@ -228,7 +229,7 @@ class CalendarService
             'action' => 'TEMPLATE',
             'text' => $event->title,
             'dates' => $event->start_date->copy()->utc()->format('Ymd\THis\Z') . '/' . $event->end_date->copy()->utc()->format('Ymd\THis\Z'),
-            'details' => strip_tags($event->description),
+            'details' => Ui::plainText($event->description, null, true),
             'location' => $this->formatLocation($event),
             'ctz' => 'Europe/Berlin',
         ];
@@ -250,7 +251,7 @@ class CalendarService
             'subject' => $event->title,
             'startdt' => $event->start_date->toIso8601String(),
             'enddt' => $event->end_date->toIso8601String(),
-            'body' => strip_tags($event->description),
+            'body' => Ui::plainText($event->description, null, true),
             'location' => $this->formatLocation($event),
         ];
 
@@ -320,7 +321,7 @@ class CalendarService
         $desc .= "Buchungsnummer: {$booking->booking_number}\n";
         $desc .= "Tickets: {$booking->items->sum('quantity')}\n";
         $desc .= "Status: {$booking->status}\n\n";
-        $desc .= strip_tags($booking->event->description);
+        $desc .= Ui::plainText($booking->event->description, null, true);
 
         return $this->formatDescription($desc);
     }

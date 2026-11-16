@@ -2,11 +2,7 @@
     <x-ui.page-header title="Rechnungsnummern für Plattformgebühren"
         subtitle="Konfigurieren Sie das Format und die Nummerierung für Rechnungen, die von der Plattform an Veranstalter gestellt werden." />
 
-    <x-ui.tabs label="Bereiche der Monetarisierung" class="mb-8">
-        <x-ui.tab :href="route('admin.monetization.index')">Gebühren-Einstellungen</x-ui.tab>
-        <x-ui.tab :href="route('admin.monetization.billing-data')">Plattform-Rechnungsdaten</x-ui.tab>
-        <x-ui.tab :href="route('admin.settings.invoice.index')" active>Rechnungsnummern</x-ui.tab>
-    </x-ui.tabs>
+    @include('admin.monetization._tabs', ['active' => 'numbers'])
 
     <div class="max-w-form">
         <x-ui.alert tone="info" class="mb-8">
@@ -24,7 +20,7 @@
                 <dl class="m-0 grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-3 text-small">
                     @foreach ($placeholders as $placeholder => $description)
                         <div class="flex flex-col gap-0.5">
-                            <dt><code class="font-mono text-small font-medium text-ink">{{ $placeholder }}</code></dt>
+                            <dt><code class="text-small font-medium text-ink">{{ $placeholder }}</code></dt>
                             <dd class="m-0 text-muted">{{ $description }}</dd>
                         </div>
                     @endforeach
@@ -36,12 +32,13 @@
                 class="border-t border-line py-8">
                 <div class="flex flex-col gap-y-5">
                     <div>
-                        <x-ui.label for="invoice_number_format_platform_fee" required>Format für Rechnungsnummern</x-ui.label>
+                        <x-ui.label for="invoice_number_format_platform_fee" required>Format für
+                            Rechnungsnummern</x-ui.label>
                         <x-ui.input name="invoice_number_format_platform_fee" id="invoice_number_format_platform_fee"
-                            :value="$settings['invoice_number_format_platform_fee']" class="font-mono" required
-                            aria-describedby="invoice_number_format_platform_fee-hint" />
+                            :value="$settings['invoice_number_format_platform_fee']" required aria-describedby="invoice_number_format_platform_fee-hint" />
                         <x-ui.hint id="invoice_number_format_platform_fee-hint">
-                            Beispiel: PF-{YEAR}-{NUMBER} wird zu <span id="preview-platform" class="font-mono font-semibold text-ink">...</span>
+                            Beispiel: PF-{YEAR}-{NUMBER} wird zu <span id="preview-platform"
+                                class="font-semibold text-ink">...</span>
                         </x-ui.hint>
                         <x-ui.field-error name="invoice_number_format_platform_fee" />
                     </div>
@@ -99,15 +96,15 @@
                     .then(data => {
                         if (data.success) {
                             previewSpan.textContent = data.preview;
-                            previewSpan.className = 'font-mono font-semibold text-success';
+                            previewSpan.className = 'font-semibold text-success';
                         } else {
                             previewSpan.textContent = 'Ungültig!';
-                            previewSpan.className = 'font-mono font-semibold text-danger';
+                            previewSpan.className = 'font-semibold text-danger';
                         }
                     })
                     .catch(() => {
                         previewSpan.textContent = 'Fehler';
-                        previewSpan.className = 'font-mono font-semibold text-danger';
+                        previewSpan.className = 'font-semibold text-danger';
                     });
             }
 

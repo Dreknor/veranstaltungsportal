@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Models\Booking;
 use App\Models\Event;
 use App\Models\User;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,7 +17,7 @@ use Illuminate\Notifications\Notification;
  */
 class EventUpdatedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     protected $event;
     protected $booking;
@@ -39,7 +40,7 @@ class EventUpdatedNotification extends Notification implements ShouldQueue
     {
         // Gäste erhalten die Information ausschließlich per E-Mail
         if (!$notifiable instanceof User) {
-            return ['mail'];
+            return $this->withWebPush(['mail'], $notifiable);
         }
 
         $channels = ['database'];
@@ -50,7 +51,7 @@ class EventUpdatedNotification extends Notification implements ShouldQueue
             $channels[] = 'mail';
         }
 
-        return $channels;
+        return $this->withWebPush($channels, $notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage

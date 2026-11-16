@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notification;
 
 class BookingStatusChangedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     protected $booking;
     protected $oldStatus;
@@ -30,11 +31,11 @@ class BookingStatusChangedNotification extends Notification implements ShouldQue
     public function via($notifiable)
     {
         if ($this->channels !== null) {
-            return $this->channels;
+            return $this->withWebPush($this->channels, $notifiable);
         }
 
         // Gäste (On-Demand) haben keinen In-App-Bereich
-        return $notifiable instanceof \App\Models\User ? ['database'] : [];
+        return $this->withWebPush($notifiable instanceof \App\Models\User ? ['database'] : [], $notifiable);
     }
 
     public function toMail($notifiable)

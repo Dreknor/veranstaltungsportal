@@ -11,7 +11,7 @@
         <x-ui.stat label="Registrierte Abonnenten" :value="number_format($stats['total_subscribers'])" />
         <x-ui.stat label="Gast-Abonnenten" :value="number_format($stats['guest_subscribers'])" />
         <x-ui.stat label="Gesamt Abonnenten" :value="number_format($stats['total_subscribers'] + $stats['guest_subscribers'])" />
-        <x-ui.stat label="Abonnement-Rate" :value="$stats['subscription_rate'] . '%'" />
+        <x-ui.stat label="Abonnement-Rate" :value="\App\Support\Ui::percent($stats['subscription_rate'])" />
     </div>
 
     <x-ui.section title="Aktionen" class="mb-12">
@@ -24,7 +24,7 @@
             </x-ui.button>
             <x-ui.button variant="secondary" :href="route('admin.newsletter.export')">
                 <x-slot:icon><x-icon.download /></x-slot:icon>
-                Export als CSV
+                CSV exportieren
             </x-ui.button>
         </div>
     </x-ui.section>
@@ -43,7 +43,8 @@
                     @foreach ($upcomingEvents as $event)
                         <tr>
                             <th scope="row">{{ $event->title }}</th>
-                            <td class="tabular-nums whitespace-nowrap">{{ $event->start_date->format('d.m.Y H:i') }} Uhr</td>
+                            <td class="tabular-nums whitespace-nowrap">{{ $event->start_date->format('d.m.Y H:i') }} Uhr
+                            </td>
                             <td>{{ $event->isOnline() ? 'Online' : $event->venue_city }}</td>
                         </tr>
                     @endforeach

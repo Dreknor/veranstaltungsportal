@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,13 +11,13 @@ use Illuminate\Notifications\Notification;
 
 class BookingApprovalRequiredNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     public function __construct(public Booking $booking) {}
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->withWebPush(['mail', 'database'], $notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage

@@ -30,7 +30,9 @@ class AuditLogController extends Controller
 
         // Filter by model type
         if ($request->filled('auditable_type')) {
-            $query->where('auditable_type', $request->auditable_type);
+            // Der Filter kennt nur den Klassennamen ohne Namensraum
+            $query->whereIn('auditable_type', AuditLog::whereNotNull('auditable_type')->distinct()->pluck('auditable_type')
+                ->filter(fn ($type) => class_basename($type) === class_basename($request->auditable_type))->all());
         }
 
         // Filter by date range

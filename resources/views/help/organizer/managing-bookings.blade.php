@@ -1,5 +1,5 @@
-<x-help.article title="Buchungen & Teilnehmer verwalten"
-    subtitle="So behalten Sie den Überblick über Buchungen, Zahlungen und Check-Ins." :back-href="route('help.category', 'organizer')"
+<x-help.article title="Buchungen & Teilnehmende verwalten"
+    subtitle="So behalten Sie den Überblick über Buchungen, Zahlungen und Check-ins." :back-href="route('help.category', 'organizer')"
     back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Der Ablauf einer Buchung</h2>
@@ -34,15 +34,15 @@
     </section>
 
     <section>
-        <h2>3. Check-In am Veranstaltungstag</h2>
+        <h2>3. Check-in am Veranstaltungstag</h2>
         <p>Nutzen Sie den QR-Code-Scanner:</p>
         <ul>
-            <li>Gehen Sie zu „Check-In" für die Veranstaltung</li>
-            <li>Scannen Sie die Tickets der Teilnehmer (QR-Code auf PDF-Ticket)</li>
+            <li>Gehen Sie zu „Check-in“ für die Veranstaltung</li>
+            <li>Scannen Sie die Tickets der Teilnehmende (QR-Code auf PDF-Ticket)</li>
             <li>Alternativ: Manuelle Suche nach Name/Buchungsnummer</li>
-            <li>Check-In kann rückgängig gemacht werden (falls Fehler)</li>
+            <li>Check-in kann rückgängig gemacht werden (falls Fehler)</li>
         </ul>
-        <p>Die Check-In-Statistik zeigt live, wie viele Teilnehmer bereits anwesend sind.</p>
+        <p>Die Check-in-Statistik zeigt live, wie viele Teilnehmende bereits anwesend sind.</p>
     </section>
 
     <section>
@@ -51,25 +51,25 @@
         <ul>
             <li>Buchungsnummer, Name, E-Mail, Telefon</li>
             <li>Ticketart, Anzahl, Gesamtpreis</li>
-            <li>Zahlungs- und Check-In-Status</li>
+            <li>Zahlungs- und Check-in-Status</li>
             <li>Buchungsdatum</li>
         </ul>
-        <p>Nutzen Sie die Filter, um z.B. nur bezahlte oder eingecheckte Teilnehmer zu exportieren.</p>
+        <p>Nutzen Sie die Filter, um z. B. nur bezahlte oder eingecheckte Teilnehmende zu exportieren.</p>
     </section>
 
     <section>
-        <h2>5. Kommunikation mit Teilnehmern</h2>
-        <p>Kontaktieren Sie Teilnehmer über:</p>
+        <h2>5. Kommunikation mit Teilnehmenden</h2>
+        <p>Kontaktieren Sie Teilnehmende über:</p>
         <ul>
-            <li>„Teilnehmer kontaktieren" › E-Mail an alle oder gefilterte Gruppe</li>
+            <li>„Teilnehmende kontaktieren“ › E-Mail an alle oder gefilterte Gruppe</li>
             <li>Automatische Erinnerungs-E-Mails (24h und 3h vor der Veranstaltung)</li>
             <li>Veranstaltungs-Update-Benachrichtigungen bei Änderungen</li>
         </ul>
     </section>
 
-    <x-ui.alert tone="info" title="Best Practice">Checken Sie Teilnehmer frühzeitig ein, um Wartezeiten
-        zu vermeiden. Nutzen Sie Bulk-Check-In für Gruppen.</x-ui.alert>
+    <x-ui.alert tone="info" title="Empfehlung">Checken Sie Teilnehmende frühzeitig ein, um Wartezeiten
+        zu vermeiden. Nutzen Sie Sammel-Check-in für Gruppen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Tipp">Exportieren Sie die Check-In-Liste nach der Veranstaltung für Ihre Statistik
+    <x-ui.alert tone="info" title="Tipp">Exportieren Sie die Check-in-Liste nach der Veranstaltung für Ihre Statistik
         und Teilnahmebestätigungen.</x-ui.alert>
 </x-help.article>

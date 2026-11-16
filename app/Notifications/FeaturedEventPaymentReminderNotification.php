@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\FeaturedEventFee;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notification;
 
 class FeaturedEventPaymentReminderNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     public function __construct(
         public FeaturedEventFee $fee
@@ -18,7 +19,7 @@ class FeaturedEventPaymentReminderNotification extends Notification implements S
 
     public function via($notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->withWebPush(['mail', 'database'], $notifiable);
     }
 
     public function toMail($notifiable): MailMessage

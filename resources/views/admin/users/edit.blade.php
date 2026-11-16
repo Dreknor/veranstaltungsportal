@@ -1,6 +1,5 @@
 <x-layouts.app title="Benutzer bearbeiten" :header="false">
-    <x-ui.page-header title="Benutzer bearbeiten" :subtitle="$user->name . ' · ' . $user->email"
-        :back-href="route('admin.users.index')" back-label="Zur Benutzerliste" />
+    <x-ui.page-header title="Benutzer bearbeiten" :subtitle="$user->name . ' · ' . $user->email" :back-href="route('admin.users.index')" back-label="Zur Benutzerliste" />
 
     <div class="grid items-start gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,640px)_minmax(0,368px)] lg:justify-between">
 
@@ -21,7 +20,9 @@
                 </div>
 
                 <x-ui.field label="E-Mail-Adresse" name="email" type="email" :value="$user->email" required
-                    :hint="$user->hasVerifiedEmail() ? 'Verifiziert am ' . $user->email_verified_at->format('d.m.Y H:i') . ' Uhr' : 'Noch nicht verifiziert'" />
+                    :hint="$user->hasVerifiedEmail()
+                        ? 'Verifiziert am ' . $user->email_verified_at->format('d.m.Y H:i') . ' Uhr'
+                        : 'Noch nicht verifiziert'" />
 
                 <x-ui.field label="Telefon" name="phone" :value="$user->phone" optional />
 
@@ -29,9 +30,9 @@
                     <x-ui.label as="legend">Rollen</x-ui.label>
                     @foreach ($roles as $role)
                         @php $lockedAdmin = auth()->id() === $user->id && $role->name === 'admin'; @endphp
-                        <x-ui.checkbox name="roles[]" :value="$role->name" :checked="in_array($role->name, $userRoles)"
-                            :disabled="$lockedAdmin"
-                            :label="ucfirst($role->name) . ($lockedAdmin ? ' (kann nicht geändert werden)' : '')" />
+                        <x-ui.checkbox name="roles[]" :value="$role->name" :checked="in_array($role->name, $userRoles)" :disabled="$lockedAdmin"
+                            :label="\App\Support\AccessLabels::role($role->name) .
+                                ($lockedAdmin ? ' (kann nicht geändert werden)' : '')" />
                         @if ($lockedAdmin && in_array($role->name, $userRoles))
                             <input type="hidden" name="roles[]" value="admin">
                         @endif
@@ -67,7 +68,8 @@
                     <p class="mb-4 mt-0 text-small text-muted">Die E-Mail ist noch nicht verifiziert.</p>
                     <form action="{{ route('admin.users.verify-email', $user) }}" method="POST">
                         @csrf
-                        <x-ui.button type="submit" variant="secondary" full>E-Mail als verifiziert markieren</x-ui.button>
+                        <x-ui.button type="submit" variant="secondary" full>E-Mail als verifiziert
+                            markieren</x-ui.button>
                     </form>
                 @endif
             </section>
@@ -80,17 +82,19 @@
                         Setzen Sie direkt ein neues Passwort für diesen Benutzer. Der Benutzer wird ausgeloggt.
                     </p>
 
-                    <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" x-data="{ show: false }"
-                        class="flex flex-col gap-y-4">
+                    <form action="{{ route('admin.users.reset-password', $user) }}" method="POST"
+                        x-data="{ show: false }" class="flex flex-col gap-y-4">
                         @csrf
-                        <x-ui.field label="Neues Passwort" name="password" type="password" x-bind:type="show ? 'text' : 'password'"
-                            :old="false" required minlength="8" autocomplete="new-password" />
+                        <x-ui.field label="Neues Passwort" name="password" type="password"
+                            x-bind:type="show ? 'text' : 'password'" :old="false" required minlength="8"
+                            autocomplete="new-password" />
                         <x-ui.field label="Passwort bestätigen" name="password_confirmation" type="password"
                             x-bind:type="show ? 'text' : 'password'" :old="false" required minlength="8"
                             autocomplete="new-password" />
                         <x-ui.checkbox x-model="show" label="Passwort anzeigen" size="small" />
-                        <x-ui.button type="submit" variant="danger" full
-                            onclick="return confirm('Passwort wirklich zurücksetzen? Der Benutzer wird ausgeloggt.')">Passwort zurücksetzen</x-ui.button>
+                        <x-ui.button type="submit" variant="secondary" full
+                            onclick="return confirm('Passwort wirklich zurücksetzen? Der Benutzer wird ausgeloggt.')">Passwort
+                            zurücksetzen</x-ui.button>
                     </form>
                 @else
                     <x-ui.alert tone="info" size="small">

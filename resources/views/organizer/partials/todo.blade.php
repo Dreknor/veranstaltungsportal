@@ -25,7 +25,8 @@
 
         @if ($todo['waiting'] > 0)
             <p class="mt-4 mb-0 text-small text-muted">
-                {{ $todo['waiting'] }} Platz/Plätze auf Wartelisten angefragt – bei Stornierungen rücken Wartende
+                {{ trans_choice('{1} :count Platz|[0,*] :count Plätze', $todo['waiting']) }} auf Wartelisten angefragt –
+                bei Stornierungen rücken Wartende
                 automatisch nach.
             </p>
         @endif
@@ -35,7 +36,9 @@
                 @foreach ($todo['almostFull'] as $event)
                     <x-ui.alert tone="warning">
                         „{{ $event->title }}“ ist fast ausgebucht
-                        (<span class="tabular-nums">{{ $event->max_attendees - $event->availableTickets() }}/{{ $event->max_attendees }}</span>).
+                        (<span
+                            class="tabular-nums">{{ $event->max_attendees - $event->availableTickets() }}/{{ $event->max_attendees }}</span>)
+                        .
                         <a href="{{ route('organizer.events.edit', $event) }}">Kapazität prüfen</a>
                     </x-ui.alert>
                 @endforeach
@@ -45,19 +48,22 @@
 
     <x-ui.section title="Die nächsten 7 Tage" id="todo-soon-heading">
         @if ($todo['soon']->isEmpty())
-            <p class="m-0 border-t border-line pt-4 text-base text-muted">Keine Veranstaltungen in den nächsten 7 Tagen.</p>
+            <p class="m-0 border-t border-line pt-4 text-base text-muted">Keine Veranstaltungen in den nächsten 7 Tagen.
+            </p>
         @else
             <ul class="m-0 list-none p-0">
                 @foreach ($todo['soon'] as $row)
                     @php $event = $row['event']; @endphp
-                    <li class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-line py-3 last:border-b">
+                    <li
+                        class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-line py-3 last:border-b">
                         <div class="flex min-w-0 flex-[1_1_240px] flex-col gap-0.5">
                             <a href="{{ route('organizer.events.edit', $event) }}"
                                 class="text-base font-semibold text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
                             <span class="text-small text-muted tabular-nums">
                                 {{ $event->start_date->isToday() ? 'Heute' : ($event->start_date->isTomorrow() ? 'Morgen' : $event->start_date->translatedFormat('D, d.m.')) }},
                                 {{ $event->start_date->format('H:i') }} Uhr ·
-                                {{ $row['booked'] }}{{ $row['capacity'] ? '/' . $row['capacity'] : '' }} Plätze bestätigt
+                                {{ $row['booked'] }}{{ $row['capacity'] ? '/' . $row['capacity'] : '' }}
+                                {{ $row['booked'] === 1 ? 'Platz' : 'Plätze' }} bestätigt
                                 @if ($row['open'])
                                     · <span class="font-medium text-warning">{{ $row['open'] }} offen</span>
                                 @endif

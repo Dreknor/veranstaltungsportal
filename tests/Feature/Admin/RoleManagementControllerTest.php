@@ -92,7 +92,7 @@ class RoleManagementControllerTest extends TestCase
             ->post(route('admin.roles.store'), [
                 'name'        => 'content-editor',
                 'description' => 'Darf Inhalte bearbeiten',
-                'color'       => '#3b82f6',
+                'color'       => 'primary',
                 'permissions' => [],
             ]);
 
@@ -106,7 +106,7 @@ class RoleManagementControllerTest extends TestCase
         $response = $this->actingAs($this->admin)
             ->post(route('admin.roles.store'), [
                 'name'  => 'Invalid Name!', // Leerzeichen + Sonderzeichen → ungültig
-                'color' => '#3b82f6',
+                'color' => 'primary',
             ]);
 
         $response->assertSessionHasErrors('name');
@@ -118,13 +118,13 @@ class RoleManagementControllerTest extends TestCase
         $this->actingAs($this->admin)
             ->post(route('admin.roles.store'), [
                 'name'  => 'test-role',
-                'color' => '#6b7280',
+                'color' => 'neutral',
             ]);
 
         $response = $this->actingAs($this->admin)
             ->post(route('admin.roles.store'), [
                 'name'  => 'test-role',
-                'color' => '#6b7280',
+                'color' => 'neutral',
             ]);
 
         $response->assertSessionHasErrors('name');
@@ -141,7 +141,7 @@ class RoleManagementControllerTest extends TestCase
         $this->actingAs($this->admin)
             ->post(route('admin.roles.store'), [
                 'name'        => 'viewer-plus',
-                'color'       => '#6b7280',
+                'color'       => 'neutral',
                 'permissions' => ['view events'],
             ]);
 
@@ -176,14 +176,14 @@ class RoleManagementControllerTest extends TestCase
             ->put(route('admin.roles.update', $role), [
                 'name'        => 'custom-role',
                 'description' => 'Aktualisierte Beschreibung',
-                'color'       => '#ef4444',
+                'color'       => 'danger',
                 'permissions' => ['view events'],
             ]);
 
         $role->refresh();
         $this->assertTrue($role->hasPermissionTo('view events'));
         $this->assertEquals('Aktualisierte Beschreibung', $role->description);
-        $this->assertEquals('#ef4444', $role->color);
+        $this->assertEquals('danger', $role->color);
     }
 
     public function test_system_role_name_cannot_be_changed(): void
@@ -195,7 +195,7 @@ class RoleManagementControllerTest extends TestCase
             ->put(route('admin.roles.update', $systemRole), [
                 'name'        => 'renamed-user',
                 'description' => 'Neue Beschreibung',
-                'color'       => '#6b7280',
+                'color'       => 'neutral',
                 'permissions' => [],
             ]);
 
@@ -213,7 +213,7 @@ class RoleManagementControllerTest extends TestCase
             ->put(route('admin.roles.update', $adminRole), [
                 'name'        => 'admin',
                 'description' => 'Super Admin',
-                'color'       => '#ef4444',
+                'color'       => 'danger',
                 'permissions' => [], // Keine Permissions angegeben
             ]);
 
@@ -282,7 +282,7 @@ class RoleManagementControllerTest extends TestCase
             ->get(route('admin.roles.matrix'));
 
         $response->assertStatus(200);
-        $response->assertSee('view events');
+        $response->assertSee('Veranstaltungen ansehen');
         $response->assertSee('View-only'); // Anzeige mit großem Anfangsbuchstaben
     }
 
@@ -295,7 +295,7 @@ class RoleManagementControllerTest extends TestCase
         $this->actingAs($this->admin)
             ->post(route('admin.roles.store'), [
                 'name'  => 'auditable-role',
-                'color' => '#6b7280',
+                'color' => 'neutral',
             ]);
 
         $this->assertDatabaseHas('audit_logs', [

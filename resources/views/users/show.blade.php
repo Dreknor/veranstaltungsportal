@@ -74,10 +74,10 @@
             <x-ui.section title="Aktivität">
                 <ul class="m-0 flex list-none flex-col p-0 text-base text-ink">
                     @if ($stats['events_attended'] > 0)
-                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_attended'] }}</span> Veranstaltung(en) besucht</li>
+                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_attended'] }}</span> {{ $stats['events_attended'] === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} besucht</li>
                     @endif
                     @if ($user->isOrganizer() && $stats['events_organized'] > 0)
-                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_organized'] }}</span> Veranstaltung(en) organisiert</li>
+                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_organized'] }}</span> {{ $stats['events_organized'] === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} organisiert</li>
                     @endif
                     @if ($user->badges->isNotEmpty())
                         <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $user->badges->count() }}</span> Abzeichen verdient</li>

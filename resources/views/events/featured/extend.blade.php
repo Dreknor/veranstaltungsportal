@@ -1,6 +1,5 @@
-<x-layouts.app>
-    <x-ui.page-header title="Hervorhebung verlängern"
-        subtitle="Verlängern Sie die Hervorhebung Ihrer Veranstaltung."
+<x-layouts.app title="Hervorhebung verlängern">
+    <x-ui.page-header title="Hervorhebung verlängern" subtitle="Verlängern Sie die Hervorhebung Ihrer Veranstaltung."
         :back-href="route('organizer.events.edit', $event)" back-label="Zur Veranstaltung" />
 
     @if ($activeFee)
@@ -9,7 +8,8 @@
         </x-ui.alert>
     @endif
 
-    <form method="POST" action="{{ route('organizer.featured-events.process-extension', $event) }}" class="flex max-w-form flex-col gap-y-8">
+    <form method="POST" action="{{ route('organizer.featured-events.process-extension', $event) }}"
+        class="flex max-w-form flex-col gap-y-8">
         @csrf
         <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
@@ -25,14 +25,15 @@
                 <x-ui.choice name="duration_type" value="monthly" title="30 Tage" required>
                     <x-slot:aside>{{ \App\Support\Ui::money($pricing['monthly']['rate']) }}</x-slot:aside>
                 </x-ui.choice>
-                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Anzahl unten angeben" required />
+                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Anzahl unten angeben"
+                    required />
             </div>
             <x-ui.field-error name="duration_type" />
         </fieldset>
 
         <x-ui.field label="Eigene Tage" name="custom_days" type="number" optional min="1"
-            max="{{ config('monetization.featured_event_max_duration_days') }}"
-            hint="Nur bei der Dauer „Individuell“." class="max-w-80" />
+            max="{{ config('monetization.featured_event_max_duration_days') }}" hint="Nur bei der Dauer „Individuell“."
+            class="max-w-80" />
 
         <div>
             <x-ui.button type="submit">Verlängerung erstellen</x-ui.button>

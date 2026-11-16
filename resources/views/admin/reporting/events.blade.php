@@ -3,7 +3,8 @@
         :back-href="route('admin.reporting.index', ['period' => $period])" back-label="Zurück zur Übersicht" />
 
     <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
-        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()" class="w-full max-w-64">
+        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()"
+            class="w-full max-w-64">
             <option value="7days" @selected($period === '7days')>Letzte 7 Tage</option>
             <option value="30days" @selected($period === '30days')>Letzte 30 Tage</option>
             <option value="90days" @selected($period === '90days')>Letzte 90 Tage</option>
@@ -19,7 +20,7 @@
             <dl class="m-0 flex flex-col gap-1">
                 @foreach ($data['events_by_type'] as $type)
                     <div class="flex justify-between gap-4">
-                        <dt>{{ ucfirst($type->event_type) }}</dt>
+                        <dt>{{ \App\Support\AdminLabels::eventType($type->event_type) }}</dt>
                         <dd class="m-0 font-semibold tabular-nums">{{ $type->count }}</dd>
                     </div>
                 @endforeach
@@ -38,7 +39,8 @@
             </dl>
         </x-ui.box>
 
-        <x-ui.stat label="Durchschnittliche Kapazität" :value="number_format($data['average_capacity'], 0)" sub="Teilnehmer pro Veranstaltung" class="p-6" />
+        <x-ui.stat label="Durchschnittliche Kapazität" :value="number_format($data['average_capacity'], 0)" sub="Teilnehmer pro Veranstaltung"
+            class="p-6" />
     </div>
 
     <x-ui.section title="Veranstaltungen nach Kategorie">

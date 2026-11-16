@@ -378,7 +378,7 @@ test('Dashboard zeigt offene Aufgaben', function () {
         ->withSession(['current_organization_id' => $organization->id])
         ->get(route('organizer.dashboard'))
         ->assertOk()
-        ->assertSee('warten auf Ihre Freigabe')
+        ->assertSee('wartet auf Ihre Freigabe')
         ->assertSee('noch nicht fakturiert');
 });
 

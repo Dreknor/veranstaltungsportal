@@ -134,6 +134,25 @@ class Organization extends Model
     }
 
     /**
+     * Deutsche Anzeigenamen der Rollen in der Organisation (Schlüssel = Wert in organization_user.role).
+     *
+     * @var array<string, string>
+     */
+    public const ROLE_LABELS = [
+        'owner' => 'Inhaber',
+        'admin' => 'Administrator',
+        'member' => 'Mitglied',
+    ];
+
+    /**
+     * Anzeigename einer Rolle ("owner" → "Inhaber"); unbekannte Schlüssel kommen unverändert zurück.
+     */
+    public static function roleLabel(?string $role): string
+    {
+        return self::ROLE_LABELS[$role ?? ''] ?? (string) $role;
+    }
+
+    /**
      * Organization owners
      */
     public function owners(): BelongsToMany
@@ -181,7 +200,6 @@ class Organization extends Model
     {
         return $this->hasMany(Event::class);
     }
-
 
     /**
      * Get all bookings for this organization's events
@@ -303,7 +321,7 @@ class Organization extends Model
     public function logoUrl(): ?string
     {
         if ($this->logo) {
-            return asset('storage/' . $this->logo);
+            return asset('storage/'.$this->logo);
         }
 
         return null;
@@ -316,7 +334,7 @@ class Organization extends Model
     {
         return Str::of($this->name)
             ->explode(' ')
-            ->map(fn($word) => Str::upper(Str::substr($word, 0, 1)))
+            ->map(fn ($word) => Str::upper(Str::substr($word, 0, 1)))
             ->take(2)
             ->implode('');
     }
@@ -327,7 +345,7 @@ class Organization extends Model
     public function hasPayPalConfigured(): bool
     {
         // Check if PayPal is enabled
-        if (!$this->paypal_enabled) {
+        if (! $this->paypal_enabled) {
             return false;
         }
 
@@ -349,6 +367,7 @@ class Organization extends Model
             \Log::warning('PayPal configuration error: Client ID and Secret are identical', [
                 'organization_id' => $this->id,
             ]);
+
             return false;
         }
 
@@ -360,7 +379,7 @@ class Organization extends Model
      */
     public function getPayPalCredentials(): ?array
     {
-        if (!$this->hasPayPalConfigured()) {
+        if (! $this->hasPayPalConfigured()) {
             return null;
         }
 

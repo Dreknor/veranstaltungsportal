@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Mail\EventReminderMail;
 use App\Models\Booking;
 use App\Models\Event;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +13,7 @@ use Illuminate\Notifications\Notification;
 
 class EventReminderNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     public function __construct(
         protected Event $event,
@@ -30,7 +31,7 @@ class EventReminderNotification extends Notification implements ShouldQueue
             $channels[] = 'mail';
         }
 
-        return $channels;
+        return $this->withWebPush($channels, $notifiable);
     }
 
     public function toMail($notifiable)

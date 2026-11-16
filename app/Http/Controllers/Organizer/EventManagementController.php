@@ -14,11 +14,10 @@ use Illuminate\Support\Str;
 
 class EventManagementController extends Controller
 {
-
     public function index(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -39,7 +38,7 @@ class EventManagementController extends Controller
 
         // Zähler für Tab-Badges
         $upcomingCount = $organization->events()->where('end_date', '>=', now())->count();
-        $archiveCount  = $organization->events()->where('end_date', '<', now())->count();
+        $archiveCount = $organization->events()->where('end_date', '<', now())->count();
 
         return view('organizer.events.index', compact('events', 'organization', 'isArchive', 'upcomingCount', 'archiveCount'));
     }
@@ -47,11 +46,11 @@ class EventManagementController extends Controller
     public function create()
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
         $categories = EventCategory::where('is_active', true)->get();
-        $event = new Event();
+        $event = new Event;
         $event->max_attendees = 50; // Default
         $event->price_from = 0;
         $event->is_featured = false;
@@ -59,13 +58,14 @@ class EventManagementController extends Controller
         /** @var User $currentUser */
         $currentUser = User::findOrFail(auth()->id());
         $publishingCosts = $costCalculationService->calculatePublishingCosts($event, $currentUser);
+
         return view('organizer.events.create', compact('categories', 'publishingCosts', 'organization'));
     }
 
     public function store(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -107,8 +107,9 @@ class EventManagementController extends Controller
         ]);
 
         if ($request->boolean('is_published')) {
-            if (!$organization->hasCompleteBillingData()) {
+            if (! $organization->hasCompleteBillingData()) {
                 $errorMessage = 'Um Events zu veröffentlichen, müssen Sie zunächst die Rechnungsdaten und Bankverbindung Ihrer Organisation vervollständigen.';
+
                 return back()->withErrors(['is_published' => $errorMessage])
                     ->with('error', $errorMessage)
                     ->with('redirect_to_settings', true)
@@ -117,7 +118,7 @@ class EventManagementController extends Controller
         }
 
         $validated['organization_id'] = $organization->id;
-        $validated['slug'] = Str::slug($validated['title']) . '-' . Str::random(6);
+        $validated['slug'] = Str::slug($validated['title']).'-'.Str::random(6);
 
         // Handle Image Upload
         if ($request->hasFile('featured_image')) {
@@ -178,13 +179,13 @@ class EventManagementController extends Controller
                 $currentUser,
                 $durationType,
                 $startDate,
-                $durationType === 'custom' ? (int)$customDays : null
+                $durationType === 'custom' ? (int) $customDays : null
             );
 
             // Store fee ID in session for redirect to payment
             session()->put('pending_featured_fee_id', $featuredFee->id);
         } catch (\Exception $e) {
-            Log::error('Failed to create featured booking: ' . $e->getMessage());
+            Log::error('Failed to create featured booking: '.$e->getMessage());
         }
     }
 
@@ -250,10 +251,10 @@ class EventManagementController extends Controller
         unset($validated['has_multiple_dates']);
 
         // Check if trying to publish without complete organizer data
-        if ($request->boolean('is_published') && !$event->is_published) {
+        if ($request->boolean('is_published') && ! $event->is_published) {
             $user = auth()->user();
 
-            if (!$user->canPublishEvents()) {
+            if (! $user->canPublishEvents()) {
                 $missingData = $user->getMissingOrganizerData();
                 $errorMessage = 'Um Events zu veröffentlichen, müssen Sie zunächst Ihre ';
 
@@ -272,7 +273,6 @@ class EventManagementController extends Controller
                     ->with('redirect_to_settings', true);
             }
         }
-
 
         // Handle Image Upload / Deletion
         if ($request->hasFile('featured_image')) {
@@ -299,7 +299,7 @@ class EventManagementController extends Controller
         $wasFeatured = $event->getOriginal('is_featured');
         $isFeaturedNow = $request->boolean('is_featured');
 
-        if ($isFeaturedNow && !$wasFeatured && $request->filled('featured_duration_type')) {
+        if ($isFeaturedNow && ! $wasFeatured && $request->filled('featured_duration_type')) {
             $this->createFeaturedBooking($event, $request);
         }
 
@@ -323,15 +323,15 @@ class EventManagementController extends Controller
 
         // Dupliziere Event
         $newEvent = $event->replicate();
-        $newEvent->title = $event->title . ' (Kopie)';
-        $newEvent->slug = Str::slug($event->title) . '-' . Str::random(6);
+        $newEvent->title = $event->title.' (Kopie)';
+        $newEvent->slug = Str::slug($event->title).'-'.Str::random(6);
         $newEvent->is_published = false;
         $newEvent->is_featured = false;
         $newEvent->created_at = now();
         $newEvent->updated_at = now();
         $newEvent->save();
 
-        // Dupliziere Ticket-Typen
+        // Dupliziere Ticketarten
         foreach ($event->ticketTypes as $ticketType) {
             $newTicketType = $ticketType->replicate();
             $newTicketType->event_id = $newEvent->id;
@@ -370,7 +370,7 @@ class EventManagementController extends Controller
         $validated['event_id'] = $event->id;
         TicketType::create($validated);
 
-        return back()->with('success', 'Ticket-Typ erfolgreich hinzugefügt!');
+        return back()->with('success', 'Ticketart erfolgreich hinzugefügt!');
     }
 
     public function updateTicketType(Request $request, Event $event, TicketType $ticketType)
@@ -390,13 +390,13 @@ class EventManagementController extends Controller
         ]);
 
         // Preisänderung verhindern, wenn aktive (nicht-stornierte) Buchungen existieren
-        if ($ticketType->hasActiveSales() && (float)$validated['price'] !== (float)$ticketType->price) {
-            return back()->withErrors(['price' => 'Der Preis kann nicht geändert werden, da noch aktive Buchungen für diesen Ticket-Typ vorhanden sind.']);
+        if ($ticketType->hasActiveSales() && (float) $validated['price'] !== (float) $ticketType->price) {
+            return back()->withErrors(['price' => 'Der Preis kann nicht geändert werden, da noch aktive Buchungen für diese Ticketart vorhanden sind.']);
         }
 
         $ticketType->update($validated);
 
-        return back()->with('success', 'Ticket-Typ erfolgreich aktualisiert!');
+        return back()->with('success', 'Ticketart erfolgreich aktualisiert!');
     }
 
     public function deleteTicketType(Event $event, TicketType $ticketType)
@@ -404,12 +404,12 @@ class EventManagementController extends Controller
         $this->authorize('update', $event);
 
         if ($ticketType->quantity_sold > 0) {
-            return back()->with('error', 'Ticket-Typ kann nicht gelöscht werden, da bereits Tickets verkauft wurden.');
+            return back()->with('error', 'Ticketart kann nicht gelöscht werden, da bereits Tickets verkauft wurden.');
         }
 
         $ticketType->delete();
 
-        return back()->with('success', 'Ticket-Typ erfolgreich gelöscht!');
+        return back()->with('success', 'Ticketart erfolgreich gelöscht!');
     }
 
     /**
@@ -438,8 +438,8 @@ class EventManagementController extends Controller
         $count = app(\App\Services\BookingWorkflowService::class)->cancelAllForEvent($event);
 
         return redirect()->route('organizer.events.index')
-            ->with('success', "Die Veranstaltung wurde abgesagt. {$count} Buchung(en) wurden storniert und per E-Mail informiert. "
-                . 'Bitte veranlassen Sie ggf. Erstattungen bereits bezahlter Buchungen.');
+            ->with('success', 'Die Veranstaltung wurde abgesagt. '.trans_choice('{1} :count Buchung wurde|[0,*] :count Buchungen wurden', $count).' storniert und per E-Mail informiert. '
+                .'Bitte veranlassen Sie ggf. Erstattungen bereits bezahlter Buchungen.');
     }
 
     /**
@@ -451,14 +451,14 @@ class EventManagementController extends Controller
 
         $attendees = $event->getAttendees();
 
-        $filename = 'teilnehmerliste-' . Str::slug($event->title) . '-' . date('Y-m-d') . '.csv';
+        $filename = 'teilnehmerliste-'.Str::slug($event->title).'-'.date('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $callback = function() use ($attendees) {
+        $callback = function () use ($attendees) {
             $file = fopen('php://output', 'w');
 
             // Add UTF-8 BOM for proper Excel encoding
@@ -484,7 +484,7 @@ class EventManagementController extends Controller
                     $booking->customer_email,
                     $booking->customer_phone ?? '-',
                     $booking->items->sum('quantity'),
-                    number_format($booking->total, 2, ',', '.') . ' €',
+                    number_format($booking->total, 2, ',', '.').' €',
                     $booking->status,
                     $booking->created_at->format('d.m.Y H:i'),
                 ], ';');
@@ -546,7 +546,7 @@ class EventManagementController extends Controller
         $this->authorize('view', $event);
 
         $validated = $request->validate([
-            'segment' => 'nullable|in:' . implode(',', array_keys(self::MESSAGE_SEGMENTS)),
+            'segment' => 'nullable|in:'.implode(',', array_keys(self::MESSAGE_SEGMENTS)),
             'include_attendees' => 'nullable|boolean',
             'subject' => 'required|string|max:255',
             'message' => 'required|string|max:5000',
@@ -577,7 +577,7 @@ class EventManagementController extends Controller
 
         return redirect()->route('organizer.events.attendees.contact', $event)
             ->with('success', "Die Nachricht wird an {$recipients} Empfänger:innen versendet ({$bookings->count()} Buchungen). "
-                . 'Sie erscheint im E-Mail-Verlauf der jeweiligen Buchung.');
+                .'Sie erscheint im E-Mail-Verlauf der jeweiligen Buchung.');
     }
 
     /**

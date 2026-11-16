@@ -20,7 +20,7 @@ return new class extends Migration
                 'type' => 'string',
                 'created_at' => now(),
                 'updated_at' => now(),
-                'label' => 'Rechungsnummer-Format für Veranstalter',
+                'label' => 'Rechnungsnummer-Format für Veranstalter',
                 'description' => 'Format der Rechnungsnummer für Rechnungen an Kunden für Buchungen',
             ],
             [

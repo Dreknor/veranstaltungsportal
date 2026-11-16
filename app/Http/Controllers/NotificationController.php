@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\Ui;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\DatabaseNotification;
 
@@ -32,7 +33,14 @@ class NotificationController extends Controller
         $notifications = auth()->user()
             ->unreadNotifications()
             ->limit(10)
-            ->get();
+            ->get()
+            ->each(function ($notification) {
+                // Anzeigefertige Texte für die Glocke (gleiche Regeln wie Übersicht und Dashboard)
+                $data = $notification->data;
+                $data['title'] = Ui::notificationTitle($notification->type, $data);
+                $data['message'] = Ui::notificationMessage($data);
+                $notification->data = $data;
+            });
 
         return response()->json([
             'notifications' => $notifications,

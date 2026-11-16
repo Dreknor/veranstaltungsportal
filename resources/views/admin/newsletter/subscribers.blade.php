@@ -1,10 +1,10 @@
 <x-layouts.app title="Newsletter-Abonnenten">
-    <x-ui.page-header title="Newsletter-Abonnenten" subtitle="Alle Newsletter-Abonnenten verwalten."
-        :back-href="route('admin.newsletter.index')" back-label="Zurück zur Newsletter-Verwaltung">
+    <x-ui.page-header title="Newsletter-Abonnenten" subtitle="Alle Newsletter-Abonnenten verwalten." :back-href="route('admin.newsletter.index')"
+        back-label="Zurück zur Newsletter-Verwaltung">
         <x-slot:actions>
             <x-ui.button variant="secondary" :href="route('admin.newsletter.export')">
                 <x-slot:icon><x-icon.download /></x-slot:icon>
-                CSV-Export
+                CSV exportieren
             </x-ui.button>
         </x-slot:actions>
     </x-ui.page-header>
@@ -24,7 +24,8 @@
                     <tr>
                         <th scope="row">
                             <span class="flex items-center gap-3">
-                                <img class="h-10 w-10 flex-none rounded-full" src="{{ $subscriber->profilePhotoUrl() }}" alt="">
+                                <img class="h-10 w-10 flex-none rounded-full" src="{{ $subscriber->profilePhotoUrl() }}"
+                                    alt="">
                                 {{ $subscriber->fullName() }}
                             </span>
                         </th>

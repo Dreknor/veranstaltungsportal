@@ -3,18 +3,15 @@
 namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-
     public function index()
     {
         $user = auth()->user();
         $organization = $user->currentOrganization();
 
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -70,7 +67,7 @@ class DashboardController extends Controller
 
         // Top Events by Revenue
         $topEvents = $organization->events()
-            ->withSum(['bookings' => function($q) {
+            ->withSum(['bookings' => function ($q) {
                 $q->whereIn('payment_status', ['paid']);
             }], 'total')
             ->orderBy('bookings_sum_total', 'desc')
@@ -82,7 +79,7 @@ class DashboardController extends Controller
             ->upcoming()
             ->published()
             ->with(['category', 'bookings'])
-            ->withCount(['bookings' => function($q) {
+            ->withCount(['bookings' => function ($q) {
                 $q->where('status', '!=', 'cancelled');
             }])
             ->orderBy('start_date')
@@ -129,17 +126,18 @@ class DashboardController extends Controller
         $upcoming = fn ($q) => $q->where('organization_id', $organization->id)->where('end_date', '>=', now());
         $bookings = fn () => \App\Models\Booking::whereHas('event', $upcoming);
 
+        /** @var array<int, array{count: int, label: string, tone: string, url: string}> $tasks */
         $tasks = [];
 
         $pendingApproval = $bookings()->where('status', 'pending_approval')->count();
         if ($pendingApproval) {
-            $tasks[] = ['count' => $pendingApproval, 'label' => 'Anmeldung(en) warten auf Ihre Freigabe', 'tone' => 'amber',
+            $tasks[] = ['count' => $pendingApproval, 'label' => trans_choice('{1} Anmeldung wartet auf Ihre Freigabe|[0,*] Anmeldungen warten auf Ihre Freigabe', $pendingApproval), 'tone' => 'amber',
                 'url' => route('organizer.bookings.index', ['status' => 'pending_approval'])];
         }
 
         $unpaid = $bookings()->where('status', 'pending')->where('payment_status', 'pending')->where('total', '>', 0)->count();
         if ($unpaid) {
-            $tasks[] = ['count' => $unpaid, 'label' => 'Buchung(en) mit offener Zahlung', 'tone' => 'yellow',
+            $tasks[] = ['count' => $unpaid, 'label' => trans_choice('{1} Buchung mit offener Zahlung|[0,*] Buchungen mit offener Zahlung', $unpaid), 'tone' => 'yellow',
                 'url' => route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending'])];
         }
 
@@ -150,7 +148,7 @@ class DashboardController extends Controller
                 ->where('externally_invoiced', false)
                 ->count();
             if ($toInvoice) {
-                $tasks[] = ['count' => $toInvoice, 'label' => 'Buchung(en) noch nicht fakturiert', 'tone' => 'blue',
+                $tasks[] = ['count' => $toInvoice, 'label' => trans_choice('{1} Buchung noch nicht fakturiert|[0,*] Buchungen noch nicht fakturiert', $toInvoice), 'tone' => 'blue',
                     'url' => route('organizer.billing-data.index', ['filter' => 'pending'])];
             }
         }
@@ -158,7 +156,7 @@ class DashboardController extends Controller
         $pendingReviews = \App\Models\EventReview::whereHas('event', fn ($q) => $q->where('organization_id', $organization->id))
             ->where('is_approved', false)->count();
         if ($pendingReviews) {
-            $tasks[] = ['count' => $pendingReviews, 'label' => 'Bewertung(en) warten auf Moderation', 'tone' => 'purple',
+            $tasks[] = ['count' => $pendingReviews, 'label' => trans_choice('{1} Bewertung wartet auf Moderation|[0,*] Bewertungen warten auf Moderation', $pendingReviews), 'tone' => 'purple',
                 'url' => route('organizer.reviews.index', ['status' => 'pending'])];
         }
 

@@ -27,8 +27,12 @@
     <form method="GET" action="{{ route('admin.connections.index') }}"
         class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Benutzer suchen" />
-        <x-ui.select label="Status" name="status" :old="false" :selected="request('status')"
-            :options="['' => 'Alle Status', 'pending' => 'Ausstehend', 'accepted' => 'Akzeptiert', 'blocked' => 'Blockiert']" />
+        <x-ui.select label="Status" name="status" :old="false" :selected="request('status')" :options="[
+            '' => 'Alle Status',
+            'pending' => 'Ausstehend',
+            'accepted' => 'Akzeptiert',
+            'blocked' => 'Blockiert',
+        ]" />
         <div class="flex flex-wrap gap-3">
             <x-ui.button type="submit" variant="secondary" size="lg">Filtern</x-ui.button>
             @if (request()->hasAny(['search', 'status']))
@@ -43,8 +47,14 @@
             <h2 class="m-0 text-h3">Verbindungen ({{ $connections->total() }})</h2>
             <div class="flex flex-wrap items-end gap-3">
                 <x-ui.select label="Sammelaktion" name="action" id="bulkAction" :old="false" class="min-w-52"
-                    :options="['' => 'Sammelaktion wählen...', 'approve' => 'Freigeben', 'block' => 'Blockieren', 'delete' => 'Löschen']" />
-                <x-ui.button type="submit" variant="secondary" size="lg" onclick="return confirm('Sind Sie sicher?')">Ausführen</x-ui.button>
+                    :options="[
+                        '' => 'Sammelaktion wählen...',
+                        'approve' => 'Freigeben',
+                        'block' => 'Blockieren',
+                        'delete' => 'Löschen',
+                    ]" />
+                <x-ui.button type="submit" variant="secondary" size="lg"
+                    onclick="return confirm('Sind Sie sicher?')">Ausführen</x-ui.button>
             </div>
         </div>
 
@@ -52,10 +62,11 @@
             <thead>
                 <tr>
                     <th scope="col">
-                        <input type="checkbox" id="selectAll" class="ui-checkbox" aria-label="Alle Verbindungen auswählen">
+                        <input type="checkbox" id="selectAll" class="ui-checkbox"
+                            aria-label="Alle Verbindungen auswählen">
                     </th>
-                    <th scope="col">Follower</th>
-                    <th scope="col">Folgt</th>
+                    <th scope="col">Folgende Person</th>
+                    <th scope="col">Gefolgte Person</th>
                     <th scope="col">Status</th>
                     <th scope="col">Erstellt</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
@@ -71,7 +82,8 @@
                         </td>
                         <td>
                             <div class="flex items-center gap-3">
-                                <img src="{{ $connection->follower->profilePhotoUrl() }}" alt="" class="h-10 w-10 flex-none rounded-full">
+                                <img src="{{ $connection->follower->profilePhotoUrl() }}" alt=""
+                                    class="h-10 w-10 flex-none rounded-full">
                                 <div class="min-w-0">
                                     {{ $connection->follower->name }}
                                     <span class="block text-small text-muted">{{ $connection->follower->email }}</span>
@@ -80,20 +92,25 @@
                         </td>
                         <td>
                             <div class="flex items-center gap-3">
-                                <img src="{{ $connection->following->profilePhotoUrl() }}" alt="" class="h-10 w-10 flex-none rounded-full">
+                                <img src="{{ $connection->following->profilePhotoUrl() }}" alt=""
+                                    class="h-10 w-10 flex-none rounded-full">
                                 <div class="min-w-0">
                                     {{ $connection->following->name }}
-                                    <span class="block text-small text-muted">{{ $connection->following->email }}</span>
+                                    <span
+                                        class="block text-small text-muted">{{ $connection->following->email }}</span>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <x-ui.status :tone="$statusTone[$connection->status] ?? 'neutral'">{{ $statusLabel[$connection->status] ?? ucfirst($connection->status) }}</x-ui.status>
+                            <x-ui.status
+                                :tone="$statusTone[$connection->status] ?? 'neutral'">{{ $statusLabel[$connection->status] ?? ucfirst($connection->status) }}</x-ui.status>
                         </td>
-                        <td class="tabular-nums whitespace-nowrap">{{ $connection->created_at->format('d.m.Y H:i') }}</td>
+                        <td class="tabular-nums whitespace-nowrap">{{ $connection->created_at->format('d.m.Y H:i') }}
+                        </td>
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('admin.connections.show', $connection)">Details</x-ui.button>
-                            <x-ui.button size="sm" variant="secondary" type="submit" :form="'delete-connection-' . $connection->id">Löschen</x-ui.button>
+                            <x-ui.button size="sm" variant="secondary" type="submit"
+                                :form="'delete-connection-' . $connection->id">Löschen</x-ui.button>
                         </td>
                     </tr>
                 @empty

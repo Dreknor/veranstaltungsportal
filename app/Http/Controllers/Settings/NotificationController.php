@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Support\PushNotifications;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,20 +16,27 @@ class NotificationController extends Controller
     {
         $user = Auth::user();
 
-        // Get current notification preferences from user meta or defaults
-        $preferences = $user->notification_preferences ?? [
+        // Gespeicherte Einstellungen, fehlende Schlüssel mit Standardwerten
+        $preferences = array_merge([
             'email_booking_confirmed' => true,
             'email_booking_cancelled' => true,
             'email_event_reminder' => true,
             'email_event_updated' => true,
             'email_new_review' => false,
             'email_marketing' => false,
-            'push_booking_confirmed' => false,
-            'push_event_reminder' => false,
-            'push_event_updated' => false,
+        ], $user->notification_preferences);
+
+        $push = [
+            'configured' => PushNotifications::configured(),
+            'publicKey' => PushNotifications::publicKey(),
+            'enabled' => PushNotifications::enabledFor($user),
+            'devices' => $user->pushSubscriptions()->count(),
+            // Damit der Browser erkennt, ob sein Abo noch gilt – ohne die Endpunkte selbst auszugeben
+            'knownEndpoints' => $user->pushSubscriptions()->pluck('endpoint')
+                ->map(fn (string $endpoint) => hash('sha256', $endpoint))->values()->all(),
         ];
 
-        return view('settings.notifications', compact('preferences'));
+        return view('settings.notifications', compact('preferences', 'push'));
     }
 
     /**
@@ -46,9 +54,6 @@ class NotificationController extends Controller
             'email_event_updated' => $request->has('email_event_updated'),
             'email_new_review' => $request->has('email_new_review'),
             'email_marketing' => $request->has('email_marketing'),
-            'push_booking_confirmed' => $request->has('push_booking_confirmed'),
-            'push_event_reminder' => $request->has('push_event_reminder'),
-            'push_event_updated' => $request->has('push_event_updated'),
             // Für den BookingController
             'booking_notifications' => $request->has('email_booking_confirmed'),
             'event_updates' => $request->has('email_event_updated'),
@@ -56,11 +61,11 @@ class NotificationController extends Controller
         ];
 
         // Update user preferences
+        // Übrige Einstellungen (z. B. Push, Abzeichen, Kontakte) bleiben erhalten
         $user->update([
-            'notification_preferences' => $preferences,
+            'notification_preferences' => array_merge($user->notification_preferences, $preferences),
         ]);
 
         return back()->with('success', 'Benachrichtigungseinstellungen wurden aktualisiert.');
     }
 }
-

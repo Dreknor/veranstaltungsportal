@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts.app title="Passwort">
     <x-ui.page-header title="Einstellungen" class="mb-4" />
 
     @include('settings.partials.navigation')

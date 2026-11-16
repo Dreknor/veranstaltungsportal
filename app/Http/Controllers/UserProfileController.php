@@ -136,6 +136,7 @@ class UserProfileController extends Controller
     public function followers(Request $request, User $user): View
     {
         $followers = $user->followers()
+            ->withCount(['bookings as events_attended_count' => fn ($query) => $query->where('checked_in', true)])
             ->paginate(12);
 
         return view('users.followers', compact('user', 'followers'));
@@ -147,6 +148,7 @@ class UserProfileController extends Controller
     public function following(Request $request, User $user): View
     {
         $following = $user->following()
+            ->withCount(['bookings as events_attended_count' => fn ($query) => $query->where('checked_in', true)])
             ->paginate(12);
 
         return view('users.following', compact('user', 'following'));

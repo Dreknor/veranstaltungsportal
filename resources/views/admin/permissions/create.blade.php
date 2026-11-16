@@ -25,7 +25,7 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach ($groups as $g)
                                 <x-ui.button variant="secondary" size="sm" class="group-quick-btn"
-                                    data-group="{{ $g }}">{{ $g }}</x-ui.button>
+                                    data-group="{{ $g }}">{{ \App\Support\AccessLabels::group($g) }}</x-ui.button>
                             @endforeach
                         </div>
                     </div>

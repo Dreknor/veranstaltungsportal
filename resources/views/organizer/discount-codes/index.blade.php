@@ -1,10 +1,5 @@
 <x-layouts.app title="Rabattcodes für {{ $event->title }}">
-    <x-ui.page-header
-        title="Rabattcodes"
-        :subtitle="$event->title"
-        :back-href="route('organizer.events.edit', $event)"
-        back-label="Zurück zur Veranstaltung"
-    >
+    <x-ui.page-header title="Rabattcodes" :subtitle="$event->title" :back-href="route('organizer.events.edit', $event)" back-label="Zurück zur Veranstaltung">
         <x-slot:actions>
             <x-ui.button :href="route('organizer.events.discount-codes.create', $event)">
                 <x-slot:icon><x-icon.plus /></x-slot:icon>
@@ -39,7 +34,9 @@
                             @endif
                         </td>
                         <td class="num">
-                            {{ $code->bookings_count }}@if ($code->max_uses) / {{ $code->max_uses }}@endif
+                            {{ $code->usage_count }}@if ($code->usage_limit)
+                                / {{ $code->usage_limit }}
+                            @endif
                         </td>
                         <td class="tabular-nums whitespace-nowrap">
                             @if ($code->valid_from || $code->valid_until)
@@ -65,18 +62,24 @@
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('organizer.events.discount-codes.edit', [$event, $code])">Bearbeiten</x-ui.button>
                             <x-ui.dropdown label="Weitere Aktionen für {{ $code->code }}" icon-only>
-                                <x-ui.dropdown-item type="submit" form="code-toggle-{{ $code->id }}">{{ $code->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
+                                <x-ui.dropdown-item type="submit"
+                                    form="code-toggle-{{ $code->id }}">{{ $code->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
                                 @if ($code->bookings_count == 0)
-                                    <x-ui.dropdown-item type="submit" form="code-delete-{{ $code->id }}" danger>Löschen</x-ui.dropdown-item>
+                                    <x-ui.dropdown-item type="submit" form="code-delete-{{ $code->id }}"
+                                        danger>Löschen</x-ui.dropdown-item>
                                 @endif
                             </x-ui.dropdown>
-                            <form id="code-toggle-{{ $code->id }}" action="{{ route('organizer.events.discount-codes.toggle', [$event, $code]) }}" method="POST" class="hidden">
+                            <form id="code-toggle-{{ $code->id }}"
+                                action="{{ route('organizer.events.discount-codes.toggle', [$event, $code]) }}"
+                                method="POST" class="hidden">
                                 @csrf
                                 @method('PATCH')
                             </form>
                             @if ($code->bookings_count == 0)
-                                <form id="code-delete-{{ $code->id }}" action="{{ route('organizer.events.discount-codes.destroy', [$event, $code]) }}" method="POST" class="hidden"
-                                      onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Rabattcode löschen möchten?');">
+                                <form id="code-delete-{{ $code->id }}"
+                                    action="{{ route('organizer.events.discount-codes.destroy', [$event, $code]) }}"
+                                    method="POST" class="hidden"
+                                    onsubmit="return confirm('Sind Sie sicher, dass Sie diesen Rabattcode löschen möchten?');">
                                     @csrf
                                     @method('DELETE')
                                 </form>
@@ -87,7 +90,8 @@
             </tbody>
         </x-ui.table>
     @else
-        <x-ui.empty title="Keine Rabattcodes" :action-href="route('organizer.events.discount-codes.create', $event)" action-label="Rabattcode erstellen" action-variant="primary">
+        <x-ui.empty title="Keine Rabattcodes" :action-href="route('organizer.events.discount-codes.create', $event)" action-label="Rabattcode erstellen"
+            action-variant="primary">
             Erstellen Sie Ihren ersten Rabattcode für diese Veranstaltung.
         </x-ui.empty>
     @endif

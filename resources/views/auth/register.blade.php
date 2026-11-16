@@ -14,11 +14,11 @@
                 <x-ui.label as="legend">{{ __('Kontotyp') }}</x-ui.label>
                 <div class="flex flex-col gap-3">
                     <x-ui.choice name="account_type" value="participant" :title="__('Teilnehmer')"
-                        :description="__('Ich möchte Events besuchen')" checked x-model="userType" />
+                        :description="__('Ich möchte Veranstaltungen besuchen')" checked x-model="userType" />
 
                     @if ($allowOrganizerRegistration)
                         <x-ui.choice name="account_type" value="organizer" :title="__('Veranstalter')"
-                            :description="__('Ich möchte Events erstellen')" x-model="userType" />
+                            :description="__('Ich möchte Veranstaltungen anbieten')" x-model="userType" />
                     @endif
                 </div>
                 <x-ui.field-error name="account_type" />

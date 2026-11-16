@@ -112,7 +112,7 @@ class BadgeService
             $progress[$key] = [
                 'current' => $currentValue,
                 'required' => $targetValue,
-                'percentage' => min(100.0, round(($currentValue / $targetValue) * 100, 1)),
+                'percentage' => $targetValue > 0 ? min(100.0, round(($currentValue / $targetValue) * 100, 1)) : 100.0,
                 'completed' => $currentValue >= $targetValue,
             ];
         }
@@ -142,10 +142,11 @@ class BadgeService
                 return \App\Models\EventReview::where('user_id', $user->id)->count();
 
             case 'total_hours_attended':
-                return (int) $user->bookings()
+                // events.duration ist in Minuten gespeichert, die Anforderung in Stunden
+                return intdiv((int) $user->bookings()
                     ->where('checked_in', true)
                     ->join('events', 'bookings.event_id', '=', 'events.id')
-                    ->sum('events.duration');
+                    ->sum('events.duration'), 60);
 
             case 'categories_explored':
                 return $user->bookings()

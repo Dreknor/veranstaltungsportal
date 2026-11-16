@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 
 class TicketTypeController extends Controller
 {
-
     public function index(Event $event)
     {
         $this->authorize('update', $event);
@@ -51,12 +50,12 @@ class TicketTypeController extends Controller
         if ($request->input('redirect_to_edit')) {
             return redirect()
                 ->route('organizer.events.edit', $event)
-                ->with('success', 'Ticket-Typ erfolgreich erstellt!');
+                ->with('success', 'Ticketart erfolgreich erstellt!');
         }
 
         return redirect()
             ->route('organizer.events.ticket-types.index', $event)
-            ->with('success', 'Ticket-Typ erfolgreich erstellt!');
+            ->with('success', 'Ticketart erfolgreich erstellt!');
     }
 
     public function edit(Event $event, TicketType $ticketType)
@@ -92,17 +91,17 @@ class TicketTypeController extends Controller
         $validated['is_available'] = $request->boolean('is_available');
 
         // Preisänderung verhindern, wenn aktive (nicht-stornierte) Buchungen existieren
-        if ($ticketType->hasActiveSales() && (float)$validated['price'] !== (float)$ticketType->price) {
+        if ($ticketType->hasActiveSales() && (float) $validated['price'] !== (float) $ticketType->price) {
             return back()
                 ->withInput()
-                ->withErrors(['price' => 'Der Preis kann nicht geändert werden, da noch aktive Buchungen für diesen Ticket-Typ vorhanden sind. Bitte stornieren Sie zuerst alle Buchungen dieses Typs.']);
+                ->withErrors(['price' => 'Der Preis kann nicht geändert werden, da noch aktive Buchungen für diese Ticketart vorhanden sind. Bitte stornieren Sie zuerst alle Buchungen dieses Typs.']);
         }
 
         $ticketType->update($validated);
 
         return redirect()
             ->route('organizer.events.ticket-types.index', $event)
-            ->with('success', 'Ticket-Typ erfolgreich aktualisiert!');
+            ->with('success', 'Ticketart erfolgreich aktualisiert!');
     }
 
     public function destroy(Event $event, TicketType $ticketType)
@@ -117,14 +116,14 @@ class TicketTypeController extends Controller
         if ($ticketType->hasActiveSales()) {
             return redirect()
                 ->route('organizer.events.ticket-types.index', $event)
-                ->with('error', 'Dieser Ticket-Typ kann nicht gelöscht werden, da noch aktive Buchungen vorhanden sind. Bitte stornieren Sie zuerst alle Buchungen dieses Typs.');
+                ->with('error', 'Diese Ticketart kann nicht gelöscht werden, da noch aktive Buchungen vorhanden sind. Bitte stornieren Sie zuerst alle Buchungen dieses Typs.');
         }
 
         $ticketType->delete();
 
         return redirect()
             ->route('organizer.events.ticket-types.index', $event)
-            ->with('success', 'Ticket-Typ erfolgreich gelöscht!');
+            ->with('success', 'Ticketart erfolgreich gelöscht!');
     }
 
     public function reorder(Request $request, Event $event)
@@ -135,4 +134,3 @@ class TicketTypeController extends Controller
         return response()->json(['success' => false, 'message' => 'Sort order feature requires database migration']);
     }
 }
-

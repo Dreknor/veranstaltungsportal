@@ -3,9 +3,9 @@
         <x-slot:actions>
             <x-ui.button variant="secondary" :href="route('admin.audit-logs.export', request()->query())">
                 <x-slot:icon><x-icon.download /></x-slot:icon>
-                Export CSV
+                CSV exportieren
             </x-ui.button>
-            <x-ui.button variant="secondary" x-data x-on:click="$dispatch('open-modal', 'clear-logs')">
+            <x-ui.button variant="link" x-data x-on:click="$dispatch('open-modal', 'clear-logs')">
                 <x-slot:icon><x-icon.trash /></x-slot:icon>
                 Alte Logs löschen
             </x-ui.button>
@@ -16,13 +16,15 @@
         <x-ui.select label="Aktion" name="action" :old="false">
             <option value="">Alle Aktionen</option>
             @foreach ($actions as $action)
-                <option value="{{ $action }}" @selected(request('action') === $action)>{{ $action }}</option>
+                <option value="{{ $action }}" @selected(request('action') === $action)>
+                    {{ \App\Support\AdminLabels::auditAction($action) }}</option>
             @endforeach
         </x-ui.select>
         <x-ui.select label="Modell" name="auditable_type" :old="false">
             <option value="">Alle Modelle</option>
             @foreach ($modelTypes as $type)
-                <option value="{{ $type }}" @selected(request('auditable_type') === $type)>{{ $type }}</option>
+                <option value="{{ $type }}" @selected(request('auditable_type') === $type)>
+                    {{ \App\Support\AdminLabels::auditModel($type) }}</option>
             @endforeach
         </x-ui.select>
         <x-ui.field label="Von" name="from" type="date" :old="false" :value="request('from')" />
@@ -54,14 +56,21 @@
                 <tr>
                     <td class="tabular-nums whitespace-nowrap">{{ $log->created_at->format('d.m.Y H:i') }}</td>
                     <td class="whitespace-nowrap">{{ $log->user?->name ?? 'System' }}</td>
-                    <td><x-ui.status :tone="$actionTone">{{ $log->action }}</x-ui.status></td>
-                    <td class="whitespace-nowrap">{{ $log->auditable_type ? class_basename($log->auditable_type) : '-' }}</td>
+                    <td><x-ui.status
+                            :tone="$actionTone">{{ \App\Support\AdminLabels::auditAction($log->action) }}</x-ui.status>
+                    </td>
+                    <td class="whitespace-nowrap">
+                        {{ $log->auditable_type ? \App\Support\AdminLabels::auditModel($log->auditable_type) : '-' }}
+                    </td>
                     <td class="tabular-nums whitespace-nowrap text-muted">{{ $log->ip_address }}</td>
-                    <td class="max-w-[220px] truncate" title="{{ $log->description }}">{{ $log->description ?? '-' }}</td>
+                    <td class="max-w-[220px] truncate" title="{{ $log->description }}">{{ $log->description ?? '-' }}
+                    </td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.audit-logs.show', $log)">Details</x-ui.button>
-                        <x-ui.button variant="secondary" size="sm" type="submit" form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>
-                        <form id="destroy-log-{{ $log->id }}" action="{{ route('admin.audit-logs.destroy', $log) }}" method="POST" class="hidden"
+                        <x-ui.button variant="secondary" size="sm" type="submit"
+                            form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>
+                        <form id="destroy-log-{{ $log->id }}"
+                            action="{{ route('admin.audit-logs.destroy', $log) }}" method="POST" class="hidden"
                             onsubmit="return confirm('Sind Sie sicher?')">
                             @csrf
                             @method('DELETE')

@@ -8,8 +8,7 @@
             @foreach ($following as $followedUser)
                 <x-ui.person-row :user="$followedUser">
                     <x-slot:meta>
-                        <span class="text-ui font-medium tabular-nums">{{ $followedUser->events_count }} Veranstaltungen</span>
-                        <span class="text-small text-muted tabular-nums">{{ $followedUser->bookings_count }} Buchungen</span>
+                        <span class="text-ui font-medium tabular-nums">{{ trans_choice('{0} Keine besuchten Veranstaltungen|{1} 1 besuchte Veranstaltung|[2,*] :count besuchte Veranstaltungen', $followedUser->events_attended_count) }}</span>
                     </x-slot:meta>
                     <x-slot:action>
                         <x-ui.button variant="secondary" :href="route('users.show', $followedUser)" full>Profil ansehen</x-ui.button>

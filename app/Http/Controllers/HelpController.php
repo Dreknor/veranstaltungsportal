@@ -233,9 +233,9 @@ class HelpController extends Controller
             [
                 'category' => 'user',
                 'slug' => 'badges',
-                'title' => 'Badges & Erfolge',
-                'description' => 'Badges sammeln und Ihren Fortschritt verfolgen',
-                'keywords' => ['badges', 'auszeichnungen', 'erfolge', 'punkte', 'leaderboard'],
+                'title' => 'Abzeichen & Erfolge',
+                'description' => 'Abzeichen sammeln und Ihren Fortschritt verfolgen',
+                'keywords' => ['abzeichen', 'badges', 'auszeichnungen', 'erfolge', 'punkte', 'bestenliste', 'leaderboard'],
             ],
             [
                 'category' => 'user',

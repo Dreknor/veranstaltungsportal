@@ -1,6 +1,5 @@
 <x-layouts.app :title="'Organisation: ' . $organization->name" :header="false">
-    <x-ui.page-header :title="$organization->name" :subtitle="$organization->email"
-        :back-href="route('admin.organizations.index')" back-label="Zur Übersicht" />
+    <x-ui.page-header :title="$organization->name" :subtitle="$organization->email" :back-href="route('admin.organizations.index')" back-label="Zur Übersicht" />
 
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat label="Veranstaltungen gesamt" :value="$stats['total_events']" />
@@ -30,11 +29,13 @@
                         <x-ui.status tone="neutral">Inaktiv</x-ui.status>
                     @endif
                 </x-ui.dl-item>
-                <x-ui.dl-item label="Erstellt am" num>{{ $organization->created_at->format('d.m.Y H:i') }} Uhr</x-ui.dl-item>
+                <x-ui.dl-item label="Erstellt am" num>{{ $organization->created_at->format('d.m.Y H:i') }}
+                    Uhr</x-ui.dl-item>
             </x-ui.dl>
         </x-ui.section>
 
-        <x-ui.section class="min-w-0" title="Gebühren-Einstellungen" level="h2" :link-href="route('admin.organizer-fees.edit', $organization)" link-label="Bearbeiten">
+        <x-ui.section class="min-w-0" title="Gebühren-Einstellungen" level="h2" :link-href="route('admin.organizer-fees.edit', $organization)"
+            link-label="Bearbeiten">
             @if ($organization->custom_platform_fee && ($organization->custom_platform_fee['enabled'] ?? false))
                 @php
                     $customFee = $organization->custom_platform_fee;
@@ -44,20 +45,24 @@
                     <x-ui.status tone="info">Individuelle Gebühren aktiv</x-ui.status>
                 </p>
                 <x-ui.dl>
-                    <x-ui.dl-item label="Gebührentyp">{{ $feeType === 'percentage' ? 'Prozentual' : 'Festbetrag' }}</x-ui.dl-item>
+                    <x-ui.dl-item
+                        label="Gebührentyp">{{ $feeType === 'percentage' ? 'Prozentual' : 'Festbetrag' }}</x-ui.dl-item>
                     <x-ui.dl-item label="Gebühr" num>
                         @if ($feeType === 'percentage')
-                            {{ $customFee['fee_percentage'] ?? 0 }}%
+                            {{ \App\Support\Ui::percent($customFee['fee_percentage'] ?? 0, 2) }}
                         @else
                             {{ number_format($customFee['fee_fixed_amount'] ?? 0, 2, ',', '.') }} €
                         @endif
                     </x-ui.dl-item>
-                    <x-ui.dl-item label="Mindestgebühr" num>{{ number_format($customFee['minimum_fee'] ?? 0, 2, ',', '.') }} €</x-ui.dl-item>
+                    <x-ui.dl-item label="Mindestgebühr"
+                        num>{{ number_format($customFee['minimum_fee'] ?? 0, 2, ',', '.') }} €</x-ui.dl-item>
                     @if (!empty($customFee['notes']))
                         <x-ui.dl-item label="Notizen">{{ $customFee['notes'] }}</x-ui.dl-item>
                     @endif
                     @if (isset($customFee['updated_at']))
-                        <x-ui.dl-item label="Letzte Aktualisierung" num>{{ \Carbon\Carbon::parse($customFee['updated_at'])->format('d.m.Y H:i') }} Uhr</x-ui.dl-item>
+                        <x-ui.dl-item label="Letzte Aktualisierung"
+                            num>{{ \Carbon\Carbon::parse($customFee['updated_at'])->format('d.m.Y H:i') }}
+                            Uhr</x-ui.dl-item>
                     @endif
                 </x-ui.dl>
             @else
@@ -83,17 +88,17 @@
                     <td>Eigentümer</td>
                 </tr>
                 @foreach ($organization->members->where('id', '!=', $organization->owner_id) as $member)
-                    <tr>
+<tr>
                         <th scope="row">{{ $member->name }}</th>
                         <td>{{ $member->email }}</td>
                         <td>Mitglied</td>
                     </tr>
-                @endforeach
+@endforeach
             </tbody>
         </x-ui.table>
         @if ($organization->members->where('id', '!=', $organization->owner_id)->isEmpty())
-            <p class="mb-0 mt-3 text-small text-muted">Keine weiteren Team-Mitglieder.</p>
-        @endif
+<p class="mb-0 mt-3 text-small text-muted">Keine weiteren Team-Mitglieder.</p>
+@endif
     </x-ui.section>
 
     <x-ui.section title="Aktionen">
@@ -106,13 +111,13 @@
             </form>
 
             @if ($stats['total_events'] === 0)
-                <form method="POST" action="{{ route('admin.organizations.destroy', $organization) }}"
+<form method="POST" action="{{ route('admin.organizations.destroy', $organization) }}"
                     onsubmit="return confirm('Organisation wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')">
                     @csrf
                     @method('DELETE')
                     <x-ui.button type="submit" variant="danger">Löschen</x-ui.button>
                 </form>
-            @endif
-        </div>
-    </x-ui.section>
-</x-layouts.app>
+ @endif
+                    </div>
+                    </x-ui.section>
+                    </x-layouts.app>)

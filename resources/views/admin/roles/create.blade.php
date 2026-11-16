@@ -12,23 +12,7 @@
                     hint="Nur Kleinbuchstaben, Zahlen und Bindestriche erlaubt." />
                 <x-ui.textarea label="Beschreibung" name="description" optional rows="2"
                     placeholder="Kurze Beschreibung der Rolle" />
-
-                <fieldset class="m-0 min-w-0 border-0 p-0">
-                    <x-ui.label as="legend">Farbe der Rolle</x-ui.label>
-                    <div class="-ml-1 flex flex-wrap">
-                        @foreach (['#6b7280', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'] as $color)
-                            <label class="cursor-pointer p-1">
-                                <input type="radio" name="color" value="{{ $color }}" class="peer sr-only"
-                                    @checked(old('color', '#6b7280') === $color)>
-                                <span class="sr-only">{{ $color }}</span>
-                                <span aria-hidden="true"
-                                    class="block h-9 w-9 rounded-full outline-offset-2 peer-checked:outline peer-checked:outline-2 peer-checked:outline-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-ink"
-                                    style="background-color: {{ $color }};"></span>
-                            </label>
-                        @endforeach
-                    </div>
-                    <x-ui.field-error name="color" />
-                </fieldset>
+                @include('admin.roles._color-field', ['current' => 'neutral'])
             </div>
         </x-ui.section>
 
@@ -41,17 +25,19 @@
                 @foreach ($permissions as $group => $groupPermissions)
                     <fieldset class="m-0 min-w-0 border-0 p-0">
                         <div class="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                            <legend class="float-left m-0 p-0 text-h3 capitalize">{{ $group }}</legend>
+                            <legend class="float-left m-0 p-0 text-h3">{{ \App\Support\AccessLabels::group($group) }}
+                            </legend>
                             <x-ui.button variant="link" size="sm" class="select-group-btn"
                                 data-group="{{ $group }}">Alle wählen</x-ui.button>
                         </div>
                         <div class="clear-both grid grid-cols-1 gap-x-4 md:grid-cols-2">
                             @foreach ($groupPermissions as $permission)
-                                <x-ui.checkbox name="permissions[]" :value="$permission->name"
-                                    :checked="is_array(old('permissions')) && in_array($permission->name, old('permissions'))"
-                                    data-perm="{{ Str::slug($group) }}"
-                                    :hint="trim(($permission->description ?? '') . ($permission->is_system ? ' System-Berechtigung' : ''))"
-                                    :label="$permission->name" />
+                                <x-ui.checkbox name="permissions[]" :value="$permission->name" :checked="is_array(old('permissions')) &&
+                                    in_array($permission->name, old('permissions'))"
+                                    data-perm="{{ Str::slug($group) }}" :hint="trim(
+                                        ($permission->description ?? '') .
+                                            ($permission->is_system ? ' System-Berechtigung' : ''),
+                                    )" :label="\App\Support\AccessLabels::permission($permission->name)" />
                             @endforeach
                         </div>
                     </fieldset>

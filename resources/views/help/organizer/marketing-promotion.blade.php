@@ -1,16 +1,17 @@
 <x-help.article title="Marketing & Promotion" subtitle="Erhöhen Sie die Sichtbarkeit Ihrer Veranstaltungen."
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
-        <h2>1. Featured Events – Hervorhebung</h2>
-        <p>Markieren Sie Ihre Veranstaltung als „Featured" für maximale Sichtbarkeit:</p>
+        <h2>1. Hervorgehobene Veranstaltungen</h2>
+        <p>Markieren Sie Ihre Veranstaltung hervorgehoben für maximale Sichtbarkeit:</p>
         <ul>
-            <li>Featured Events erscheinen prominent auf der Startseite</li>
+            <li>Hervorgehobene Veranstaltungen erscheinen prominent auf der Startseite</li>
             <li>Eigene Sektion mit visueller Hervorhebung</li>
             <li>Höheres Ranking in Suchergebnissen</li>
             <li>Gebühr: täglich, wöchentlich oder monatlich buchbar</li>
         </ul>
-        <p>Gehen Sie zu „Featured Events" › „Antrag stellen" und wählen Sie die Dauer. Nach Zahlung ist Ihre
-            Veranstaltung sofort featured.</p>
+        <p>Gehen Sie zu „Hervorgehobene Veranstaltungen“ › „Veranstaltung hervorheben“ und wählen Sie die Dauer. Nach
+            Zahlung ist Ihre
+            Veranstaltung sofort hervorgehoben.</p>
     </section>
 
     <section>
@@ -24,7 +25,7 @@
             <li><strong>E-Mail:</strong> Mailto-Link mit vorgefertigtem Text</li>
             <li><strong>Telegram:</strong> Teilen in Kanälen oder Gruppen</li>
         </ul>
-        <p>Zusätzlich: „Link kopieren" für eigene Kanäle (Newsletter, Website, etc.)</p>
+        <p>Zusätzlich: „Link kopieren“ für eigene Kanäle (Newsletter, Website, etc.)</p>
     </section>
 
     <section>
@@ -57,7 +58,7 @@
             <li><strong>Partner-Codes:</strong> Für Kooperationen mit Schulen, Verbänden</li>
             <li><strong>Newsletter-Codes:</strong> Exklusive Rabatte für Abonnenten</li>
             <li><strong>Social-Media-Codes:</strong> Zeitlich begrenzte Aktionen</li>
-            <li><strong>Tracking:</strong> Sehen Sie in der Statistik, welche Codes genutzt wurden</li>
+            <li><strong>Nachverfolgung:</strong> Sehen Sie in der Statistik, welche Codes genutzt wurden</li>
         </ul>
     </section>
 
@@ -75,6 +76,7 @@
     <x-ui.alert tone="info" title="Tipp">Kombinieren Sie Frühbucher-Rabatt mit Social-Media-Kampagne
         für maximale Reichweite in kurzer Zeit.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Investieren Sie in 1-2 Featured-Wochen kurz vor Veranstaltungsbeginn
+    <x-ui.alert tone="info" title="Empfehlung">Investieren Sie in ein bis zwei Wochen Hervorhebung kurz vor
+        Veranstaltungsbeginn
         für letzten Buchungsschub.</x-ui.alert>
 </x-help.article>

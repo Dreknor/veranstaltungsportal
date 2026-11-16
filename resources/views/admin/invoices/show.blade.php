@@ -1,9 +1,7 @@
 @use('App\Support\Ui')
 
 <x-layouts.app :title="'Rechnung ' . $invoice->invoice_number">
-    <x-ui.page-header :title="'Rechnung ' . $invoice->invoice_number"
-        :subtitle="$invoice->recipient_name"
-        :back-href="route('admin.invoices.index')" back-label="Zu den Rechnungen">
+    <x-ui.page-header :title="'Rechnung ' . $invoice->invoice_number" :subtitle="$invoice->recipient_name" :back-href="route('admin.invoices.index')" back-label="Zu den Rechnungen">
         <x-slot:actions>
             @if ($invoice->pdf_path)
                 <x-ui.button :href="route('admin.invoices.download', $invoice)">
@@ -15,7 +13,8 @@
                 @if ($invoice->status !== 'paid')
                     <x-ui.dropdown-item type="submit" form="mark-paid">Als bezahlt markieren</x-ui.dropdown-item>
                     @if ($invoice->status !== 'overdue')
-                        <x-ui.dropdown-item type="submit" form="mark-overdue">Als überfällig markieren</x-ui.dropdown-item>
+                        <x-ui.dropdown-item type="submit" form="mark-overdue">Als überfällig
+                            markieren</x-ui.dropdown-item>
                     @endif
                 @endif
                 <x-ui.dropdown-item type="submit" form="resend">Erneut per E-Mail senden</x-ui.dropdown-item>
@@ -61,7 +60,7 @@
                 <x-ui.dl>
                     <x-ui.dl-item label="Rechnungsnummer" num>{{ $invoice->invoice_number }}</x-ui.dl-item>
                     <x-ui.dl-item label="Art">
-                        {{ $invoice->type === 'platform_fee' ? 'Plattformgebühr' : 'Teilnahme' }}
+                        {{ $invoice->type === 'platform_fee' ? 'Plattformgebühr' : 'Teilnehmende' }}
                     </x-ui.dl-item>
                     <x-ui.dl-item label="Status">
                         @if ($invoice->status === 'paid')
@@ -74,11 +73,14 @@
                             <x-ui.status tone="warning">Offen</x-ui.status>
                         @endif
                     </x-ui.dl-item>
-                    <x-ui.dl-item label="Rechnungsdatum" num>{{ $invoice->invoice_date?->format('d.m.Y') }}</x-ui.dl-item>
-                    <x-ui.dl-item label="Fälligkeitsdatum" num>{{ $invoice->due_date?->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Rechnungsdatum"
+                        num>{{ $invoice->invoice_date?->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Fälligkeitsdatum"
+                        num>{{ $invoice->due_date?->format('d.m.Y') }}</x-ui.dl-item>
                     <x-ui.dl-item label="Veranstaltung">
                         @if ($invoice->event)
-                            <a href="{{ route('events.show', $invoice->event) }}" class="font-medium text-ink underline underline-offset-[3px]">{{ $invoice->event->title }}</a>
+                            <a href="{{ route('events.show', $invoice->event) }}"
+                                class="font-medium text-ink underline underline-offset-[3px]">{{ $invoice->event->title }}</a>
                         @endif
                     </x-ui.dl-item>
                     <x-ui.dl-item label="Buchung" num>
@@ -95,12 +97,14 @@
                     <x-ui.dl-item label="E-Mail">{{ $invoice->recipient_email }}</x-ui.dl-item>
                     <x-ui.dl-item label="Anschrift">
                         @if ($invoice->recipient_address)
-                            <span class="whitespace-pre-line">{{ is_array($invoice->recipient_address) ? implode("\n", array_filter($invoice->recipient_address)) : $invoice->recipient_address }}</span>
+                            <span
+                                class="whitespace-pre-line">{{ is_array($invoice->recipient_address) ? implode("\n", array_filter($invoice->recipient_address)) : $invoice->recipient_address }}</span>
                         @endif
                     </x-ui.dl-item>
                     @if ($invoice->user)
                         <x-ui.dl-item label="Konto">
-                            <a href="{{ route('admin.users.edit', $invoice->user) }}" class="text-ink underline underline-offset-[3px]">{{ $invoice->user->fullName() }}</a>
+                            <a href="{{ route('admin.users.edit', $invoice->user) }}"
+                                class="text-ink underline underline-offset-[3px]">{{ $invoice->user->fullName() }}</a>
                         </x-ui.dl-item>
                     @endif
                 </x-ui.dl>
@@ -122,7 +126,8 @@
                                 <tr>
                                     <td class="tabular-nums">{{ $fee->booking?->booking_number ?? '–' }}</td>
                                     <td class="num">{{ Ui::money($fee->booking_amount) }}</td>
-                                    <td class="num">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
+                                    <td class="num">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %
+                                    </td>
                                     <td class="num">{{ Ui::money($fee->fee_amount) }}</td>
                                 </tr>
                             @endforeach
@@ -158,7 +163,8 @@
                                         @endif
                                     </td>
                                     <td class="num">{{ $item['quantity'] ?? 1 }}</td>
-                                    <td class="num">{{ Ui::money($item['unit_price'] ?? ($item['total'] ?? 0)) }}</td>
+                                    <td class="num">{{ Ui::money($item['unit_price'] ?? ($item['total'] ?? 0)) }}
+                                    </td>
                                     <td class="num">{{ Ui::money($item['total'] ?? 0) }}</td>
                                 </tr>
                             @endforeach

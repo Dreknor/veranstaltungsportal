@@ -24,8 +24,7 @@
         {{-- Nicht-fakturierte Buchungen (nur bei externer Rechnungsstellung) --}}
         @if ($showPendingInvoices)
             <x-ui.stat label="Noch nicht fakturiert" :value="$stats['pending_invoice_count']"
-                sub="kostenpflichtige Buchungen warten auf externe Rechnung – exportieren"
-                :href="route('organizer.billing-data.index', ['filter' => 'pending'])" />
+                sub="kostenpflichtige Buchungen warten auf externe Rechnung – exportieren" :href="route('organizer.billing-data.index', ['filter' => 'pending'])" />
         @endif
     </div>
 
@@ -37,7 +36,8 @@
                 @foreach ($upcomingEvents as $event)
                     <x-ui.event-row :event="$event" :href="route('organizer.events.edit', $event)">
                         <x-slot:aside>
-                            <span class="text-ui font-medium whitespace-nowrap">{{ $event->bookings->count() }} Buchungen</span>
+                            <span
+                                class="text-ui font-medium whitespace-nowrap">{{ trans_choice('{1} :count Buchung|[0,*] :count Buchungen', $event->bookings->count()) }}</span>
                             @if ($event->is_published)
                                 <x-ui.status tone="success">Veröffentlicht</x-ui.status>
                             @else
@@ -52,7 +52,8 @@
                 @endforeach
             </x-ui.row-list>
         @else
-            <x-ui.empty title="Keine kommenden Veranstaltungen" :action-href="route('organizer.events.create')" action-label="Erste Veranstaltung anlegen">
+            <x-ui.empty title="Keine kommenden Veranstaltungen" :action-href="route('organizer.events.create')"
+                action-label="Erste Veranstaltung anlegen">
                 Sobald Sie eine Veranstaltung veröffentlichen, erscheint sie hier.
             </x-ui.empty>
         @endif
@@ -67,11 +68,13 @@
                             class="text-base font-semibold text-ink no-underline underline-offset-[3px] hover:underline">{{ $booking->customer_name }}</a>
                         <span class="text-small text-muted">{{ $booking->event->title }}</span>
                         <x-slot:meta>
-                            <span class="text-ui font-medium tabular-nums">{{ $booking->items->count() }} Tickets</span>
+                            <span
+                                class="text-ui font-medium tabular-nums">{{ trans_choice('{1} :count Ticket|[0,*] :count Tickets', $booking->items->count()) }}</span>
                             <span class="text-small text-muted">{{ $booking->created_at->diffForHumans() }}</span>
                         </x-slot:meta>
                         <x-slot:aside>
-                            <span class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
+                            <span
+                                class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
                             <x-ui.status :tone="\App\Support\Ui::bookingTone($booking->status)">{{ $booking->statusLabel() }}</x-ui.status>
                         </x-slot:aside>
                         <x-slot:action>
@@ -89,11 +92,23 @@
         <h2 id="schnellzugriff-heading" class="m-0 mb-6 text-h2">Schnellzugriff</h2>
         @php
             $quickLinks = [
-                ['Veranstaltung anlegen', route('organizer.events.create'), 'Veranstaltung anlegen und veröffentlichen'],
+                [
+                    'Veranstaltung anlegen',
+                    route('organizer.events.create'),
+                    'Veranstaltung anlegen und veröffentlichen',
+                ],
                 ['Buchungen verwalten', route('organizer.bookings.index'), 'Buchungen ansehen und bearbeiten'],
                 ['Daten exportieren', route('organizer.bookings.export'), 'Buchungsdaten als CSV'],
-                ['Hervorgehobene Veranstaltungen', route('organizer.featured-events.history'), 'Anträge, Zahlungen und Verlängerungen'],
-                ['Hilfe für Veranstalter', route('help.category', 'organizer'), 'Erste Schritte, Veranstaltungen, Buchungen'],
+                [
+                    'Hervorgehobene Veranstaltungen',
+                    route('organizer.featured-events.history'),
+                    'Anträge, Zahlungen und Verlängerungen',
+                ],
+                [
+                    'Hilfe für Veranstalter',
+                    route('help.category', 'organizer'),
+                    'Erste Schritte, Veranstaltungen, Buchungen',
+                ],
             ];
         @endphp
         <ul class="m-0 grid list-none grid-cols-1 gap-x-8 p-0 sm:grid-cols-2 lg:grid-cols-3">

@@ -21,15 +21,17 @@
                     <x-ui.choice name="invoice_mode" value="automatic" x-model="mode"
                         title="Automatische Rechnungsstellung"
                         description="Rechnungen werden automatisch als ZUGFeRD-PDF generiert und per E-Mail an die Teilnehmer versendet. PayPal-Zahlung ist möglich." />
-                    <x-ui.choice name="invoice_mode" value="external" x-model="mode"
-                        title="Externe Rechnungsstellung"
+                    <x-ui.choice name="invoice_mode" value="external" x-model="mode" title="Externe Rechnungsstellung"
                         description="Sie erstellen Rechnungen in Ihrer eigenen Buchhaltungssoftware. Die Plattform generiert keine Rechnungen und bietet kein PayPal an. Rechnungsdaten können als Excel exportiert werden." />
 
                     {{-- Warnhinweis --}}
-                    <x-ui.alert tone="warning" x-show="mode !== '{{ $organization->invoice_mode ?? 'automatic' }}'" x-cloak>
+                    <x-ui.alert tone="warning" x-show="mode !== '{{ $organization->invoice_mode ?? 'automatic' }}'"
+                        x-cloak>
                         <span>
-                            <strong>Achtung:</strong> Beim Wechsel des Rechnungsmodus werden bestehende Buchungen nicht verändert. Der neue Modus gilt nur für zukünftige Buchungen.
-                            <span x-show="mode === 'external'">Bei Wechsel auf „Extern" wird PayPal automatisch für neue Buchungen deaktiviert.</span>
+                            <strong>Achtung:</strong> Beim Wechsel des Rechnungsmodus werden bestehende Buchungen nicht
+                            verändert. Der neue Modus gilt nur für zukünftige Buchungen.
+                            <span x-show="mode === 'external'">Bei Wechsel auf „Extern" wird PayPal automatisch für neue
+                                Buchungen deaktiviert.</span>
                         </span>
                     </x-ui.alert>
 
@@ -57,7 +59,9 @@
                         <dl class="m-0 grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-3 text-small">
                             @foreach ($placeholders as $placeholder => $description)
                                 <div class="flex flex-col gap-0.5">
-                                    <dt><code class="font-mono text-small font-medium text-ink">{{ $placeholder }}</code></dt>
+                                    <dt><code
+                                            class="font-sans text-small font-medium text-ink">{{ $placeholder }}</code>
+                                    </dt>
                                     <dd class="m-0 text-muted">{{ $description }}</dd>
                                 </div>
                             @endforeach
@@ -66,12 +70,14 @@
 
                     <!-- Invoice Format -->
                     <div>
-                        <x-ui.label for="invoice_number_format_booking" required>Format für Rechnungsnummern</x-ui.label>
+                        <x-ui.label for="invoice_number_format_booking" required>Format für
+                            Rechnungsnummern</x-ui.label>
                         <x-ui.input name="invoice_number_format_booking" id="invoice_number_format_booking"
-                            :value="$settings['invoice_number_format_booking']" class="font-mono"
-                            placeholder="RE-{YEAR}-{NUMBER}" required aria-describedby="invoice_number_format_booking-hint" />
+                            :value="$settings['invoice_number_format_booking']" placeholder="RE-{YEAR}-{NUMBER}" required
+                            aria-describedby="invoice_number_format_booking-hint" />
                         <x-ui.hint id="invoice_number_format_booking-hint">
-                            Beispiel: RE-{YEAR}-{NUMBER} wird zu <span id="preview-booking" class="font-mono font-semibold text-ink">...</span>
+                            Beispiel: RE-{YEAR}-{NUMBER} wird zu <span id="preview-booking"
+                                class="font-semibold text-ink">...</span>
                         </x-ui.hint>
                         <x-ui.field-error name="invoice_number_format_booking" />
                     </div>
@@ -94,7 +100,8 @@
 
                     <!-- Warning Box -->
                     <x-ui.alert tone="warning" title="Wichtiger Hinweis">
-                        Diese Einstellungen gelten nur für Ihre Rechnungen. Ändern Sie die Zählerstände nur, wenn Sie genau wissen, was Sie tun, da dies zu doppelten Rechnungsnummern führen kann.
+                        Diese Einstellungen gelten nur für Ihre Rechnungen. Ändern Sie die Zählerstände nur, wenn Sie
+                        genau wissen, was Sie tun, da dies zu doppelten Rechnungsnummern führen kann.
                     </x-ui.alert>
 
                     <!-- Submit Button -->
@@ -109,7 +116,8 @@
             </x-ui.section>
         @else
             <x-ui.alert tone="info">
-                Die Rechnungsnummern-Einstellungen sind bei externer Rechnungsstellung nicht verfügbar, da keine Rechnungsnummern generiert werden.
+                Die Rechnungsnummern-Einstellungen sind bei externer Rechnungsstellung nicht verfügbar, da keine
+                Rechnungsnummern generiert werden.
             </x-ui.alert>
         @endif
     </div>
@@ -140,15 +148,15 @@
                         .then(data => {
                             if (data.success) {
                                 previewSpan.textContent = data.preview;
-                                previewSpan.className = 'font-mono font-semibold text-success';
+                                previewSpan.className = 'font-semibold text-success';
                             } else {
                                 previewSpan.textContent = 'Ungültig!';
-                                previewSpan.className = 'font-mono font-semibold text-danger';
+                                previewSpan.className = 'font-semibold text-danger';
                             }
                         })
                         .catch(() => {
                             previewSpan.textContent = 'Fehler';
-                            previewSpan.className = 'font-mono font-semibold text-danger';
+                            previewSpan.className = 'font-semibold text-danger';
                         });
                 }
 

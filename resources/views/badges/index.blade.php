@@ -1,3 +1,5 @@
+@use('App\Support\Ui')
+
 <x-layouts.app title="Meine Abzeichen">
     <x-ui.page-header :title="__('Meine Abzeichen')">
         <x-slot:actions>
@@ -10,9 +12,9 @@
 
     <!-- Statistics -->
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <x-ui.stat label="Abzeichen" :value="$stats['earned_badges'] . ' / ' . $stats['total_badges']" />
-        <x-ui.stat label="Fortschritt" :value="$stats['completion_percentage'] . '%'" />
-        <x-ui.stat label="Punkte" :value="$stats['total_points']" />
+        <x-ui.stat label="Abzeichen" :value="$stats['earned_badges'] . ' von ' . $stats['total_badges']" />
+        <x-ui.stat label="Fortschritt" :value="Ui::percent($stats['completion_percentage'])" />
+        <x-ui.stat label="Punkte" :value="Ui::number($stats['total_points'])" />
         <x-ui.stat label="Zuletzt"
             :value="$stats['recent_badges']->isNotEmpty() ? $stats['recent_badges']->first()->name : 'Noch keine'"
             class="[&>span:nth-child(2)]:truncate [&>span:nth-child(2)]:text-h3" />
@@ -21,86 +23,101 @@
     <!-- Earned Badges -->
     @if ($earnedBadges->isNotEmpty())
         <x-ui.section :title="'Verdiente Abzeichen (' . $earnedBadges->count() . ')'" class="mb-12">
-            <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(248px,1fr))] gap-4 p-0">
+            <x-ui.row-list>
                 @foreach ($earnedBadges as $badge)
-                    <li class="relative flex flex-col items-center rounded-box border border-line p-4 text-center transition-colors duration-150 hover:bg-zone-hover"
-                        onclick="window.location.href='{{ route('badges.show', $badge) }}'">
-                        <!-- Highlight Toggle -->
-                        <button type="button" onclick="event.stopPropagation(); toggleHighlight({{ $badge->id }})"
-                            class="absolute right-1 top-1 inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control text-ink"
-                            title="{{ $badge->pivot->is_highlighted ? 'Von Favoriten entfernen' : 'Als Favorit markieren' }}"
-                            aria-label="{{ $badge->pivot->is_highlighted ? 'Von Favoriten entfernen' : 'Als Favorit markieren' }}"
-                            aria-pressed="{{ $badge->pivot->is_highlighted ? 'true' : 'false' }}">
-                            @if ($badge->pivot->is_highlighted)
-                                <x-icon.star-filled class="h-5 w-5" />
-                            @else
-                                <x-icon.star class="h-5 w-5" />
-                            @endif
-                        </button>
-
-                        <x-badge-icon :badge="$badge" />
-                        <h3 class="m-0 mb-1 mt-3 text-base font-semibold text-ink">
-                            <a href="{{ route('badges.show', $badge) }}" class="text-ink no-underline hover:underline"
-                                onclick="event.stopPropagation()">{{ $badge->name }}</a>
-                        </h3>
-                        <p class="m-0 mb-2 line-clamp-2 text-small text-muted">{{ $badge->description }}</p>
-                        <p class="m-0 flex flex-wrap items-center justify-center gap-x-3 text-small text-ink-soft tabular-nums">
-                            <span>{{ $badge->points }} Punkte</span>
-                            <span>
-                                @if ($badge->pivot->earned_at instanceof \Carbon\Carbon)
-                                    {{ $badge->pivot->earned_at->diffForHumans() }}
-                                @else
-                                    {{ \Carbon\Carbon::parse($badge->pivot->earned_at)->diffForHumans() }}
-                                @endif
-                            </span>
-                        </p>
-                    </li>
+                    @php
+                        $earnedAt =
+                            $badge->pivot->earned_at instanceof \Carbon\Carbon
+                                ? $badge->pivot->earned_at
+                                : \Carbon\Carbon::parse($badge->pivot->earned_at);
+                        $highlighted = (bool) $badge->pivot->is_highlighted;
+                    @endphp
+                    <x-ui.row>
+                        <x-slot:lead>
+                            <x-badge-icon :badge="$badge" size="sm" />
+                        </x-slot:lead>
+                        <span class="text-small text-muted">{{ Ui::badgeType($badge->type) }}</span>
+                        <a href="{{ route('badges.show', $badge) }}"
+                            class="text-h3 text-ink no-underline hover:underline">{{ $badge->name }}</a>
+                        @if ($badge->description)
+                            <span class="line-clamp-2 text-small text-ink-soft">{{ $badge->description }}</span>
+                        @endif
+                        <x-slot:meta>
+                            <span class="text-ui font-medium tabular-nums">{{ Ui::number($badge->points) }}
+                                Punkte</span>
+                            <span class="text-small text-muted tabular-nums">Verdient am
+                                {{ $earnedAt->format('d.m.Y') }}</span>
+                        </x-slot:meta>
+                        <x-slot:action>
+                            <x-ui.button variant="secondary" full onclick="toggleHighlight({{ $badge->id }})"
+                                title="Als Favorit markieren" aria-pressed="{{ $highlighted ? 'true' : 'false' }}">
+                                <x-slot:icon>
+                                    @if ($highlighted)
+                                        <x-icon.star-filled />
+                                    @else
+                                        <x-icon.star />
+                                    @endif
+                                </x-slot:icon>
+                                Favorit
+                            </x-ui.button>
+                        </x-slot:action>
+                    </x-ui.row>
                 @endforeach
-            </ul>
+            </x-ui.row-list>
         </x-ui.section>
     @endif
 
     <!-- Badges by Type -->
     <div class="mb-12 grid gap-4 sm:grid-cols-3">
-        <x-ui.stat label="Teilnahme" :value="$stats['badges_by_type']['attendance']" />
-        <x-ui.stat label="Leistung" :value="$stats['badges_by_type']['achievement']" />
-        <x-ui.stat label="Besonders" :value="$stats['badges_by_type']['special']" />
+        <x-ui.stat :label="Ui::badgeType('attendance')" :value="$stats['badges_by_type']['attendance']" sub="verdiente Abzeichen" />
+        <x-ui.stat :label="Ui::badgeType('achievement')" :value="$stats['badges_by_type']['achievement']" sub="verdiente Abzeichen" />
+        <x-ui.stat :label="Ui::badgeType('special')" :value="$stats['badges_by_type']['special']" sub="verdiente Abzeichen" />
     </div>
 
     <!-- Unearned Badges -->
     @if ($unearnedBadges->isNotEmpty())
         <x-ui.section :title="'Noch zu verdienen (' . $unearnedBadges->count() . ')'">
-            <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(248px,1fr))] gap-4 p-0">
+            <x-ui.row-list>
                 @foreach ($unearnedBadges as $badge)
-                    <li class="flex flex-col items-center rounded-box border border-line p-4 text-center transition-colors duration-150 hover:bg-zone-hover"
-                        onclick="window.location.href='{{ route('badges.show', $badge) }}'">
-                        <x-badge-icon :badge="$badge" :earned="false" />
-                        <h3 class="m-0 mb-1 mt-3 text-base font-semibold text-ink">
-                            <a href="{{ route('badges.show', $badge) }}" class="text-ink no-underline hover:underline"
-                                onclick="event.stopPropagation()">{{ $badge->name }}</a>
-                        </h3>
-                        <p class="m-0 mb-2 line-clamp-2 text-small text-muted">{{ $badge->description }}</p>
-                        <p class="m-0 text-small text-ink-soft tabular-nums">{{ $badge->points }} Punkte</p>
-
-                        <!-- Progress Bar -->
-                        @if (isset($badgeProgress[$badge->id]) && !empty($badgeProgress[$badge->id]))
-                            @php
-                                $firstProgress = array_values($badgeProgress[$badge->id])[0];
-                            @endphp
-                            <div class="mt-3 w-full">
-                                <div class="mb-1 flex justify-between text-small text-muted tabular-nums">
-                                    <span>Fortschritt</span>
-                                    <span>{{ $firstProgress['percentage'] }}%</span>
-                                </div>
-                                <x-ui.progress :value="$firstProgress['percentage']" decorative />
-                                <div class="mt-1 text-small text-muted tabular-nums">
-                                    {{ $firstProgress['current'] }} / {{ $firstProgress['required'] }}
-                                </div>
-                            </div>
+                    @php
+                        // Angezeigt wird die Anforderung, die am weitesten vom Ziel entfernt ist.
+                        $requirements = collect($badgeProgress[$badge->id] ?? []);
+                        $openKey = $requirements->sortBy('percentage')->keys()->first();
+                        $open = $openKey !== null ? $requirements[$openKey] : null;
+                        $allMet = $requirements->isNotEmpty() && $requirements->every(fn($r) => $r['completed']);
+                    @endphp
+                    <x-ui.row>
+                        <x-slot:lead>
+                            <x-badge-icon :badge="$badge" size="sm" :earned="false" />
+                        </x-slot:lead>
+                        <span class="text-small text-muted">{{ Ui::badgeType($badge->type) }}</span>
+                        <a href="{{ route('badges.show', $badge) }}"
+                            class="text-h3 text-ink no-underline hover:underline">{{ $badge->name }}</a>
+                        @if ($badge->description)
+                            <span class="line-clamp-2 text-small text-ink-soft">{{ $badge->description }}</span>
                         @endif
-                    </li>
+                        <x-slot:meta>
+                            <span class="text-ui font-medium tabular-nums">{{ Ui::number($badge->points) }}
+                                Punkte</span>
+                            @if ($open && !$allMet)
+                                <span class="text-small text-muted tabular-nums">
+                                    {{ Ui::badgeRequirement($openKey) }}:
+                                    {{ Ui::number(min($open['current'], $open['required'])) }} von
+                                    {{ Ui::number($open['required']) }}
+                                </span>
+                            @endif
+                        </x-slot:meta>
+                        <x-slot:aside class="lg:w-[184px]">
+                            @if ($allMet)
+                                <x-ui.status tone="success">Anforderungen erfüllt</x-ui.status>
+                            @elseif ($open)
+                                <span class="text-small text-ink-soft">{{ Ui::percent($open['percentage']) }}</span>
+                                <x-ui.progress :value="$open['percentage']" decorative class="w-full max-w-46" />
+                            @endif
+                        </x-slot:aside>
+                    </x-ui.row>
                 @endforeach
-            </ul>
+            </x-ui.row-list>
         </x-ui.section>
     @endif
 

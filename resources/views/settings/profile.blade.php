@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts.app title="Profil">
     <x-ui.page-header title="Einstellungen" class="mb-4" />
 
     @include('settings.partials.navigation')
@@ -17,9 +17,9 @@
                         <img class="h-24 w-24 shrink-0 rounded-full border border-line object-cover"
                             src="{{ $user->profilePhotoUrl() }}" alt="{{ $user->fullName() }}">
                         <div class="min-w-0 flex-1 basis-60">
-                            <x-ui.input type="file" name="profile_photo" id="profile_photo" accept="image/*"
+                            <x-ui.file-input name="profile_photo" button="Foto auswählen" accept="image/*"
                                 aria-describedby="profile_photo-hint" />
-                            <x-ui.hint id="profile_photo-hint">{{ __('JPG, PNG or GIF (MAX. 2MB)') }}</x-ui.hint>
+                            <x-ui.hint id="profile_photo-hint">JPG, PNG oder GIF, höchstens 2 MB</x-ui.hint>
                             @if ($user->profile_photo)
                                 <x-ui.button variant="link"
                                     onclick="if(confirm('{{ __('Are you sure you want to delete your profile photo?') }}')) { document.getElementById('delete-photo-form').submit(); }">
@@ -45,7 +45,7 @@
                 <div>
                     <x-ui.label as="span">{{ __('Account Type') }}</x-ui.label>
                     <p class="m-0 text-base font-medium text-ink">
-                        {{ $user->isOrganizer() ? __('Veranstalter') : __('Teilnehmer') }}
+                        {{ $user->isAdmin() ? 'Administrator' : ($user->isOrganizer() ? 'Veranstalter' : 'Teilnehmer') }}
                     </p>
                     <x-ui.hint>{{ __('Contact support to change your account type') }}</x-ui.hint>
                 </div>

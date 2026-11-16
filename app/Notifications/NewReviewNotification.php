@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\EventReview;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notification;
 
 class NewReviewNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     protected EventReview $review;
 
@@ -24,7 +25,7 @@ class NewReviewNotification extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->withWebPush(['mail', 'database'], $notifiable);
     }
 
     /**

@@ -174,10 +174,12 @@ class DashboardController extends Controller
                 ->whereYear('created_at', now()->year)
                 ->count(),
 
+            // Teilgenommen = bestätigt und bereits vorbei (wie total_events_attended), hier nur dieses Jahr
             'events_this_year' => $user->bookings()
                 ->where('status', 'confirmed')
                 ->whereHas('event', function ($query) {
-                    $query->whereYear('start_date', now()->year);
+                    $query->whereYear('start_date', now()->year)
+                        ->where('end_date', '<', now());
                 })
                 ->count(),
 
@@ -210,15 +212,42 @@ class DashboardController extends Controller
             ->whereHas('event', function ($query) {
                 $query->where('end_date', '<', now());
             })
-            ->with('event')
+            ->with('event.dates')
             ->get();
 
         $totalMinutes = 0;
         foreach ($bookings as $booking) {
-            $totalMinutes += $booking->event->start_date->diffInMinutes($booking->event->end_date);
+            $totalMinutes += $this->eventMinutes($booking->event);
         }
 
         return round($totalMinutes / 60, 1);
+    }
+
+    /**
+     * Unterrichtszeit einer Veranstaltung in Minuten: bei Terminreihen die Summe der Termine, bei
+     * mehrtägigen Veranstaltungen Tage × tägliche Dauer – nicht die Spanne vom ersten bis zum letzten Tag.
+     */
+    private function eventMinutes(\App\Models\Event $event): int
+    {
+        if ($event->dates->isNotEmpty()) {
+            return (int) $event->dates->sum(
+                fn ($date) => $date->end_date ? $this->dayMinutes($date->start_date, $date->end_date) : 0
+            );
+        }
+
+        return $this->dayMinutes($event->start_date, $event->end_date);
+    }
+
+    private function dayMinutes(\Carbon\CarbonInterface $start, \Carbon\CarbonInterface $end): int
+    {
+        if ($start->isSameDay($end)) {
+            return (int) $start->diffInMinutes($end);
+        }
+
+        $days = (int) $start->copy()->startOfDay()->diffInDays($end->copy()->startOfDay()) + 1;
+        $daily = (int) $start->copy()->setDate($end->year, $end->month, $end->day)->diffInMinutes($end, false);
+
+        return $days * max(0, $daily);
     }
 }
 

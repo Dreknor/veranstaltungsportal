@@ -16,8 +16,9 @@
     </x-ui.page-header>
 
     @if (!$permission->is_system)
-        <form id="delete-permission-form" action="{{ route('admin.permissions.destroy', $permission) }}" method="POST" class="hidden"
-            onsubmit="return confirm('Permission \'{{ $permission->name }}\' wirklich löschen?')">
+        <form id="delete-permission-form" action="{{ route('admin.permissions.destroy', $permission) }}" method="POST"
+            class="hidden"
+            onsubmit="return confirm('Berechtigung „{{ \App\Support\AccessLabels::permission($permission->name) }}“ wirklich löschen?')">
             @csrf
             @method('DELETE')
         </form>
@@ -37,7 +38,8 @@
                         <x-ui.input id="permission-name-display" :value="$permission->name" disabled :old="false"
                             aria-describedby="permission-name-display-hint" />
                         <input type="hidden" name="name" value="{{ $permission->name }}">
-                        <x-ui.hint id="permission-name-display-hint">System-Berechtigung: Der Name ist nicht änderbar.</x-ui.hint>
+                        <x-ui.hint id="permission-name-display-hint">System-Berechtigung: Der Name ist nicht
+                            änderbar.</x-ui.hint>
                     </div>
                 @else
                     <x-ui.field label="Name der Berechtigung" name="name" :value="$permission->name" required />
@@ -57,7 +59,7 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach ($groups as $g)
                                 <x-ui.button variant="secondary" size="sm" class="group-quick-btn"
-                                    data-group="{{ $g }}">{{ $g }}</x-ui.button>
+                                    data-group="{{ $g }}">{{ \App\Support\AccessLabels::group($g) }}</x-ui.button>
                             @endforeach
                         </div>
                     </div>
@@ -72,7 +74,7 @@
                 @if ($loop->first)
                     <ul class="m-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-base text-ink">
                 @endif
-                <li>{{ ucfirst($role->name) }}</li>
+                <li>{{ \App\Support\AccessLabels::role($role->name) }}</li>
                 @if ($loop->last)
                     </ul>
                 @endif

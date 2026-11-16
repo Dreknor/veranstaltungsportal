@@ -5,12 +5,12 @@
     @if ($userRank)
         <div class="mb-12 grid gap-4 sm:grid-cols-2">
             <x-ui.stat label="Ihre Position" :value="'Platz ' . $userRank" />
-            <x-ui.stat label="Ihre Punkte" :value="auth()->user()->getTotalBadgePoints()" />
+            <x-ui.stat label="Ihre Punkte" :value="\App\Support\Ui::number(auth()->user()->getTotalBadgePoints())" />
         </div>
     @endif
 
     <!-- Leaderboard -->
-    <x-ui.section :title="'Top ' . count($leaderboard) . ' Teilnehmer'">
+    <x-ui.section title="Platzierungen">
         @if (count($leaderboard) === 0)
             <x-ui.empty :action-href="route('events.index')" action-label="Veranstaltungen entdecken">
                 Noch keine Einträge in der Bestenliste.
@@ -56,7 +56,7 @@
                                 </span>
                             </th>
                             <td class="num">{{ $entry['badges_count'] }}</td>
-                            <td class="num">{{ $entry['total_points'] }}</td>
+                            <td class="num">{{ \App\Support\Ui::number($entry['total_points']) }}</td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -67,17 +67,18 @@
     <!-- Info Box -->
     <x-ui.alert tone="info" title="Wie funktioniert die Bestenliste?" class="mt-12 max-w-prose">
         <div class="flex flex-col gap-3">
-        <p>
-            Die Bestenliste basiert auf den Gesamtpunkten, die Sie durch das Verdienen von Abzeichen sammeln.
-            Jedes Abzeichen hat einen bestimmten Punktewert. Je mehr Abzeichen Sie verdienen, desto höher steigen Sie in der Rangliste!
-            Nehmen Sie an Fortbildungen teil, schreiben Sie Bewertungen und engagieren Sie sich, um mehr Abzeichen zu verdienen.
-        </p>
-        <p>
-            <strong>Datenschutz:</strong> Nur Benutzer mit öffentlichen Profilen oder aktiviertem Networking erscheinen in der Bestenliste.
-            Bei privaten Profilen wird der Name anonymisiert angezeigt (z.B. "Max M.").
-            Sie können Ihre Sichtbarkeitseinstellungen in Ihren
-            <a href="{{ route('settings.profile.edit') }}">Profileinstellungen</a> anpassen.
-        </p>
+            <p>
+                Die Bestenliste basiert auf den Gesamtpunkten, die Sie durch das Verdienen von Abzeichen sammeln.
+                Jedes Abzeichen hat einen bestimmten Punktewert. Je mehr Abzeichen Sie verdienen, desto höher steigen
+                Sie in der Bestenliste. Nehmen Sie an Fortbildungen teil, schreiben Sie Bewertungen und engagieren Sie
+                sich, um weitere Abzeichen zu verdienen.
+            </p>
+            <p>
+                <strong>Datenschutz:</strong> In der Bestenliste erscheinen nur Personen mit öffentlichem Profil oder
+                aktiviertem Networking. Bei privaten Profilen wird der Name gekürzt angezeigt (z. B. „Max M.“).
+                Ihre Sichtbarkeit stellen Sie in den
+                <a href="{{ route('settings.privacy.edit') }}">Datenschutz-Einstellungen</a> ein.
+            </p>
         </div>
     </x-ui.alert>
 </x-layouts.app>

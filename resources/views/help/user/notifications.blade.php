@@ -42,7 +42,7 @@
 
         <h3>System-Benachrichtigungen</h3>
         <ul>
-            <li>Neue Badges erhalten</li>
+            <li>Neue Abzeichen erhalten</li>
             <li>Zertifikate verfügbar</li>
             <li>Wichtige Systemupdates</li>
             <li>Sicherheitshinweise</li>
@@ -78,7 +78,7 @@
         <p>Sehen Sie Benachrichtigungen direkt im Portal.</p>
         <ul>
             <li>Echtzeit-Updates</li>
-            <li>Badge mit Anzahl ungelesener Nachrichten</li>
+            <li>Zähler mit der Anzahl ungelesener Benachrichtigungen</li>
             <li>Zentrale Übersicht aller Benachrichtigungen</li>
         </ul>
     </section>

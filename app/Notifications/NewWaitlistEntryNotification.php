@@ -3,13 +3,14 @@
 namespace App\Notifications;
 
 use App\Models\EventWaitlist;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class NewWaitlistEntryNotification extends Notification
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     protected $waitlistEntry;
 
@@ -20,7 +21,7 @@ class NewWaitlistEntryNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['mail', 'database'];
+        return $this->withWebPush(['mail', 'database'], $notifiable);
     }
 
     public function toMail($notifiable)

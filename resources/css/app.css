@@ -433,6 +433,34 @@
     }
 
     /*
+     * Aufklappbereich <details>/<summary> in Lesetexten (Hilfe, Rechtstexte): statt des Browser-Dreiecks
+     * ein Chevron rechts wie bei der FAQ (zu: nach unten, offen: nach oben), Farbe muted.
+     */
+    .disclosure summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        list-style: none;
+    }
+    .disclosure summary::-webkit-details-marker {
+        display: none;
+    }
+    .disclosure summary::after {
+        content: "";
+        flex: none;
+        width: 8px;
+        height: 8px;
+        margin-right: 6px;
+        border-right: 1.6px solid var(--color-muted);
+        border-bottom: 1.6px solid var(--color-muted);
+        transform: translateY(-2px) rotate(45deg);
+    }
+    .disclosure details[open] > summary::after {
+        transform: translateY(2px) rotate(-135deg);
+    }
+
+    /*
      * Tabelle: <x-ui.table> setzt die Klasse; th/td brauchen keine eigenen Klassen.
      * Hilfsklassen an Zellen: "num" (Zahl, rechtsbündig, tabellarisch), "actions" (rechts, kein Umbruch).
      */

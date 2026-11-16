@@ -18,7 +18,7 @@
             $display = str_repeat('●', strlen($localPart));
         }
 
-        $display .= ' @ ';
+        $display .= '@';
 
         // Zeige nur erste und letzte 3 Zeichen der Domain
         if (strlen($domainPart) > 6) {
@@ -38,12 +38,12 @@
       data-contact="{{ $reversed }}"
       data-type="email"
       {{ $attributes->merge(['class' => $class]) }}>
-    <button type="button" class="inline-flex min-h-11 cursor-pointer items-center gap-2"
+    <button type="button" class="inline-flex min-h-11 cursor-pointer flex-wrap items-center gap-x-2 text-left"
             onclick="revealContact(this)"
             aria-label="E-Mail-Adresse anzeigen">
         <x-icon.mail class="h-4 w-4 flex-shrink-0" />
-        <span class="contact-display">{{ $display }}</span>
-        <span class="text-small text-muted">(klicken zum Anzeigen)</span>
+        <span class="contact-display whitespace-nowrap">{{ $display }}</span>
+        <span class="text-small whitespace-nowrap text-muted">(zum Anzeigen klicken)</span>
     </button>
 </span>
 

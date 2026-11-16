@@ -1,6 +1,6 @@
 <x-layouts.app title="System-Log-Statistiken" :header="false">
-    <x-ui.page-header title="System-Log-Statistiken" subtitle="Übersicht und Analyse der System-Logs"
-        :back-href="route('admin.system-logs.index')" back-label="Zurück zur Übersicht" />
+    <x-ui.page-header title="System-Log-Statistiken" subtitle="Übersicht und Analyse der System-Logs" :back-href="route('admin.system-logs.index')"
+        back-label="Zurück zur Übersicht" />
 
     <div class="mb-12 grid gap-4 sm:grid-cols-3">
         <x-ui.stat label="Logs gesamt" :value="number_format($stats['total'])" />
@@ -8,11 +8,11 @@
         <x-ui.stat label="Letzte 7 Tage" :value="number_format($stats['week'])" />
     </div>
 
-    <x-ui.section title="Verteilung nach Log-Level" class="mb-12">
-        <x-ui.table label="Verteilung nach Log-Level">
+    <x-ui.section title="Verteilung nach Schweregrad" class="mb-12">
+        <x-ui.table label="Verteilung nach Schweregrad">
             <thead>
                 <tr>
-                    <th scope="col">Level</th>
+                    <th scope="col">Schweregrad</th>
                     <th scope="col" class="num">Anzahl</th>
                     <th scope="col" class="hidden w-1/3 md:table-cell"><span class="sr-only">Anteil</span></th>
                     <th scope="col" class="num">Anteil</th>
@@ -30,7 +30,7 @@
                         <td class="hidden md:table-cell">
                             <x-ui.progress :value="$percentage" decorative />
                         </td>
-                        <td class="num">{{ number_format($percentage, 1) }} %</td>
+                        <td class="num">{{ \App\Support\Ui::percent($percentage) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">
@@ -43,11 +43,11 @@
         </x-ui.table>
     </x-ui.section>
 
-    <x-ui.section title="Top-Channels" class="mb-12">
-        <x-ui.table label="Top-Channels">
+    <x-ui.section title="Häufigste Kanäle" class="mb-12">
+        <x-ui.table label="Häufigste Kanäle">
             <thead>
                 <tr>
-                    <th scope="col">Channel</th>
+                    <th scope="col">Kanal</th>
                     <th scope="col" class="num">Anzahl</th>
                     <th scope="col" class="num">Prozent</th>
                 </tr>
@@ -60,7 +60,7 @@
                     <tr>
                         <th scope="row">{{ $channel->channel }}</th>
                         <td class="num">{{ number_format($channel->count) }}</td>
-                        <td class="num">{{ number_format($percentage, 1) }} %</td>
+                        <td class="num">{{ \App\Support\Ui::percent($percentage) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">

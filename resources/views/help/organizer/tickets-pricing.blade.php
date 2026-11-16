@@ -1,4 +1,4 @@
-<x-help.article title="Tickets & Preisgestaltung" subtitle="Best Practices für Ticketarten, Preise und Kapazitäten."
+<x-help.article title="Tickets & Preisgestaltung" subtitle="Empfehlungen für Ticketarten, Preise und Kapazitäten."
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Ticketarten erstellen</h2>
@@ -17,7 +17,7 @@
         <h2>2. Preisstaffeln & Zeitfenster</h2>
         <p>Nutzen Sie Preisstaffeln, um Buchungen zu steuern:</p>
         <ul>
-            <li>Frühbucherpreis bis 4 Wochen vor der Veranstaltung (z.B. 20% Rabatt)</li>
+            <li>Frühbucherpreis bis 4 Wochen vor der Veranstaltung (z. B. 20% Rabatt)</li>
             <li>Normalpreis bis 1 Woche vor der Veranstaltung</li>
             <li>Last-Minute-Preis (optional höher oder niedriger)</li>
         </ul>
@@ -28,8 +28,8 @@
         <h2>3. Rabattcodes einrichten</h2>
         <p>Erstellen Sie individuelle Rabattcodes:</p>
         <ul>
-            <li><strong>Fixer Betrag:</strong> z.B. 10 € Rabatt</li>
-            <li><strong>Prozentual:</strong> z.B. 15% auf Gesamtpreis</li>
+            <li><strong>Fixer Betrag:</strong> z. B. 10 € Rabatt</li>
+            <li><strong>Prozentual:</strong> z. B. 15% auf Gesamtpreis</li>
             <li><strong>Nutzungslimit:</strong> max. X-mal einlösbar</li>
             <li><strong>Gültigkeitszeitraum:</strong> von-bis Datum</li>
         </ul>
@@ -41,7 +41,7 @@
         <p>Steuern Sie die Verfügbarkeit:</p>
         <ul>
             <li><strong>Max. Teilnehmerzahl:</strong> Gesamtkapazität der Veranstaltung</li>
-            <li><strong>Kontingent pro Ticketart:</strong> z.B. max. 20 Frühbucher-Tickets</li>
+            <li><strong>Kontingent pro Ticketart:</strong> z. B. max. 20 Frühbucher-Tickets</li>
             <li><strong>Warteliste:</strong> Aktivieren Sie die Warteliste, damit Interessenten bei Ausverkauf
                 benachrichtigt werden</li>
         </ul>
@@ -53,13 +53,13 @@
         <ul>
             <li>Setzen Sie Preis auf 0,00 €</li>
             <li>Nutzen Sie Tickets für Kapazitätskontrolle</li>
-            <li>Teilnehmer erhalten trotzdem Bestätigung und QR-Code für Check-In</li>
+            <li>Teilnehmende erhalten trotzdem Bestätigung und QR-Code für Check-in</li>
         </ul>
     </section>
 
     <x-ui.alert tone="info" title="Tipp">Frühbucherrabatte erhöhen die Planungssicherheit. Setzen Sie
         attraktive Anreize für frühe Buchungen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Begrenzen Sie Frühbucher-Kontingente künstlich (z.B. nur 30% der
+    <x-ui.alert tone="info" title="Empfehlung">Begrenzen Sie Frühbucher-Kontingente künstlich (z. B. nur 30% der
         Plätze), um Dringlichkeit zu erzeugen.</x-ui.alert>
 </x-help.article>

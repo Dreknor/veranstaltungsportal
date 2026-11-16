@@ -97,10 +97,10 @@
                                 <span aria-hidden="true" class="h-2 w-2 flex-none rounded-full bg-leaf"></span>
                                 <span class="sr-only">Ungelesen:</span>
                             @endunless
-                            {{ $notification->data['title'] ?? 'Neue Benachrichtigung' }}
+                            {{ \App\Support\Ui::notificationTitle($notification->type, $notification->data) }}
                         </p>
                         @if (!empty($notification->data['message']))
-                            <p class="m-0 text-small text-muted">{{ $notification->data['message'] }}</p>
+                            <p class="m-0 text-small text-muted">{{ \App\Support\Ui::notificationMessage($notification->data) }}</p>
                         @endif
                         <x-slot:aside>
                             <span class="text-small text-muted">{{ $notification->created_at->diffForHumans() }}</span>

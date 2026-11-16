@@ -272,6 +272,16 @@
                 <x-ui.textarea label="Beschreibung" name="sg_description" required
                     error="Die Beschreibung muss mindestens 50 Zeichen lang sein.">Zu kurz.</x-ui.textarea>
 
+                <x-ui.markdown-editor label="Beschreibung mit Formatierung" name="sg_markdown" rows="6"
+                    :value="implode(PHP_EOL, ['**Inhalte:**', '- Grundlagen', '- Übungen in Kleingruppen'])" />
+
+                <div>
+                    <x-ui.label for="sg_file">Profilfoto</x-ui.label>
+                    <x-ui.file-input name="sg_file" button="Foto auswählen" accept="image/*"
+                        aria-describedby="sg_file-hint" />
+                    <x-ui.hint id="sg_file-hint">JPG, PNG oder GIF, höchstens 2 MB</x-ui.hint>
+                </div>
+
                 <div>
                     <x-ui.label for="sg_discount" optional>Rabattcode</x-ui.label>
                     <div class="flex max-w-[400px] flex-wrap gap-2">
@@ -835,6 +845,14 @@
                     <x-ui.tab href="#menues">Ticketarten</x-ui.tab>
                     <x-ui.tab href="#menues">Rabattcodes</x-ui.tab>
                     <x-ui.tab href="#menues">Check-in</x-ui.tab>
+                </x-ui.tabs>
+
+                <x-ui.tabs label="Einstellungen (umbrechend)" wrap>
+                    <x-ui.tab href="#menues" active>Profil</x-ui.tab>
+                    <x-ui.tab href="#menues">Passwort</x-ui.tab>
+                    <x-ui.tab href="#menues">Benachrichtigungen</x-ui.tab>
+                    <x-ui.tab href="#menues">Interessen &amp; Newsletter</x-ui.tab>
+                    <x-ui.tab href="#menues">Datenschutz</x-ui.tab>
                 </x-ui.tabs>
 
                 <div x-data="{ sgTab: 'participants' }" class="flex flex-col gap-4">

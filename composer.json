@@ -14,6 +14,7 @@
         "danielme85/laravel-log-to-db": "^4.1",
         "horstoeko/zugferd": "^1.0",
         "josiasmontag/laravel-recaptchav3": "^1.0",
+        "laravel-notification-channels/webpush": "^13.0",
         "laravel/framework": "^12",
         "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.10.1",

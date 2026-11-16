@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use PHPUnit\Framework\Attributes\Test;
-use App\Models\User;
-use App\Models\Event;
 use App\Models\DiscountCode;
+use App\Models\Event;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DiscountCodeTest extends TestCase
@@ -164,7 +164,53 @@ class DiscountCodeTest extends TestCase
 
         $response->assertStatus(403);
     }
+
+    #[Test]
+    public function edit_form_shows_usage_count_and_prefilled_limit()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer->id]);
+        $discountCode = DiscountCode::factory()->create([
+            'event_id' => $event->id,
+            'usage_limit' => 25,
+            'usage_count' => 7,
+        ]);
+
+        $this->actingAs($organizer)
+            ->get(route('organizer.events.discount-codes.edit', [$event, $discountCode]))
+            ->assertOk()
+            ->assertSee('aktuell verwendet: 7')
+            ->assertSee('name="usage_limit"', false)
+            ->assertSee('value="25"', false);
+    }
+
+    #[Test]
+    public function usage_limit_is_saved_on_create_and_update()
+    {
+        $organizer = User::factory()->create(['user_type' => 'organizer']);
+        $event = Event::factory()->create(['user_id' => $organizer->id]);
+
+        $this->actingAs($organizer)
+            ->post(route('organizer.events.discount-codes.store', $event), [
+                'code' => 'LIMIT5',
+                'type' => 'fixed',
+                'value' => 5,
+                'usage_limit' => 40,
+                'is_active' => true,
+            ]);
+
+        $discountCode = DiscountCode::where('code', 'LIMIT5')->firstOrFail();
+        $this->assertSame(40, $discountCode->usage_limit);
+
+        $this->actingAs($organizer)
+            ->put(route('organizer.events.discount-codes.update', [$event, $discountCode]), [
+                'code' => 'LIMIT5',
+                'type' => 'fixed',
+                'value' => 5,
+                'usage_limit' => 60,
+                'is_active' => true,
+            ]);
+
+        $this->assertSame(60, $discountCode->fresh()->usage_limit);
+    }
 }
-
-
-

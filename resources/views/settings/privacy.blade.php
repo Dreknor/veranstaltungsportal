@@ -1,4 +1,4 @@
-<x-layouts.app>
+<x-layouts.app title="Datenschutz-Einstellungen">
     <x-ui.page-header title="Einstellungen" class="mb-4" />
 
     @include('settings.partials.navigation')
@@ -31,8 +31,8 @@
                     :checked="(bool) $user->show_phone_to_connections" />
                 </div>
 
-                <!-- Data Processing & Analytics Section -->
-                <h3 class="m-0 mb-2 mt-8 text-h3">Datenverarbeitung & Analytics</h3>
+                <!-- Datenverarbeitung -->
+                <h3 class="m-0 mb-2 mt-8 text-h3">Datenverarbeitung &amp; Nutzungsanalyse</h3>
                 <div class="divide-y divide-line border-y border-line">
                 <x-ui.checkbox name="allow_data_analytics" label="Datenanalyse erlauben"
                     hint="Ihre anonymisierten Nutzungsdaten helfen uns, die Plattform zu verbessern"

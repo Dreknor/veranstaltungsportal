@@ -1,6 +1,6 @@
 <x-layouts.app title="Audit-Log-Details" :header="false">
-    <x-ui.page-header title="Audit-Log-Details" subtitle="Detaillierte Ansicht des Log-Eintrags"
-        :back-href="route('admin.audit-logs.index')" back-label="Zurück zur Übersicht" />
+    <x-ui.page-header title="Audit-Log-Details" subtitle="Detaillierte Ansicht des Log-Eintrags" :back-href="route('admin.audit-logs.index')"
+        back-label="Zurück zur Übersicht" />
 
     @php
         $actionTone = \App\Support\Ui::auditActionTone($auditLog->action);
@@ -17,26 +17,28 @@
                 System
             @endif
         </x-ui.dl-item>
-        <x-ui.dl-item label="Aktion"><x-ui.status :tone="$actionTone">{{ $auditLog->action }}</x-ui.status></x-ui.dl-item>
+        <x-ui.dl-item label="Aktion"><x-ui.status
+                :tone="$actionTone">{{ \App\Support\AdminLabels::auditAction($auditLog->action) }}</x-ui.status></x-ui.dl-item>
         <x-ui.dl-item label="Modell">
-            {{ $auditLog->auditable_type ? class_basename($auditLog->auditable_type) : '-' }}
+            {{ $auditLog->auditable_type ? \App\Support\AdminLabels::auditModel($auditLog->auditable_type) : '-' }}
             @if ($auditLog->auditable_id)
                 (ID: {{ $auditLog->auditable_id }})
             @endif
         </x-ui.dl-item>
         <x-ui.dl-item label="IP-Adresse" num>{{ $auditLog->ip_address ?? '-' }}</x-ui.dl-item>
-        <x-ui.dl-item label="User Agent"><span class="break-all">{{ $auditLog->user_agent ?? '-' }}</span></x-ui.dl-item>
+        <x-ui.dl-item label="Browser (User-Agent)"><span
+                class="break-all">{{ $auditLog->user_agent ?? '-' }}</span></x-ui.dl-item>
         @if ($auditLog->description)
             <x-ui.dl-item label="Beschreibung">{{ $auditLog->description }}</x-ui.dl-item>
         @endif
         @if ($auditLog->old_values)
             <x-ui.dl-item label="Alte Werte">
-                <pre class="m-0 overflow-x-auto rounded-box bg-zone p-4 font-mono text-small text-ink">{{ json_encode($auditLog->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                <pre class="m-0 rounded-box bg-zone p-4 text-small text-ink overflow-x-auto break-words whitespace-pre-wrap">{{ json_encode($auditLog->old_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
             </x-ui.dl-item>
         @endif
         @if ($auditLog->new_values)
             <x-ui.dl-item label="Neue Werte">
-                <pre class="m-0 overflow-x-auto rounded-box bg-zone p-4 font-mono text-small text-ink">{{ json_encode($auditLog->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                <pre class="m-0 rounded-box bg-zone p-4 text-small text-ink overflow-x-auto break-words whitespace-pre-wrap">{{ json_encode($auditLog->new_values, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
             </x-ui.dl-item>
         @endif
     </x-ui.dl>
@@ -55,8 +57,10 @@
                     @foreach ($changes as $field => $change)
                         <tr>
                             <th scope="row">{{ $field }}</th>
-                            <td class="break-all text-danger">{{ is_array($change['old']) ? json_encode($change['old']) : $change['old'] }}</td>
-                            <td class="break-all text-success">{{ is_array($change['new']) ? json_encode($change['new']) : $change['new'] }}</td>
+                            <td class="break-all text-danger">
+                                {{ is_array($change['old']) ? json_encode($change['old']) : $change['old'] }}</td>
+                            <td class="break-all text-success">
+                                {{ is_array($change['new']) ? json_encode($change['new']) : $change['new'] }}</td>
                         </tr>
                     @endforeach
                 </tbody>

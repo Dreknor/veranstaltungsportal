@@ -71,6 +71,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/help/{category}/{article}', [\App\Http\Controllers\HelpController::class, 'show'])->name('help.article');
 });
 
+// Vorschau für <x-ui.markdown-editor> (gleicher Renderer wie die Anzeige: App\Support\Ui::markdown)
+Route::post('/markdown/preview', \App\Http\Controllers\MarkdownPreviewController::class)
+    ->middleware(['auth', 'throttle:60,1'])
+    ->name('markdown.preview');
+
 // Event Routes (Public)
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 Route::get('/events/calendar', [EventController::class, 'calendar'])->name('events.calendar');
@@ -373,6 +378,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
     Route::get('settings/notifications', [Settings\NotificationController::class, 'edit'])->name('settings.notifications.edit');
     Route::put('settings/notifications', [Settings\NotificationController::class, 'update'])->name('settings.notifications.update');
+    Route::post('settings/notifications/push', [Settings\PushSubscriptionController::class, 'store'])->name('settings.notifications.push.store');
+    Route::delete('settings/notifications/push', [Settings\PushSubscriptionController::class, 'destroy'])->name('settings.notifications.push.destroy');
     Route::get('settings/privacy', [Settings\PrivacyController::class, 'edit'])->name('settings.privacy.edit');
     Route::put('settings/privacy', [Settings\PrivacyController::class, 'update'])->name('settings.privacy.update');
 
@@ -393,6 +400,8 @@ Route::middleware(['auth', 'verified', 'admin'])
 
 // Admin Routes
 Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    // /admin führt auf das Dashboard
+    Route::redirect('/', '/admin/dashboard')->name('index');
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
 
     // User Management
@@ -602,3 +611,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications/read/all', [\App\Http\Controllers\NotificationController::class, 'deleteRead'])->name('notifications.delete-read');
 });
+
+// Unbekannte Adressen: 404-Seite innerhalb der Web-Middleware, damit Sitzung und Anmeldung für die Kopfzeile bekannt sind
+Route::fallback(fn () => response()->view('errors.404', [], 404));

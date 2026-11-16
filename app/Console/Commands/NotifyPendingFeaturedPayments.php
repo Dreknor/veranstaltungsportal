@@ -8,7 +8,7 @@ use App\Notifications\PendingFeaturedPaymentAdminNotification;
 use Illuminate\Console\Command;
 
 /**
- * Benachrichtigt Admins über ausstehende Featured-Event-Zahlungen,
+ * Benachrichtigt Admins über ausstehende Zahlungen für Hervorhebungen,
  * die seit mehr als 7 Tagen offen sind.
  *
  * Wird täglich via Scheduler ausgeführt.
@@ -25,7 +25,7 @@ class NotifyPendingFeaturedPayments extends Command
     /**
      * The console command description.
      */
-    protected $description = 'Benachrichtigt Admins über ausstehende Featured-Event-Zahlungen (Standard: > 7 Tage offen)';
+    protected $description = 'Benachrichtigt Admins über ausstehende Zahlungen für Hervorhebungen (Standard: > 7 Tage offen)';
 
     /**
      * Execute the console command.
@@ -45,7 +45,7 @@ class NotifyPendingFeaturedPayments extends Command
             ->get();
 
         if ($pendingFees->isEmpty()) {
-            $this->info("Keine ausstehenden Featured-Zahlungen älter als {$days} Tage.");
+            $this->info("Keine ausstehenden Zahlungen für Hervorhebungen älter als {$days} Tage.");
             return self::SUCCESS;
         }
 

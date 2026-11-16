@@ -23,7 +23,7 @@
                 vervollständigen.
             </p>
             <p class="mt-1">
-                Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen an Teilnehmer versendet werden.
+                Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen an Teilnehmende versendet werden.
             </p>
             <p class="mt-2 flex flex-wrap gap-x-6 gap-y-1">
                 @if (!auth()->user()->hasCompleteBillingData())
@@ -41,10 +41,10 @@
             enctype="multipart/form-data" class="m-0 min-w-0">
             @csrf
 
-            {{-- 1 Einstellungen --}}
+            {{-- 1 Grunddaten --}}
             <section aria-labelledby="schritt-1" class="border-t border-line py-8">
                 <x-ui.step-heading number="1" id="schritt-1" aside="* Pflichtfeld" class="mb-6">
-                    Einstellungen
+                    Grunddaten
                 </x-ui.step-heading>
 
                 <div class="flex flex-col gap-y-5">
@@ -61,7 +61,7 @@
                             'external' => 'Externe Veranstaltung',
                         ]" />
 
-                    <x-ui.textarea label="Beschreibung" name="description" required rows="6" />
+                    <x-ui.markdown-editor label="Beschreibung" name="description" required />
 
                     <x-ui.field label="Titelbild" name="featured_image" type="file" accept="image/*" optional />
                 </div>
@@ -82,7 +82,7 @@
                         <input type="hidden" name="has_multiple_dates" value="0">
                         <x-ui.checkbox name="has_multiple_dates" id="has_multiple_dates"
                             label="Veranstaltung hat mehrere Termine"
-                            hint="Aktivieren Sie diese Option, wenn die Veranstaltung aus mehreren aufeinanderfolgenden Terminen besteht (z.B. ein 8-Wochen-Kurs). Teilnehmer buchen dann automatisch alle Termine gemeinsam." />
+                            hint="Aktivieren Sie diese Option, wenn die Veranstaltung aus mehreren aufeinanderfolgenden Terminen besteht (z. B. ein 8-Wochen-Kurs). Teilnehmende buchen dann automatisch alle Termine gemeinsam." />
 
                         <div id="multiple-dates-info" class="mt-3"
                             style="display: {{ old('has_multiple_dates') ? 'block' : 'none' }}">
@@ -124,9 +124,9 @@
                             <div class="flex flex-wrap gap-x-4 gap-y-5">
                                 <x-ui.field :label="$star('PLZ', 'venue-required')" name="venue_postal_code" inputmode="numeric"
                                     class="max-w-40 flex-[1_1_112px]" />
-                                <x-ui.field :label="$star('Stadt', 'venue-required')" name="venue_city" class="min-w-0 flex-[3_1_200px]" />
+                                <x-ui.field :label="$star('Ort', 'venue-required')" name="venue_city" class="min-w-0 flex-[3_1_200px]" />
                             </div>
-                            <x-ui.field :label="$star('Land', 'venue-required')" name="venue_country" value="Germany" />
+                            <x-ui.field :label="$star('Land', 'venue-required')" name="venue_country" value="Deutschland" />
                             <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-5">
                                 <x-ui.field label="Breitengrad" name="venue_latitude" type="number" step="0.0000001"
                                     optional />
@@ -145,7 +145,7 @@
                                 placeholder="https://zoom.us/j/123456789 oder https://meet.google.com/..."
                                 hint="Sichtbar nur für bestätigte und bezahlte Buchungen: in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen 24 h und 3 h vor Beginn." />
                             <x-ui.field label="Zugangs-/Meeting-Code" name="online_access_code" optional
-                                placeholder="z.B. Meeting-ID, Passwort"
+                                placeholder="z. B. Meeting-ID, Passwort"
                                 hint="Falls ein separater Zugangscode für die Online-Veranstaltung benötigt wird." />
                         </div>
                     </div>
@@ -178,7 +178,7 @@
                     <div id="pricing-section"
                         class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-5">
                         <x-ui.field label="Preis ab (€)" name="price_from" type="number" step="0.01" optional />
-                        <x-ui.field label="Max. Teilnehmer" name="max_attendees" type="number" optional />
+                        <x-ui.field label="Max. Teilnehmende" name="max_attendees" type="number" optional />
                     </div>
 
                     <div>
@@ -193,11 +193,11 @@
                         <input type="hidden" id="featured_start_date" name="featured_start_date" value="">
 
                         <x-ui.checkbox name="is_private" id="is_private"
-                            label="Private Veranstaltung (Zugriffscode erforderlich)" />
+                            label="Private Veranstaltung (Zugangscode erforderlich)" />
                     </div>
 
                     <div id="access_code_field" style="display: {{ old('is_private') ? 'block' : 'none' }}">
-                        <x-ui.field label="Zugriffscode" name="access_code" />
+                        <x-ui.field label="Zugangscode" name="access_code" />
                     </div>
                 </div>
             </section>
@@ -209,20 +209,20 @@
 
                 <div class="flex flex-col gap-y-5">
                     <x-ui.textarea label="Hinweise auf dem Ticket" name="ticket_notes" rows="4" optional
-                        placeholder="z.B. Bitte Personalausweis mitbringen, Einlass ab 18:30 Uhr, etc."
+                        placeholder="z. B. Bitte Personalausweis mitbringen, Einlass ab 18:30 Uhr, etc."
                         hint="Diese Hinweise werden auf allen generierten Tickets für diese Veranstaltung angezeigt. Maximal 1000 Zeichen." />
 
                     <div>
                         <input type="hidden" name="requires_ticket" value="0">
                         <x-ui.checkbox name="requires_ticket" id="requires_ticket" :checked="true"
                             label="Ticket-Versand erforderlich"
-                            hint="Wenn deaktiviert, werden keine Tickets per E-Mail versendet. Teilnehmer erhalten nur eine Buchungsbestätigung mit Link zur Buchungsseite." />
+                            hint="Wenn deaktiviert, werden keine Tickets per E-Mail versendet. Teilnehmende erhalten nur eine Buchungsbestätigung mit Link zur Buchungsseite." />
 
                         <div id="qr_code_option">
                             <input type="hidden" name="show_qr_code_on_ticket" value="0">
                             <x-ui.checkbox name="show_qr_code_on_ticket" :checked="true"
                                 label="QR-Code auf Tickets anzeigen"
-                                hint="Wenn aktiviert, wird auf jedem Ticket ein QR-Code für den Check-In angezeigt." />
+                                hint="Wenn aktiviert, wird auf jedem Ticket ein QR-Code für den Check-in angezeigt." />
                         </div>
                     </div>
 
@@ -233,14 +233,14 @@
                         <div>
                             <input type="hidden" name="cancellation_allowed" value="0">
                             <x-ui.checkbox name="cancellation_allowed" id="cancellation_allowed_create"
-                                label="Stornierung durch Teilnehmer erlauben"
-                                hint="Wenn aktiviert, können Teilnehmer ihre Buchung selbst stornieren." />
+                                label="Stornierung durch Teilnehmende erlauben"
+                                hint="Wenn aktiviert, können Teilnehmende ihre Buchung selbst stornieren." />
 
                             <div id="cancellation_days_field_create"
                                 class="{{ old('cancellation_allowed') ? '' : 'hidden' }} mt-3 pl-8">
                                 <x-ui.field label="Stornierungsfrist (Tage vor Veranstaltungsbeginn)"
                                     name="cancellation_days_before" id="cancellation_days_before_create"
-                                    type="number" min="0" placeholder="z.B. 3" input-class="max-w-32"
+                                    type="number" min="0" placeholder="z. B. 3" input-class="max-w-32"
                                     hint="Stornierung muss mindestens diese Anzahl an Tagen vor Beginn erfolgen. Leer lassen = bis Veranstaltungsbeginn." />
                             </div>
                         </div>
@@ -252,7 +252,7 @@
                                 'optional' => 'Optional anzeigen',
                                 'required' => 'Pflichtfeld',
                             ]"
-                            hint="Legt fest, ob Teilnehmer bei der Buchung und Personalisierung ihre Organisation/Einrichtung angeben müssen." />
+                            hint="Legt fest, ob Teilnehmende bei der Buchung und Personalisierung ihre Organisation bzw. Einrichtung angeben müssen." />
 
                         {{-- Bestätigungsmodus für kostenfreie Anmeldungen --}}
                         <fieldset class="m-0 min-w-0 border-0 p-0">

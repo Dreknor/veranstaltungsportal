@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
-use App\Models\Event;
 use App\Models\DiscountCode;
+use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class DiscountCodeController extends Controller
 {
-
     public function index(Event $event)
     {
         $this->authorize('update', $event);
@@ -47,7 +46,7 @@ class DiscountCodeController extends Controller
                     }
                 },
             ],
-            'max_uses' => 'nullable|integer|min:1',
+            'usage_limit' => 'nullable|integer|min:1',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date|after:valid_from',
             'is_active' => 'boolean',
@@ -84,7 +83,7 @@ class DiscountCodeController extends Controller
         }
 
         $validated = $request->validate([
-            'code' => 'required|string|max:50|unique:discount_codes,code,' . $discountCode->id,
+            'code' => 'required|string|max:50|unique:discount_codes,code,'.$discountCode->id,
             'type' => 'required|in:percentage,fixed',
             'value' => [
                 'required',
@@ -96,7 +95,7 @@ class DiscountCodeController extends Controller
                     }
                 },
             ],
-            'max_uses' => 'nullable|integer|min:1',
+            'usage_limit' => 'nullable|integer|min:1',
             'valid_from' => 'nullable|date',
             'valid_until' => 'nullable|date|after:valid_from',
             'is_active' => 'boolean',
@@ -136,7 +135,7 @@ class DiscountCodeController extends Controller
         }
 
         $discountCode->update([
-            'is_active' => !$discountCode->is_active
+            'is_active' => ! $discountCode->is_active,
         ]);
 
         return back()->with('success', 'Rabattcode-Status erfolgreich geändert!');
@@ -151,4 +150,3 @@ class DiscountCodeController extends Controller
         return response()->json(['code' => $code]);
     }
 }
-

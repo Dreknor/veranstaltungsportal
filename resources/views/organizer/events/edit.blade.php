@@ -101,7 +101,7 @@
                             required />
                     </div>
 
-                    <x-ui.textarea label="Beschreibung" name="description" :value="$event->description" required rows="6" />
+                    <x-ui.markdown-editor label="Beschreibung" name="description" :value="$event->description" required />
 
                     <div class="flex flex-col gap-3">
                         <x-ui.label as="span" class="mb-0">Titelbild</x-ui.label>
@@ -487,7 +487,7 @@
             @endphp
             @if ($pendingApprovalCount > 0)
                 <x-ui.alert tone="warning" class="mb-8"
-                    title="{{ $pendingApprovalCount }} Anmeldung(en) warten auf Bestätigung">
+                    title="{{ trans_choice('{1} :count Anmeldung wartet|[0,*] :count Anmeldungen warten', $pendingApprovalCount) }} auf Bestätigung">
                     <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2">
                         <a
                             href="{{ route('organizer.bookings.index', ['event_id' => $event->id, 'status' => 'pending_approval']) }}">Anzeigen</a>
@@ -496,7 +496,7 @@
                             @csrf
                             <button type="submit"
                                 class="min-h-11 cursor-pointer font-medium text-current underline underline-offset-[3px]"
-                                onclick="return confirm('Alle {{ $pendingApprovalCount }} Anmeldung(en) bestätigen?')">
+                                onclick="return confirm('{{ $pendingApprovalCount === 1 ? 'Die Anmeldung' : 'Alle ' . $pendingApprovalCount . ' Anmeldungen' }} bestätigen?')">
                                 Alle bestätigen
                             </button>
                         </form>
@@ -505,34 +505,34 @@
             @endif
 
             {{-- Früher nur sichtbar, wenn Rechnungsdaten fehlten (falsch platziertes @if) – jetzt immer --}}
-                <section aria-labelledby="teilnehmende-titel" class="border-t border-line py-8">
-                    <h2 id="teilnehmende-titel" class="m-0 mb-2 text-h2-form text-ink">Teilnehmende</h2>
-                    <p class="m-0 mb-4 text-small text-muted tabular-nums">{{ $event->getAttendeesCount() }}
-                        bestätigte
-                        Teilnehmende</p>
-                    @php
-                        $waitlistCount = \App\Models\EventWaitlist::where('event_id', $event->id)
-                            ->where('status', 'waiting')
-                            ->count();
-                    @endphp
-                    <div class="flex flex-col gap-3">
-                        <x-ui.button variant="secondary" full :href="route('organizer.events.attendees.download', $event)">
-                            <x-slot:icon><x-icon.download /></x-slot:icon>
-                            Teilnehmerliste herunterladen
-                        </x-ui.button>
-                        <x-ui.button variant="secondary" full :href="route('organizer.events.attendees.contact', $event)">
-                            <x-slot:icon><x-icon.mail /></x-slot:icon>
-                            Teilnehmende kontaktieren
-                        </x-ui.button>
-                        <x-ui.button variant="secondary" full :href="route('organizer.events.waitlist.index', $event)">
-                            <x-slot:icon><x-icon.clock /></x-slot:icon>
-                            Warteliste verwalten
-                            @if ($waitlistCount > 0)
-                                <span class="tabular-nums">({{ $waitlistCount }})</span>
-                            @endif
-                        </x-ui.button>
-                    </div>
-                </section>
+            <section aria-labelledby="teilnehmende-titel" class="border-t border-line py-8">
+                <h2 id="teilnehmende-titel" class="m-0 mb-2 text-h2-form text-ink">Teilnehmende</h2>
+                <p class="m-0 mb-4 text-small text-muted tabular-nums">{{ $event->getAttendeesCount() }}
+                    bestätigte
+                    Teilnehmende</p>
+                @php
+                    $waitlistCount = \App\Models\EventWaitlist::where('event_id', $event->id)
+                        ->where('status', 'waiting')
+                        ->count();
+                @endphp
+                <div class="flex flex-col gap-3">
+                    <x-ui.button variant="secondary" full :href="route('organizer.events.attendees.download', $event)">
+                        <x-slot:icon><x-icon.download /></x-slot:icon>
+                        Teilnehmerliste herunterladen
+                    </x-ui.button>
+                    <x-ui.button variant="secondary" full :href="route('organizer.events.attendees.contact', $event)">
+                        <x-slot:icon><x-icon.mail /></x-slot:icon>
+                        Teilnehmende kontaktieren
+                    </x-ui.button>
+                    <x-ui.button variant="secondary" full :href="route('organizer.events.waitlist.index', $event)">
+                        <x-slot:icon><x-icon.clock /></x-slot:icon>
+                        Warteliste verwalten
+                        @if ($waitlistCount > 0)
+                            <span class="tabular-nums">({{ $waitlistCount }})</span>
+                        @endif
+                    </x-ui.button>
+                </div>
+            </section>
 
             <section id="ticket-types-section" aria-labelledby="ticketarten-titel" class="border-t border-line py-8">
                 <h2 id="ticketarten-titel" class="m-0 mb-6 text-h2-form text-ink">Ticketarten</h2>
@@ -620,12 +620,12 @@
                         <x-ui.checkbox name="is_available" id="ticket_is_available" checked :old="false"
                             :error="false" label="Ticketart aktivieren" />
 
-                        <div class="flex flex-wrap justify-end gap-3 border-t border-line pt-4">
+                        <div class="flex flex-wrap gap-3 border-t border-line pt-4">
+                            <x-ui.button type="submit">Ticketart speichern</x-ui.button>
                             <x-ui.button variant="secondary"
                                 onclick="document.getElementById('add-ticket-form').classList.add('hidden')">
                                 Abbrechen
                             </x-ui.button>
-                            <x-ui.button type="submit">Ticketart speichern</x-ui.button>
                         </div>
                     </form>
                 </x-ui.box>

@@ -68,7 +68,7 @@
         <ul>
             <li>Profilbild und Bio</li>
             <li>Besuchte Veranstaltungen</li>
-            <li>Badges und Erfolge</li>
+            <li>Abzeichen und Erfolge</li>
             <li>Gemeinsame Interessen</li>
             <li>Gemeinsame Verbindungen</li>
         </ul>

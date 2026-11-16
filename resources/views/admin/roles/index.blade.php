@@ -2,7 +2,7 @@
     <x-ui.page-header title="Rollen & Berechtigungen" :back-href="route('admin.dashboard')" back-label="Zum Dashboard">
         <x-slot:actions>
             <x-ui.button variant="secondary" :href="route('admin.roles.matrix')">Matrix-Ansicht</x-ui.button>
-            <x-ui.button variant="secondary" :href="route('admin.permissions.index')">Berechtigungen verwalten</x-ui.button>
+            <x-ui.button variant="link" :href="route('admin.permissions.index')">Berechtigungen verwalten</x-ui.button>
             <x-ui.button :href="route('admin.roles.create')">
                 <x-slot:icon><x-icon.plus /></x-slot:icon>
                 Neue Rolle
@@ -25,9 +25,10 @@
                 @foreach ($roles as $role)
                     <tr>
                         <th scope="row">
-                            <span class="block">{{ ucfirst($role->name) }}</span>
+                            <span class="block">{{ \App\Support\AccessLabels::role($role->name) }}</span>
                             @if ($role->description)
-                                <span class="block max-w-prose text-small font-normal text-muted">{{ $role->description }}</span>
+                                <span
+                                    class="block max-w-prose text-small font-normal text-muted">{{ $role->description }}</span>
                             @endif
                             @if ($role->is_system)
                                 <x-ui.status tone="neutral" class="mt-1">System-Rolle</x-ui.status>
@@ -35,7 +36,11 @@
                         </th>
                         <td class="text-small">
                             @foreach ($role->permissions->take(4) as $permission)
-                                <span class="font-mono whitespace-nowrap">{{ $permission->name }}</span>@if (!$loop->last), @endif
+                                <span
+                                    class="whitespace-nowrap">{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
+                                @if (!$loop->last)
+                                    ,
+                                @endif
                             @endforeach
                             @if ($role->permissions->count() > 4)
                                 <span class="text-muted">+{{ $role->permissions->count() - 4 }} mehr</span>
@@ -46,9 +51,11 @@
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('admin.roles.edit', $role)">Bearbeiten</x-ui.button>
                             @if (!$role->is_system)
-                                <x-ui.button size="sm" variant="secondary" type="submit" form="delete-role-{{ $role->id }}">Löschen</x-ui.button>
-                                <form id="delete-role-{{ $role->id }}" action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="hidden"
-                                    onsubmit="return confirm('Rolle \'{{ $role->name }}\' wirklich löschen? {{ $role->users_count }} Benutzer werden auf \'user\' zurückgesetzt.')">
+                                <x-ui.button size="sm" variant="secondary" type="submit"
+                                    form="delete-role-{{ $role->id }}">Löschen</x-ui.button>
+                                <form id="delete-role-{{ $role->id }}"
+                                    action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="hidden"
+                                    onsubmit="return confirm('Rolle „{{ \App\Support\AccessLabels::role($role->name) }}“ wirklich löschen? {{ $role->users_count }} Benutzer werden auf „Teilnehmer“ zurückgesetzt.')">
                                     @csrf
                                     @method('DELETE')
                                 </form>
@@ -60,21 +67,22 @@
         </x-ui.table>
     </x-ui.section>
 
-    <x-ui.section title="Berechtigungen" :description="$permissions->flatten()->count() . ' gesamt'"
-        link-label="Alle verwalten" :link-href="route('admin.permissions.index')">
+    <x-ui.section title="Berechtigungen" :description="$permissions->flatten()->count() . ' gesamt'" link-label="Alle verwalten" :link-href="route('admin.permissions.index')">
         <div class="flex flex-col gap-8">
             @foreach ($permissions as $group => $groupPermissions)
                 <div class="border-t border-line pt-4">
-                    <h3 class="m-0 mb-3 text-h3 capitalize">
-                        {{ $group }}
-                        <span class="text-small font-normal text-muted tabular-nums">({{ $groupPermissions->count() }})</span>
+                    <h3 class="m-0 mb-3 text-h3">
+                        {{ \App\Support\AccessLabels::group($group) }}
+                        <span
+                            class="text-small font-normal text-muted tabular-nums">({{ $groupPermissions->count() }})</span>
                     </h3>
-                    <ul class="m-0 grid list-none grid-cols-1 gap-x-4 gap-y-2 p-0 text-small sm:grid-cols-2 lg:grid-cols-4">
+                    <ul
+                        class="m-0 grid list-none grid-cols-1 gap-x-4 gap-y-2 p-0 text-small sm:grid-cols-2 lg:grid-cols-4">
                         @foreach ($groupPermissions as $permission)
-                            <li class="font-mono text-ink">
-                                {{ $permission->name }}
+                            <li class="text-ink">
+                                {{ \App\Support\AccessLabels::permission($permission->name) }}
                                 @if ($permission->is_system)
-                                    <span class="font-sans text-muted">(System)</span>
+                                    <span class="text-muted">(System)</span>
                                 @endif
                             </li>
                         @endforeach

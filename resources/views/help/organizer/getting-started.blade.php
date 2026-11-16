@@ -3,7 +3,7 @@
     back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Organisation auswählen oder erstellen</h2>
-        <p>Gehen Sie im Organizer-Bereich zu „Organisation“ und wählen Sie eine bestehende Organisation aus oder
+        <p>Gehen Sie im Veranstalter-Bereich zu „Organisation“ und wählen Sie eine bestehende Organisation aus oder
             erstellen Sie eine neue. Laden Sie ein Logo hoch und pflegen Sie die Beschreibung sowie Website und Kontakt.
         </p>
     </section>
@@ -20,10 +20,10 @@
     <section>
         <h2>4. Erste Veranstaltung erstellen</h2>
         <p>Nutzen Sie „Veranstaltung anlegen“ und pflegen Sie Titel, Beschreibung, Kategorie sowie Format (Präsenz,
-            Online oder Hybrid). Fügen Sie Ticket-Typen hinzu und veröffentlichen Sie die Veranstaltung, sobald alles
+            Online oder Hybrid). Fügen Sie Ticketarten hinzu und veröffentlichen Sie die Veranstaltung, sobald alles
             vollständig ist.</p>
     </section>
 
     <x-ui.alert tone="info" title="Tipp">Für bessere Sichtbarkeit können Sie Ihre Veranstaltung als
-        „Featured“ markieren und so prominent hervorheben.</x-ui.alert>
+        „hervorgehoben“ markieren und so prominent platzieren.</x-ui.alert>
 </x-help.article>

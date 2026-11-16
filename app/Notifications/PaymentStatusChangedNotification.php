@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -10,7 +11,7 @@ use Illuminate\Notifications\Notification;
 
 class PaymentStatusChangedNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     protected $booking;
     protected $oldPaymentStatus;
@@ -32,12 +33,14 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
         $isUser = $notifiable instanceof \App\Models\User;
 
         if ($this->channels !== null) {
-            return $isUser
+            $channels = $isUser
                 ? array_values(array_unique(array_merge($this->channels, ['database'])))
                 : array_values(array_diff($this->channels, ['database']));
+
+            return $this->withWebPush($channels, $notifiable);
         }
 
-        return $isUser ? ['database'] : [];
+        return $this->withWebPush($isUser ? ['database'] : [], $notifiable);
     }
 
     public function toMail($notifiable)

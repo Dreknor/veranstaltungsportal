@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\Booking;
 use App\Models\Event;
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notification;
 
 class EventCancelledNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     public function __construct(
         public Event $event,
@@ -21,7 +22,7 @@ class EventCancelledNotification extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return $this->channels;
+        return $this->withWebPush($this->channels, $notifiable);
     }
 
     public function toMail(object $notifiable): MailMessage

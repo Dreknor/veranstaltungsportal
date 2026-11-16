@@ -99,7 +99,7 @@ class NotifyPendingFeaturedPaymentsTest extends TestCase
 
         $this->artisan('featured:notify-pending-payments')
             ->assertSuccessful()
-            ->expectsOutput('Keine ausstehenden Featured-Zahlungen älter als 7 Tage.');
+            ->expectsOutput('Keine ausstehenden Zahlungen für Hervorhebungen älter als 7 Tage.');
 
         Notification::assertNothingSent();
     }
@@ -114,7 +114,7 @@ class NotifyPendingFeaturedPaymentsTest extends TestCase
 
         $this->artisan('featured:notify-pending-payments')
             ->assertSuccessful()
-            ->expectsOutput('Keine ausstehenden Featured-Zahlungen älter als 7 Tage.');
+            ->expectsOutput('Keine ausstehenden Zahlungen für Hervorhebungen älter als 7 Tage.');
 
         Notification::assertNothingSent();
     }
@@ -129,7 +129,7 @@ class NotifyPendingFeaturedPaymentsTest extends TestCase
 
         $this->artisan('featured:notify-pending-payments')
             ->assertSuccessful()
-            ->expectsOutput('Keine ausstehenden Featured-Zahlungen älter als 7 Tage.');
+            ->expectsOutput('Keine ausstehenden Zahlungen für Hervorhebungen älter als 7 Tage.');
 
         Notification::assertNothingSent();
     }

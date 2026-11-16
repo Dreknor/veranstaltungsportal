@@ -1,6 +1,6 @@
 @use('App\Support\Ui')
 <x-layouts.public :title="$event->title"
-    :description="\Illuminate\Support\Str::limit(strip_tags($event->description ?? ''), 160) ?: null">
+    :description="\App\Support\Ui::plainText($event->description, 160) ?: null">
     <!-- SEO & Social Media Meta Tags -->
     @push('meta')
         @php
@@ -233,9 +233,7 @@
                     @endif
 
                     <x-ui.section title="Über die Veranstaltung" id="beschreibung">
-                        <div class="max-w-prose text-base text-ink">
-                            {!! nl2br(e($event->description)) !!}
-                        </div>
+                        <div class="richtext max-w-prose">{!! Ui::markdown($event->description) !!}</div>
                     </x-ui.section>
                 </div>
 
@@ -308,7 +306,7 @@
                                         @endif
                                     </div>
                                     <span
-                                        class="text-base font-semibold whitespace-nowrap tabular-nums">{{ Ui::money($ticket->price) }}</span>
+                                        class="text-base font-semibold whitespace-nowrap tabular-nums">{{ $ticket->price > 0 ? Ui::money($ticket->price) : 'kostenfrei' }}</span>
                                 </li>
                             @endforeach
 
@@ -321,7 +319,7 @@
                                         <span class="text-small text-ink-soft">Regulärer Zugang zur Veranstaltung</span>
                                     </div>
                                     <span
-                                        class="text-base font-semibold whitespace-nowrap tabular-nums">{{ Ui::money($event->price_from) }}</span>
+                                        class="text-base font-semibold whitespace-nowrap tabular-nums">{{ $event->price_from > 0 ? Ui::money($event->price_from) : 'kostenfrei' }}</span>
                                 </li>
                             @endif
                         </ul>
@@ -339,7 +337,7 @@
                             @endif
                             <span>{{ $event->venue_postal_code }} {{ $event->venue_city }}</span>
                             @if ($event->venue_country)
-                                <span class="text-ink-soft">{{ $event->venue_country }}</span>
+                                <span class="text-ink-soft">{{ Ui::country($event->venue_country) }}</span>
                             @endif
                         </address>
 

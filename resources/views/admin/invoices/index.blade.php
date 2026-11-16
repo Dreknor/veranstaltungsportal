@@ -20,11 +20,9 @@
     <form method="GET" action="{{ route('admin.invoices.index') }}"
         class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')"
-            placeholder="Rechnungsnummer, Name oder E-Mail" />
-        <x-ui.select label="Typ" name="type" :old="false" :selected="request('type')"
-            :options="['' => 'Alle', 'platform_fee' => 'Plattformgebühr', 'participant' => 'Teilnehmende']" />
-        <x-ui.select label="Status" name="status" :old="false" :selected="request('status')"
-            :options="['' => 'Alle', 'sent' => 'Versendet', 'paid' => 'Bezahlt', 'overdue' => 'Überfällig']" />
+            placeholder="Nummer, Name, E-Mail" />
+        <x-ui.select label="Typ" name="type" :old="false" :selected="request('type')" :options="['' => 'Alle', 'platform_fee' => 'Plattformgebühr', 'participant' => 'Teilnehmende']" />
+        <x-ui.select label="Status" name="status" :old="false" :selected="request('status')" :options="['' => 'Alle', 'sent' => 'Versendet', 'paid' => 'Bezahlt', 'overdue' => 'Überfällig']" />
         <x-ui.field label="Von Datum" name="from_date" type="date" :old="false" :value="request('from_date')" />
         <x-ui.field label="Bis Datum" name="to_date" type="date" :old="false" :value="request('to_date')" />
         <div>
@@ -49,12 +47,14 @@
             @forelse ($invoices as $invoice)
                 <tr>
                     <th scope="row" class="whitespace-nowrap tabular-nums">
-                        <a href="{{ route('admin.invoices.show', $invoice) }}" class="text-ink underline underline-offset-[3px]">{{ $invoice->invoice_number }}</a>
+                        <a href="{{ route('admin.invoices.show', $invoice) }}"
+                            class="text-ink underline underline-offset-[3px]">{{ $invoice->invoice_number }}</a>
                     </th>
                     <td>{{ $invoice->type === 'platform_fee' ? 'Plattformgebühr' : 'Teilnehmende' }}</td>
                     <td class="whitespace-nowrap tabular-nums">
                         {{ $invoice->invoice_date->format('d.m.Y') }}
-                        <span class="block text-small text-muted">Fällig: {{ $invoice->due_date->format('d.m.Y') }}</span>
+                        <span class="block text-small text-muted">Fällig:
+                            {{ $invoice->due_date->format('d.m.Y') }}</span>
                     </td>
                     <td>
                         {{ $invoice->recipient_name }}
@@ -62,7 +62,8 @@
                     </td>
                     <td>
                         @if ($invoice->event)
-                            <a href="{{ route('events.show', $invoice->event->slug) }}" class="text-ink underline underline-offset-[3px]">{{ Str::limit($invoice->event->title, 30) }}</a>
+                            <a href="{{ route('events.show', $invoice->event->slug) }}"
+                                class="text-ink underline underline-offset-[3px]">{{ Str::limit($invoice->event->title, 30) }}</a>
                         @else
                             –
                         @endif
@@ -82,7 +83,8 @@
                             <x-ui.dropdown-item :href="route('admin.invoices.show', $invoice)">Ansehen</x-ui.dropdown-item>
                             <x-ui.dropdown-item :href="route('admin.invoices.download', $invoice)">PDF herunterladen</x-ui.dropdown-item>
                             @if ($invoice->status !== 'paid')
-                                <x-ui.dropdown-item type="submit" :form="'mark-paid-' . $invoice->id">Als bezahlt markieren</x-ui.dropdown-item>
+                                <x-ui.dropdown-item type="submit" :form="'mark-paid-' . $invoice->id">Als bezahlt
+                                    markieren</x-ui.dropdown-item>
                             @endif
                         </x-ui.dropdown>
                         @if ($invoice->status !== 'paid')

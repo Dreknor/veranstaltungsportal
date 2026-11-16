@@ -1,27 +1,31 @@
 <x-layouts.app title="Log-Benachrichtigungen" :header="false">
-    <x-ui.page-header title="Log-Benachrichtigungen" subtitle="Verwalten Sie Benachrichtigungen für kritische System-Fehler"
-        :back-href="route('admin.system-logs.index')" back-label="Zurück zu System-Logs" />
+    <x-ui.page-header title="Log-Benachrichtigungen"
+        subtitle="Verwalten Sie Benachrichtigungen für kritische System-Fehler" :back-href="route('admin.system-logs.index')"
+        back-label="Zurück zu System-Logs" />
 
     <x-ui.alert tone="info" title="Über Log-Benachrichtigungen" class="mb-12">
-        <p class="m-0 mb-2">Benutzer mit der Permission "receive-critical-log-notifications" erhalten automatisch E-Mail-Benachrichtigungen bei kritischen System-Fehlern.</p>
-        <p class="m-0 mb-2"><strong class="font-semibold">Kritische Log-Levels:</strong> ERROR, CRITICAL, ALERT, EMERGENCY</p>
-        <p class="m-0"><strong class="font-semibold">Features:</strong></p>
+        <p class="m-0 mb-2">Benutzer mit der Berechtigung „Meldungen zu kritischen Logs erhalten“ bekommen automatisch
+            E-Mails bei kritischen Systemfehlern.</p>
+        <p class="m-0 mb-2"><strong class="font-semibold">Kritische Schweregrade:</strong> ERROR, CRITICAL, ALERT,
+            EMERGENCY</p>
+        <p class="m-0"><strong class="font-semibold">Funktionen:</strong></p>
         <ul class="m-0 mt-1 list-disc pl-5">
-            <li>Automatische Duplicate-Detection (5 Minuten)</li>
+            <li>Doppelte Meldungen werden 5 Minuten lang unterdrückt</li>
             <li>Gruppierung ähnlicher Fehler</li>
-            <li>E-Mail und Datenbank-Benachrichtigungen</li>
-            <li>Asynchrone Verarbeitung via Queue</li>
+            <li>Benachrichtigung per E-Mail und im Portal</li>
+            <li>Verarbeitung im Hintergrund (Warteschlange)</li>
         </ul>
     </x-ui.alert>
 
     <div class="mb-12 grid gap-4 sm:grid-cols-3">
         <x-ui.stat label="Aktive Empfänger" :value="$usersWithPermission->count()" />
-        <x-ui.stat label="Kritische Levels" value="4" sub="ERROR, CRITICAL, ALERT, EMERGENCY" />
-        <x-ui.stat label="Duplicate-Fenster" value="5 Min" sub="Verhindert Spam-Benachrichtigungen" />
+        <x-ui.stat label="Kritische Schweregrade" value="4" sub="ERROR, CRITICAL, ALERT, EMERGENCY" />
+        <x-ui.stat label="Zeitfenster für Doppelte" value="5 Min" sub="Verhindert wiederholte Meldungen" />
     </div>
 
     <x-ui.section title="Test-Benachrichtigung" class="mb-12">
-        <p class="m-0 mb-4 text-small text-muted">Senden Sie eine Test-Benachrichtigung an Ihre E-Mail-Adresse, um das System zu testen.</p>
+        <p class="m-0 mb-4 text-small text-muted">Senden Sie eine Test-Benachrichtigung an Ihre E-Mail-Adresse, um das
+            System zu testen.</p>
         <form action="{{ route('admin.log-notifications.test') }}" method="POST">
             @csrf
             <x-ui.button type="submit" variant="secondary">
@@ -31,7 +35,7 @@
         </form>
     </x-ui.section>
 
-    <x-ui.section title="Benutzer mit Benachrichtigungen ({{ $usersWithPermission->count() }})" class="mb-12">
+    <x-ui.section :title="'Benutzer mit Benachrichtigungen (' . $usersWithPermission->count() . ')'" class="mb-12">
         @if ($usersWithPermission->isEmpty())
             <x-ui.empty>Keine Benutzer haben derzeit die Berechtigung für Log-Benachrichtigungen.</x-ui.empty>
         @else
@@ -50,11 +54,14 @@
                             <th scope="row">{{ $user->name }}</th>
                             <td>{{ $user->email }}</td>
                             <td>
-                                <x-ui.status tone="neutral">{{ $user->hasRole('admin') ? 'Admin' : 'Benutzer' }}</x-ui.status>
+                                <x-ui.status
+                                    tone="neutral">{{ $user->hasRole('admin') ? 'Admin' : 'Benutzer' }}</x-ui.status>
                             </td>
                             <td class="actions">
-                                <x-ui.button variant="secondary" size="sm" type="submit" form="revoke-{{ $user->id }}">Deaktivieren</x-ui.button>
-                                <form id="revoke-{{ $user->id }}" action="{{ route('admin.log-notifications.revoke') }}" method="POST" class="hidden"
+                                <x-ui.button variant="secondary" size="sm" type="submit"
+                                    form="revoke-{{ $user->id }}">Deaktivieren</x-ui.button>
+                                <form id="revoke-{{ $user->id }}"
+                                    action="{{ route('admin.log-notifications.revoke') }}" method="POST" class="hidden"
                                     onsubmit="return confirm('Benachrichtigungen für {{ $user->name }} deaktivieren?')">
                                     @csrf
                                     <input type="hidden" name="user_id" value="{{ $user->id }}">

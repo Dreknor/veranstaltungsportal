@@ -41,8 +41,8 @@
             <li>Klicken Sie auf <strong>„Bewertung abschicken“</strong></li>
         </ol>
 
-        <x-ui.alert tone="success" title="Belohnung">Für jede abgegebene Bewertung erhalten Sie Badge-Punkte!
-        </x-ui.alert>
+        <x-ui.alert tone="success" title="Abzeichen">Geschriebene Bewertungen zählen für Abzeichen, zum Beispiel
+            „Feedback-Geber“.</x-ui.alert>
     </section>
 
     <section id="guidelines">
@@ -114,8 +114,6 @@
         </ol>
 
         <ul>
-            <li><strong>Top-Reviewer Badge:</strong> Erhalten Sie das „Top-Reviewer“ Badge wenn 50 Ihrer
-                Bewertungen als hilfreich markiert wurden</li>
             <li><strong>Bewertungs-Rang:</strong> Hilfreiche Bewertungen werden weiter oben angezeigt</li>
         </ul>
     </section>

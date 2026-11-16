@@ -52,7 +52,7 @@
                   scheme="{{ route('feed.atom.category', $event->category->slug) }}" />
         @endif
 
-        <summary type="text">{{ e(\Illuminate\Support\Str::limit(strip_tags($event->description ?? ''), 500)) }}</summary>
+        <summary type="text">{{ \App\Support\Ui::plainText($event->description, 500) }}</summary>
 
         <content type="html"><![CDATA[
             <p><strong>Datum:</strong>
@@ -64,7 +64,7 @@
 
             @if($event->event_type !== 'online')
             <p><strong>Ort:</strong>
-                {{ e($event->venue_name) }}{{ $event->venue_name ? ', ' : '' }}{{ e($event->venue_address) }}{{ $event->venue_address ? ', ' : '' }}{{ e($event->venue_postal_code) }} {{ e($event->venue_city) }}{{ $event->venue_city ? ', ' : '' }}{{ e($event->venue_country) }}
+                {{ e($event->venue_name) }}{{ $event->venue_name ? ', ' : '' }}{{ e($event->venue_address) }}{{ $event->venue_address ? ', ' : '' }}{{ e($event->venue_postal_code) }} {{ e($event->venue_city) }}{{ $event->venue_city ? ', ' : '' }}{{ \App\Support\Ui::country($event->venue_country) }}
             </p>
             @endif
 

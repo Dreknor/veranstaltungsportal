@@ -10,16 +10,21 @@
         </div>
     </form>
 
-    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <x-ui.stat label="Veranstaltungen gesamt" :value="$totalEvents" sub="{{ $publishedEvents }} veröffentlicht · {{ $upcomingEvents }} kommend" />
-        <x-ui.stat label="Buchungen gesamt" :value="$totalBookings" sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} ausstehend" />
-        <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)" sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
-        <x-ui.stat label="Verkaufte Tickets" :value="$ticketsSold" sub="Ø {{ \App\Support\Ui::money($avgTicketPrice ?? 0) }} pro Ticket" />
+    <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <x-ui.stat label="Veranstaltungen gesamt" :value="$totalEvents"
+            sub="{{ $publishedEvents }} veröffentlicht · {{ $upcomingEvents }} kommend" />
+        <x-ui.stat label="Buchungen gesamt" :value="$totalBookings"
+            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} ausstehend" />
+        <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)"
+            sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
+        <x-ui.stat label="Verkaufte Tickets" :value="$ticketsSold"
+            sub="Ø {{ \App\Support\Ui::money($avgTicketPrice ?? 0) }} pro Ticket" />
     </div>
 
     <div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
         <x-ui.section title="Konversionsrate">
-            <x-ui.stat label="Bestätigte Buchungen von gesamt" value="{{ number_format((float) $conversionRate, 1, ',', '.') }} %" />
+            <x-ui.stat label="Bestätigte Buchungen von gesamt"
+                value="{{ number_format((float) $conversionRate, 1, ',', '.') }} %" />
             <x-ui.progress :value="$conversionRate" label="Konversionsrate" class="mt-3" />
         </x-ui.section>
 
@@ -69,7 +74,8 @@
             <tbody>
                 @forelse ($monthlyBookings as $month)
                     <tr>
-                        <th scope="row" class="whitespace-nowrap">{{ \Carbon\Carbon::parse($month->month . '-01')->translatedFormat('F Y') }}</th>
+                        <th scope="row" class="whitespace-nowrap">
+                            {{ \Carbon\Carbon::parse($month->month . '-01')->translatedFormat('F Y') }}</th>
                         <td class="num">{{ $month->count }}</td>
                         <td class="hidden md:table-cell">
                             <x-ui.progress :value="$month->count" :max="$maxMonthly" decorative />
@@ -100,7 +106,8 @@
                     @forelse ($topEventsByRevenue->take(5) as $event)
                         <tr>
                             <th scope="row">
-                                <a href="{{ route('organizer.statistics.event', $event) }}" class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
+                                <a href="{{ route('organizer.statistics.event', $event) }}"
+                                    class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
                             </th>
                             <td class="num">{{ \App\Support\Ui::money($event->bookings_sum_total ?? 0) }}</td>
                         </tr>
@@ -127,7 +134,8 @@
                     @forelse ($topEventsByAttendees->take(5) as $event)
                         <tr>
                             <th scope="row">
-                                <a href="{{ route('organizer.statistics.event', $event) }}" class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
+                                <a href="{{ route('organizer.statistics.event', $event) }}"
+                                    class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
                             </th>
                             <td class="num">{{ $event->bookings_count }}</td>
                         </tr>
@@ -145,7 +153,7 @@
 
     <x-ui.section title="Veranstaltungen nach Kategorie">
         @if ($categoryStats->isNotEmpty())
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 @foreach ($categoryStats as $stat)
                     <x-ui.stat :label="$stat->category->name ?? 'Unbekannt'" :value="$stat->count" />
                 @endforeach

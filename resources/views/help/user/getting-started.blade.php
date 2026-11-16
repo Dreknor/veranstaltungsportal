@@ -90,7 +90,7 @@
             <li><strong>Kommende Veranstaltungen:</strong> Alle Ihre anstehenden Veranstaltungen chronologisch
                 sortiert.</li>
             <li><strong>Empfehlungen:</strong> Personalisierte Vorschläge basierend auf Ihren Interessen.</li>
-            <li><strong>Badges:</strong> Ihre gesammelten Auszeichnungen und Fortschritte.</li>
+            <li><strong>Abzeichen:</strong> Ihre gesammelten Auszeichnungen und Fortschritte.</li>
         </ul>
     </section>
 
@@ -141,7 +141,7 @@
                     <li>Buchungsbestätigungen und Zahlungsinformationen</li>
                     <li>Änderungen an gebuchten Veranstaltungen</li>
                     <li>Neue Verbindungsanfragen</li>
-                    <li>Badge-Benachrichtigungen</li>
+                    <li>Benachrichtigungen über neue Abzeichen</li>
                 </ul>
             </li>
             <li>Speichern Sie Ihre Einstellungen</li>
@@ -160,7 +160,7 @@
             <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'social-features']) }}">Vernetzen Sie sich</a>
                 – Knüpfen Sie Kontakte mit anderen Pädagogen.</li>
             <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'badges']) }}">Badges sammeln</a>
-                – Verfolgen Sie Ihren Lernfortschritt mit Badges.</li>
+                – Verfolgen Sie Ihren Lernfortschritt mit Abzeichen.</li>
             <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'favorites']) }}">Favoriten nutzen</a>
                 – Speichern Sie interessante Veranstaltungen.</li>
         </ul>

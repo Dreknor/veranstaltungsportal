@@ -9,13 +9,17 @@
         <x-ui.box tone="zone" padding="sm" class="mb-8">
             <h2 class="m-0 mb-4 text-h3">Globale Plattform-Einstellungen</h2>
             <x-ui.dl layout="stack" class="lg:grid-cols-2!">
-                <x-ui.dl-item label="Typ">{{ $globalSettings['fee_type'] === 'percentage' ? 'Prozentual' : 'Festbetrag' }}</x-ui.dl-item>
+                <x-ui.dl-item
+                    label="Typ">{{ $globalSettings['fee_type'] === 'percentage' ? 'Prozentual' : 'Festbetrag' }}</x-ui.dl-item>
                 @if ($globalSettings['fee_type'] === 'percentage')
-                    <x-ui.dl-item label="Gebühr" num>{{ $globalSettings['fee_percentage'] }}%</x-ui.dl-item>
+                    <x-ui.dl-item label="Gebühr"
+                        num>{{ \App\Support\Ui::percent($globalSettings['fee_percentage'], 2) }}</x-ui.dl-item>
                 @else
-                    <x-ui.dl-item label="Gebühr" num>{{ number_format($globalSettings['fee_fixed_amount'], 2, ',', '.') }} €</x-ui.dl-item>
+                    <x-ui.dl-item label="Gebühr"
+                        num>{{ number_format($globalSettings['fee_fixed_amount'], 2, ',', '.') }} €</x-ui.dl-item>
                 @endif
-                <x-ui.dl-item label="Mindestgebühr" num>{{ number_format($globalSettings['minimum_fee'], 2, ',', '.') }} €</x-ui.dl-item>
+                <x-ui.dl-item label="Mindestgebühr" num>{{ number_format($globalSettings['minimum_fee'], 2, ',', '.') }}
+                    €</x-ui.dl-item>
                 <x-ui.dl-item label="Gilt für">Alle Organisationen</x-ui.dl-item>
             </x-ui.dl>
         </x-ui.box>
@@ -26,37 +30,37 @@
 
             <x-ui.section title="Individuelle Regelung" class="border-t border-line py-8">
                 <div class="flex flex-col gap-y-5">
-                    <x-ui.checkbox name="use_custom_fee" id="use_custom_fee" value="1"
-                        :checked="(bool) ($customFee['enabled'] ?? false)" label="Individuelle Gebühren aktivieren"
+                    <x-ui.checkbox name="use_custom_fee" id="use_custom_fee" value="1" :checked="(bool) ($customFee['enabled'] ?? false)"
+                        label="Individuelle Gebühren aktivieren"
                         hint="Überschreibt die globalen Einstellungen für diese Organisation." />
 
                     <div id="custom_fee_settings" class="flex flex-col gap-y-5" style="display: none;">
                         <fieldset class="m-0 min-w-0 border-0 p-0">
                             <x-ui.label as="legend">Gebührentyp</x-ui.label>
                             <x-ui.radio name="custom_fee_type" id="custom_type_percentage" value="percentage"
-                                :checked="old('custom_fee_type', $customFee['fee_type'] ?? 'percentage') == 'percentage'"
-                                :old="false" label="Prozentual" />
-                            <x-ui.radio name="custom_fee_type" id="custom_type_fixed" value="fixed"
-                                :checked="old('custom_fee_type', $customFee['fee_type'] ?? 'percentage') == 'fixed'"
+                                :checked="old('custom_fee_type', $customFee['fee_type'] ?? 'percentage') ==
+                                    'percentage'" :old="false" label="Prozentual" />
+                            <x-ui.radio name="custom_fee_type" id="custom_type_fixed" value="fixed" :checked="old('custom_fee_type', $customFee['fee_type'] ?? 'percentage') == 'fixed'"
                                 :old="false" label="Festbetrag" />
                         </fieldset>
 
                         <div id="custom_percentage_field">
                             <x-ui.field label="Plattformgebühr (Prozent)" name="custom_fee_percentage" type="number"
-                                step="0.01" min="0" max="100" :value="$customFee['fee_percentage'] ?? 0"
-                                input-class="sm:max-w-64" hint="Beispiel: Bei 3 % und einer Buchung über 100 € werden 3 € Gebühr berechnet." />
+                                step="0.01" min="0" max="100" :value="$customFee['fee_percentage'] ?? 0" input-class="sm:max-w-64"
+                                hint="Beispiel: Bei 3 % und einer Buchung über 100 € werden 3 € Gebühr berechnet." />
                         </div>
 
                         <div id="custom_fixed_field" style="display: none;">
-                            <x-ui.field label="Plattformgebühr (Festbetrag in €)" name="custom_fee_fixed_amount" type="number"
-                                step="0.01" min="0" :value="$customFee['fee_fixed_amount'] ?? 0" input-class="sm:max-w-64"
+                            <x-ui.field label="Plattformgebühr (Festbetrag in €)" name="custom_fee_fixed_amount"
+                                type="number" step="0.01" min="0" :value="$customFee['fee_fixed_amount'] ?? 0" input-class="sm:max-w-64"
                                 hint="Fester Betrag pro Buchung." />
                         </div>
 
                         <x-ui.field label="Mindestgebühr pro Buchung (in €)" name="custom_minimum_fee" type="number"
-                            step="0.01" min="0" :value="$customFee['minimum_fee'] ?? $globalSettings['minimum_fee']"
-                            input-class="sm:max-w-64"
-                            :hint="'Wichtig für kostenlose Tickets. Standard: ' . number_format($globalSettings['minimum_fee'], 2, ',', '.') . ' €'" />
+                            step="0.01" min="0" :value="$customFee['minimum_fee'] ?? $globalSettings['minimum_fee']" input-class="sm:max-w-64"
+                            :hint="'Wichtig für kostenlose Tickets. Standard: ' .
+                                number_format($globalSettings['minimum_fee'], 2, ',', '.') .
+                                ' €'" />
 
                         <x-ui.textarea label="Notizen" name="custom_fee_notes" optional rows="3"
                             :value="$customFee['notes'] ?? ''" placeholder="Grund für die individuelle Regelung"
@@ -65,7 +69,9 @@
 
                     @if (!empty($customFee['updated_at']))
                         <p class="m-0 text-small text-muted">
-                            Letzte Aktualisierung: <span class="tabular-nums">{{ \Carbon\Carbon::parse($customFee['updated_at'])->format('d.m.Y H:i') }} Uhr</span>
+                            Letzte Aktualisierung: <span
+                                class="tabular-nums">{{ \Carbon\Carbon::parse($customFee['updated_at'])->format('d.m.Y H:i') }}
+                                Uhr</span>
                         </p>
                     @endif
                 </div>
@@ -75,13 +81,15 @@
                 <x-ui.button type="submit">Einstellungen speichern</x-ui.button>
                 @if (!empty($customFee))
                     <x-ui.button variant="secondary" type="submit" form="remove-fee-form" class="sm:ml-auto"
-                        onclick="return confirm('Individuelle Gebühren wirklich entfernen?')">Individuelle Gebühren entfernen</x-ui.button>
+                        onclick="return confirm('Individuelle Gebühren wirklich entfernen?')">Individuelle Gebühren
+                        entfernen</x-ui.button>
                 @endif
             </div>
         </form>
 
         @if (!empty($customFee))
-            <form id="remove-fee-form" method="POST" action="{{ route('admin.organizer-fees.destroy', $organization) }}" class="hidden">
+            <form id="remove-fee-form" method="POST"
+                action="{{ route('admin.organizer-fees.destroy', $organization) }}" class="hidden">
                 @csrf
                 @method('DELETE')
             </form>

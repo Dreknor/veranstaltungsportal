@@ -4,29 +4,26 @@
     <form method="POST" action="{{ route('admin.badges.store') }}" enctype="multipart/form-data" class="max-w-form">
         @csrf
 
-        {{-- Standardwert der gespeicherten Icon-Bezeichnung (unverändert gegenüber dem bisherigen Wert) --}}
-        @php $defaultIcon = 'fas' . ' fa-medal'; @endphp
-
         <p class="m-0 mb-6 text-small text-muted">* Pflichtfeld</p>
 
         <x-ui.section title="Grunddaten" class="border-t border-line py-8">
             <div class="flex flex-col gap-y-5">
                 <x-ui.field label="Name des Abzeichens" name="name" required />
                 <x-ui.textarea label="Beschreibung" name="description" rows="3" required />
-                <x-ui.select label="Typ" name="type" placeholder="Typ auswählen..." required
-                    :options="['attendance' => 'Teilnahme', 'achievement' => 'Erfolge', 'special' => 'Spezial']" />
+                <x-ui.select label="Typ" name="type" placeholder="Typ auswählen..." required :options="['attendance' => 'Teilnahme', 'achievement' => 'Erfolge', 'special' => 'Spezial']" />
             </div>
         </x-ui.section>
 
         <x-ui.section title="Darstellung" class="border-t border-line py-8">
             <div class="flex flex-col gap-y-5">
-                <x-ui.field label="Icon" name="icon" :value="$defaultIcon" :placeholder="$defaultIcon" required
-                    hint="Name eines Symbols, z. B. medal, star, academic-cap oder ein Font-Awesome-Name wie fa-trophy. Ohne eigenes Bild zeigt das Abzeichen dieses Symbol; unbekannte Namen zeigen die Medaille." />
+                @include('admin.badges._icon-field', ['current' => null])
 
                 <div>
                     <x-ui.label for="image" optional>Bild des Abzeichens</x-ui.label>
-                    <x-ui.input type="file" name="image" id="image" accept="image/*" aria-describedby="image-hint image-error" />
-                    <x-ui.hint id="image-hint">Empfohlen: PNG oder SVG, 200 × 200 px oder größer, höchstens 2 MB.</x-ui.hint>
+                    <x-ui.file-input name="image" id="image" accept="image/*"
+                        aria-describedby="image-hint image-error" />
+                    <x-ui.hint id="image-hint">Empfohlen: PNG oder SVG, 200 × 200 px oder größer, höchstens 2
+                        MB.</x-ui.hint>
                     <x-ui.field-error name="image" id="image-error" />
 
                     <!-- Image Preview -->
@@ -39,13 +36,13 @@
                 <div>
                     <x-ui.label for="color" required>Farbe (Hex-Code)</x-ui.label>
                     <div class="flex flex-wrap items-center gap-3">
-                        <input type="color" name="color" id="color" value="{{ old('color', '#3B82F6') }}"
+                        <input type="color" name="color" id="color" value="{{ old('color', '#2B4347') }}"
                             class="h-12 w-20 cursor-pointer rounded-control border border-line-strong bg-surface p-1">
-                        <x-ui.input id="colorText" value="{{ old('color', '#3B82F6') }}" placeholder="#3B82F6"
+                        <x-ui.input id="colorText" value="{{ old('color', '#2B4347') }}" placeholder="#2B4347"
                             aria-label="Hex-Code der Farbe" :old="false" class="min-w-0 max-w-48 flex-1" />
                         <span id="colorPreview"
                             class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full"
-                            style="background-color: {{ old('color', '#3B82F6') }}20; color: {{ old('color', '#3B82F6') }}"
+                            style="background-color: {{ old('color', '#2B4347') }}20; color: {{ old('color', '#2B4347') }}"
                             title="Vorschau des Abzeichens">
                             <x-icon.medal class="h-6 w-6" />
                         </span>
@@ -57,12 +54,12 @@
 
         <x-ui.section title="Vergabe" class="border-t border-line py-8">
             <div class="flex flex-col gap-y-5">
-                <x-ui.field label="Punkte" name="points" type="number" value="10" min="0" max="1000" required />
+                <x-ui.field label="Punkte" name="points" type="number" value="10" min="0" max="1000"
+                    required />
                 <x-ui.select label="Anforderungstyp" name="requirement_type" placeholder="Typ auswählen..." required
-                    :old="false" :options="\App\Models\Badge::REQUIREMENT_TYPES"
-                    :selected="\App\Models\Badge::normalizeRequirement((string) old('requirement_type'))" />
-                <x-ui.field label="Anforderungswert" name="requirement_value" type="number" value="1" min="1" required
-                    hint="Anzahl, die erreicht werden muss, um das Abzeichen zu erhalten." />
+                    :old="false" :options="\App\Models\Badge::REQUIREMENT_TYPES" :selected="\App\Models\Badge::normalizeRequirement((string) old('requirement_type'))" />
+                <x-ui.field label="Anforderungswert" name="requirement_value" type="number" value="1"
+                    min="1" required hint="Anzahl, die erreicht werden muss, um das Abzeichen zu erhalten." />
             </div>
         </x-ui.section>
 

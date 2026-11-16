@@ -48,7 +48,7 @@
 @if ($isOrganizer)
     <x-ui.sidebar-group label="Veranstalter">
         <x-layouts.sidebar-link href="{{ route('organizer.dashboard') }}" icon="chart" :active="request()->routeIs('organizer.dashboard')">
-            Veranstalter Dashboard
+            Veranstalter-Dashboard
         </x-layouts.sidebar-link>
 
         <x-layouts.sidebar-link href="{{ route('organizer.events.index') }}" icon="calendar" :active="request()->routeIs('organizer.events.*')">

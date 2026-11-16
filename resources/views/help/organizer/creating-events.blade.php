@@ -30,14 +30,14 @@
         <ul>
             <li>Entwurf vs. Veröffentlicht</li>
             <li>Privat (Zugangscode) oder öffentlich</li>
-            <li>Featured Events – Hervorhebung gegen Gebühr</li>
+            <li>Hervorgehobene Veranstaltungen – Hervorhebung gegen Gebühr</li>
         </ul>
     </section>
     <section>
         <h2>5. Medien & Sharing</h2>
         <ul>
             <li>Galerie-Bilder hochladen</li>
-            <li>Social Share (Facebook, Twitter, LinkedIn, WhatsApp, E-Mail, Telegram)</li>
+            <li>Teilen in sozialen Netzwerken (Facebook, Twitter, LinkedIn, WhatsApp, E-Mail, Telegram)</li>
             <li>SEO: Meta-Tags und strukturierte Daten</li>
         </ul>
     </section>

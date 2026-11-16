@@ -7,7 +7,6 @@ use App\Models\Booking;
 use App\Models\Event;
 use App\Services\BookingWorkflowService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class BookingManagementController extends Controller
@@ -15,7 +14,7 @@ class BookingManagementController extends Controller
     public function index(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -58,8 +57,8 @@ class BookingManagementController extends Controller
 
         // Events für Dropdown (gefiltert nach Archiv-Status)
         $events = $organization->events()
-            ->when($isArchive, fn($q) => $q->where('end_date', '<', now()))
-            ->when(!$isArchive, fn($q) => $q->where('end_date', '>=', now()))
+            ->when($isArchive, fn ($q) => $q->where('end_date', '<', now()))
+            ->when(! $isArchive, fn ($q) => $q->where('end_date', '>=', now()))
             ->orderBy('start_date', 'desc')
             ->get();
 
@@ -81,10 +80,10 @@ class BookingManagementController extends Controller
             ->count();
 
         // Gruppierte Ansicht (kein Event-Filter): Events mit Buchungen laden
-        $groupByEvent = !$filterByEvent
-            && !$request->filled('status')
-            && !$request->filled('payment_status')
-            && !$request->filled('search');
+        $groupByEvent = ! $filterByEvent
+            && ! $request->filled('status')
+            && ! $request->filled('payment_status')
+            && ! $request->filled('search');
 
         if ($groupByEvent) {
             $groupedEventsQuery = $organization->events()
@@ -116,6 +115,7 @@ class BookingManagementController extends Controller
         }
 
         $bookings = $query->latest()->paginate(20);
+
         return view('organizer.bookings.index', compact(
             'bookings', 'events', 'organization', 'groupByEvent',
             'isArchive', 'upcomingBookingsCount', 'archiveBookingsCount',
@@ -127,6 +127,7 @@ class BookingManagementController extends Controller
     {
         $this->authorize('view', $booking);
         $booking->load(['event.organization', 'items.ticketType', 'user', 'discountCode', 'emailLogs']);
+
         return view('organizer.bookings.show', compact('booking'));
     }
 
@@ -154,6 +155,7 @@ class BookingManagementController extends Controller
 
         if ($newStatus === 'cancelled') {
             $workflow->cancel($booking, 'organizer');
+
             return back()->with('success', 'Buchung storniert. Der Kunde hat eine Stornobestätigung erhalten.');
         }
 
@@ -163,6 +165,7 @@ class BookingManagementController extends Controller
 
         if ($newStatus === 'confirmed' && $booking->status === 'pending_approval') {
             $workflow->approve($booking);
+
             return back()->with('success', 'Anmeldung bestätigt. Die Bestätigung mit Tickets bzw. Zugangsdaten wurde per E-Mail versendet.');
         }
 
@@ -216,7 +219,7 @@ class BookingManagementController extends Controller
 
         $sent = $workflow->resendCurrentState($booking);
 
-        if (!$sent) {
+        if (! $sent) {
             return back()->with('error', 'Für diese Buchung kann keine E-Mail erneut versendet werden.');
         }
 
@@ -235,7 +238,7 @@ class BookingManagementController extends Controller
             return back()->with('error', 'PayPal-Buchungen werden erst nach erfolgter Zahlung freigegeben.');
         }
 
-        if (!$workflow->releaseTicketsBeforePayment($booking)) {
+        if (! $workflow->releaseTicketsBeforePayment($booking)) {
             return back()->with('error', 'Für diese Buchung ist keine Vorab-Freigabe möglich (bereits freigegeben, storniert oder kostenfrei).');
         }
 
@@ -256,7 +259,7 @@ class BookingManagementController extends Controller
 
         $notify = $request->boolean('notify_customer', true);
 
-        if (!$workflow->cancel($booking, 'organizer', $validated['cancellation_reason'] ?? null, $notify)) {
+        if (! $workflow->cancel($booking, 'organizer', $validated['cancellation_reason'] ?? null, $notify)) {
             return back()->with('error', 'Diese Buchung kann nicht storniert werden.');
         }
 
@@ -268,7 +271,7 @@ class BookingManagementController extends Controller
     public function export(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -288,12 +291,13 @@ class BookingManagementController extends Controller
         if ($format === 'excel') {
             return $this->exportExcel($bookings);
         }
+
         return $this->exportCsv($bookings);
     }
 
     private function exportCsv($bookings)
     {
-        $filename = 'teilnehmerliste-' . now()->format('Y-m-d-His') . '.csv';
+        $filename = 'teilnehmerliste-'.now()->format('Y-m-d-His').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -303,7 +307,7 @@ class BookingManagementController extends Controller
             'Expires' => '0',
         ];
 
-        $callback = function() use ($bookings) {
+        $callback = function () use ($bookings) {
             $file = fopen('php://output', 'w');
 
             // UTF-8 BOM für korrekte Darstellung in Excel
@@ -319,7 +323,7 @@ class BookingManagementController extends Controller
                 'Email',
                 'Telefon',
                 'Organisation',
-                'Ticket-Typ',
+                'Ticketart',
                 'Anzahl',
                 'Preis',
                 'Gesamt',
@@ -382,7 +386,7 @@ class BookingManagementController extends Controller
     private function exportExcel($bookings)
     {
         // Für eine einfache Excel-Export-Variante ohne Package
-        $filename = 'teilnehmerliste-' . now()->format('Y-m-d-His') . '.xls';
+        $filename = 'teilnehmerliste-'.now()->format('Y-m-d-His').'.xls';
 
         $headers = [
             'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
@@ -405,7 +409,7 @@ class BookingManagementController extends Controller
         $content .= '<th>Email</th>';
         $content .= '<th>Telefon</th>';
         $content .= '<th>Organisation</th>';
-        $content .= '<th>Ticket-Typ</th>';
+        $content .= '<th>Ticketart</th>';
         $content .= '<th>Anzahl</th>';
         $content .= '<th>Preis</th>';
         $content .= '<th>Gesamt</th>';
@@ -431,30 +435,30 @@ class BookingManagementController extends Controller
 
             foreach ($booking->items as $item) {
                 $content .= '<tr>';
-                $content .= '<td>' . htmlspecialchars($booking->booking_number) . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->event->title) . '</td>';
-                $content .= '<td>' . $booking->event->start_date->format('d.m.Y H:i') . '</td>';
-                $content .= '<td>' . htmlspecialchars($firstName) . '</td>';
-                $content .= '<td>' . htmlspecialchars($lastName) . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->customer_email) . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->customer_phone ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($item->attendee_organization ?? $booking->customer_organization ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($item->ticketType->name ?? 'Standard') . '</td>';
-                $content .= '<td>' . $item->quantity . '</td>';
-                $content .= '<td>' . number_format($item->price, 2, ',', '.') . ' €</td>';
-                $content .= '<td>' . number_format($booking->total_amount, 2, ',', '.') . ' €</td>';
-                $content .= '<td>' . htmlspecialchars($booking->status) . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->payment_status) . '</td>';
-                $content .= '<td>' . ($item->checked_in_at ? 'Ja' : 'Nein') . '</td>';
-                $content .= '<td>' . $booking->created_at->format('d.m.Y H:i') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->billing_address ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->billing_postal_code ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->billing_city ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->billing_country ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->billing_company ?? '') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->billing_vat_id ?? '') . '</td>';
-                $content .= '<td>' . ($booking->externally_invoiced ? 'Ja' : 'Nein') . '</td>';
-                $content .= '<td>' . htmlspecialchars($booking->external_invoice_number ?? '') . '</td>';
+                $content .= '<td>'.htmlspecialchars($booking->booking_number).'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->event->title).'</td>';
+                $content .= '<td>'.$booking->event->start_date->format('d.m.Y H:i').'</td>';
+                $content .= '<td>'.htmlspecialchars($firstName).'</td>';
+                $content .= '<td>'.htmlspecialchars($lastName).'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->customer_email).'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->customer_phone ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($item->attendee_organization ?? $booking->customer_organization ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($item->ticketType->name ?? 'Standard').'</td>';
+                $content .= '<td>'.$item->quantity.'</td>';
+                $content .= '<td>'.number_format($item->price, 2, ',', '.').' €</td>';
+                $content .= '<td>'.number_format($booking->total_amount, 2, ',', '.').' €</td>';
+                $content .= '<td>'.htmlspecialchars($booking->status).'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->payment_status).'</td>';
+                $content .= '<td>'.($item->checked_in_at ? 'Ja' : 'Nein').'</td>';
+                $content .= '<td>'.$booking->created_at->format('d.m.Y H:i').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->billing_address ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->billing_postal_code ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->billing_city ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->billing_country ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->billing_company ?? '').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->billing_vat_id ?? '').'</td>';
+                $content .= '<td>'.($booking->externally_invoiced ? 'Ja' : 'Nein').'</td>';
+                $content .= '<td>'.htmlspecialchars($booking->external_invoice_number ?? '').'</td>';
                 $content .= '</tr>';
             }
         }
@@ -472,7 +476,7 @@ class BookingManagementController extends Controller
         $this->authorize('update', $booking);
 
         if ($booking->status !== 'pending_approval') {
-            return back()->with('error', 'Diese Buchung kann nicht bestätigt werden (Status: ' . $booking->statusLabel() . ').');
+            return back()->with('error', 'Diese Buchung kann nicht bestätigt werden (Status: '.$booking->statusLabel().').');
         }
 
         $workflow->approve($booking);
@@ -516,10 +520,11 @@ class BookingManagementController extends Controller
             $workflow->approve($booking, queue: true);
         }
 
-        return back()->with('success', $pendingBookings->count() . ' Buchung(en) bestätigt und Bestätigungen versendet.');
+        return back()->with('success', trans_choice('{1} :count Buchung bestätigt und Bestätigung versendet.|[0,*] :count Buchungen bestätigt und Bestätigungen versendet.', $pendingBookings->count()));
     }
 
-    public function checkIn(Request $request, Booking $booking)    {
+    public function checkIn(Request $request, Booking $booking)
+    {
         $this->authorize('update', $booking);
 
         $request->validate([
@@ -536,4 +541,3 @@ class BookingManagementController extends Controller
         return back()->with('success', 'Ticket erfolgreich eingecheckt!');
     }
 }
-

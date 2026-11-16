@@ -8,7 +8,7 @@
 @php
     // Default values
     $pageTitle = $title ?? ($event ? $event->title . ' - ' . config('app.name') : config('app.name') . ' - Fort- und Weiterbildungen für Bildungseinrichtungen');
-    $pageDescription = $description ?? ($event ? \Illuminate\Support\Str::limit(strip_tags($event->description ?? ''), 160) : 'Entdecken Sie hochwertige Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Schwerpunkt: Aktion Hauptfach Mensch und pädagogische Exzellenz.');
+    $pageDescription = $description ?? ($event ? \App\Support\Ui::plainText($event->description, 160) : 'Entdecken Sie hochwertige Fort- und Weiterbildungen für evangelische Schulen und Bildungseinrichtungen. Schwerpunkt: Aktion Hauptfach Mensch und pädagogische Exzellenz.');
     $pageImage = $image ?? ($event && $event->featured_image ? \Illuminate\Support\Facades\Storage::url($event->featured_image) : asset('images/og-default.jpg'));
     $pageUrl = url()->current();
 

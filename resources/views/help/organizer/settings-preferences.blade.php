@@ -2,14 +2,14 @@
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Organisationsdaten & Logo</h2>
-        <p>Unter „Organisation bearbeiten" pflegen Sie:</p>
+        <p>Unter „Organisation bearbeiten“ pflegen Sie:</p>
         <ul>
             <li><strong>Name:</strong> Offizieller Organisationsname</li>
             <li><strong>Beschreibung:</strong> Über Ihre Organisation (wird auf Veranstaltungsseiten angezeigt)</li>
             <li><strong>Logo:</strong> Wird auf Veranstaltungen, Tickets, Rechnungen angezeigt (max. 2MB, JPG/PNG)</li>
             <li><strong>Website & Kontakt:</strong> E-Mail, Telefon, Website-URL</li>
         </ul>
-        <p>Das Logo erscheint automatisch auf allen Ihren Veranstaltungen und in E-Mails an Teilnehmer.</p>
+        <p>Das Logo erscheint automatisch auf allen Ihren Veranstaltungen und in E-Mails an Teilnehmende.</p>
     </section>
 
     <section>
@@ -40,7 +40,7 @@
         <h2>4. Teamverwaltung</h2>
         <p>Laden Sie Teammitglieder ein und vergeben Sie Rollen:</p>
         <ul>
-            <li><strong>Owner:</strong> Volle Rechte inkl. Löschung der Organisation</li>
+            <li><strong>Inhaber:</strong> Volle Rechte inkl. Löschung der Organisation</li>
             <li><strong>Admin:</strong> Kann alles außer Organisation löschen</li>
             <li><strong>Editor:</strong> Kann Veranstaltungen erstellen/bearbeiten, Buchungen verwalten</li>
             <li><strong>Viewer:</strong> Kann nur ansehen, keine Änderungen</li>
@@ -49,7 +49,7 @@
     </section>
 
     <section>
-        <h2>5. Persönliches Profil (Organizer)</h2>
+        <h2>5. Persönliches Profil (Veranstalter)</h2>
         <p>Ihr persönliches Profil ist getrennt von der Organisation:</p>
         <ul>
             <li><strong>Vor- und Nachname:</strong> Ihr persönlicher Name</li>
@@ -63,8 +63,8 @@
         <h2>6. Monetarisierungs-Einstellungen</h2>
         <p>Einsehen, aber nicht ändern (Admin-Rechte erforderlich):</p>
         <ul>
-            <li><strong>Platform-Fee:</strong> Standardmäßig z.B. 5% auf Buchungen</li>
-            <li><strong>Featured-Event-Gebühren:</strong> Kosten für Hervorhebung</li>
+            <li><strong>Platform-Fee:</strong> Standardmäßig z. B. 5% auf Buchungen</li>
+            <li><strong>Gebühren für Hervorhebungen:</strong> Kosten für Hervorhebung</li>
             <li><strong>Individuelle Gebühren:</strong> Können vom Admin angepasst werden</li>
         </ul>
     </section>

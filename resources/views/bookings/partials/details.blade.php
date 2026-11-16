@@ -282,7 +282,7 @@
                         <th scope="col">Ticket</th>
                         <th scope="col">Teilnehmer:in</th>
                         @unless ($isFree)
-                            <th scope="col" class="num">Preis</th>
+                            <th scope="col" class="num max-sm:hidden">Preis</th>
                         @endunless
                         @if ($eventPast)
                             <th scope="col" class="actions"><span class="sr-only">Zertifikat</span></th>
@@ -296,12 +296,16 @@
                                 {{ $item->ticketType?->name ?? 'Ticket' }}
                                 <span
                                     class="block text-caption font-normal whitespace-nowrap text-muted tabular-nums">{{ $item->ticket_number }}</span>
+                                @unless ($isFree)
+                                    <span
+                                        class="block text-small font-normal text-muted tabular-nums sm:hidden">{{ Ui::money($item->price) }}</span>
+                                @endunless
                             </th>
                             <td>
                                 @if ($item->attendee_name)
                                     {{ $item->attendee_name }}
                                     @if ($item->attendee_email)
-                                        <span class="block text-small break-all text-muted">{{ $item->attendee_email }}</span>
+                                        <span class="block text-small [overflow-wrap:anywhere] text-muted">{{ $item->attendee_email }}</span>
                                     @endif
                                 @else
                                     <x-ui.status tone="warning">Teilnehmer:in noch nicht eingetragen</x-ui.status>
@@ -312,7 +316,7 @@
                                 @endif
                             </td>
                             @unless ($isFree)
-                                <td class="num">{{ Ui::money($item->price) }}</td>
+                                <td class="num max-sm:hidden">{{ Ui::money($item->price) }}</td>
                             @endunless
                             @if ($eventPast)
                                 <td class="actions">
@@ -427,7 +431,7 @@
                         <x-ui.summary-line label="Rechnung" amount="folgt separat" />
                     @elseif($booking->payment_status !== 'extern')
                         <x-ui.summary-line label="Zahlung">
-                            <x-ui.status :tone="Ui::paymentTone($booking->payment_status)">{{ $booking->paymentStatusLabel() }}</x-ui.status>
+                            <x-ui.status :tone="Ui::paymentTone($booking->payment_status)">{{ $booking->payment_status === 'pending' ? 'Offen' : $booking->paymentStatusLabel() }}</x-ui.status>
                         </x-ui.summary-line>
                     @endif
                 </div>

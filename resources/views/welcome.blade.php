@@ -157,8 +157,8 @@
                                 Veranstaltung anlegen
                             </x-ui.button>
                         @else
-                            <x-ui.button variant="secondary" size="lg" :href="route('events.index')" arrow>
-                                Veranstaltungen entdecken
+                            <x-ui.button variant="secondary" size="lg" :href="route('contact.show')" arrow>
+                                Kontakt aufnehmen
                             </x-ui.button>
                         @endif
                     @endguest

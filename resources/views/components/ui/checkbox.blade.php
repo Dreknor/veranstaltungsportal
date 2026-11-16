@@ -23,6 +23,10 @@
     $error ??= \App\Support\Ui::error($errors ?? null, $name, $bag);
     $isChecked = $old ? \App\Support\Ui::checked($name, $value, (bool) $checked) : (bool) $checked;
     $describedBy = trim(($hint ? $id . '-hint ' : '') . ($error ? $id . '-error' : ''));
+    // Pflicht-Stern direkt am Text mit geschütztem Leerzeichen, damit er nie allein in eine neue Zeile rutscht
+    $labelHtml =
+        ($label !== null ? e($label) : trim($slot->toHtml())) .
+        ($required ? '<span aria-hidden="true">&nbsp;*</span>' : '');
 @endphp
 
 <div {{ $attributes->only('class') }}>
@@ -37,10 +41,7 @@
             @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
             {{ $attributes->except('class')->class(['ui-checkbox', $inputClass]) }}>
         <span class="min-w-0">
-            {{ $label ?? $slot }}
-            @if ($required)
-                <span aria-hidden="true">*</span>
-            @endif
+            {!! $labelHtml !!}
             @if ($hint)
                 <span id="{{ $id }}-hint" class="mt-0.5 block text-small text-muted">{{ $hint }}</span>
             @endif

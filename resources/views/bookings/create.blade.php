@@ -209,7 +209,7 @@
                 </x-ui.summary-lines>
 
                 <x-ui.summary-total>
-                    <span id="total">0,00 €</span>
+                    <span id="total">{{ $onlyFreeTickets ? 'kostenfrei' : '–' }}</span>
                 </x-ui.summary-total>
 
                 <x-recaptcha action="booking" />
@@ -249,6 +249,7 @@
                 const onlyFree = @json($onlyFreeTickets);
                 let subtotal = 0;
                 let discountAmount = 0;
+                let count = 0;
 
                 function paymentMethod() {
                     const checked = document.querySelector('input[name="payment_method"]:checked');
@@ -259,7 +260,8 @@
                 function updateSubmitButton() {
                     const text = document.getElementById('submit-button-text');
                     const total = subtotal - discountAmount;
-                    if (onlyFree || total <= 0) {
+                    // Ohne Auswahl bleibt bei kostenpflichtigen Veranstaltungen die kostenpflichtige Beschriftung.
+                    if (onlyFree || (count > 0 && total <= 0)) {
                         text.textContent = 'Verbindlich anmelden';
                     } else if (paymentMethod() === 'paypal') {
                         text.textContent = 'Weiter zu PayPal';
@@ -270,7 +272,7 @@
 
                 function updateSummary() {
                     subtotal = 0;
-                    let count = 0;
+                    count = 0;
                     const summary = document.getElementById('order-summary');
                     summary.innerHTML = '';
 
@@ -300,7 +302,9 @@
 
                     const total = Math.max(0, subtotal - discountAmount);
                     document.getElementById('subtotal').textContent = euro(subtotal);
-                    document.getElementById('total').textContent = total > 0 ? euro(total) : 'kostenfrei';
+                    // Ohne Auswahl: "–" statt "kostenfrei", damit eine kostenpflichtige Veranstaltung nicht kostenlos wirkt.
+                    document.getElementById('total').textContent = count === 0 && !onlyFree ? '–' : (total > 0 ? euro(total) :
+                        'kostenfrei');
                     document.getElementById('submit-button').disabled = count === 0;
                     updateSubmitButton();
                 }

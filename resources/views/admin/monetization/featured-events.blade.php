@@ -4,14 +4,10 @@
         $payLabel = ['paid' => 'Bezahlt', 'pending' => 'Ausstehend', 'failed' => 'Fehlgeschlagen'];
     @endphp
 
-    <x-ui.page-header title="Übersicht der Hervorhebungen" subtitle="Alle Gebühren und Transaktionen für hervorgehobene Veranstaltungen." />
+    <x-ui.page-header title="Übersicht der Hervorhebungen"
+        subtitle="Alle Gebühren und Transaktionen für hervorgehobene Veranstaltungen." />
 
-    <x-ui.tabs label="Bereiche der Monetarisierung" class="mb-8">
-        <x-ui.tab :href="route('admin.monetization.index')">Gebühren-Einstellungen</x-ui.tab>
-        <x-ui.tab :href="route('admin.monetization.billing-data')">Plattform-Rechnungsdaten</x-ui.tab>
-        <x-ui.tab :href="route('admin.settings.invoice.index')">Rechnungsnummern</x-ui.tab>
-        <x-ui.tab :href="route('admin.monetization.featured-events')" active>Übersicht der Hervorhebungen</x-ui.tab>
-    </x-ui.tabs>
+    @include('admin.monetization._tabs', ['active' => 'featured'])
 
     <!-- Statistics -->
     <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -40,7 +36,8 @@
                         <th scope="row">
                             {{ $fee->event->title ?? 'Veranstaltung gelöscht' }}
                             @if ($fee->event)
-                                <span class="block text-small font-normal tabular-nums text-muted">{{ $fee->event->start_date->format('d.m.Y H:i') }}</span>
+                                <span
+                                    class="block text-small font-normal tabular-nums text-muted">{{ $fee->event->start_date->format('d.m.Y H:i') }}</span>
                             @endif
                         </th>
                         <td>
@@ -49,7 +46,8 @@
                         </td>
                         <td class="whitespace-nowrap tabular-nums">
                             {{ $fee->featured_start_date->format('d.m.Y') }}
-                            <span class="block text-small text-muted">bis {{ $fee->featured_end_date->format('d.m.Y') }}</span>
+                            <span class="block text-small text-muted">bis
+                                {{ $fee->featured_end_date->format('d.m.Y') }}</span>
                         </td>
                         <td class="whitespace-nowrap">
                             @if ($fee->duration_type === 'daily')
@@ -64,13 +62,15 @@
                         </td>
                         <td class="num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
                         <td>
-                            <x-ui.status :tone="$payTone[$fee->payment_status] ?? 'neutral'">{{ $payLabel[$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status>
+                            <x-ui.status
+                                :tone="$payTone[$fee->payment_status] ?? 'neutral'">{{ $payLabel[$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status>
                         </td>
                         <td class="whitespace-nowrap tabular-nums">
                             @if ($fee->paid_at)
                                 {{ $fee->paid_at->format('d.m.Y H:i') }}
                                 @if ($fee->payment_method)
-                                    <span class="block text-small text-muted">via {{ ucfirst($fee->payment_method) }}</span>
+                                    <span class="block text-small text-muted">per
+                                        {{ \App\Support\AdminLabels::paymentMethod($fee->payment_method) }}</span>
                                 @endif
                             @else
                                 –

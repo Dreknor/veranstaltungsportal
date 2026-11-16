@@ -2,6 +2,8 @@ import "./bootstrap";
 import Alpine from "alpinejs";
 import * as CookieConsent from "vanilla-cookieconsent";
 import { richEditor } from "./rich-editor";
+import { pushNotifications } from "./push-notifications";
+import { markdownEditor } from "./markdown-editor";
 
 window.Alpine = Alpine;
 window.CookieConsent = CookieConsent;
@@ -16,6 +18,8 @@ window.setAppearance = () => {};
 
 // Rich-Text-Editor als Alpine-Komponente registrieren (vor Alpine.start())
 Alpine.data("richEditor", richEditor);
+Alpine.data("pushNotifications", pushNotifications);
+Alpine.data("markdownEditor", markdownEditor);
 
 Alpine.start();
 

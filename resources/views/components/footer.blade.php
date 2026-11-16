@@ -11,7 +11,10 @@
         ['label' => 'Veranstaltungen', 'url' => route('events.index')],
         ['label' => 'Kalender', 'url' => route('events.calendar')],
         ['label' => 'FAQ', 'url' => route('faq')],
-        ['label' => 'Hilfe', 'url' => route('help.index')],
+        // Die Hilfe ist nur für Angemeldete erreichbar; Gäste würden auf die Anmeldung umgeleitet.
+        ...auth()->check() ? [['label' => 'Hilfe', 'url' => route('help.index')]] : [],
+    ];
+    $serviceLinks = [
         ['label' => 'Kontakt', 'url' => route('contact.show')],
         ['label' => 'Impressum', 'url' => route('impressum')],
         ['label' => 'Datenschutz', 'url' => route('datenschutz')],
@@ -28,7 +31,7 @@
                 <a href="https://www.esdigmbh.de/" target="_blank" rel="noopener"
                     class="text-muted underline-offset-[3px] hover:underline">ESdi GmbH</a></span>
             <nav aria-label="Fußnavigation" class="flex flex-wrap gap-x-6">
-                @foreach (array_slice($footerLinks, 4) as $link)
+                @foreach ($serviceLinks as $link)
                     <a href="{{ $link['url'] }}" class="{{ $linkClass }} font-medium">{{ $link['label'] }}</a>
                 @endforeach
                 <button type="button" onclick="window.showCookiePreferences()"
@@ -42,7 +45,7 @@
             <div class="flex flex-wrap items-center justify-between gap-x-12 gap-y-4">
                 <x-wordmark size="sm" />
                 <nav aria-label="Fußnavigation" class="flex flex-wrap gap-x-7">
-                    @foreach ($footerLinks as $link)
+                    @foreach ([...$footerLinks, ...$serviceLinks] as $link)
                         <a href="{{ $link['url'] }}"
                             class="{{ $linkClass }} text-ui font-medium">{{ $link['label'] }}</a>
                     @endforeach

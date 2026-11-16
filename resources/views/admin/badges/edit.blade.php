@@ -4,11 +4,15 @@
     @php
         $requirements = $badge->requirements ?? [];
         $requirements = is_array($requirements) ? $requirements : [];
-        $currentRequirementType = old('requirement_type', count($requirements) > 0 ? array_key_first($requirements) : '');
+        $currentRequirementType = old(
+            'requirement_type',
+            count($requirements) > 0 ? array_key_first($requirements) : '',
+        );
         $currentRequirementValue = old('requirement_value', count($requirements) > 0 ? reset($requirements) : 1);
     @endphp
 
-    <form method="POST" action="{{ route('admin.badges.update', $badge) }}" enctype="multipart/form-data" class="max-w-form">
+    <form method="POST" action="{{ route('admin.badges.update', $badge) }}" enctype="multipart/form-data"
+        class="max-w-form">
         @csrf
         @method('PUT')
 
@@ -25,8 +29,7 @@
 
         <x-ui.section title="Darstellung" class="border-t border-line py-8">
             <div class="flex flex-col gap-y-5">
-                <x-ui.field label="Icon" name="icon" :value="$badge->icon" required
-                    hint="Name eines Symbols, z. B. medal, star, academic-cap oder ein Font-Awesome-Name wie fa-trophy. Ohne eigenes Bild zeigt das Abzeichen dieses Symbol; unbekannte Namen zeigen die Medaille." />
+                @include('admin.badges._icon-field', ['current' => $badge->icon])
 
                 <div>
                     <x-ui.label for="image" optional>Bild des Abzeichens</x-ui.label>
@@ -38,12 +41,14 @@
                                 class="h-24 w-24 rounded-full border-4 border-line object-cover" id="currentImage">
                             <div>
                                 <p class="m-0 text-small text-muted">Aktuelles Bild</p>
-                                <x-ui.checkbox name="remove_image" id="removeImageCheckbox" value="1" label="Bild entfernen" :old="false" />
+                                <x-ui.checkbox name="remove_image" id="removeImageCheckbox" value="1"
+                                    label="Bild entfernen" :old="false" />
                             </div>
                         </div>
                     @endif
 
-                    <x-ui.input type="file" name="image" id="image" accept="image/*" aria-describedby="image-hint image-error" />
+                    <x-ui.file-input name="image" id="image" accept="image/*"
+                        aria-describedby="image-hint image-error" />
                     <x-ui.hint id="image-hint">
                         @if ($badge->image_path)
                             Neues Bild hochladen, um das aktuelle zu ersetzen.
@@ -66,7 +71,7 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <input type="color" name="color" id="color" value="{{ old('color', $badge->color) }}"
                             class="h-12 w-20 cursor-pointer rounded-control border border-line-strong bg-surface p-1">
-                        <x-ui.input id="colorText" value="{{ old('color', $badge->color) }}" placeholder="#3B82F6"
+                        <x-ui.input id="colorText" value="{{ old('color', $badge->color) }}" placeholder="#2B4347"
                             aria-label="Hex-Code der Farbe" :old="false" class="min-w-0 max-w-48 flex-1" />
                         <span id="colorPreview"
                             class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full"
@@ -82,10 +87,10 @@
 
         <x-ui.section title="Vergabe" class="border-t border-line py-8">
             <div class="flex flex-col gap-y-5">
-                <x-ui.field label="Punkte" name="points" type="number" :value="$badge->points" min="0" max="1000" required />
+                <x-ui.field label="Punkte" name="points" type="number" :value="$badge->points" min="0" max="1000"
+                    required />
                 <x-ui.select label="Anforderungstyp" name="requirement_type" placeholder="Typ auswählen..." required
-                    :old="false" :options="\App\Models\Badge::REQUIREMENT_TYPES"
-                    :selected="\App\Models\Badge::normalizeRequirement((string) $currentRequirementType)" />
+                    :old="false" :options="\App\Models\Badge::REQUIREMENT_TYPES" :selected="\App\Models\Badge::normalizeRequirement((string) $currentRequirementType)" />
                 <x-ui.field label="Anforderungswert" name="requirement_value" type="number" :old="false"
                     :value="$currentRequirementValue" min="1" required
                     hint="Anzahl, die erreicht werden muss, um das Abzeichen zu erhalten." />
@@ -96,7 +101,8 @@
             <x-ui.button type="submit">Änderungen speichern</x-ui.button>
             <x-ui.button variant="secondary" :href="route('admin.badges.index')">Abbrechen</x-ui.button>
             @if ($badge->users()->count() === 0)
-                <x-ui.button variant="danger" type="submit" form="delete-badge-form" class="sm:ml-auto">Abzeichen löschen</x-ui.button>
+                <x-ui.button variant="danger" type="submit" form="delete-badge-form" class="sm:ml-auto">Abzeichen
+                    löschen</x-ui.button>
             @endif
         </div>
     </form>

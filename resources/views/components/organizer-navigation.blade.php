@@ -21,7 +21,8 @@
                     <div class="min-w-0">
                         <p class="m-0 truncate text-ui font-semibold text-ink">{{ $currentOrg->name }}</p>
                         <p class="m-0 text-caption text-muted">
-                            {{ ucfirst(auth()->user()->getRoleInOrganization($currentOrg)) }}</p>
+                            {{ \App\Models\Organization::roleLabel(auth()->user()->getRoleInOrganization($currentOrg)) }}
+                        </p>
                     </div>
                 @else
                     <p class="m-0 text-ui text-muted">Keine Organisation ausgewählt</p>
@@ -39,7 +40,7 @@
                     Buchungen
                 </x-ui.nav-link>
                 <x-ui.nav-link :href="route('organizer.statistics.index')" :active="request()->routeIs('organizer.statistics.*')">
-                    Statistiken
+                    Statistik
                 </x-ui.nav-link>
 
                 <x-ui.dropdown width="w-64">
@@ -77,7 +78,7 @@
             <x-ui.nav-link block :href="route('organizer.dashboard')" :active="request()->routeIs('organizer.dashboard')">Dashboard</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.events.index')" :active="request()->routeIs('organizer.events.*')">Veranstaltungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.bookings.index')" :active="request()->routeIs('organizer.bookings.*')">Buchungen</x-ui.nav-link>
-            <x-ui.nav-link block :href="route('organizer.statistics.index')" :active="request()->routeIs('organizer.statistics.*')">Statistiken</x-ui.nav-link>
+            <x-ui.nav-link block :href="route('organizer.statistics.index')" :active="request()->routeIs('organizer.statistics.*')">Statistik</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.reviews.index')">Bewertungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.invoices.index')">Rechnungen</x-ui.nav-link>
             <x-ui.nav-link block :href="route('organizer.settings.invoice.index')">Rechnungseinstellungen</x-ui.nav-link>

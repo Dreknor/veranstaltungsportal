@@ -344,6 +344,47 @@ Wie `field`, Mindesthöhe 120 px. Inhalt über `value` oder den Slot; `rows` (4)
 <x-ui.textarea label="Beschreibung" name="description" :value="$event->description" required rows="8" />
 ```
 
+### `<x-ui.markdown-editor>`
+
+Mehrzeiliges Feld für Text mit Markdown-Formatierung (Veranstaltungsbeschreibung): Label, Werkzeugleiste
+aus `sm`-Sekundärbuttons (B6) – **Fett**, **Kursiv**, **Überschrift** (`## `), **Aufzählung** (`- `),
+**Nummerierung** (`1. `), **Link** (`[Text](https://)`, die Adresse ist danach markiert) – und rechts der
+Umschalter **Vorschau** (`aria-pressed`). Darunter `<x-ui.textarea>` mit Hinweis und Fehler. Die Vorschau
+erscheint unter dem Feld (das Feld bleibt sichtbar, Pflichtfeld-Prüfung funktioniert weiter) und folgt den
+Eingaben; der Server rendert sie über `POST /markdown/preview` (Route `markdown.preview`, nur angemeldet)
+mit demselben Renderer wie die Anzeige, `App\Support\Ui::markdown()`.
+
+Props wie `x-ui.textarea` (`label`, `name`, `id`, `value`, `rows` 8, `required`, `optional`, `hint` mit
+Standard-Hinweis zur Formatierung, `error`, `old`, `bag`) plus `preview-url`. `class` landet am äußeren
+Element, übrige Attribute am `<textarea>`. Tastatur: Tab durch die Werkzeugleiste, Pfeiltasten links/rechts
+innerhalb der Leiste, im Feld Strg/Cmd+B (fett), Strg/Cmd+I (kursiv), Strg/Cmd+K (Link). Alpine-Logik:
+`resources/js/markdown-editor.js` (`Alpine.data('markdownEditor')`).
+
+```blade
+<x-ui.markdown-editor label="Beschreibung" name="description" :value="$event->description" required />
+```
+
+**Anzeige:** Markdown nie mit `nl2br(e(…))` oder `{!! $text !!}` ausgeben, sondern
+`<div class="richtext max-w-prose">{!! Ui::markdown($event->description) !!}</div>` (HTML im Text wird
+entfernt, `javascript:`-Links entfallen, einfache Zeilenumbrüche bleiben, Überschriften beginnen bei `h3`,
+Bilder erscheinen als Alternativtext). Für Auszüge, Meta-Beschreibungen, Feeds, Newsletter und Kalender:
+`Ui::plainText($text, 160)` – reiner Text ohne Markdown-Zeichen.
+
+### `<x-ui.file-input>`
+
+Dateiauswahl mit deutscher Beschriftung statt „Choose File / No file chosen“: Sekundärbutton
+(„Datei auswählen“, Icon `upload`) und daneben der gewählte Dateiname („Keine Datei ausgewählt“). Das
+echte `<input type="file">` bleibt per Tastatur bedienbar (visuell versteckt, Fokus-Ring am Button).
+Props: `name`, `id`, `button`, `empty`, `invalid` (automatisch aus `$errors`), `bag`. Label setzt der
+Aufrufer (`x-ui.label for`); `class` am äußeren Element, übrige Attribute (`accept`, `required`,
+`aria-describedby`, `onchange`) am `<input>`.
+
+```blade
+<x-ui.label for="profile_photo">Profilfoto</x-ui.label>
+<x-ui.file-input name="profile_photo" button="Foto auswählen" accept="image/*" aria-describedby="profile_photo-hint" />
+<x-ui.hint id="profile_photo-hint">JPG, PNG oder GIF, höchstens 2 MB</x-ui.hint>
+```
+
 ### `<x-ui.checkbox>` und `<x-ui.radio>`
 
 20 px, Zeile mindestens 44 px, Label klickbar. Beschriftung über `label` oder den Slot (Slot erlaubt
@@ -882,7 +923,8 @@ Innerhalb von `<x-ui.dropdown>` oder eines anderen `x-data`-Bereichs ist das nic
 
 Reiter als Links (Seitenwechsel, kein JavaScript) oder als Umschalter innerhalb einer Seite.
 `tabs`: `label` (Name der Navigation bzw. Gruppe), `variant` (`links` → `<nav>` · `toggle` →
-`<div role="group">`). `tab`: `href`, `active`, `count`. Aktiv: Gewicht 600, 2-px-Linie `ink`.
+`<div role="group">`), `wrap` (`false`; `true`: Reiter brechen auf dem Handy in eine zweite Zeile um, statt
+unsichtbar abgeschnitten waagrecht zu scrollen – für kurze Leisten wie die Einstellungen). `tab`: `href`, `active`, `count`. Aktiv: Gewicht 600, 2-px-Linie `ink`.
 
 - Mit `href`: Link, aktiv mit `aria-current="page"`.
 - Ohne `href`: `<button type="button" aria-pressed>`. Die Optik folgt `aria-pressed="true"`; `active` setzt
@@ -1044,3 +1086,9 @@ unbekannte Namen ergeben das Ersatz-Icon. Neue Zuordnungen in `Ui::FA_ICONS` ein
 | `Ui::icon($name, $fallback = 'list')` | Komponentenname eines Linien-Icons zu einem Icon-/Font-Awesome-Namen: `icon.academic-cap` |
 | `Ui::logLevelTone($level)` | Ton für die Stufe eines System-Logs (`ERROR` → `danger`, `WARNING` → `warning`, `INFO`/`NOTICE` → `info`) |
 | `Ui::auditActionTone($action)` | Ton für eine Audit-Aktion (`…created` → `success`, `…updated` → `info`, `…deleted` → `danger`) |
+| `Ui::number($n, $decimals = 0)` | „1.250“, „12,5“ (ohne überflüssige Nullen) |
+| `Ui::country($country)` | Land zur Anzeige: „Germany“ / „DE“ → „Deutschland“; Unbekanntes bleibt |
+| `Ui::markdown($text)` | Markdown als sicheres HTML für `.richtext` (siehe `x-ui.markdown-editor`) |
+| `Ui::plainText($text, $limit = null, $keepLines = false)` | Markdown als reiner Text für Auszüge, Meta, Feeds, ICS |
+| `Ui::badgeType($type)` / `Ui::badgeRequirement($key)` | Art und Anforderung eines Abzeichens: „Teilnahme“ / „Fortbildungsstunden“ |
+| `Ui::notificationTitle($type, $data)` / `Ui::notificationMessage($data)` | Titel und Text gespeicherter Benachrichtigungen (Ersatztitel je Art, „…“ statt "…") |

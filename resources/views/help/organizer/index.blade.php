@@ -10,18 +10,22 @@
             'Veranstaltungen erstellen & verwalten',
             'Datenpflege, Online/Hybrid, Veröffentlichung und Medien.',
         ],
-        ['managing-bookings', 'Buchungen & Teilnehmer verwalten', 'Zahlungen, Check-In, Export und Kommunikation.'],
+        ['managing-bookings', 'Buchungen & Teilnehmende verwalten', 'Zahlungen, Check-in, Export und Kommunikation.'],
         ['tickets-pricing', 'Tickets & Preisgestaltung', 'Ticketarten, Preise, Rabatte und Kapazitäten.'],
         ['analytics-reports', 'Statistiken & Berichte', 'Kennzahlen, Trends und Exporte.'],
-        ['communication', 'Kommunikation mit Teilnehmern', 'E-Mails, Erinnerungen und Datenschutz.'],
-        ['marketing-promotion', 'Marketing & Promotion', 'Featured, Social Sharing und Sichtbarkeit.'],
+        ['communication', 'Kommunikation mit Teilnehmenden', 'E-Mails, Erinnerungen und Datenschutz.'],
+        [
+            'marketing-promotion',
+            'Marketing & Promotion',
+            'Hervorhebung, Teilen in sozialen Netzwerken und Sichtbarkeit.',
+        ],
         ['settings-preferences', 'Einstellungen & Präferenzen', 'Organisation, Rechnung, Team & Profil.'],
         ['troubleshooting', 'Häufige Probleme & FAQ', 'Typische Fehler und Lösungen.'],
     ];
 @endphp
 <x-layouts.app title="Hilfe für Veranstalter">
     <x-ui.page-header title="Hilfe für Veranstalter"
-        subtitle="Leitfäden und Best Practices für Organisationen und Veranstalter" :back-href="route('help.index')"
+        subtitle="Leitfäden und Empfehlungen für Organisationen und Veranstalter" :back-href="route('help.index')"
         back-label="Zur Hilfe-Übersicht" />
 
     <ul class="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(296px,1fr))] gap-x-8 p-0">

@@ -1,28 +1,28 @@
-<x-help.article title="Badges & Erfolge" subtitle="Sammeln Sie Auszeichnungen für Ihre Teilnahme">
+<x-help.article :title="'Abzeichen & Erfolge'" subtitle="Sammeln Sie Auszeichnungen für Ihre Teilnahme">
     <p>
-        Sammeln Sie Badges für Ihre Fortbildungsaktivitäten und verfolgen Sie Ihren Lernfortschritt auf dem Weg zum
-        lebenslangen Lernen.
+        Sammeln Sie Abzeichen für Ihre Fortbildungsaktivitäten und verfolgen Sie Ihren Lernfortschritt auf dem Weg
+        zum lebenslangen Lernen.
     </p>
 
     <nav aria-label="Inhalt">
         <ul>
-            <li><a href="#what">1. Was sind Badges?</a></li>
-            <li><a href="#earn">2. Badges verdienen</a></li>
-            <li><a href="#types">3. Badge-Kategorien</a></li>
-            <li><a href="#display">4. Badges präsentieren</a></li>
-            <li><a href="#leaderboard">5. Leaderboard</a></li>
+            <li><a href="#what">1. Was sind Abzeichen?</a></li>
+            <li><a href="#earn">2. Abzeichen verdienen</a></li>
+            <li><a href="#types">3. Arten von Abzeichen</a></li>
+            <li><a href="#display">4. Abzeichen präsentieren</a></li>
+            <li><a href="#leaderboard">5. Bestenliste</a></li>
         </ul>
     </nav>
 
     <section id="what">
-        <h2>1. Was sind Badges?</h2>
+        <h2>1. Was sind Abzeichen?</h2>
         <p>
-            Badges sind digitale Auszeichnungen, die Sie für bestimmte Aktivitäten und Meilensteine auf dem
+            Abzeichen sind digitale Auszeichnungen, die Sie für bestimmte Aktivitäten und Meilensteine auf dem
             Bildungsportal erhalten. Sie dokumentieren Ihren Lernweg und motivieren zur kontinuierlichen
             Weiterbildung.
         </p>
 
-        <h3>Vorteile von Badges</h3>
+        <h3>Vorteile von Abzeichen</h3>
         <ul>
             <li><strong>Fortschritt sichtbar machen:</strong> Dokumentieren Sie Ihre Weiterbildungsaktivitäten auf
                 einen Blick</li>
@@ -33,98 +33,72 @@
     </section>
 
     <section id="earn">
-        <h2>2. Badges verdienen</h2>
+        <h2>2. Abzeichen verdienen</h2>
         <p>
-            Badges werden automatisch vergeben, wenn Sie bestimmte Kriterien erfüllen. Sie müssen sich nicht separat
-            bewerben.
+            Abzeichen werden automatisch vergeben, wenn Sie bestimmte Kriterien erfüllen. Sie müssen sich nicht
+            separat bewerben.
         </p>
 
-        <h3>Wie erhalte ich Badges?</h3>
+        <h3>Wie erhalte ich Abzeichen?</h3>
         <ol>
             <li>Nehmen Sie an Veranstaltungen teil</li>
-            <li>Das System prüft automatisch die Badge-Kriterien</li>
-            <li>Bei Erfüllung wird das Badge sofort vergeben</li>
-            <li>Sie erhalten eine Benachrichtigung über neue Badges</li>
-            <li>Das Badge erscheint in Ihrer Badge-Sammlung</li>
+            <li>Das System prüft automatisch die Kriterien der Abzeichen</li>
+            <li>Sind sie erfüllt, wird das Abzeichen vergeben</li>
+            <li>Sie erhalten eine Benachrichtigung über neue Abzeichen</li>
+            <li>Das Abzeichen erscheint in Ihrer Sammlung unter „Abzeichen“</li>
         </ol>
 
-        <x-ui.alert tone="info" title="Tipp">Unter „Abzeichen“ sehen Sie, welche Badges Sie noch erreichen können
-            und was dafür nötig ist!</x-ui.alert>
+        <x-ui.alert tone="info" title="Tipp">Unter „Abzeichen“ sehen Sie, welche Abzeichen Sie noch erreichen
+            können und was dafür nötig ist.</x-ui.alert>
     </section>
 
     <section id="types">
-        <h2>3. Badge-Kategorien</h2>
+        <h2>3. Arten von Abzeichen</h2>
 
-        <h3>Teilnahme-Badges</h3>
-        <p>Für die Teilnahme an Veranstaltungen</p>
-        <ul>
-            <li>Erste Veranstaltung - Nach der ersten besuchten Veranstaltung</li>
-            <li>Fortbildungs-Enthusiast - 10 Veranstaltungen besucht</li>
-            <li>Wissensdurstig - 25 Veranstaltungen besucht</li>
-            <li>Lebenslanges Lernen - 50 Veranstaltungen besucht</li>
-        </ul>
+        <h3>Teilnahme</h3>
+        <p>Für absolvierte Fortbildungsstunden, z. B. 50 oder 100 Stunden Fortbildung.</p>
 
-        <h3>Stunden-Badges</h3>
-        <p>Basierend auf absolvierten Fortbildungsstunden</p>
-        <ul>
-            <li>10 Stunden - Bronze</li>
-            <li>25 Stunden - Silber</li>
-            <li>50 Stunden - Gold</li>
-            <li>100 Stunden - Platin</li>
-        </ul>
+        <h3>Erfolg</h3>
+        <p>
+            Für besuchte Veranstaltungen, Veranstaltungen in verschiedenen Kategorien, frühzeitige Buchungen und
+            geschriebene Bewertungen.
+        </p>
 
-        <h3>Themen-Badges</h3>
-        <p>Für Expertise in bestimmten Themenbereichen</p>
-        <ul>
-            <li>Digitalisierungs-Experte - 5 Veranstaltungen zu Digitalisierung</li>
-            <li>Inklusions-Spezialist - 5 Veranstaltungen zu Inklusion</li>
-            <li>Pädagogik-Profi - 5 Veranstaltungen zu Pädagogik</li>
-        </ul>
+        <h3>Spezial</h3>
+        <p>Für besondere Anlässe, z. B. die erste selbst organisierte Fortbildung.</p>
 
-        <h3>Community-Badges</h3>
-        <p>Für soziales Engagement auf der Plattform</p>
-        <ul>
-            <li>Netzwerker - 10 Verbindungen aufgebaut</li>
-            <li>Reviewer - 10 hilfreiche Bewertungen geschrieben</li>
-            <li>Empfehler - Veranstaltungen mit Kollegen geteilt</li>
-        </ul>
+        <p>Welche Abzeichen es gibt und was jeweils nötig ist, sehen Sie unter „Abzeichen“.</p>
     </section>
 
     <section id="display">
-        <h2>4. Badges präsentieren</h2>
+        <h2>4. Abzeichen präsentieren</h2>
 
-        <h3>Ihre Badge-Sammlung ansehen</h3>
+        <h3>Ihre Sammlung ansehen</h3>
         <ol>
             <li>Gehen Sie zu <strong>Abzeichen</strong> in der Navigation</li>
-            <li>Sie sehen alle verdienten Badges mit Beschreibung</li>
-            <li>Gesperrte Badges zeigen, was noch möglich ist</li>
+            <li>Sie sehen alle verdienten Abzeichen mit Beschreibung</li>
+            <li>Gesperrte Abzeichen zeigen, was noch möglich ist</li>
         </ol>
 
-        <h3>Badges im Profil hervorheben</h3>
+        <h3>Lieblingsabzeichen markieren</h3>
         <ol>
-            <li>Klicken Sie auf ein Badge in Ihrer Sammlung</li>
-            <li>Wählen Sie <strong>„Als Highlight festlegen“</strong></li>
-            <li>Bis zu 3 Badges können prominent im Profil angezeigt werden</li>
-            <li>Diese Badges sehen andere Nutzer beim Besuch Ihres Profils</li>
+            <li>Gehen Sie zu <strong>Abzeichen</strong></li>
+            <li>Wählen Sie bei einem verdienten Abzeichen <strong>„Als Favorit markieren“</strong> (Stern)</li>
+            <li>Markierte Abzeichen tragen in Ihrer Sammlung einen gefüllten Stern</li>
         </ol>
 
-        <x-ui.alert tone="info" title="Tipp">Wählen Sie Badges, die Ihre Expertise am besten
-            repräsentieren!</x-ui.alert>
+        <p>Ihre zuletzt verdienten Abzeichen sehen andere auch auf Ihrem Profil.</p>
     </section>
 
     <section id="leaderboard">
-        <h2>5. Leaderboard</h2>
-        <p>Im Leaderboard sehen Sie, wie Sie im Vergleich zu anderen Nutzern abschneiden.</p>
+        <h2>5. Bestenliste</h2>
+        <p>
+            In der Bestenliste sehen Sie, wie Sie im Vergleich zu anderen Teilnehmenden abschneiden. Grundlage
+            sind die Punkte aller verdienten Abzeichen.
+        </p>
 
-        <h3>Ranglisten-Kategorien</h3>
-        <ul>
-            <li><strong>Gesamt-Punkte:</strong> Basierend auf allen verdienten Badges</li>
-            <li><strong>Diesen Monat:</strong> Aktivste Nutzer im aktuellen Monat</li>
-            <li><strong>Fortbildungsstunden:</strong> Meiste absolvierte Stunden</li>
-            <li><strong>Themen-Experten:</strong> Führend in bestimmten Themenbereichen</li>
-        </ul>
-
-        <x-ui.alert tone="warning" title="Privatsphäre">Sie können in den Einstellungen wählen, ob Sie im
-            Leaderboard erscheinen möchten.</x-ui.alert>
+        <x-ui.alert tone="warning" title="Privatsphäre">In der Bestenliste erscheinen nur Personen mit
+            öffentlichem Profil oder aktiviertem Networking. Das stellen Sie in den Einstellungen unter
+            „Datenschutz“ ein.</x-ui.alert>
     </section>
 </x-help.article>

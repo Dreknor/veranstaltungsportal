@@ -1,4 +1,4 @@
-<x-layouts.app title="Einstellungen">
+<x-layouts.app title="Darstellung">
     <x-ui.page-header title="Einstellungen" class="mb-4" />
 
     @include('settings.partials.navigation')

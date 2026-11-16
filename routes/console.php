@@ -68,7 +68,7 @@ Schedule::command('featured:notify-expiry')
     ->timezone('Europe/Berlin')
     ->description('Send expiry reminders for featured events (3 days before)');
 
-// Benachrichtige Admins über ausstehende Featured-Zahlungen (> 7 Tage offen)
+// Benachrichtige Admins über ausstehende Zahlungen für Hervorhebungen (> 7 Tage offen)
 Schedule::command('featured:notify-pending-payments')
     ->dailyAt('08:30')
     ->timezone('Europe/Berlin')

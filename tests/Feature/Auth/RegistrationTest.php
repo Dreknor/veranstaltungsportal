@@ -134,7 +134,7 @@ class RegistrationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Veranstalter');
-        $response->assertSee('Ich möchte Events erstellen');
+        $response->assertSee('Ich möchte Veranstaltungen anbieten');
     }
 
     public function test_registration_page_hides_organizer_option_when_disabled(): void

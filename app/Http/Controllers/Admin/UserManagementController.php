@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\NewOrganizerRegisteredNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
@@ -18,7 +19,7 @@ class UserManagementController extends Controller
 
     public function index(Request $request)
     {
-        $query = User::query()->with('roles');
+        $query = User::query()->with('roles')->withCount('bookings');
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -47,6 +48,18 @@ class UserManagementController extends Controller
 
         $users = $query->latest()
                        ->paginate(20);
+
+        // Veranstaltungen je Benutzer (über die aktiven Organisationen) in einer Abfrage
+        $eventCounts = DB::table('organization_user')
+            ->join('events', 'events.organization_id', '=', 'organization_user.organization_id')
+            ->whereIn('organization_user.user_id', $users->pluck('id'))
+            ->where('organization_user.is_active', true)
+            ->whereNull('events.deleted_at')
+            ->groupBy('organization_user.user_id')
+            ->selectRaw('organization_user.user_id as user_id, count(distinct events.id) as total')
+            ->pluck('total', 'user_id');
+
+        $users->each(fn (User $user) => $user->setAttribute('events_count', (int) ($eventCounts[$user->id] ?? 0)));
 
         $roles = Role::all();
 

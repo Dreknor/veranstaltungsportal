@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Permission\Traits\HasRoles;
 use App\Models\Event;
 use App\Models\Booking;
@@ -44,7 +45,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasPushSubscriptions, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -122,7 +123,14 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function notificationPreferences(): Attribute
     {
         return Attribute::make(
-            get: fn ($value) => is_array($value) ? $value : [],
+            // Der Accessor ersetzt den array-Cast: gespeichertes JSON hier selbst dekodieren
+            get: function ($value) {
+                if (is_string($value)) {
+                    $value = json_decode($value, true);
+                }
+
+                return is_array($value) ? $value : [];
+            },
         );
     }
 
@@ -802,10 +810,11 @@ class User extends Authenticatable implements MustVerifyEmail
                     break;
 
                 case 'total_hours_attended':
+                    // events.duration ist in Minuten gespeichert, die Anforderung in Stunden
                     $totalHours = $this->bookings()
                         ->where('checked_in', true)
                         ->join('events', 'bookings.event_id', '=', 'events.id')
-                        ->sum('events.duration');
+                        ->sum('events.duration') / 60;
                     if ($totalHours < $value) {
                         return false;
                     }

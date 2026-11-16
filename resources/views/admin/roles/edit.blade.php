@@ -1,5 +1,5 @@
-<x-layouts.app :title="'Rolle bearbeiten: ' . ucfirst($role->name)">
-    <x-ui.page-header :title="'Rolle bearbeiten: ' . ucfirst($role->name)" :back-href="route('admin.roles.index')" back-label="Zurück zu Rollen">
+<x-layouts.app :title="'Rolle bearbeiten: ' . \App\Support\AccessLabels::role($role->name)">
+    <x-ui.page-header :title="'Rolle bearbeiten: ' . \App\Support\AccessLabels::role($role->name)" :back-href="route('admin.roles.index')" back-label="Zurück zu Rollen">
         @if ($role->is_system)
             <x-slot:meta>
                 <x-ui.status tone="neutral">System-Rolle</x-ui.status>
@@ -17,7 +17,7 @@
 
     @if (!$role->is_system)
         <form id="delete-role-form" action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="hidden"
-            onsubmit="return confirm('Rolle \'{{ $role->name }}\' wirklich löschen? {{ $role->users()->count() }} Benutzer werden auf \'user\' zurückgesetzt.')">
+            onsubmit="return confirm('Rolle „{{ \App\Support\AccessLabels::role($role->name) }}“ wirklich löschen? {{ $role->users()->count() }} Benutzer werden auf „Teilnehmer“ zurückgesetzt.')">
             @csrf
             @method('DELETE')
         </form>
@@ -45,44 +45,28 @@
                 @endif
 
                 <x-ui.textarea label="Beschreibung" name="description" :value="$role->description" optional rows="2" />
-
-                <fieldset class="m-0 min-w-0 border-0 p-0">
-                    <x-ui.label as="legend">Farbe der Rolle</x-ui.label>
-                    <div class="-ml-1 flex flex-wrap">
-                        @foreach (['#6b7280', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'] as $color)
-                            <label class="cursor-pointer p-1">
-                                <input type="radio" name="color" value="{{ $color }}" class="peer sr-only"
-                                    @checked(old('color', $role->color ?? '#6b7280') === $color)>
-                                <span class="sr-only">{{ $color }}</span>
-                                <span aria-hidden="true"
-                                    class="block h-9 w-9 rounded-full outline-offset-2 peer-checked:outline peer-checked:outline-2 peer-checked:outline-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-ink"
-                                    style="background-color: {{ $color }};"></span>
-                            </label>
-                        @endforeach
-                    </div>
-                    <x-ui.field-error name="color" />
-                </fieldset>
+                @include('admin.roles._color-field', ['current' => $role->color])
             </div>
         </x-ui.section>
 
-        <x-ui.section title="Berechtigungen" class="border-t border-line py-8"
-            :description="$role->name !== 'admin' ? count($rolePermissions) . ' von ' . $permissions->flatten()->count() . ' Berechtigungen ausgewählt' : null">
+        <x-ui.section title="Berechtigungen" class="border-t border-line py-8" :description="$role->name !== 'admin' ? count($rolePermissions) . ' von ' . $permissions->flatten()->count() . ' Berechtigungen ausgewählt' : null">
             @if ($role->name !== 'admin')
                 <div class="flex flex-col gap-8">
                     @foreach ($permissions as $group => $groupPermissions)
                         <fieldset class="m-0 min-w-0 border-0 p-0">
                             <div class="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
-                                <legend class="float-left m-0 p-0 text-h3 capitalize">{{ $group }}</legend>
+                                <legend class="float-left m-0 p-0 text-h3">
+                                    {{ \App\Support\AccessLabels::group($group) }}</legend>
                                 <x-ui.button variant="link" size="sm" class="select-group-btn"
                                     data-group="{{ $group }}">Alle wählen</x-ui.button>
                             </div>
                             <div class="clear-both grid grid-cols-1 gap-x-4 md:grid-cols-2">
                                 @foreach ($groupPermissions as $permission)
-                                    <x-ui.checkbox name="permissions[]" :value="$permission->name"
-                                        :checked="in_array($permission->name, $rolePermissions)"
-                                        data-perm="{{ Str::slug($group) }}"
-                                        :hint="trim(($permission->description ?? '') . ($permission->is_system ? ' System-Berechtigung' : ''))"
-                                        :label="$permission->name" />
+                                    <x-ui.checkbox name="permissions[]" :value="$permission->name" :checked="in_array($permission->name, $rolePermissions)"
+                                        data-perm="{{ Str::slug($group) }}" :hint="trim(
+                                            ($permission->description ?? '') .
+                                                ($permission->is_system ? ' System-Berechtigung' : ''),
+                                        )" :label="\App\Support\AccessLabels::permission($permission->name)" />
                                 @endforeach
                             </div>
                         </fieldset>
@@ -91,7 +75,8 @@
                 <x-ui.field-error name="permissions" />
             @else
                 <x-ui.alert tone="info">
-                    Die <strong>Admin-Rolle</strong> erhält automatisch alle Berechtigungen und kann nicht eingeschränkt werden.
+                    Die <strong>Admin-Rolle</strong> erhält automatisch alle Berechtigungen und kann nicht eingeschränkt
+                    werden.
                 </x-ui.alert>
             @endif
         </x-ui.section>
@@ -117,7 +102,7 @@
                 @if ($loop->first)
                     <ul class="m-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-small text-ink">
                 @endif
-                <li class="font-mono">{{ $permission->name }}</li>
+                <li>{{ \App\Support\AccessLabels::permission($permission->name) }}</li>
                 @if ($loop->last)
                     </ul>
                 @endif

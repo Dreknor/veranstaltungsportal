@@ -14,7 +14,7 @@ class OrganizationManagementController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Organization::with(['owners', 'events']);
+        $query = Organization::with('owners')->withCount('events');
 
         // Search filter
         if ($request->filled('search')) {
@@ -48,7 +48,7 @@ class OrganizationManagementController extends Controller
         $sortDir = $request->get('sort_dir', 'asc');
 
         if ($sortBy === 'events_count') {
-            $query->withCount('events')->orderBy('events_count', $sortDir);
+            $query->orderBy('events_count', $sortDir);
         } else {
             $query->orderBy($sortBy, $sortDir);
         }

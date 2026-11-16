@@ -1,11 +1,12 @@
-<x-layouts.app>
-    <x-ui.page-header :title="'Rechnung ' . $invoice->invoice_number"
-        :back-href="route('organizer.invoices.index')" back-label="Zu den Rechnungen">
+<x-layouts.app :title="'Rechnung ' . $invoice->invoice_number">
+    <x-ui.page-header :title="'Rechnung ' . $invoice->invoice_number" :back-href="route('organizer.invoices.index')" back-label="Zu den Rechnungen">
         <x-slot:actions>
-            <x-ui.button :href="route('organizer.invoices.download', $invoice)">
-                <x-slot:icon><x-icon.download /></x-slot:icon>
-                PDF herunterladen
-            </x-ui.button>
+            @if ($invoice->pdf_path)
+                <x-ui.button :href="route('organizer.invoices.download', $invoice)">
+                    <x-slot:icon><x-icon.download /></x-slot:icon>
+                    PDF herunterladen
+                </x-ui.button>
+            @endif
         </x-slot:actions>
     </x-ui.page-header>
 
@@ -37,11 +38,13 @@
                             <x-ui.status tone="warning">Offen</x-ui.status>
                         @endif
                     </x-ui.dl-item>
-                    <x-ui.dl-item label="Rechnungsdatum" num>{{ $invoice->invoice_date->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Rechnungsdatum"
+                        num>{{ $invoice->invoice_date->format('d.m.Y') }}</x-ui.dl-item>
                     <x-ui.dl-item label="Fälligkeitsdatum" num>{{ $invoice->due_date->format('d.m.Y') }}</x-ui.dl-item>
                     <x-ui.dl-item label="Veranstaltung">
                         @if ($invoice->event)
-                            <a href="{{ route('organizer.events.edit', $invoice->event) }}" class="font-medium text-ink underline underline-offset-[3px]">{{ $invoice->event->title }}</a>
+                            <a href="{{ route('organizer.events.edit', $invoice->event) }}"
+                                class="font-medium text-ink underline underline-offset-[3px]">{{ $invoice->event->title }}</a>
                         @endif
                     </x-ui.dl-item>
                     <x-ui.dl-item label="Datum der Veranstaltung" num>
@@ -58,30 +61,34 @@
                         <thead>
                             <tr>
                                 <th scope="col">Buchung</th>
-                                <th scope="col" class="num">Buchungsbetrag</th>
-                                <th scope="col" class="num">Gebührensatz</th>
+                                <th scope="col" class="num max-sm:hidden">Buchungsbetrag</th>
+                                <th scope="col" class="num max-sm:hidden">Gebührensatz</th>
                                 <th scope="col" class="num">Gebühr</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($platformFees as $fee)
                                 <tr>
-                                    <td class="tabular-nums">
+                                    <td class="tabular-nums whitespace-nowrap">
                                         @if ($fee->booking)
-                                            <a href="{{ route('organizer.bookings.show', $fee->booking) }}" class="text-ink underline underline-offset-[3px]">{{ $fee->booking->booking_number }}</a>
+                                            <a href="{{ route('organizer.bookings.show', $fee->booking) }}"
+                                                class="text-ink underline underline-offset-[3px]">{{ $fee->booking->booking_number }}</a>
                                         @else
                                             –
                                         @endif
                                     </td>
-                                    <td class="num">{{ \App\Support\Ui::money($fee->booking_amount) }}</td>
-                                    <td class="num">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
+                                    <td class="num max-sm:hidden">{{ \App\Support\Ui::money($fee->booking_amount) }}
+                                    </td>
+                                    <td class="num max-sm:hidden">
+                                        {{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
                                     <td class="num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="3" class="num">Gesamt (netto)</td>
+                                <td colspan="3" class="num max-sm:hidden">Gesamt (netto)</td>
+                                <td class="num sm:hidden">Gesamt (netto)</td>
                                 <td class="num">{{ \App\Support\Ui::money($platformFees->sum('fee_amount')) }}</td>
                             </tr>
                         </tfoot>
@@ -110,7 +117,8 @@
                                         @endif
                                     </td>
                                     <td class="num">{{ $item['quantity'] ?? 1 }}</td>
-                                    <td class="num">{{ \App\Support\Ui::money($item['unit_price'] ?? $item['total']) }}</td>
+                                    <td class="num">
+                                        {{ \App\Support\Ui::money($item['unit_price'] ?? $item['total']) }}</td>
                                     <td class="num">{{ \App\Support\Ui::money($item['total']) }}</td>
                                 </tr>
                             @endforeach

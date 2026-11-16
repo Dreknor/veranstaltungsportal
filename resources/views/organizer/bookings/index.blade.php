@@ -36,12 +36,15 @@
         <div class="mb-6 flex flex-col gap-3" aria-label="Handlungsbedarf">
             @if ($pendingApprovalCount > 0)
                 <x-ui.alert tone="warning">
-                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending_approval']) }}" class="font-medium">{{ $pendingApprovalCount }} Anmeldung(en) warten auf Freigabe</a>
+                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending_approval']) }}"
+                        class="font-medium">{{ trans_choice('{1} :count Anmeldung wartet|[0,*] :count Anmeldungen warten', $pendingApprovalCount) }}
+                        auf Freigabe</a>
                 </x-ui.alert>
             @endif
             @if ($unpaidCount > 0)
                 <x-ui.alert tone="warning">
-                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending']) }}" class="font-medium">{{ $unpaidCount }} Buchung(en) mit offener Zahlung</a>
+                    <a href="{{ route('organizer.bookings.index', ['status' => 'pending', 'payment_status' => 'pending']) }}"
+                        class="font-medium">{{ trans_choice('{1} :count Buchung mit offener Zahlung|[0,*] :count Buchungen mit offener Zahlung', $unpaidCount) }}</a>
                 </x-ui.alert>
             @endif
         </div>
@@ -54,7 +57,8 @@
             <input type="hidden" name="archive" value="1">
         @endif
         <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
-            <x-ui.field label="Suche" name="search" :value="request('search')" placeholder="Buchungsnummer, Name, E-Mail" :old="false" />
+            <x-ui.field label="Suche" name="search" :value="request('search')" placeholder="Buchungsnummer, Name, E-Mail"
+                :old="false" />
             <x-ui.select label="Veranstaltung" name="event_id" :old="false">
                 <option value="">Alle Veranstaltungen</option>
                 @foreach ($events as $event)
@@ -95,10 +99,11 @@
                 <div class="overflow-hidden rounded-box border border-line bg-surface" x-data="{ open: false }">
                     {{-- Veranstaltungskopf --}}
                     <div class="flex flex-col sm:flex-row sm:items-center">
-                        <button type="button" @click="open = !open" :aria-expanded="open.toString()" aria-expanded="false"
-                                class="focus-inset flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-4 bg-transparent px-4 py-4 text-left text-ink transition-colors duration-150 hover:bg-zone-hover sm:px-6">
+                        <button type="button" @click="open = !open" :aria-expanded="open.toString()"
+                            aria-expanded="false"
+                            class="focus-inset flex min-w-0 flex-1 cursor-pointer flex-col items-stretch gap-2 bg-transparent px-4 py-4 text-left text-ink transition-colors duration-150 hover:bg-zone-hover sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
                             <span class="min-w-0">
-                                <span class="block truncate text-h3">{{ $groupedEvent->title }}</span>
+                                <span class="block text-h3 sm:truncate">{{ $groupedEvent->title }}</span>
                                 <span class="block text-small text-muted tabular-nums">
                                     {{ $groupedEvent->start_date->format('d.m.Y') }}
                                     @if ($groupedEvent->location)
@@ -106,19 +111,26 @@
                                     @endif
                                 </span>
                             </span>
-                            <span class="flex shrink-0 flex-wrap items-center justify-end gap-x-4 gap-y-1">
-                                <span class="text-small font-medium tabular-nums">{{ $groupedEvent->bookings_count }} Buchung(en)</span>
+                            <span class="flex flex-wrap items-center gap-x-4 gap-y-2 sm:shrink-0 sm:justify-end">
+                                <span
+                                    class="text-small font-medium tabular-nums">{{ trans_choice('{1} :count Buchung|[0,*] :count Buchungen', $groupedEvent->bookings_count) }}</span>
                                 @if ($groupedEvent->confirmed_bookings_count > 0)
-                                    <x-ui.status tone="success" class="tabular-nums">{{ $groupedEvent->confirmed_bookings_count }} bestätigt</x-ui.status>
+                                    <x-ui.status tone="success"
+                                        class="tabular-nums">{{ $groupedEvent->confirmed_bookings_count }}
+                                        bestätigt</x-ui.status>
                                 @endif
                                 @if ($groupedEvent->pending_bookings_count > 0)
-                                    <x-ui.status tone="warning" class="tabular-nums">{{ $groupedEvent->pending_bookings_count }} offen</x-ui.status>
+                                    <x-ui.status tone="warning"
+                                        class="tabular-nums">{{ $groupedEvent->pending_bookings_count }}
+                                        offen</x-ui.status>
                                 @endif
-                                <x-icon.chevron-down class="h-5 w-5 text-muted transition-transform duration-150" x-bind:class="open && 'rotate-180'" />
+                                <x-icon.chevron-down
+                                    class="ml-auto h-5 w-5 text-muted sm:ml-0 transition-transform duration-150"
+                                    x-bind:class="open && 'rotate-180'" />
                             </span>
                         </button>
                         <a href="{{ route('organizer.bookings.index', array_filter(['event_id' => $groupedEvent->id, 'archive' => $isArchive ? 1 : null])) }}"
-                           class="inline-flex min-h-11 items-center px-4 pb-3 text-small font-medium whitespace-nowrap text-ink underline underline-offset-[3px] sm:px-6 sm:pb-0">
+                            class="inline-flex min-h-11 items-center px-4 pb-3 text-small font-medium whitespace-nowrap text-ink underline underline-offset-[3px] sm:px-6 sm:pb-0">
                             Nur diese Veranstaltung
                         </a>
                     </div>
@@ -127,7 +139,10 @@
                     <div x-show="open" x-cloak class="border-t border-line">
                         <ul class="m-0 list-none divide-y divide-line p-0 md:hidden">
                             @foreach ($groupedEvent->bookings as $booking)
-                                @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization])
+                                @include('organizer.bookings._card', [
+                                    'booking' => $booking,
+                                    'organization' => $organization,
+                                ])
                             @endforeach
                         </ul>
                         <div class="hidden md:block">
@@ -147,7 +162,10 @@
                                 </thead>
                                 <tbody>
                                     @forelse ($groupedEvent->bookings as $booking)
-                                        @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization])
+                                        @include('organizer.bookings._row', [
+                                            'booking' => $booking,
+                                            'organization' => $organization,
+                                        ])
                                     @empty
                                         <tr class="hover:bg-transparent">
                                             <td colspan="7" class="p-0">
@@ -161,7 +179,8 @@
                     </div>
                 </div>
             @empty
-                <x-ui.empty title="Noch keine Buchungen">Sobald sich jemand anmeldet, erscheint die Buchung hier.</x-ui.empty>
+                <x-ui.empty title="Noch keine Buchungen">Sobald sich jemand anmeldet, erscheint die Buchung
+                    hier.</x-ui.empty>
             @endforelse
         </div>
 
@@ -171,13 +190,18 @@
             </div>
         @endif
 
-    {{-- ================================================================
+        {{-- ================================================================
          MODUS 2: Gefilterte Flachliste
          ================================================================ --}}
     @else
-        <ul class="m-0 list-none divide-y divide-line overflow-hidden rounded-box border border-line bg-surface p-0 md:hidden">
+        <ul
+            class="m-0 list-none divide-y divide-line overflow-hidden rounded-box border border-line bg-surface p-0 md:hidden">
             @forelse ($bookings as $booking)
-                @include('organizer.bookings._card', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
+                @include('organizer.bookings._card', [
+                    'booking' => $booking,
+                    'organization' => $organization,
+                    'showEvent' => true,
+                ])
             @empty
                 <li class="p-6 text-base text-muted">Keine Buchungen gefunden.</li>
             @endforelse
@@ -200,7 +224,11 @@
                 </thead>
                 <tbody>
                     @forelse ($bookings as $booking)
-                        @include('organizer.bookings._row', ['booking' => $booking, 'organization' => $organization, 'showEvent' => true])
+                        @include('organizer.bookings._row', [
+                            'booking' => $booking,
+                            'organization' => $organization,
+                            'showEvent' => true,
+                        ])
                     @empty
                         <tr class="hover:bg-transparent">
                             <td colspan="8" class="p-0">

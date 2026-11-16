@@ -19,12 +19,12 @@ class Badge extends Model
      * Anforderungen, die die Vergabelogik (User::meetsRequirements, BadgeService) auswertet.
      */
     public const REQUIREMENT_TYPES = [
-        'events_attended' => 'Events besucht (eingecheckt)',
+        'events_attended' => 'Veranstaltungen besucht (eingecheckt)',
         'total_hours_attended' => 'Gesamt-Stunden teilgenommen',
         'bookings_count' => 'Bezahlte Buchungen',
         'reviews_written' => 'Bewertungen geschrieben',
         'connections_made' => 'Verbindungen hergestellt',
-        'events_organized' => 'Events organisiert',
+        'events_organized' => 'Veranstaltungen organisiert',
         'categories_explored' => 'Verschiedene Kategorien besucht',
         'early_bird_bookings' => 'Frühbucher-Buchungen (7+ Tage vorher)',
     ];

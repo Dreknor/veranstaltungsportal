@@ -31,7 +31,8 @@
             <x-ui.field label="E-Mail des Benutzers" name="email" type="email" required
                 placeholder="benutzer@beispiel.de" />
             <x-ui.select label="Rolle" name="role" required>
-                <option value="admin" @selected(old('role') === 'admin')>Administrator</option>
+                <option value="admin" @selected(old('role') === 'admin')>{{ \App\Models\Organization::roleLabel('admin') }}
+                </option>
                 <option value="member" @selected(old('role') === 'member')>Mitglied</option>
             </x-ui.select>
             <div class="col-span-full">
@@ -45,10 +46,10 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">E-Mail</th>
+                    <th scope="col" class="max-sm:hidden">E-Mail</th>
                     <th scope="col">Rolle</th>
-                    <th scope="col">Beigetreten</th>
-                    <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+                    <th scope="col" class="max-sm:hidden">Beigetreten</th>
+                    <th scope="col" class="actions max-sm:hidden">Aktionen</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,29 +58,53 @@
                         <th scope="row">
                             <span class="flex items-center gap-3">
                                 <img src="{{ $member->profilePhotoUrl() }}"
-                                    class="h-10 w-10 shrink-0 rounded-full border border-line object-cover" alt="">
-                                <span>{{ $member->fullName() }}</span>
+                                    class="h-10 w-10 shrink-0 max-sm:hidden rounded-full border border-line object-cover"
+                                    alt="">
+                                <span>{{ $member->fullName() }}<span
+                                        class="block break-all text-small font-normal text-muted sm:hidden">{{ $member->email }}</span></span>
                             </span>
                         </th>
-                        <td>{{ $member->email }}</td>
+                        <td class="max-sm:hidden">{{ $member->email }}</td>
                         <td>
-                            <form method="POST" action="{{ route('organizer.team.update-role', ['user' => $member->id]) }}"
-                                class="flex items-center gap-2">
+                            <form method="POST"
+                                action="{{ route('organizer.team.update-role', ['user' => $member->id]) }}"
+                                class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
                                 @csrf
                                 @method('PUT')
-                                <x-ui.select name="role" id="role-{{ $member->id }}" size="sm" :old="false"
-                                    aria-label="Rolle von {{ $member->fullName() }}" class="min-w-36">
-                                    <option value="owner" @selected($member->pivot->role === 'owner')>Owner</option>
-                                    <option value="admin" @selected($member->pivot->role === 'admin')>Admin</option>
-                                    <option value="member" @selected($member->pivot->role === 'member')>Mitglied</option>
+                                <x-ui.select name="role" id="role-{{ $member->id }}" size="sm"
+                                    :old="false" aria-label="Rolle von {{ $member->fullName() }}"
+                                    class="min-w-36 max-sm:min-w-28">
+                                    <option value="owner" @selected($member->pivot->role === 'owner')>
+                                        {{ \App\Models\Organization::roleLabel('owner') }}</option>
+                                    <option value="admin" @selected($member->pivot->role === 'admin')>
+                                        {{ \App\Models\Organization::roleLabel('admin') }}</option>
+                                    <option value="member" @selected($member->pivot->role === 'member')>
+                                        {{ \App\Models\Organization::roleLabel('member') }}</option>
                                 </x-ui.select>
                                 <x-ui.button type="submit" size="sm" variant="secondary">Speichern</x-ui.button>
                             </form>
+                            {{-- Schmale Bildschirme: Entfernen steht unter der Rolle statt in einer eigenen Spalte --}}
+                            <div class="mt-2 sm:hidden">
+                                @if ($member->pivot->role !== 'owner')
+                                    <form method="POST"
+                                        action="{{ route('organizer.team.remove', ['user' => $member->id]) }}"
+                                        onsubmit="return confirm('Mitglied wirklich entfernen?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <x-ui.button type="submit" size="sm"
+                                            variant="danger">Entfernen</x-ui.button>
+                                    </form>
+                                @else
+                                    <span class="text-small text-muted">Haupt-Inhaber</span>
+                                @endif
+                            </div>
                         </td>
-                        <td class="tabular-nums">{{ optional($member->pivot->joined_at)->format('d.m.Y') }}</td>
-                        <td class="actions">
+                        <td class="tabular-nums max-sm:hidden">
+                            {{ optional($member->pivot->joined_at)->format('d.m.Y') ?? '–' }}</td>
+                        <td class="actions max-sm:hidden">
                             @if ($member->pivot->role !== 'owner')
-                                <form method="POST" action="{{ route('organizer.team.remove', ['user' => $member->id]) }}"
+                                <form method="POST"
+                                    action="{{ route('organizer.team.remove', ['user' => $member->id]) }}"
                                     onsubmit="return confirm('Mitglied wirklich entfernen?');" class="inline">
                                     @csrf
                                     @method('DELETE')

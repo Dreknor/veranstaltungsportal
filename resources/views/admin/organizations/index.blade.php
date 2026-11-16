@@ -11,10 +11,9 @@
     <form method="GET" action="{{ route('admin.organizations.index') }}"
         class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Name oder E-Mail" />
-        <x-ui.select label="Status" name="status" :old="false"
-            :options="['' => 'Alle', 'active' => 'Aktiv', 'inactive' => 'Inaktiv']" :selected="request('status')" />
-        <x-ui.select label="Individuelle Gebühren" name="custom_fees" :old="false"
-            :options="['' => 'Alle', 'yes' => 'Ja', 'no' => 'Nein']" :selected="request('custom_fees')" />
+        <x-ui.select label="Status" name="status" :old="false" :options="['' => 'Alle', 'active' => 'Aktiv', 'inactive' => 'Inaktiv']" :selected="request('status')" />
+        <x-ui.select label="Individuelle Gebühren" name="custom_fees" :old="false" :options="['' => 'Alle', 'yes' => 'Ja', 'no' => 'Nein']"
+            :selected="request('custom_fees')" />
         <div>
             <x-ui.button type="submit" variant="secondary" size="lg" full>Filtern</x-ui.button>
         </div>
@@ -50,7 +49,7 @@
                         <span class="block">{{ $organization->owner->name ?? 'N/A' }}</span>
                         <span class="block text-small text-muted">{{ $organization->owner->email ?? 'N/A' }}</span>
                     </td>
-                    <td class="num">{{ $organization->events_count ?? 0 }}</td>
+                    <td class="num">{{ $organization->events_count }}</td>
                     <td>
                         @if ($organization->is_active)
                             <x-ui.status tone="success">Aktiv</x-ui.status>
@@ -65,7 +64,7 @@
                                 $feeType = $customFee['fee_type'] ?? 'percentage';
                                 $feeValue =
                                     $feeType === 'percentage'
-                                        ? ($customFee['fee_percentage'] ?? 0) . '%'
+                                        ? \App\Support\Ui::percent($customFee['fee_percentage'] ?? 0, 2)
                                         : number_format($customFee['fee_fixed_amount'] ?? 0, 2, ',', '.') . ' €';
                             @endphp
                             {{ $feeValue }}
@@ -74,13 +73,15 @@
                         @endif
                     </td>
                     <td class="actions">
-                        <x-ui.dropdown label="Aktionen für {{ $organization->name }}" icon-only>
+                        <x-ui.dropdown :label="'Aktionen für ' . $organization->name" icon-only>
                             <x-ui.dropdown-item :href="route('admin.organizations.show', $organization)">Details</x-ui.dropdown-item>
                             <x-ui.dropdown-item :href="route('admin.organizer-fees.edit', $organization)">Gebühren festlegen</x-ui.dropdown-item>
-                            <x-ui.dropdown-item type="submit" form="toggle-active-{{ $organization->id }}">{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
+                            <x-ui.dropdown-item type="submit"
+                                form="toggle-active-{{ $organization->id }}">{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
                         </x-ui.dropdown>
                         <form id="toggle-active-{{ $organization->id }}" method="POST"
-                            action="{{ route('admin.organizations.toggle-active', $organization) }}" class="hidden">@csrf</form>
+                            action="{{ route('admin.organizations.toggle-active', $organization) }}" class="hidden">
+                            @csrf</form>
                     </td>
                 </tr>
             @empty

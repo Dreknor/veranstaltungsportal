@@ -6,7 +6,8 @@
             @foreach ($bookings as $booking)
                 @php
                     $quantity = $booking->items->sum('quantity');
-                    $daysUntil = now()->diffInDays($booking->event->start_date, false);
+                    // Ganze Kalendertage bis zum Beginn (Carbon 3 liefert sonst Bruchteile)
+                    $daysUntil = (int) now()->startOfDay()->diffInDays($booking->event->start_date->copy()->startOfDay(), false);
                 @endphp
                 <x-ui.event-row :event="$booking->event" :href="route('bookings.show', $booking->booking_number)">
                     <span class="text-small text-muted tabular-nums">{{ $quantity }} {{ $quantity === 1 ? 'Ticket' : 'Tickets' }}</span>

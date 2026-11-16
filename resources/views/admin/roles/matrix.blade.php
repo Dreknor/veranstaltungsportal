@@ -15,7 +15,7 @@
                 <th scope="col" class="min-w-56">Berechtigung</th>
                 @foreach ($roles as $role)
                     <th scope="col" class="text-center">
-                        {{ ucfirst($role->name) }}
+                        {{ \App\Support\AccessLabels::role($role->name) }}
                         @if ($role->is_system)
                             <span class="block text-caption font-normal">System</span>
                         @endif
@@ -26,42 +26,43 @@
         <tbody>
             @foreach ($permissions as $group => $groupPermissions)
                 <tr class="bg-zone hover:bg-zone">
-                    <th scope="colgroup" colspan="{{ $roles->count() + 1 }}" class="capitalize">
-                        {{ $group }}
+                    <th scope="colgroup" colspan="{{ $roles->count() + 1 }}" ">
+                        {{ \App\Support\AccessLabels::group($group) }}
                         <span class="font-normal text-muted tabular-nums">({{ $groupPermissions->count() }})</span>
                     </th>
                 </tr>
 
-                @foreach ($groupPermissions as $permission)
-                    <tr>
-                        <th scope="row">
-                            <span class="font-mono">{{ $permission->name }}</span>
-                            @if ($permission->is_system)
-                                <span class="text-caption font-normal text-muted">(System)</span>
+                  @foreach ($groupPermissions as $permission)
+                <tr>
+                    <th scope="row">
+                        <span>{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
+                        @if ($permission->is_system)
+                            <span class="text-caption font-normal text-muted">(System)</span>
+                        @endif
+                        @if ($permission->description)
+                            <span class="block text-small font-normal text-muted">{{ $permission->description }}</span>
+                        @endif
+                    </th>
+                    @foreach ($roles as $role)
+                        <td class="text-center">
+                            @if ($role->hasPermissionTo($permission->name))
+                                <x-icon.check class="mx-auto h-5 w-5 text-ink" />
+                                <span class="sr-only">Ja</span>
+                            @else
+                                <span aria-hidden="true" class="text-disabled">–</span>
+                                <span class="sr-only">Nein</span>
                             @endif
-                            @if ($permission->description)
-                                <span class="block text-small font-normal text-muted">{{ $permission->description }}</span>
-                            @endif
-                        </th>
-                        @foreach ($roles as $role)
-                            <td class="text-center">
-                                @if ($role->hasPermissionTo($permission->name))
-                                    <x-icon.check class="mx-auto h-5 w-5 text-ink" />
-                                    <span class="sr-only">Ja</span>
-                                @else
-                                    <span aria-hidden="true" class="text-disabled">–</span>
-                                    <span class="sr-only">Nein</span>
-                                @endif
-                            </td>
-                        @endforeach
-                    </tr>
-                @endforeach
+                        </td>
+                    @endforeach
+                </tr>
+            @endforeach
             @endforeach
         </tbody>
     </x-ui.table>
 
     <p class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-small text-muted">
-        <span class="inline-flex items-center gap-2"><x-icon.check class="h-4 w-4 text-ink" /> Berechtigung vorhanden</span>
+        <span class="inline-flex items-center gap-2"><x-icon.check class="h-4 w-4 text-ink" /> Berechtigung
+            vorhanden</span>
         <span class="inline-flex items-center gap-2"><span aria-hidden="true">–</span> Keine Berechtigung</span>
         <span>System: vom System geschützt</span>
     </p>

@@ -20,7 +20,7 @@ class BadgeManagementController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Badge::query();
+        $query = Badge::query()->withCount('users');
 
         // Search
         if ($request->has('search') && $request->search !== '') {

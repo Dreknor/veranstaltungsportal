@@ -11,28 +11,41 @@
         [$stateText, $stateTone] = $stateLabels[$state['status']] ?? $stateLabels['idle'];
     @endphp
 
-    <x-ui.page-header title="Updates"
-        subtitle="Anwendung aus dem Repository aktualisieren ({{ config('updater.remote') }}/{{ config('updater.branch') }})" />
+    <x-ui.page-header title="Updates" :subtitle="'Anwendung aus dem Repository aktualisieren (' .
+        config('updater.remote') .
+        '/' .
+        config('updater.branch') .
+        ')'" />
 
     @if ($error)
         <x-ui.alert tone="danger" title="Versionsstand konnte nicht ermittelt werden" class="mb-8">
-            <p class="m-0 font-mono text-small break-all">{{ $error }}</p>
+            <p class="m-0 text-small break-all">{{ $error }}</p>
         </x-ui.alert>
     @endif
 
     @if ($status)
         <x-ui.dl class="mb-8">
             <x-ui.dl-item label="Installierte Version">
-                <span class="font-mono tabular-nums">{{ substr($status['current'], 0, 7) }}</span>
+                <span class="tabular-nums">{{ substr($status['current'], 0, 7) }}</span>
                 <span class="block text-small text-muted tabular-nums">
-                    {{ $status['branch'] }} · {{ \Illuminate\Support\Carbon::parse($status['current_date'])->format('d.m.Y H:i') }}
+                    {{ $status['branch'] }} ·
+                    {{ \Illuminate\Support\Carbon::parse($status['current_date'])->format('d.m.Y H:i') }}
                 </span>
             </x-ui.dl-item>
             <x-ui.dl-item label="Verfügbare Version">
-                <span class="font-mono tabular-nums">{{ substr($status['target'], 0, 7) }}</span>
+                <span class="tabular-nums">{{ substr($status['target'], 0, 7) }}</span>
                 <span class="mt-1 block">
-                    <x-ui.status :tone="$status['behind'] ? 'info' : 'success'">
-                        {{ $status['behind'] ? $status['behind'] . ' neue Änderung(en)' : 'Auf dem neuesten Stand' }}
+                    @php
+                        $upToDate = !$status['behind'] && !$status['ahead'] && !$status['dirty'];
+                    @endphp
+                    <x-ui.status :tone="$status['behind'] ? 'info' : ($upToDate ? 'success' : 'neutral')">
+                        @if ($status['behind'])
+                            {{ $status['behind'] }} {{ $status['behind'] === 1 ? 'neue Änderung' : 'neue Änderungen' }}
+                        @elseif ($upToDate)
+                            Auf dem neuesten Stand
+                        @else
+                            Keine neuen Änderungen im Repository
+                        @endif
                     </x-ui.status>
                 </span>
             </x-ui.dl-item>
@@ -49,7 +62,7 @@
         @if ($status['dirty'])
             <x-ui.alert tone="warning" title="Lokale Änderungen auf dem Server" class="mb-8">
                 <p class="m-0">Das Update wird abgebrochen, solange diese Dateien verändert sind:</p>
-                <ul class="m-0 mt-2 list-disc pl-5 font-mono">
+                <ul class="m-0 mt-2 list-disc pl-5">
                     @foreach ($status['dirty'] as $file)
                         <li class="break-all">{{ $file }}</li>
                     @endforeach
@@ -59,7 +72,10 @@
 
         @if ($status['ahead'])
             <x-ui.alert tone="warning" class="mb-8">
-                Die installierte Version enthält {{ $status['ahead'] }} Commit(s), die nicht im Repository sind. Ein Update ist nur per Fast-Forward möglich und schlägt in diesem Fall fehl.
+                Die installierte Version enthält {{ $status['ahead'] }}
+                {{ $status['ahead'] === 1 ? 'Commit' : 'Commits' }}, {{ $status['ahead'] === 1 ? 'der' : 'die' }}
+                nicht im Repository {{ $status['ahead'] === 1 ? 'ist' : 'sind' }}. Ein Update ist nur per Fast-Forward
+                möglich und schlägt in diesem Fall fehl.
             </x-ui.alert>
         @endif
 
@@ -76,17 +92,19 @@
                             </x-ui.button>
                         </form>
                     @else
-                        <span class="text-small text-muted">Updates über die Oberfläche sind deaktiviert (UPDATER_ENABLED).</span>
+                        <span class="text-small text-muted">Updates über die Oberfläche sind deaktiviert
+                            (UPDATER_ENABLED).</span>
                     @endif
                 </x-slot:actions>
 
                 <x-ui.row-list>
                     @foreach ($status['commits'] as $commit)
                         <li class="flex flex-col gap-1 px-6 py-3 sm:flex-row sm:items-center sm:gap-4">
-                            <span class="font-mono text-small text-muted">{{ $commit['short'] }}</span>
+                            <span class="text-small text-muted tabular-nums">{{ $commit['short'] }}</span>
                             <span class="flex-1">{{ $commit['subject'] }}</span>
                             <span class="text-small text-muted tabular-nums">
-                                {{ $commit['author'] }} · {{ \Illuminate\Support\Carbon::parse($commit['date'])->format('d.m.Y') }}
+                                {{ $commit['author'] }} ·
+                                {{ \Illuminate\Support\Carbon::parse($commit['date'])->format('d.m.Y') }}
                             </span>
                         </li>
                     @endforeach
@@ -102,20 +120,23 @@
                     <span id="update-running" class="text-small text-muted">Update läuft …</span>
                 </x-slot:actions>
             @endif
-            <pre id="update-log" class="m-0 max-h-[32rem] overflow-auto rounded-box bg-zone p-4 font-mono text-small whitespace-pre-wrap text-ink">{{ $log }}</pre>
+            <pre id="update-log"
+                class="m-0 max-h-[32rem] overflow-auto rounded-box bg-zone p-4 text-small whitespace-pre-wrap text-ink">{{ $log }}</pre>
         </x-ui.section>
     @endif
 
-    @if($running)
+    @if ($running)
         @push('scripts')
             <script>
-                (function () {
+                (function() {
                     const logEl = document.getElementById('update-log');
 
                     async function poll() {
                         try {
                             const response = await fetch(@json(route('admin.updates.progress')), {
-                                headers: { 'Accept': 'application/json' },
+                                headers: {
+                                    'Accept': 'application/json'
+                                },
                             });
                             if (response.ok) {
                                 const data = await response.json();

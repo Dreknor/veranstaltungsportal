@@ -28,8 +28,8 @@
             @foreach ($notifications as $notification)
                 @php
                     $data = $notification->data;
-                    $title = $data['title'] ?? 'Benachrichtigung';
-                    $message = $data['message'] ?? 'Keine Details verfügbar';
+                    $title = \App\Support\Ui::notificationTitle($notification->type, $data);
+                    $message = \App\Support\Ui::notificationMessage($data) ?: 'Keine Details verfügbar';
                     $url = $data['url'] ?? null;
                     $isCritical = $notification->type === 'App\Notifications\CriticalLogNotification';
                     $unread = !$notification->read_at;

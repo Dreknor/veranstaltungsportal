@@ -15,17 +15,13 @@
     </form>
 
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <x-ui.stat label="Benutzer (gesamt)" :value="number_format($metrics['total_users'])" sub="+{{ number_format($metrics['new_users']) }} neu" />
-        <x-ui.stat label="Veranstaltungen (gesamt)" :value="number_format($metrics['total_events'])"
-            sub="+{{ number_format($metrics['new_events']) }} neu" />
-        <x-ui.stat label="Buchungen (gesamt)" :value="number_format($metrics['total_bookings'])"
-            sub="+{{ number_format($metrics['new_bookings']) }} neu" />
-        <x-ui.stat label="Umsatz (gesamt)" :value="\App\Support\Ui::money($metrics['total_revenue'])"
-            sub="+{{ \App\Support\Ui::money($metrics['period_revenue']) }} im Zeitraum" />
+        <x-ui.stat label="Benutzer (gesamt)" :value="number_format($metrics['total_users'])" :sub="'+' . number_format($metrics['new_users']) . ' neu'" />
+        <x-ui.stat label="Veranstaltungen (gesamt)" :value="number_format($metrics['total_events'])" :sub="'+' . number_format($metrics['new_events']) . ' neu'" />
+        <x-ui.stat label="Buchungen (gesamt)" :value="number_format($metrics['total_bookings'])" :sub="'+' . number_format($metrics['new_bookings']) . ' neu'" />
+        <x-ui.stat label="Umsatz (gesamt)" :value="\App\Support\Ui::money($metrics['total_revenue'])" :sub="'+' . \App\Support\Ui::money($metrics['period_revenue']) . ' im Zeitraum'" />
     </div>
 
-    <x-ui.section title="Konversions-Trichter" description="Buchungen im gewählten Zeitraum"
-        class="mb-12">
+    <x-ui.section title="Konversions-Trichter" description="Buchungen im gewählten Zeitraum" class="mb-12">
         <ul class="m-0 flex list-none flex-col gap-5 p-0">
             <li>
                 <div class="mb-2 flex justify-between gap-4 text-small">

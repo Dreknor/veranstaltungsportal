@@ -1,7 +1,7 @@
-<x-layouts.app>
+<x-layouts.app title="Veranstaltung hervorheben">
     <x-ui.page-header title="Veranstaltung hervorheben"
-        subtitle="Wählen Sie die Dauer, für die Ihre Veranstaltung hervorgehoben werden soll."
-        :back-href="route('organizer.events.edit', $event)" back-label="Zur Veranstaltung" />
+        subtitle="Wählen Sie die Dauer, für die Ihre Veranstaltung hervorgehoben werden soll." :back-href="route('organizer.events.edit', $event)"
+        back-label="Zur Veranstaltung" />
 
     @if ($activeFee)
         <x-ui.alert tone="success" class="mb-8 max-w-form" title="Aktiv">
@@ -9,7 +9,8 @@
         </x-ui.alert>
     @endif
 
-    <form method="POST" action="{{ route('organizer.featured-events.store', $event) }}" class="flex max-w-form flex-col gap-y-8">
+    <form method="POST" action="{{ route('organizer.featured-events.store', $event) }}"
+        class="flex max-w-form flex-col gap-y-8">
         @csrf
         <p class="m-0 text-small text-muted">* Pflichtfeld</p>
 
@@ -25,7 +26,8 @@
                 <x-ui.choice name="duration_type" value="monthly" title="30 Tage" required>
                     <x-slot:aside>{{ \App\Support\Ui::money($pricing['monthly']['rate']) }}</x-slot:aside>
                 </x-ui.choice>
-                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Anzahl unten angeben" required />
+                <x-ui.choice name="duration_type" value="custom" title="Individuell" description="Anzahl unten angeben"
+                    required />
             </div>
             <x-ui.field-error name="duration_type" />
         </fieldset>

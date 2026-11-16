@@ -37,8 +37,8 @@
         ],
         [
             'badges',
-            'Badges & Erfolge',
-            'Sammeln Sie Badges für Ihre Teilnahme und verfolgen Sie Ihren Lernfortschritt.',
+            'Abzeichen & Erfolge',
+            'Sammeln Sie Abzeichen für Ihre Teilnahme und verfolgen Sie Ihren Lernfortschritt.',
         ],
         [
             'favorites',

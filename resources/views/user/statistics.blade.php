@@ -9,7 +9,7 @@
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$stats['total_bookings']" />
         <x-ui.stat label="Teilgenommen" :value="$stats['total_events_attended']" />
-        <x-ui.stat label="Stunden gesamt" :value="$stats['total_hours']" />
+        <x-ui.stat label="Stunden gesamt" :value="\App\Support\Ui::number($stats['total_hours'], 1)" />
         <x-ui.stat label="Investiert" :value="\App\Support\Ui::money($stats['total_spent'])" />
     </div>
 

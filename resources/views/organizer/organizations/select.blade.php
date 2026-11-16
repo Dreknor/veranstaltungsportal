@@ -1,5 +1,6 @@
 <x-layouts.app title="Organisation wählen">
-    <x-ui.page-header title="Organisation wählen" subtitle="Wählen Sie die Organisation aus, mit der Sie arbeiten möchten.">
+    <x-ui.page-header title="Organisation wählen"
+        subtitle="Wählen Sie die Organisation aus, mit der Sie arbeiten möchten.">
         @if ($organizations->isNotEmpty())
             <x-slot:actions>
                 <x-ui.button variant="secondary" :href="route('organizer.organizations.create')">
@@ -11,8 +12,8 @@
     </x-ui.page-header>
 
     @if ($organizations->isEmpty())
-        <x-ui.empty title="Noch keine Organisation" :action-href="route('organizer.organizations.create')"
-            action-label="Organisation erstellen" action-variant="primary">
+        <x-ui.empty title="Noch keine Organisation" :action-href="route('organizer.organizations.create')" action-label="Organisation erstellen"
+            action-variant="primary">
             Sie gehören noch keiner Organisation an. Erstellen Sie jetzt Ihre erste Organisation.
         </x-ui.empty>
     @else
@@ -29,7 +30,8 @@
                         @endif
                     </x-slot:lead>
 
-                    <span class="text-small text-muted">{{ ucfirst($org->getUserRole(auth()->user()) ?? 'Mitglied') }}</span>
+                    <span
+                        class="text-small text-muted">{{ \App\Models\Organization::roleLabel($org->getUserRole(auth()->user()) ?? 'member') }}</span>
                     <h2 class="m-0 truncate text-h3 text-ink">{{ $org->name }}</h2>
                     @if ($org->description)
                         <p class="m-0 line-clamp-2 text-small text-muted">{{ $org->description }}</p>

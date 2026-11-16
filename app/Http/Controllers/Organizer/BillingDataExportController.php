@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\Event;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -21,7 +20,7 @@ class BillingDataExportController extends Controller
     public function index(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -42,9 +41,9 @@ class BillingDataExportController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('booking_number', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_email', 'like', "%{$search}%")
-                  ->orWhere('external_invoice_number', 'like', "%{$search}%");
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%")
+                    ->orWhere('external_invoice_number', 'like', "%{$search}%");
             });
         }
 
@@ -59,7 +58,7 @@ class BillingDataExportController extends Controller
     public function export(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -76,7 +75,7 @@ class BillingDataExportController extends Controller
 
         $bookings = $query->latest()->get();
 
-        $filename = 'Rechnungsdaten_' . $organization->slug . '_' . now()->format('Y-m-d') . '.csv';
+        $filename = 'Rechnungsdaten_'.$organization->slug.'_'.now()->format('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -131,7 +130,7 @@ class BillingDataExportController extends Controller
                     $booking->billing_country ?? '',
                     number_format($net, 2, ',', '.'),
                     number_format($booking->total, 2, ',', '.'),
-                    $taxRate . '%',
+                    $taxRate.'%',
                     $booking->payment_method ?? '',
                     $booking->status,
                     $booking->payment_status,
@@ -156,7 +155,7 @@ class BillingDataExportController extends Controller
     public function exportDatev(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             return redirect()->route('organizer.organizations.select');
         }
 
@@ -166,11 +165,11 @@ class BillingDataExportController extends Controller
             ->with(['event', 'items.ticketType'])
             ->when($request->event_id, fn ($q, $id) => $q->where('event_id', $id))
             ->when($request->date_from, fn ($q, $d) => $q->where('created_at', '>=', $d))
-            ->when($request->date_to, fn ($q, $d) => $q->where('created_at', '<=', $d . ' 23:59:59'))
+            ->when($request->date_to, fn ($q, $d) => $q->where('created_at', '<=', $d.' 23:59:59'))
             ->orderBy('created_at', 'asc')
             ->get();
 
-        $filename = 'datev-buchungsstapel-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'datev-buchungsstapel-'.now()->format('Y-m-d').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -218,7 +217,7 @@ class BillingDataExportController extends Controller
                 $datum = $booking->created_at->format('dm');
                 // Buchungstext: max. 60 Zeichen
                 $text = mb_substr(
-                    ($booking->event->title ?? '') . ' ' . $booking->customer_name,
+                    ($booking->event->title ?? '').' '.$booking->customer_name,
                     0, 60
                 );
                 // Belegnummer: Buchungsnummer (max. 36 Zeichen)
@@ -255,7 +254,7 @@ class BillingDataExportController extends Controller
     public function markAsInvoiced(Request $request, Booking $booking)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             abort(403);
         }
 
@@ -283,7 +282,7 @@ class BillingDataExportController extends Controller
     public function bulkMarkAsInvoiced(Request $request)
     {
         $organization = auth()->user()->currentOrganization();
-        if (!$organization) {
+        if (! $organization) {
             abort(403);
         }
 
@@ -306,10 +305,10 @@ class BillingDataExportController extends Controller
         $updated = $bookings->count();
 
         if ($sentCount > 0) {
-            return back()->with('status', "{$updated} Buchung(en) wurden als fakturiert markiert, {$sentCount}× wurden Tickets bzw. Zugangsdaten versendet.");
+            return back()->with('status', trans_choice('{1} :count Buchung wurde|[0,*] :count Buchungen wurden', $updated)." als fakturiert markiert, {$sentCount}× wurden Tickets bzw. Zugangsdaten versendet.");
         }
 
-        return back()->with('status', "{$updated} Buchung(en) wurden als fakturiert markiert.");
+        return back()->with('status', trans_choice('{1} :count Buchung wurde|[0,*] :count Buchungen wurden', $updated).' als fakturiert markiert.');
     }
 
     /**
@@ -331,6 +330,7 @@ class BillingDataExportController extends Controller
         // Bereits bezahlte Buchungen behalten ihren Zahlungsstatus
         if ($booking->isPaymentComplete()) {
             $booking->update($invoiceData);
+
             return false;
         }
 

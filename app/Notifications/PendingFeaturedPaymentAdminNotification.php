@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\SendsWebPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -9,12 +10,12 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 
 /**
- * Admin-Benachrichtigung für ausstehende Featured-Event-Zahlungen (>7 Tage).
+ * Admin-Benachrichtigung für ausstehende Zahlungen für Hervorhebungen (>7 Tage).
  * Wird täglich vom Scheduler ausgelöst wenn offene Zahlungen vorliegen.
  */
 class PendingFeaturedPaymentAdminNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SendsWebPush;
 
     /**
      * @param  Collection  $pendingFees  Kollektion von FeaturedEventFee-Modellen
@@ -25,7 +26,7 @@ class PendingFeaturedPaymentAdminNotification extends Notification implements Sh
 
     public function via(mixed $notifiable): array
     {
-        return ['mail', 'database'];
+        return $this->withWebPush(['mail', 'database'], $notifiable);
     }
 
     public function toMail(mixed $notifiable): MailMessage
@@ -34,9 +35,9 @@ class PendingFeaturedPaymentAdminNotification extends Notification implements Sh
         $totalAmount = $this->pendingFees->sum('fee_amount');
 
         $mail = (new MailMessage)
-            ->subject("{$count} ausstehende Featured-Zahlungen (> 7 Tage)")
+            ->subject("{$count} ausstehende Zahlungen für Hervorhebungen (> 7 Tage)")
             ->greeting('Hallo ' . ($notifiable->first_name ?? 'Admin') . ',')
-            ->line("Es gibt **{$count} ausstehende Featured-Event-Zahlungen**, die seit mehr als 7 Tagen offen sind.")
+            ->line("Es gibt **{$count} ausstehende Zahlungen für Hervorhebungen**, die seit mehr als 7 Tagen offen sind.")
             ->line('**Gesamtbetrag ausstehend:** ' . number_format($totalAmount, 2, ',', '.') . ' €');
 
         foreach ($this->pendingFees->take(10) as $fee) {
@@ -59,8 +60,8 @@ class PendingFeaturedPaymentAdminNotification extends Notification implements Sh
         $totalAmount = $this->pendingFees->sum('fee_amount');
 
         return [
-            'title' => "{$count} ausstehende Featured-Zahlungen",
-            'message' => "{$count} Featured-Event-Zahlungen über insgesamt " . number_format($totalAmount, 2, ',', '.') . ' € sind seit mehr als 7 Tagen offen.',
+            'title' => "{$count} ausstehende Zahlungen für Hervorhebungen",
+            'message' => "{$count} Zahlungen für Hervorhebungen über insgesamt " . number_format($totalAmount, 2, ',', '.') . ' € sind seit mehr als 7 Tagen offen.',
             'action_url' => url('/admin/featured-events'),
             'type' => 'pending_featured_payment_admin',
             'count' => $count,

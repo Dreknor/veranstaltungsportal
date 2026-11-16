@@ -1,11 +1,11 @@
-<x-layouts.app :title="'Plattformgebühren - ' . config('app.name')" :header="false">
+<x-layouts.app title="Plattformgebühren">
     <x-ui.page-header title="Plattformgebühren im Überblick"
-        subtitle="Aufschlüsselung der Plattformgebühren für Ihre Veranstaltungen."
-        :back-href="route('organizer.invoices.index')" back-label="Zu den Rechnungen" />
+        subtitle="Aufschlüsselung der Plattformgebühren für Ihre Veranstaltungen." :back-href="route('organizer.invoices.index')"
+        back-label="Zu den Rechnungen" />
 
     <div class="mb-8 grid gap-4 sm:grid-cols-2">
         <x-ui.stat label="Gesamter Buchungsumsatz" :value="\App\Support\Ui::money($totalBookings)" sub="Summe aller bezahlten Buchungen" />
-        <x-ui.stat label="Gesamte Plattformgebühren" :value="\App\Support\Ui::money($totalFees)" :sub="$platformFees->count() . ' Transaktionen'" />
+        <x-ui.stat label="Gesamte Plattformgebühren" :value="\App\Support\Ui::money($totalFees)" :sub="trans_choice('{1} :count Transaktion|[0,*] :count Transaktionen', $platformFees->count())" />
     </div>
 
     <form method="GET" action="{{ route('organizer.invoices.platform-fees') }}"
@@ -23,24 +23,27 @@
         <thead>
             <tr>
                 <th scope="col">Veranstaltung</th>
-                <th scope="col">Datum der Veranstaltung</th>
-                <th scope="col" class="num">Buchungsumsatz</th>
-                <th scope="col" class="num">Gebührensatz</th>
+                <th scope="col" class="max-sm:hidden">Datum der Veranstaltung</th>
+                <th scope="col" class="num max-sm:hidden">Buchungsumsatz</th>
+                <th scope="col" class="num max-sm:hidden">Gebührensatz</th>
                 <th scope="col" class="num">Plattformgebühr</th>
-                <th scope="col">Berechnet am</th>
+                <th scope="col" class="max-sm:hidden">Berechnet am</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($platformFees as $fee)
                 <tr>
                     <th scope="row">
-                        <a href="{{ route('organizer.events.edit', $fee->event) }}" class="text-ink underline underline-offset-[3px]">{{ $fee->event->title }}</a>
+                        <a href="{{ route('organizer.events.edit', $fee->event) }}"
+                            class="text-ink underline underline-offset-[3px]">{{ $fee->event->title }}</a>
                     </th>
-                    <td class="tabular-nums whitespace-nowrap">{{ $fee->event->start_date->format('d.m.Y') }}</td>
-                    <td class="num">{{ \App\Support\Ui::money($fee->booking_amount) }}</td>
-                    <td class="num">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
+                    <td class="tabular-nums whitespace-nowrap max-sm:hidden">
+                        {{ $fee->event->start_date->format('d.m.Y') }}</td>
+                    <td class="num max-sm:hidden">{{ \App\Support\Ui::money($fee->booking_amount) }}</td>
+                    <td class="num max-sm:hidden">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
                     <td class="num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
-                    <td class="tabular-nums whitespace-nowrap">{{ $fee->created_at->format('d.m.Y H:i') }}</td>
+                    <td class="tabular-nums whitespace-nowrap max-sm:hidden">{{ $fee->created_at->format('d.m.Y H:i') }}
+                    </td>
                 </tr>
             @empty
                 <tr class="hover:bg-transparent">
@@ -55,11 +58,12 @@
         @if ($platformFees->count() > 0)
             <tfoot>
                 <tr>
-                    <td colspan="2">Gesamt</td>
-                    <td class="num">{{ \App\Support\Ui::money($totalBookings) }}</td>
-                    <td class="num">–</td>
+                    <td colspan="2" class="max-sm:hidden">Gesamt</td>
+                    <td class="sm:hidden">Gesamt</td>
+                    <td class="num max-sm:hidden">{{ \App\Support\Ui::money($totalBookings) }}</td>
+                    <td class="num max-sm:hidden">–</td>
                     <td class="num">{{ \App\Support\Ui::money($totalFees) }}</td>
-                    <td>–</td>
+                    <td class="max-sm:hidden">–</td>
                 </tr>
             </tfoot>
         @endif

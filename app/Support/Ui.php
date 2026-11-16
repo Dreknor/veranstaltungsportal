@@ -7,6 +7,7 @@ use Carbon\CarbonInterface as Carbon;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
+use League\CommonMark\Extension\ExternalLink\ExternalLinkExtension;
 
 /**
  * Kleine Helfer für die Bausteine unter resources/views/components/ui/.
@@ -374,6 +375,18 @@ class Ui
         return number_format((float) $amount, 2, ',', '.').' €';
     }
 
+    /** Prozentwert deutsch: "5 %", "4,5 %", "33,3 %" (höchstens $decimals Nachkommastellen, ohne überflüssige Nullen). */
+    public static function percent(float|int|string|null $value, int $decimals = 1): string
+    {
+        $text = number_format((float) $value, $decimals, ',', '.');
+
+        if (str_contains($text, ',')) {
+            $text = rtrim(rtrim($text, '0'), ',');
+        }
+
+        return $text.' %';
+    }
+
     /** Format einer Veranstaltung als Wort: "Präsenz", "Online", "Hybrid", "Extern". */
     public static function format(Event $event): string
     {
@@ -446,5 +459,208 @@ class Ui
             str_contains($action, 'deleted') => 'danger',
             default => 'neutral',
         };
+    }
+
+    /** Ganzzahl oder Dezimalzahl deutsch: "1.250", "12,5" (ohne überflüssige Nullen). */
+    public static function number(float|int|string|null $value, int $decimals = 0): string
+    {
+        $text = number_format((float) $value, $decimals, ',', '.');
+
+        if (str_contains($text, ',')) {
+            $text = rtrim(rtrim($text, '0'), ',');
+        }
+
+        return $text;
+    }
+
+    /**
+     * Ländernamen zur Anzeige: Ländercodes und englische Namen auf deutsche Namen abbilden
+     * ("DE", "Germany" → "Deutschland"). Unbekannte Werte bleiben unverändert.
+     *
+     * @var array<string, string>
+     */
+    private const COUNTRIES = [
+        'de' => 'Deutschland',
+        'deu' => 'Deutschland',
+        'germany' => 'Deutschland',
+        'deutschland' => 'Deutschland',
+        'at' => 'Österreich',
+        'aut' => 'Österreich',
+        'austria' => 'Österreich',
+        'ch' => 'Schweiz',
+        'che' => 'Schweiz',
+        'switzerland' => 'Schweiz',
+        'li' => 'Liechtenstein',
+        'liechtenstein' => 'Liechtenstein',
+        'lu' => 'Luxemburg',
+        'luxembourg' => 'Luxemburg',
+        'nl' => 'Niederlande',
+        'netherlands' => 'Niederlande',
+        'be' => 'Belgien',
+        'belgium' => 'Belgien',
+        'fr' => 'Frankreich',
+        'france' => 'Frankreich',
+        'it' => 'Italien',
+        'italy' => 'Italien',
+        'pl' => 'Polen',
+        'poland' => 'Polen',
+        'cz' => 'Tschechien',
+        'czech republic' => 'Tschechien',
+        'czechia' => 'Tschechien',
+        'dk' => 'Dänemark',
+        'denmark' => 'Dänemark',
+        'other' => 'Anderes Land',
+    ];
+
+    /** Land zur Anzeige: "Germany" / "DE" → "Deutschland". */
+    public static function country(?string $country): string
+    {
+        $value = trim((string) $country);
+
+        return self::COUNTRIES[Str::lower($value)] ?? $value;
+    }
+
+    /** Art eines Abzeichens (Spalte badges.type) als Wort. */
+    public static function badgeType(?string $type): string
+    {
+        return match ($type) {
+            'attendance' => 'Teilnahme',
+            'achievement' => 'Erfolg',
+            'special' => 'Spezial',
+            default => (string) $type,
+        };
+    }
+
+    /** Anforderung eines Abzeichens (Schlüssel aus badges.requirements) als Bezeichnung für den Fortschritt. */
+    public static function badgeRequirement(string $key): string
+    {
+        return match (\App\Models\Badge::normalizeRequirement($key)) {
+            'bookings_count' => 'Bezahlte Buchungen',
+            'events_attended' => 'Besuchte Veranstaltungen',
+            'events_organized' => 'Organisierte Veranstaltungen',
+            'reviews_written' => 'Geschriebene Bewertungen',
+            'total_hours_attended' => 'Fortbildungsstunden',
+            'categories_explored' => 'Verschiedene Kategorien',
+            'early_bird_bookings' => 'Frühbuchungen',
+            'connections_made' => 'Verbindungen',
+            default => $key,
+        };
+    }
+
+    /**
+     * Markdown (Veranstaltungsbeschreibungen) als sicheres HTML für <div class="richtext">:
+     * eingebettetes HTML wird entfernt, unsichere Links (javascript:, data: …) entfallen, einfache
+     * Zeilenumbrüche bleiben als <br> erhalten. Überschriften beginnen bei $headingStart (Standard h3),
+     * damit sie unter der Abschnittsüberschrift der Seite liegen. Bilder erscheinen als ihr Alternativtext.
+     */
+    public static function markdown(?string $text, int $headingStart = 3): string
+    {
+        $text = trim((string) $text);
+
+        if ($text === '') {
+            return '';
+        }
+
+        $html = (string) Str::markdown($text, [
+            'html_input' => 'strip',
+            'allow_unsafe_links' => false,
+            'max_nesting_level' => 20,
+            'renderer' => ['soft_break' => "<br>\n"],
+            'external_link' => [
+                'internal_hosts' => [(string) parse_url((string) config('app.url'), PHP_URL_HOST)],
+                'open_in_new_window' => false,
+                'nofollow' => 'external',
+                'noopener' => 'external',
+                'noreferrer' => 'external',
+            ],
+        ], [new ExternalLinkExtension]);
+
+        // Überschriften verschieben: "#" und "##" werden h{$headingStart}, "###" eine Stufe tiefer …
+        $html = (string) preg_replace_callback(
+            '#<(/?)h([1-6])\b#',
+            fn (array $m) => '<'.$m[1].'h'.min(6, max($headingStart, (int) $m[2] + $headingStart - 2)),
+            $html
+        );
+
+        // Keine Bilder aus Beschreibungen (fremde Server, Layout): Alternativtext statt <img>.
+        return (string) preg_replace_callback(
+            '#<img\b[^>]*?\balt="([^"]*)"[^>]*>#',
+            fn (array $m) => $m[1],
+            $html
+        );
+    }
+
+    /**
+     * Markdown als reiner Text für Auszüge, Meta-Beschreibungen, Feeds und Kalendereinträge:
+     * Formatierung entfernt, Leerraum zusammengefasst. $limit kürzt mit "…".
+     * Mit $keepLines bleiben Zeilen (Absätze, Listenpunkte) erhalten, z. B. für ICS-Dateien.
+     */
+    public static function plainText(?string $text, ?int $limit = null, bool $keepLines = false): string
+    {
+        $html = self::markdown($text);
+
+        if ($keepLines) {
+            $html = (string) preg_replace('#<li>#', '<li>- ', $html);
+        }
+
+        $plain = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        if ($keepLines) {
+            $plain = (string) preg_replace('/[ \t]+/', ' ', $plain);
+            $plain = (string) preg_replace('/ *\n */', "\n", $plain);
+            $plain = trim((string) preg_replace('/\n{3,}/', "\n\n", $plain));
+        } else {
+            $plain = trim((string) preg_replace('/\s+/u', ' ', $plain));
+        }
+
+        return $limit !== null ? Str::limit($plain, $limit, '…') : $plain;
+    }
+
+    /**
+     * Titel einer gespeicherten Benachrichtigung: der gespeicherte Titel (ältere Begriffe korrigiert),
+     * sonst ein Titel passend zur Art der Benachrichtigung.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public static function notificationTitle(?string $type, array $data): string
+    {
+        $title = trim((string) ($data['title'] ?? ''));
+
+        $renamed = [
+            'Event-Erinnerung' => 'Erinnerung an Ihre Veranstaltung',
+            'Featured-Zahlung eingegangen' => 'Zahlung für Hervorhebung eingegangen',
+        ];
+
+        if ($title !== '') {
+            return $renamed[$title] ?? $title;
+        }
+
+        return match (class_basename((string) $type)) {
+            'BadgeEarnedNotification' => 'Neues Abzeichen',
+            'ConnectionRequestNotification' => 'Neue Verbindungsanfrage',
+            'ConnectionAcceptedNotification' => 'Verbindungsanfrage angenommen',
+            'NewEventInCategoryNotification' => 'Neue Veranstaltung in Ihren Interessen',
+            'CriticalLogNotification' => 'Kritischer Systemfehler',
+            'EventReminderNotification' => 'Erinnerung an Ihre Veranstaltung',
+            default => 'Benachrichtigung',
+        };
+    }
+
+    /**
+     * Text einer gespeicherten Benachrichtigung mit deutschen Anführungszeichen („…“) und ohne
+     * Klammer-Plural ("1 Ticket(s)" → "1 Ticket").
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public static function notificationMessage(array $data): string
+    {
+        $message = trim((string) ($data['message'] ?? ''));
+        $message = (string) preg_replace('/"([^"]+)"/u', '„$1“', $message);
+
+        return (string) preg_replace_callback(
+            '/\b(\d+) Ticket\(s\)/u',
+            fn (array $m) => $m[1].((int) $m[1] === 1 ? ' Ticket' : ' Tickets'),
+            $message
+        );
     }
 }

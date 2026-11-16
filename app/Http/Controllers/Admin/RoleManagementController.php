@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\AccessLabels;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Spatie\Permission\PermissionRegistrar;
 
 class RoleManagementController extends Controller
@@ -39,7 +41,7 @@ class RoleManagementController extends Controller
         $validated = $request->validate([
             'name'          => ['required', 'string', 'regex:/^[a-z0-9\-]+$/', 'unique:roles,name', 'max:50'],
             'description'   => 'nullable|string|max:255',
-            'color'         => 'nullable|string|max:20',
+            'color'         => ['nullable', Rule::in(array_keys(config('permission-labels.tones')))],
             'permissions'   => 'nullable|array',
             'permissions.*' => 'exists:permissions,name',
         ]);
@@ -48,7 +50,7 @@ class RoleManagementController extends Controller
             'name'        => $validated['name'],
             'guard_name'  => 'web',
             'description' => $validated['description'] ?? null,
-            'color'       => $validated['color'] ?? '#6b7280',
+            'color'       => $validated['color'] ?? AccessLabels::DEFAULT_TONE,
             'is_system'   => false,
         ]);
 
@@ -85,7 +87,7 @@ class RoleManagementController extends Controller
         $validated = $request->validate([
             'name'          => ['required', 'string', 'regex:/^[a-z0-9\-]+$/', "unique:roles,name,{$role->id}", 'max:50'],
             'description'   => 'nullable|string|max:255',
-            'color'         => 'nullable|string|max:20',
+            'color'         => ['nullable', Rule::in(array_keys(config('permission-labels.tones')))],
             'permissions'   => 'nullable|array',
             'permissions.*' => 'exists:permissions,name',
         ]);
@@ -96,13 +98,13 @@ class RoleManagementController extends Controller
         if ($role->is_system) {
             $role->update([
                 'description' => $validated['description'] ?? null,
-                'color'       => $validated['color'] ?? $role->color,
+                'color'       => $validated['color'] ?? AccessLabels::toneKey($role->color),
             ]);
         } else {
             $role->update([
                 'name'        => $validated['name'],
                 'description' => $validated['description'] ?? null,
-                'color'       => $validated['color'] ?? $role->color,
+                'color'       => $validated['color'] ?? AccessLabels::toneKey($role->color),
             ]);
         }
 

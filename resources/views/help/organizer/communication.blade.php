@@ -1,4 +1,4 @@
-<x-help.article title="Kommunikation mit Teilnehmern" subtitle="Halten Sie Ihre Teilnehmer informiert und engagiert."
+<x-help.article title="Kommunikation mit Teilnehmenden" subtitle="Halten Sie Ihre Teilnehmende informiert und engagiert."
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Automatische E-Mails – wann geht was raus?</h2>
@@ -7,11 +7,11 @@
     </section>
 
     <section>
-        <h2>2. Manuelle Teilnehmer-Kontaktierung</h2>
-        <p>So erreichen Sie Ihre Teilnehmer direkt:</p>
+        <h2>2. Teilnehmende kontaktieren</h2>
+        <p>So erreichen Sie Ihre Teilnehmende direkt:</p>
         <ul>
-            <li>Gehen Sie zu „Meine Veranstaltungen" › Veranstaltung auswählen › „Teilnehmer kontaktieren"</li>
-            <li>Schreiben Sie eine Nachricht an alle oder gefilterte Teilnehmer</li>
+            <li>Gehen Sie zu „Meine Veranstaltungen“ › Veranstaltung auswählen › „Teilnehmende kontaktieren“</li>
+            <li>Schreiben Sie eine Nachricht an alle oder gefilterte Teilnehmende</li>
             <li>Filter: Alle, nur Bezahlte, nur Eingecheckte, nur Ausstehende</li>
             <li>Betreff und Nachricht individuell formulieren</li>
         </ul>
@@ -27,7 +27,7 @@
             <li>Veranstaltungsort oder Adresse ändern,</li>
             <li>oder der Online-Link bzw. Zugangscode geändert wird (nur an Buchungen mit freigeschaltetem Zugang).</li>
         </ul>
-        <p>Kleinere Änderungen (z.B. Beschreibungstext) lösen keine Benachrichtigung aus.</p>
+        <p>Kleinere Änderungen (z. B. Beschreibungstext) lösen keine Benachrichtigung aus.</p>
     </section>
 
     <section>
@@ -37,7 +37,7 @@
             <li>Nutzen Sie BCC für Massen-E-Mails (E-Mail-Adressen nicht sichtbar)</li>
             <li>Speichern Sie E-Mail-Adressen nicht außerhalb der Plattform</li>
             <li>Versenden Sie nur veranstaltungsrelevante Informationen</li>
-            <li>Teilnehmer können Benachrichtigungen abbestellen</li>
+            <li>Teilnehmende können Benachrichtigungen abbestellen</li>
         </ul>
     </section>
 
@@ -48,13 +48,13 @@
             <li>Interessenten können sich auf die Warteliste setzen</li>
             <li>Bei Stornierung erhalten sie automatisch eine Benachrichtigung</li>
             <li>48h Frist für Buchung (danach nächster auf Warteliste)</li>
-            <li>Manuell: „Nächsten benachrichtigen" Button in Wartelisten-Übersicht</li>
+            <li>Manuell: „Nächsten benachrichtigen“ Button in Wartelisten-Übersicht</li>
         </ul>
     </section>
 
     <x-ui.alert tone="info" title="Tipp">Versenden Sie 1-2 Tage vor der Veranstaltung eine persönliche
         Nachricht mit Wegbeschreibung und Ablauf – das reduziert Rückfragen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Danken Sie nach der Veranstaltung mit einer Follow-up-E-Mail und
+    <x-ui.alert tone="info" title="Empfehlung">Danken Sie nach der Veranstaltung mit einer Follow-up-E-Mail und
         bitten Sie um Feedback/Bewertung.</x-ui.alert>
 </x-help.article>

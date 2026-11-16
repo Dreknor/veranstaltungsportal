@@ -1,3 +1,5 @@
+@use('App\Support\Ui')
+
 <x-layouts.app :title="$badge->name">
     <x-ui.page-header :title="$badge->name" :back-href="route('badges.index')" back-label="Zurück zu Abzeichen" />
 
@@ -11,15 +13,15 @@
                     @if ($hasEarned)
                         <x-ui.status tone="success">Verdient</x-ui.status>
                     @else
-                        <x-ui.status tone="neutral">Gesperrt</x-ui.status>
+                        <x-ui.status tone="neutral">Noch nicht verdient</x-ui.status>
                     @endif
                 </div>
 
                 <p class="m-0 mb-4 text-base text-ink">{{ $badge->description }}</p>
 
                 <p class="m-0 flex flex-wrap gap-x-6 gap-y-1 text-ui font-medium text-ink tabular-nums">
-                    <span>{{ ucfirst($badge->type) }}</span>
-                    <span>{{ $badge->points }} Punkte</span>
+                    <span>{{ Ui::badgeType($badge->type) }}</span>
+                    <span>{{ Ui::number($badge->points) }} Punkte</span>
                     <span>{{ $earnedByCount }} {{ $earnedByCount === 1 ? 'Person' : 'Personen' }}</span>
                 </p>
 
@@ -45,48 +47,16 @@
                     @foreach ($progress as $requirement => $data)
                         <div>
                             <div class="mb-2 flex justify-between gap-4 text-small tabular-nums">
-                                <span class="font-medium text-ink">
-                                    @switch($requirement)
-                                        @case('bookings_count')
-                                            Anzahl Buchungen
-                                        @break
-
-                                        @case('events_attended')
-                                            Besuchte Veranstaltungen
-                                        @break
-
-                                        @case('events_organized')
-                                            Organisierte Veranstaltungen
-                                        @break
-
-                                        @case('reviews_written')
-                                            Geschriebene Bewertungen
-                                        @break
-
-                                        @case('total_hours_attended')
-                                            Fortbildungsstunden
-                                        @break
-
-                                        @case('categories_explored')
-                                            Verschiedene Kategorien
-                                        @break
-
-                                        @case('early_bird_bookings')
-                                            Frühbuchungen
-                                        @break
-
-                                        @default
-                                            {{ $requirement }}
-                                    @endswitch
-                                </span>
+                                <span class="font-medium text-ink">{{ Ui::badgeRequirement($requirement) }}</span>
                                 <span class="text-muted">
-                                    {{ $data['current'] }} / {{ $data['required'] }}
-                                    <span class="ml-2 font-medium text-ink">{{ $data['percentage'] }}%</span>
+                                    {{ Ui::number(min($data['current'], $data['required'])) }} von
+                                    {{ Ui::number($data['required']) }}
+                                    <span class="ml-2 font-medium text-ink">{{ Ui::percent($data['percentage']) }}</span>
                                 </span>
                             </div>
                             <x-ui.progress :value="$data['percentage']" size="lg" decorative />
                             @if ($data['completed'])
-                                <div class="mt-1 text-small text-success">Erfüllt!</div>
+                                <x-ui.status tone="success" class="mt-2">Erfüllt</x-ui.status>
                             @endif
                         </div>
                     @endforeach

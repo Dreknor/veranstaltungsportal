@@ -10,7 +10,7 @@
 
     <x-ui.tabs label="Einstellungsgruppen" class="mb-8">
         @foreach ($groups as $g)
-            <x-ui.tab :href="route('admin.settings.index', ['group' => $g])" :active="$group === $g">{{ ucfirst($g) }}</x-ui.tab>
+            <x-ui.tab :href="route('admin.settings.index', ['group' => $g])" :active="$group === $g">{{ \App\Support\AdminLabels::settingGroup($g) }}</x-ui.tab>
         @endforeach
     </x-ui.tabs>
 
@@ -25,12 +25,11 @@
                 <div class="border-t border-line py-6">
                     @if ($setting->type === 'boolean')
                         <x-ui.checkbox name="settings[{{ $setting->key }}]" id="setting_{{ $setting->key }}"
-                            :checked="(bool) $setting->getTypedValue()" :label="$setting->label"
-                            :hint="$setting->description" />
+                            :checked="(bool) $setting->getTypedValue()" :label="$setting->label" :hint="$setting->description" />
                     @elseif ($setting->type === 'integer')
                         <x-ui.field :label="$setting->label" name="settings[{{ $setting->key }}]"
-                            id="setting_{{ $setting->key }}" type="number" :value="$setting->getTypedValue()"
-                            :hint="$setting->description" input-class="sm:max-w-64" />
+                            id="setting_{{ $setting->key }}" type="number" :value="$setting->getTypedValue()" :hint="$setting->description"
+                            input-class="sm:max-w-64" />
                     @elseif ($setting->key === 'primary_color')
                         <x-ui.label for="setting_{{ $setting->key }}">{{ $setting->label }}</x-ui.label>
                         <div class="flex flex-wrap items-center gap-3">
@@ -49,8 +48,8 @@
                     @endif
 
                     <p class="m-0 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-small text-muted">
-                        <span>Schlüssel: <code class="font-mono text-ink">{{ $setting->key }}</code></span>
-                        <span>Typ: {{ $setting->type }}</span>
+                        <span>Schlüssel: <span class="text-ink">{{ $setting->key }}</span></span>
+                        <span>Typ: {{ \App\Support\AdminLabels::settingType($setting->type) }}</span>
                         @if ($setting->is_public)
                             <span>Öffentlich</span>
                         @endif

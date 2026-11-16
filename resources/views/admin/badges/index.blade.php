@@ -25,8 +25,12 @@
     <form method="GET" action="{{ route('admin.badges.index') }}"
         class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Abzeichen suchen" />
-        <x-ui.select label="Typ" name="type" :old="false" :selected="request('type')"
-            :options="['' => 'Alle Typen', 'attendance' => 'Teilnahme', 'achievement' => 'Erfolge', 'special' => 'Spezial']" />
+        <x-ui.select label="Typ" name="type" :old="false" :selected="request('type')" :options="[
+            '' => 'Alle Typen',
+            'attendance' => 'Teilnahme',
+            'achievement' => 'Erfolge',
+            'special' => 'Spezial',
+        ]" />
         <div class="flex flex-wrap gap-3">
             <x-ui.button type="submit" variant="secondary" size="lg">Filtern</x-ui.button>
             @if (request()->hasAny(['search', 'type']))
@@ -53,15 +57,20 @@
                         <div class="flex items-center gap-4">
                             <x-badge-icon :badge="$badge" size="sm" class="flex-none" />
                             <div class="min-w-0">
-                                <a href="{{ route('admin.badges.show', $badge) }}" class="text-ink underline underline-offset-[3px]">{{ $badge->name }}</a>
-                                <span class="block text-small font-normal text-muted">{{ Str::limit($badge->description, 80) }}</span>
+                                <a href="{{ route('admin.badges.show', $badge) }}"
+                                    class="text-ink underline underline-offset-[3px]">{{ $badge->name }}</a>
+                                <span
+                                    class="block text-small font-normal text-muted">{{ Str::limit($badge->description, 80) }}</span>
                             </div>
                         </div>
                     </th>
-                    <td><x-ui.status tone="neutral">{{ $typeLabels[$badge->type] ?? ucfirst($badge->type) }}</x-ui.status></td>
+                    <td><x-ui.status
+                            tone="neutral">{{ $typeLabels[$badge->type] ?? ucfirst($badge->type) }}</x-ui.status></td>
                     <td class="num">{{ $badge->points }}</td>
-                    <td class="num">{{ $badge->users_count ?? 0 }}</td>
-                    <td>{{ $badge->requirement_value }} {{ str_replace('_', ' ', $badge->requirement_type) }}</td>
+                    <td class="num">{{ $badge->users_count }}</td>
+                    <td>{{ $badge->requirement_value }}
+                        {{ \App\Models\Badge::REQUIREMENT_TYPES[\App\Models\Badge::normalizeRequirement((string) $badge->requirement_type)] ?? str_replace('_', ' ', $badge->requirement_type) }}
+                    </td>
                     <td class="actions">
                         <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.show', $badge)">Details</x-ui.button>
                         <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.edit', $badge)">Bearbeiten</x-ui.button>

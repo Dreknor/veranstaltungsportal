@@ -5,7 +5,7 @@
         'margin: 32px 0 0 0; padding: 0 0 8px 0; border-bottom: 1px solid #DCE3E2; font-size: 18px; line-height: 1.3; font-weight: 600; color: #1E3135;';
     $sections = [
         [
-            'title' => 'Highlights der Woche',
+            'title' => 'Empfehlungen der Woche',
             'events' => $featuredEvents,
             'link' => 'Jetzt anmelden',
             'description' => true,
@@ -37,7 +37,7 @@
     </p>
 
     <p style="margin: 0;">
-        wir haben wieder spannende Bildungsangebote für Sie zusammengestellt!
+        wir haben wieder spannende Bildungsangebote für Sie zusammengestellt.
     </p>
 
     @foreach ($sections as $section)
@@ -65,7 +65,7 @@
                             </p>
                             @if ($section['description'])
                                 <p style="margin: 8px 0 0 0; font-size: 15px; line-height: 1.5; color: #1E3135;">
-                                    {{ Str::limit(strip_tags($event->description), 120) }}
+                                    {{ \App\Support\Ui::plainText($event->description, 120) }}
                                 </p>
                             @endif
                             <p style="margin: 8px 0 0 0; font-size: 15px; font-weight: 600;">
