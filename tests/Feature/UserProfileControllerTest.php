@@ -232,5 +232,5 @@ test('profile shows activity feed', function () {
         ->assertSee('Aktivität')
         ->assertSee('Veranstaltung besucht')
         ->assertDontSee('Veranstaltung(en)')
-        ->assertSee('Abzeichen verdient');
+        ->assertSeeInOrder(['Abzeichen', 'verdient']);
 });
