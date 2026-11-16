@@ -529,10 +529,10 @@
                             Warteliste verwalten
                             @if ($waitlistCount > 0)
                                 <span class="tabular-nums">({{ $waitlistCount }})</span>
-                                        </x-ui.button>
+                            @endif
+                        </x-ui.button>
                     </div>
                 </section>
-            @endif
 
             <section id="ticket-types-section" aria-labelledby="ticketarten-titel" class="border-t border-line py-8">
                 <h2 id="ticketarten-titel" class="m-0 mb-6 text-h2-form text-ink">Ticketarten</h2>

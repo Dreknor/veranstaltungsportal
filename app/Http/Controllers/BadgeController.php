@@ -102,15 +102,13 @@ class BadgeController extends Controller
             // If user not in top 50, calculate their rank
             if (!$userRank) {
                 $userPoints = auth()->user()->getTotalBadgePoints();
-                $userRank = \App\Models\User::select('users.*')
-                    ->selectSub(function ($query) {
-                        $query->select(\Illuminate\Support\Facades\DB::raw('COALESCE(SUM(badges.points), 0)'))
-                            ->from('user_badges')
-                            ->join('badges', 'user_badges.badge_id', '=', 'badges.id')
-                            ->whereColumn('user_badges.user_id', 'users.id');
-                    }, 'total_points')
-                    ->having('total_points', '>', $userPoints)
-                    ->count() + 1;
+                // Ohne HAVING formuliert: HAVING ohne GROUP BY lehnt SQLite ab
+                $userRank = \App\Models\User::whereRaw(
+                    '(select COALESCE(SUM(badges.points), 0) from user_badges'
+                    .' inner join badges on user_badges.badge_id = badges.id'
+                    .' where user_badges.user_id = users.id) > ?',
+                    [$userPoints]
+                )->count() + 1;
             }
         }
 

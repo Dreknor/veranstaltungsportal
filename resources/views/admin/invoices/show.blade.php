@@ -1,0 +1,188 @@
+@use('App\Support\Ui')
+
+<x-layouts.app :title="'Rechnung ' . $invoice->invoice_number">
+    <x-ui.page-header :title="'Rechnung ' . $invoice->invoice_number"
+        :subtitle="$invoice->recipient_name"
+        :back-href="route('admin.invoices.index')" back-label="Zu den Rechnungen">
+        <x-slot:actions>
+            @if ($invoice->pdf_path)
+                <x-ui.button :href="route('admin.invoices.download', $invoice)">
+                    <x-slot:icon><x-icon.download /></x-slot:icon>
+                    PDF herunterladen
+                </x-ui.button>
+            @endif
+            <x-ui.dropdown label="Weitere Aktionen" align="right" size="md">
+                @if ($invoice->status !== 'paid')
+                    <x-ui.dropdown-item type="submit" form="mark-paid">Als bezahlt markieren</x-ui.dropdown-item>
+                    @if ($invoice->status !== 'overdue')
+                        <x-ui.dropdown-item type="submit" form="mark-overdue">Als überfällig markieren</x-ui.dropdown-item>
+                    @endif
+                @endif
+                <x-ui.dropdown-item type="submit" form="resend">Erneut per E-Mail senden</x-ui.dropdown-item>
+                <x-ui.dropdown-item type="submit" form="destroy" danger>Rechnung löschen</x-ui.dropdown-item>
+            </x-ui.dropdown>
+        </x-slot:actions>
+    </x-ui.page-header>
+
+    <form id="mark-paid" method="POST" action="{{ route('admin.invoices.mark-paid', $invoice) }}" class="hidden">
+        @csrf
+        @method('PATCH')
+    </form>
+    <form id="mark-overdue" method="POST" action="{{ route('admin.invoices.mark-overdue', $invoice) }}" class="hidden">
+        @csrf
+        @method('PATCH')
+    </form>
+    <form id="resend" method="POST" action="{{ route('admin.invoices.resend', $invoice) }}" class="hidden">
+        @csrf
+    </form>
+    <form id="destroy" method="POST" action="{{ route('admin.invoices.destroy', $invoice) }}" class="hidden"
+        onsubmit="return confirm('Rechnung wirklich löschen?')">
+        @csrf
+        @method('DELETE')
+    </form>
+
+    @if ($invoice->status === 'paid')
+        <x-ui.alert tone="success" class="mb-8" title="Rechnung bezahlt">
+            Bezahlt am {{ $invoice->paid_at?->format('d.m.Y') ?? '–' }}
+        </x-ui.alert>
+    @elseif ($invoice->due_date && $invoice->due_date->isPast())
+        <x-ui.alert tone="danger" class="mb-8" title="Rechnung überfällig">
+            Fällig seit {{ $invoice->due_date->format('d.m.Y') }}
+        </x-ui.alert>
+    @elseif ($invoice->due_date)
+        <x-ui.alert tone="warning" class="mb-8" title="Zahlungsziel">
+            Fällig am {{ $invoice->due_date->format('d.m.Y') }}
+        </x-ui.alert>
+    @endif
+
+    <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,368px)] lg:gap-x-12">
+        <div class="flex min-w-0 flex-col gap-12">
+            <x-ui.section title="Rechnungsdetails">
+                <x-ui.dl>
+                    <x-ui.dl-item label="Rechnungsnummer" num>{{ $invoice->invoice_number }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Art">
+                        {{ $invoice->type === 'platform_fee' ? 'Plattformgebühr' : 'Teilnahme' }}
+                    </x-ui.dl-item>
+                    <x-ui.dl-item label="Status">
+                        @if ($invoice->status === 'paid')
+                            <x-ui.status tone="success">Bezahlt</x-ui.status>
+                        @elseif ($invoice->status === 'overdue')
+                            <x-ui.status tone="danger">Überfällig</x-ui.status>
+                        @elseif ($invoice->status === 'cancelled')
+                            <x-ui.status tone="neutral">Storniert</x-ui.status>
+                        @else
+                            <x-ui.status tone="warning">Offen</x-ui.status>
+                        @endif
+                    </x-ui.dl-item>
+                    <x-ui.dl-item label="Rechnungsdatum" num>{{ $invoice->invoice_date?->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Fälligkeitsdatum" num>{{ $invoice->due_date?->format('d.m.Y') }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Veranstaltung">
+                        @if ($invoice->event)
+                            <a href="{{ route('events.show', $invoice->event) }}" class="font-medium text-ink underline underline-offset-[3px]">{{ $invoice->event->title }}</a>
+                        @endif
+                    </x-ui.dl-item>
+                    <x-ui.dl-item label="Buchung" num>
+                        @if ($invoice->booking)
+                            {{ $invoice->booking->booking_number }}
+                        @endif
+                    </x-ui.dl-item>
+                </x-ui.dl>
+            </x-ui.section>
+
+            <x-ui.section title="Rechnungsempfänger">
+                <x-ui.dl>
+                    <x-ui.dl-item label="Name">{{ $invoice->recipient_name }}</x-ui.dl-item>
+                    <x-ui.dl-item label="E-Mail">{{ $invoice->recipient_email }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Anschrift">
+                        @if ($invoice->recipient_address)
+                            <span class="whitespace-pre-line">{{ is_array($invoice->recipient_address) ? implode("\n", array_filter($invoice->recipient_address)) : $invoice->recipient_address }}</span>
+                        @endif
+                    </x-ui.dl-item>
+                    @if ($invoice->user)
+                        <x-ui.dl-item label="Konto">
+                            <a href="{{ route('admin.users.edit', $invoice->user) }}" class="text-ink underline underline-offset-[3px]">{{ $invoice->user->fullName() }}</a>
+                        </x-ui.dl-item>
+                    @endif
+                </x-ui.dl>
+            </x-ui.section>
+
+            @if ($platformFees && $platformFees->count() > 0)
+                <x-ui.section title="Aufschlüsselung der Plattformgebühren">
+                    <x-ui.table label="Plattformgebühren dieser Rechnung">
+                        <thead>
+                            <tr>
+                                <th scope="col">Buchung</th>
+                                <th scope="col" class="num">Buchungsbetrag</th>
+                                <th scope="col" class="num">Gebührensatz</th>
+                                <th scope="col" class="num">Gebühr</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($platformFees as $fee)
+                                <tr>
+                                    <td class="tabular-nums">{{ $fee->booking?->booking_number ?? '–' }}</td>
+                                    <td class="num">{{ Ui::money($fee->booking_amount) }}</td>
+                                    <td class="num">{{ number_format((float) $fee->fee_percentage, 2, ',', '.') }} %</td>
+                                    <td class="num">{{ Ui::money($fee->fee_amount) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="num">Gesamt (netto)</td>
+                                <td class="num">{{ Ui::money($platformFees->sum('fee_amount')) }}</td>
+                            </tr>
+                        </tfoot>
+                    </x-ui.table>
+                </x-ui.section>
+            @endif
+
+            @if (is_array($invoice->billing_data) && isset($invoice->billing_data['items']))
+                <x-ui.section title="Rechnungspositionen">
+                    <x-ui.table label="Rechnungspositionen">
+                        <thead>
+                            <tr>
+                                <th scope="col">Beschreibung</th>
+                                <th scope="col" class="num">Menge</th>
+                                <th scope="col" class="num">Einzelpreis</th>
+                                <th scope="col" class="num">Gesamt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($invoice->billing_data['items'] as $item)
+                                <tr>
+                                    <td>
+                                        {{ $item['description'] ?? 'Position' }}
+                                        @if (isset($item['details']))
+                                            <span class="block text-small text-muted">{{ $item['details'] }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="num">{{ $item['quantity'] ?? 1 }}</td>
+                                    <td class="num">{{ Ui::money($item['unit_price'] ?? ($item['total'] ?? 0)) }}</td>
+                                    <td class="num">{{ Ui::money($item['total'] ?? 0) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </x-ui.table>
+                </x-ui.section>
+            @endif
+
+            @if ($invoice->notes)
+                <x-ui.section title="Notizen">
+                    <p class="m-0 whitespace-pre-line">{{ $invoice->notes }}</p>
+                </x-ui.section>
+            @endif
+        </div>
+
+        <aside class="flex min-w-0 flex-col gap-8">
+            <x-ui.box tone="zone">
+                <h2 class="m-0 mb-4 text-h3">Rechnungsbetrag</h2>
+                <x-ui.summary-lines>
+                    <x-ui.summary-line label="Zwischensumme (netto)" :amount="Ui::money($invoice->amount)" />
+                    <x-ui.summary-line :label="'MwSt. (' . number_format((float) $invoice->tax_rate, 1, ',', '.') . ' %)'" :amount="Ui::money($invoice->tax_amount)" />
+                </x-ui.summary-lines>
+                <x-ui.summary-total label="Gesamtbetrag (brutto)" :amount="Ui::money($invoice->total_amount)" />
+            </x-ui.box>
+        </aside>
+    </div>
+</x-layouts.app>
