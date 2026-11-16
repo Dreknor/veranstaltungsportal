@@ -9,9 +9,7 @@ use App\Http\Controllers\Organizer;
 use App\Http\Controllers\Settings;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', \App\Http\Controllers\HomeController::class)->name('home');
 
 // SEO Routes
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
