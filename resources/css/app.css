@@ -211,6 +211,10 @@
             border-color 150ms,
             background-color 150ms;
     }
+    .ui-choice--compact {
+        min-height: 0;
+        align-items: center;
+    }
     .ui-choice:hover {
         border-color: var(--color-ink);
     }

@@ -13,7 +13,7 @@
             <div class="flex flex-col gap-3">
                 @foreach ($segments as $key => $segment)
                     <x-ui.choice name="segment" :value="$key" :title="$segment['label']" :checked="$key === 'all'" x-model="segment"
-                        :class="'min-h-0 items-center' . ($segment['count'] === 0 ? ' opacity-60' : '')">
+                        compact :class="$segment['count'] === 0 ? 'opacity-60' : ''">
                         <x-slot:aside>{{ $segment['count'] }}</x-slot:aside>
                     </x-ui.choice>
                 @endforeach
