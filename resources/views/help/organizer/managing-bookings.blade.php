@@ -23,10 +23,10 @@
     </section>
 
     <section>
-        <h2>3. Check-In am Event-Tag</h2>
+        <h2>3. Check-In am Veranstaltungstag</h2>
         <p>Nutzen Sie den QR-Code-Scanner:</p>
         <ul>
-            <li>Gehen Sie zu „Check-In" für das Event</li>
+            <li>Gehen Sie zu „Check-In" für die Veranstaltung</li>
             <li>Scannen Sie die Tickets der Teilnehmer (QR-Code auf PDF-Ticket)</li>
             <li>Alternativ: Manuelle Suche nach Name/Buchungsnummer</li>
             <li>Check-In kann rückgängig gemacht werden (falls Fehler)</li>
@@ -51,12 +51,12 @@
         <p>Kontaktieren Sie Teilnehmer über:</p>
         <ul>
             <li>„Teilnehmer kontaktieren" → E-Mail an alle oder gefilterte Gruppe</li>
-            <li>Automatische Erinnerungs-E-Mails (24h und 3h vor Event)</li>
-            <li>Event-Update-Benachrichtigungen bei Änderungen</li>
+            <li>Automatische Erinnerungs-E-Mails (24h und 3h vor der Veranstaltung)</li>
+            <li>Veranstaltungs-Update-Benachrichtigungen bei Änderungen</li>
         </ul>
     </section>
 
     <x-ui.alert class="mt-12" tone="info" title="Best Practice">Checken Sie Teilnehmer frühzeitig ein, um Wartezeiten zu vermeiden. Nutzen Sie Bulk-Check-In für Gruppen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Tipp">Exportieren Sie die Check-In-Liste nach dem Event für Ihre Statistik und Teilnahmebestätigungen.</x-ui.alert>
+    <x-ui.alert tone="info" title="Tipp">Exportieren Sie die Check-In-Liste nach der Veranstaltung für Ihre Statistik und Teilnahmebestätigungen.</x-ui.alert>
 </x-help.article>

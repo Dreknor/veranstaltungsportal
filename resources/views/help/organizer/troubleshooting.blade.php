@@ -1,8 +1,8 @@
 <x-help.article title="Häufige Probleme & FAQ" subtitle="Lösungen für typische Fragen und Fehler."
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
-        <h2>Warum kann ich mein Event nicht veröffentlichen?</h2>
-        <p>Das Event kann nur veröffentlicht werden, wenn:</p>
+        <h2>Warum kann ich meine Veranstaltung nicht veröffentlichen?</h2>
+        <p>Die Veranstaltung kann nur veröffentlicht werden, wenn:</p>
         <ul>
             <li>Rechnungsdaten der Organisation vollständig sind</li>
             <li>Bankverbindung hinterlegt ist</li>
@@ -60,7 +60,7 @@
         <h2>Wo finde ich meine Platform-Fee-Rechnungen?</h2>
         <p>Rechnungen werden automatisch erstellt:</p>
         <ul>
-            <li>Nach Event-Ende (innerhalb von 1-2 Tagen)</li>
+            <li>Nach Veranstaltungsende (innerhalb von 1-2 Tagen)</li>
             <li>Zugriff unter „Rechnungen" im Organizer-Bereich</li>
             <li>PDF-Download und E-Mail-Versand an Ihre hinterlegte Adresse</li>
         </ul>
@@ -71,7 +71,7 @@
         <p>Prüfen Sie Ihre Rolle in der Organisation:</p>
         <ul>
             <li><strong>Viewer:</strong> Kann nur ansehen, nichts bearbeiten</li>
-            <li><strong>Editor:</strong> Kann Events und Buchungen verwalten</li>
+            <li><strong>Editor:</strong> Kann Veranstaltungen und Buchungen verwalten</li>
             <li><strong>Admin/Owner:</strong> Volle Rechte</li>
         </ul>
         <p><strong>Lösung:</strong> Kontaktieren Sie den Owner Ihrer Organisation für Rollenzuweisung.</p>
@@ -81,7 +81,7 @@
         <h2>Statistiken zeigen keine Daten</h2>
         <p>Mögliche Gründe:</p>
         <ul>
-            <li>Noch keine Buchungen für dieses Event vorhanden</li>
+            <li>Noch keine Buchungen für diese Veranstaltung vorhanden</li>
             <li>Zeitraum-Filter zu eng gewählt</li>
             <li>Browser-Cache veraltet</li>
         </ul>
@@ -90,7 +90,5 @@
 
     <x-ui.alert class="mt-12" tone="warning" title="Wichtig">Bei technischen Problemen, die Sie nicht lösen können, kontaktieren Sie den Support mit Screenshots und Fehlermeldung.</x-ui.alert>
 
-    <div class="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded p-4 mt-4">
-        <p><strong>Weitere Hilfe benötigt?</strong> Durchsuchen Sie unsere <a href="{{ route('help.index') }}" class="text-blue-600 hover:text-blue-800">Hilfe-Artikel</a> oder kontaktieren Sie den Support.</p>
-    </div>
+    <x-ui.alert tone="info" title="Weitere Hilfe benötigt?">Durchsuchen Sie unsere <a href="{{ route('help.index') }}">Hilfe-Artikel</a> oder kontaktieren Sie den Support.</x-ui.alert>
 </x-help.article>

@@ -5,11 +5,11 @@
         <p>Unter „Organisation bearbeiten" pflegen Sie:</p>
         <ul>
             <li><strong>Name:</strong> Offizieller Organisationsname</li>
-            <li><strong>Beschreibung:</strong> Über Ihre Organisation (wird auf Event-Seiten angezeigt)</li>
-            <li><strong>Logo:</strong> Wird auf Events, Tickets, Rechnungen angezeigt (max. 2MB, JPG/PNG)</li>
+            <li><strong>Beschreibung:</strong> Über Ihre Organisation (wird auf Veranstaltungsseiten angezeigt)</li>
+            <li><strong>Logo:</strong> Wird auf Veranstaltungen, Tickets, Rechnungen angezeigt (max. 2MB, JPG/PNG)</li>
             <li><strong>Website & Kontakt:</strong> E-Mail, Telefon, Website-URL</li>
         </ul>
-        <p>Das Logo erscheint automatisch auf allen Ihren Events und in E-Mails an Teilnehmer.</p>
+        <p>Das Logo erscheint automatisch auf allen Ihren Veranstaltungen und in E-Mails an Teilnehmer.</p>
     </section>
 
     <section>
@@ -21,7 +21,7 @@
             <li><strong>USt-IdNr./Steuernummer:</strong> Für steuerliche Zwecke</li>
             <li><strong>Rechnungsnummernformat:</strong> Platzhalter {YEAR}, {MONTH}, {COUNTER}</li>
         </ul>
-        <p>Ohne vollständige Rechnungsdaten können Sie keine Events veröffentlichen.</p>
+        <p>Ohne vollständige Rechnungsdaten können Sie keine Veranstaltungen veröffentlichen.</p>
     </section>
 
     <section>
@@ -33,7 +33,7 @@
             <li><strong>BIC/SWIFT:</strong> Bank-Identifikationscode</li>
             <li><strong>Bankname:</strong> Name Ihrer Bank</li>
         </ul>
-        <p>Auszahlungen erfolgen automatisch nach Event-Ende abzgl. Platform-Fee.</p>
+        <p>Auszahlungen erfolgen automatisch nach Veranstaltungsende abzgl. Platform-Fee.</p>
     </section>
 
     <section>
@@ -42,7 +42,7 @@
         <ul>
             <li><strong>Owner:</strong> Volle Rechte inkl. Löschung der Organisation</li>
             <li><strong>Admin:</strong> Kann alles außer Organisation löschen</li>
-            <li><strong>Editor:</strong> Kann Events erstellen/bearbeiten, Buchungen verwalten</li>
+            <li><strong>Editor:</strong> Kann Veranstaltungen erstellen/bearbeiten, Buchungen verwalten</li>
             <li><strong>Viewer:</strong> Kann nur ansehen, keine Änderungen</li>
         </ul>
         <p>Teammitglieder erhalten eine Einladungs-E-Mail und müssen diese bestätigen.</p>
@@ -53,7 +53,7 @@
         <p>Ihr persönliches Profil ist getrennt von der Organisation:</p>
         <ul>
             <li><strong>Vor- und Nachname:</strong> Ihr persönlicher Name</li>
-            <li><strong>Profilbild:</strong> Für Ihr Konto (nicht für Events)</li>
+            <li><strong>Profilbild:</strong> Für Ihr Konto (nicht für Veranstaltungen)</li>
             <li><strong>E-Mail & Passwort:</strong> Login-Daten</li>
             <li><strong>Benachrichtigungseinstellungen:</strong> Was möchten Sie per E-Mail erhalten?</li>
         </ul>

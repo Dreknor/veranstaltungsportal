@@ -1,4 +1,4 @@
-<x-help.article title="Events erstellen & verwalten" subtitle="Leitfaden zur vollständigen Pflege von Veranstaltungseinträgen."
+<x-help.article title="Veranstaltungen erstellen & verwalten" subtitle="Leitfaden zur vollständigen Pflege von Veranstaltungseinträgen."
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Basisdaten</h2>

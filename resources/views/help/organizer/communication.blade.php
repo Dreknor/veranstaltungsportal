@@ -10,7 +10,7 @@
         <h2>2. Manuelle Teilnehmer-Kontaktierung</h2>
         <p>So erreichen Sie Ihre Teilnehmer direkt:</p>
         <ul>
-            <li>Gehen Sie zu „Events" → Event auswählen → „Teilnehmer kontaktieren"</li>
+            <li>Gehen Sie zu „Meine Veranstaltungen" → Veranstaltung auswählen → „Teilnehmer kontaktieren"</li>
             <li>Schreiben Sie eine Nachricht an alle oder gefilterte Teilnehmer</li>
             <li>Filter: Alle, nur Bezahlte, nur Eingecheckte, nur Ausstehende</li>
             <li>Betreff und Nachricht individuell formulieren</li>
@@ -35,14 +35,14 @@
         <ul>
             <li>Nutzen Sie BCC für Massen-E-Mails (E-Mail-Adressen nicht sichtbar)</li>
             <li>Speichern Sie E-Mail-Adressen nicht außerhalb der Plattform</li>
-            <li>Versenden Sie nur Event-relevante Informationen</li>
+            <li>Versenden Sie nur veranstaltungsrelevante Informationen</li>
             <li>Teilnehmer können Benachrichtigungen abbestellen</li>
         </ul>
     </section>
 
     <section>
         <h2>5. Wartelisten-Benachrichtigungen</h2>
-        <p>Wenn Ihr Event ausverkauft ist:</p>
+        <p>Wenn Ihre Veranstaltung ausverkauft ist:</p>
         <ul>
             <li>Interessenten können sich auf die Warteliste setzen</li>
             <li>Bei Stornierung erhalten sie automatisch eine Benachrichtigung</li>
@@ -51,7 +51,7 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Versenden Sie 1-2 Tage vor dem Event eine persönliche Nachricht mit Wegbeschreibung und Ablauf – das reduziert Rückfragen.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Versenden Sie 1-2 Tage vor der Veranstaltung eine persönliche Nachricht mit Wegbeschreibung und Ablauf – das reduziert Rückfragen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Danken Sie nach dem Event mit einer Follow-up-E-Mail und bitten Sie um Feedback/Bewertung.</x-ui.alert>
+    <x-ui.alert tone="info" title="Best Practice">Danken Sie nach der Veranstaltung mit einer Follow-up-E-Mail und bitten Sie um Feedback/Bewertung.</x-ui.alert>
 </x-help.article>

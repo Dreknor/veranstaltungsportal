@@ -13,9 +13,9 @@
         <p>Laden Sie Kolleginnen und Kollegen ein, Rollen (z. B. „Editor“, „Finanzen“) vergeben und verwalten Sie Berechtigungen. So können mehrere Personen Veranstaltungen gemeinsam betreuen.</p>
     </section>
     <section>
-        <h2>4. Erstes Event erstellen</h2>
-        <p>Nutzen Sie „Neues Event“ und pflegen Sie Titel, Beschreibung, Kategorie sowie Format (Präsenz, Online oder Hybrid). Fügen Sie Ticket-Typen hinzu und veröffentlichen Sie das Event, sobald alles vollständig ist.</p>
+        <h2>4. Erste Veranstaltung erstellen</h2>
+        <p>Nutzen Sie „Veranstaltung anlegen“ und pflegen Sie Titel, Beschreibung, Kategorie sowie Format (Präsenz, Online oder Hybrid). Fügen Sie Ticket-Typen hinzu und veröffentlichen Sie die Veranstaltung, sobald alles vollständig ist.</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Für bessere Sichtbarkeit können Sie Ihr Event als „Featured“ markieren und so prominent hervorheben.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Für bessere Sichtbarkeit können Sie Ihre Veranstaltung als „Featured“ markieren und so prominent hervorheben.</x-ui.alert>
 </x-help.article>

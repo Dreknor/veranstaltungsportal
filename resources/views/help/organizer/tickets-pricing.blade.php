@@ -2,7 +2,7 @@
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Ticketarten erstellen</h2>
-        <p>Definieren Sie verschiedene Ticketarten für Ihr Event:</p>
+        <p>Definieren Sie verschiedene Ticketarten für Ihre Veranstaltung:</p>
         <ul>
             <li><strong>Standard:</strong> Regulärer Preis für alle</li>
             <li><strong>Frühbucher:</strong> Reduzierter Preis bis zu einem Stichtag</li>
@@ -17,8 +17,8 @@
         <h2>2. Preisstaffeln & Zeitfenster</h2>
         <p>Nutzen Sie Preisstaffeln, um Buchungen zu steuern:</p>
         <ul>
-            <li>Frühbucherpreis bis 4 Wochen vor Event (z.B. 20% Rabatt)</li>
-            <li>Normalpreis bis 1 Woche vor Event</li>
+            <li>Frühbucherpreis bis 4 Wochen vor der Veranstaltung (z.B. 20% Rabatt)</li>
+            <li>Normalpreis bis 1 Woche vor der Veranstaltung</li>
             <li>Last-Minute-Preis (optional höher oder niedriger)</li>
         </ul>
         <p>Geben Sie Start- und Enddatum für jede Ticketart an. Das System zeigt automatisch nur verfügbare Tickets.</p>
@@ -40,15 +40,15 @@
         <h2>4. Kapazitäten & Kontingente</h2>
         <p>Steuern Sie die Verfügbarkeit:</p>
         <ul>
-            <li><strong>Max. Teilnehmerzahl:</strong> Gesamtkapazität des Events</li>
+            <li><strong>Max. Teilnehmerzahl:</strong> Gesamtkapazität der Veranstaltung</li>
             <li><strong>Kontingent pro Ticketart:</strong> z.B. max. 20 Frühbucher-Tickets</li>
             <li><strong>Warteliste:</strong> Aktivieren Sie die Warteliste, damit Interessenten bei Ausverkauf benachrichtigt werden</li>
         </ul>
     </section>
 
     <section>
-        <h2>5. Kostenlose Events</h2>
-        <p>Auch kostenlose Events profitieren von Tickets:</p>
+        <h2>5. Kostenlose Veranstaltungen</h2>
+        <p>Auch kostenlose Veranstaltungen profitieren von Tickets:</p>
         <ul>
             <li>Setzen Sie Preis auf 0,00 €</li>
             <li>Nutzen Sie Tickets für Kapazitätskontrolle</li>

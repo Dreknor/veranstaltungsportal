@@ -1,11 +1,11 @@
-<x-help.article title="Statistiken & Berichte" subtitle="Verstehen Sie Ihre Kennzahlen und optimieren Sie Ihre Events."
+<x-help.article title="Statistiken & Berichte" subtitle="Verstehen Sie Ihre Kennzahlen und optimieren Sie Ihre Veranstaltungen."
     :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Dashboard Statistiken</h2>
         <p>Ihr Organizer-Dashboard zeigt auf einen Blick:</p>
         <ul>
-            <li><strong>Gesamt Events:</strong> Anzahl aller Veranstaltungen</li>
-            <li><strong>Veröffentlichte Events:</strong> Aktuell online sichtbar</li>
+            <li><strong>Gesamt Veranstaltungen:</strong> Anzahl aller Veranstaltungen</li>
+            <li><strong>Veröffentlichte Veranstaltungen:</strong> Aktuell online sichtbar</li>
             <li><strong>Buchungen gesamt:</strong> Alle Buchungen (inkl. storniert)</li>
             <li><strong>Umsatz:</strong> Bestätigte Zahlungen in EUR</li>
             <li><strong>Ausstehender Umsatz:</strong> Pending-Buchungen</li>
@@ -14,8 +14,8 @@
     </section>
 
     <section>
-        <h2>2. Event-spezifische Auswertungen</h2>
-        <p>Für jedes Event sehen Sie detaillierte Statistiken:</p>
+        <h2>2. Veranstaltungsspezifische Auswertungen</h2>
+        <p>Für jede Veranstaltung sehen Sie detaillierte Statistiken:</p>
         <ul>
             <li><strong>Konversionsrate:</strong> Verhältnis Aufrufe zu Buchungen</li>
             <li><strong>Ticket-Typ-Verteilung:</strong> Welche Ticketarten wurden gebucht?</li>
@@ -23,7 +23,7 @@
             <li><strong>Rabattcode-Nutzung:</strong> Welche Codes wurden eingelöst?</li>
             <li><strong>Check-In-Rate:</strong> Wie viele Teilnehmer sind tatsächlich erschienen?</li>
         </ul>
-        <p>Gehen Sie zu „Statistiken" → Event auswählen, um Details zu sehen.</p>
+        <p>Gehen Sie zu „Statistiken" → Veranstaltung auswählen, um Details zu sehen.</p>
     </section>
 
     <section>
@@ -31,7 +31,7 @@
         <p>Monatliche und kategoriebasierte Auswertungen:</p>
         <ul>
             <li><strong>Monatliche Umsatz-Trends:</strong> Grafik der letzten 12 Monate</li>
-            <li><strong>Top Events nach Umsatz:</strong> Ihre erfolgreichsten Veranstaltungen</li>
+            <li><strong>Top-Veranstaltungen nach Umsatz:</strong> Ihre erfolgreichsten Veranstaltungen</li>
             <li><strong>Kategorie-Verteilung:</strong> In welchen Bereichen sind Sie aktiv?</li>
             <li><strong>Zeitraum-Filter:</strong> Wählen Sie 7, 30, 90 Tage oder Gesamt</li>
         </ul>
@@ -42,11 +42,11 @@
         <p>Exportieren Sie Daten für externe Auswertungen:</p>
         <ul>
             <li><strong>Buchungsliste:</strong> Alle Buchungen inkl. Teilnehmerdaten</li>
-            <li><strong>Umsatzreport:</strong> Gruppiert nach Event, Kategorie oder Monat</li>
-            <li><strong>Check-In-Liste:</strong> Nach Event mit Zeitstempel</li>
+            <li><strong>Umsatzreport:</strong> Gruppiert nach Veranstaltung, Kategorie oder Monat</li>
+            <li><strong>Check-In-Liste:</strong> Nach Veranstaltung mit Zeitstempel</li>
             <li><strong>Rabattcode-Nutzung:</strong> Welche Codes wie oft eingelöst wurden</li>
         </ul>
-        <p>Nutzen Sie Filter, um z.B. nur ein bestimmtes Event oder einen Zeitraum zu exportieren.</p>
+        <p>Nutzen Sie Filter, um z.B. nur eine bestimmte Veranstaltung oder einen Zeitraum zu exportieren.</p>
     </section>
 
     <section>
@@ -57,10 +57,10 @@
             <li><strong>Featured-Event-Gebühren:</strong> Kosten für Hervorhebung</li>
             <li><strong>Rechnungs-Historie:</strong> Alle Platform-Fee-Rechnungen mit Download</li>
         </ul>
-        <p>Rechnungen werden automatisch nach Event-Ende erstellt und per E-Mail versandt.</p>
+        <p>Rechnungen werden automatisch nach Veranstaltungsende erstellt und per E-Mail versandt.</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Nutzen Sie die Check-In-Rate, um die Qualität Ihrer Events zu verbessern. Eine niedrige Rate kann auf Probleme hinweisen.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Nutzen Sie die Check-In-Rate, um die Qualität Ihrer Veranstaltungen zu verbessern. Eine niedrige Rate kann auf Probleme hinweisen.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Best Practice">Exportieren Sie regelmäßig Umsatzberichte für Ihre Buchhaltung und Planung.</x-ui.alert>
 </x-help.article>
