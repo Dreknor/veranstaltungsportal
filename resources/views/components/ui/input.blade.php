@@ -36,7 +36,12 @@
     ]);
 @endphp
 
-<input type="{{ $type }}" @if ($name) name="{{ $name }}" @endif
-    @if ($id) id="{{ $id }}" @endif
-    @if ($value !== null && !is_array($value)) value="{{ $value }}" @endif
-    @if ($invalid) aria-invalid="true" @endif {{ $attributes->class($classes) }}>
+@if ($type === 'file')
+    {{-- Dateiauswahl immer mit deutscher Beschriftung (siehe x-ui.file-input) --}}
+    <x-ui.file-input :name="$name" :id="$id" :invalid="$invalid" :bag="$bag" {{ $attributes }} />
+@else
+    <input type="{{ $type }}" @if ($name) name="{{ $name }}" @endif
+        @if ($id) id="{{ $id }}" @endif
+        @if ($value !== null && !is_array($value)) value="{{ $value }}" @endif
+        @if ($invalid) aria-invalid="true" @endif {{ $attributes->class($classes) }}>
+@endif

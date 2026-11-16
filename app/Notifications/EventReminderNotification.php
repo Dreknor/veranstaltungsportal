@@ -43,7 +43,7 @@ class EventReminderNotification extends Notification implements ShouldQueue
     public function toArray($notifiable)
     {
         return [
-            'title' => 'Event-Erinnerung',
+            'title' => 'Erinnerung an Ihre Veranstaltung',
             'message' => 'Erinnerung: "' . $this->event->title . '" beginnt am ' . ($this->session?->start_date ?? $this->event->start_date)->format('d.m.Y H:i'),
             'event_id' => $this->event->id,
             'booking_id' => $this->booking->id,

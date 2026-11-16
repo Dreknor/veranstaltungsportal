@@ -9,8 +9,8 @@
             Die Buchung gilt automatisch für <strong>alle Termine</strong> - es ist nicht möglich, nur einzelne
             Termine zu buchen.</x-ui.alert>
 
-        <h3>2. Ticket-Typ wählen</h3>
-        <p>Wählen Sie den passenden Ticket-Typ (z.B. Standard, Ermäßigt, VIP) und die gewünschte Anzahl</p>
+        <h3>2. Ticketart wählen</h3>
+        <p>Wählen Sie die passende Ticketart (z.B. Standard, Ermäßigt, VIP) und die gewünschte Anzahl</p>
         <ul>
             <li>Prüfen Sie die Verfügbarkeit</li>
             <li>Beachten Sie eventuelle Limits pro Person</li>

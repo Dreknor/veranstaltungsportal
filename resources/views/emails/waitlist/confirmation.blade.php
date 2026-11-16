@@ -19,7 +19,7 @@ Sie wurden erfolgreich zur Warteliste für die folgende Veranstaltung hinzugefü
 
 - **Anzahl Tickets:** {{ $waitlistEntry->quantity }}
 @if($waitlistEntry->ticketType)
-- **Ticket-Typ:** {{ $waitlistEntry->ticketType->name }} ({{ number_format($waitlistEntry->ticketType->price, 2, ',', '.') }} €)
+- **Ticketart:** {{ $waitlistEntry->ticketType->name }} ({{ number_format($waitlistEntry->ticketType->price, 2, ',', '.') }} €)
 @endif
 
 Wir benachrichtigen Sie per E-Mail, sobald Tickets verfügbar werden. Sie haben dann **48 Stunden** Zeit, um Ihre Buchung abzuschließen.

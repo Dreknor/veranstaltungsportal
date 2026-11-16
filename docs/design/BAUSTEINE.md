@@ -1087,6 +1087,7 @@ unbekannte Namen ergeben das Ersatz-Icon. Neue Zuordnungen in `Ui::FA_ICONS` ein
 | `Ui::logLevelTone($level)` | Ton für die Stufe eines System-Logs (`ERROR` → `danger`, `WARNING` → `warning`, `INFO`/`NOTICE` → `info`) |
 | `Ui::auditActionTone($action)` | Ton für eine Audit-Aktion (`…created` → `success`, `…updated` → `info`, `…deleted` → `danger`) |
 | `Ui::number($n, $decimals = 0)` | „1.250“, „12,5“ (ohne überflüssige Nullen) |
+| `Ui::percent($n, $decimals = 1)` | „36,4 %“ (Dezimalkomma, überflüssige Nullen entfallen) |
 | `Ui::country($country)` | Land zur Anzeige: „Germany“ / „DE“ → „Deutschland“; Unbekanntes bleibt |
 | `Ui::markdown($text)` | Markdown als sicheres HTML für `.richtext` (siehe `x-ui.markdown-editor`) |
 | `Ui::plainText($text, $limit = null, $keepLines = false)` | Markdown als reiner Text für Auszüge, Meta, Feeds, ICS |

@@ -146,7 +146,7 @@
                         <th>Ticket-Nr.</th>
                         <th>Teilnehmer</th>
                         <th>E-Mail</th>
-                        <th>Ticket-Typ</th>
+                        <th>Ticketart</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -169,7 +169,7 @@
             <table class="tickets-table">
                 <thead>
                     <tr>
-                        <th>Ticket-Typ</th>
+                        <th>Ticketart</th>
                         <th>Anzahl</th>
                         <th class="num">Einzelpreis</th>
                         <th class="num">Gesamt</th>

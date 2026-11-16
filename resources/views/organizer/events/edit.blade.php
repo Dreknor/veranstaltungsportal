@@ -228,7 +228,7 @@
                             <div>
                                 <x-ui.label for="venue_country">Land <span class="venue-required"
                                         aria-hidden="true">*</span></x-ui.label>
-                                <x-ui.field name="venue_country" :value="$event->venue_country" />
+                                <x-ui.field name="venue_country" :value="\App\Support\Ui::country($event->venue_country)" />
                             </div>
 
                             <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-5">

@@ -224,7 +224,7 @@ class BookingController extends Controller
                             'ticket_type_id' => $ticketInput['ticket_type_id'],
                             'error' => $e->getMessage(),
                         ]);
-                        throw new \Exception('Ungültiger Ticket-Typ ausgewählt.');
+                        throw new \Exception('Ungültige Ticketart ausgewählt.');
                     }
 
                     // Prüfe ob Ticket aktiv und im Verkaufszeitraum ist

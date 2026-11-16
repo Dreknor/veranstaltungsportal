@@ -126,7 +126,7 @@
             <div class="section-title">Ticket-Details</div>
             <div class="info-grid">
                 <div class="info-row">
-                    <div class="info-label">Ticket-Typ:</div>
+                    <div class="info-label">Ticketart:</div>
                     <div class="info-value">{{ $item->ticketType->name }}</div>
                 </div>
                 @if($item->ticketType->description)

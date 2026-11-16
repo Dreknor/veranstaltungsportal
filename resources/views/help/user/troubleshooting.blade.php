@@ -54,7 +54,7 @@
             <ul>
                 <li>Code ist abgelaufen (prüfen Sie das Gültigkeitsdatum)</li>
                 <li>Code wurde bereits zu oft verwendet (maximale Nutzungsanzahl erreicht)</li>
-                <li>Code gilt nur für bestimmte Ticket-Typen</li>
+                <li>Code gilt nur für bestimmte Ticketarten</li>
                 <li>Mindestanzahl an Tickets nicht erreicht</li>
                 <li>Tippfehler im Code (Codes sind case-sensitive)</li>
             </ul>

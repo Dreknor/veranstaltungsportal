@@ -124,7 +124,7 @@
 
             <!-- Ticket Type -->
             <div class="section">
-                <div class="section-title">Ticket-Typ</div>
+                <div class="section-title">Ticketart</div>
                 <div class="info-grid">
                     <div class="info-row">
                         <div class="info-label">Kategorie:</div>

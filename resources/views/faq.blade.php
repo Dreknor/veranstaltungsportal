@@ -33,7 +33,7 @@
                     <li>Suchen Sie die gewünschte Veranstaltung in der Veranstaltungsübersicht</li>
                     <li>Klicken Sie auf den Button „Buchen“</li>
                     <li>Geben Sie Ihre Daten ein (Name, E-Mail, ggf. Telefon)</li>
-                    <li>Wählen Sie den gewünschten Termin und Tickettyp, falls zutreffend</li>
+                    <li>Wählen Sie den gewünschten Termin und die Ticketart, falls zutreffend</li>
                     <li>Bezahlen Sie die Buchungsgebühr (falls vorhanden)</li>
                     <li>Sie erhalten eine Buchungsbestätigung per E-Mail</li>
                     </ol>

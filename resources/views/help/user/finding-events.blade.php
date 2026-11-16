@@ -113,7 +113,7 @@
 
         <h3>Tickets & Preise</h3>
         <ul>
-            <li>Verfügbare Ticket-Typen</li>
+            <li>Verfügbare Ticketarten</li>
             <li>Preise</li>
             <li>Verfügbarkeit</li>
             <li>Rabattmöglichkeiten</li>
