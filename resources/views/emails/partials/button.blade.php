@@ -12,7 +12,8 @@
         'danger' => ['bg' => '#9B1C1C', 'border' => '#9B1C1C', 'text' => '#FFFFFF'],
     ][$variant] ?? ['bg' => '#2B4347', 'border' => '#2B4347', 'text' => '#FFFFFF'];
 @endphp
-<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin: {{ $margin ?? '24px 0' }}; border-collapse: separate;">
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"
+    style="margin: {{ $margin ?? '24px 0' }}; border-collapse: separate;">
     <tr>
         <td align="center" style="border-radius: 8px; background-color: {{ $styles['bg'] }};">
             <a href="{{ $url }}" target="_blank" rel="noopener"

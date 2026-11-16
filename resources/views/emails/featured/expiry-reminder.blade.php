@@ -1,8 +1,10 @@
 @extends('emails.layout')
 
 @php
-    $label = 'padding: 8px 16px 8px 0; width: 160px; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 14px; line-height: 1.5; color: #55676A;';
-    $value = 'padding: 8px 0; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 15px; line-height: 1.5; color: #1E3135; font-variant-numeric: tabular-nums;';
+    $label =
+        'padding: 8px 16px 8px 0; width: 160px; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 14px; line-height: 1.5; color: #55676A;';
+    $value =
+        'padding: 8px 0; vertical-align: top; border-bottom: 1px solid #DCE3E2; font-size: 15px; line-height: 1.5; color: #1E3135; font-variant-numeric: tabular-nums;';
     $h2 = 'margin: 32px 0 8px 0; font-size: 18px; line-height: 1.3; font-weight: 600; color: #1E3135;';
 @endphp
 
@@ -17,10 +19,12 @@
         <p style="margin: 0;">Der Hervorhebungs-Status Ihrer Veranstaltung läuft in <strong>3 Tagen</strong> ab!</p>
     @endcomponent
 
-    <p style="margin: 0;">Ihre Veranstaltung wird aktuell als „Empfohlen" prominent auf der Startseite angezeigt. Diese Hervorhebung endet am <strong>{{ $fee->featured_end_date->format('d.m.Y') }}</strong>.</p>
+    <p style="margin: 0;">Ihre Veranstaltung wird aktuell als „Empfohlen" prominent auf der Startseite angezeigt. Diese
+        Hervorhebung endet am <strong>{{ $fee->featured_end_date->format('d.m.Y') }}</strong>.</p>
 
     <h2 style="{{ $h2 }}">Veranstaltungsdetails</h2>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top: 1px solid #DCE3E2;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+        style="border-top: 1px solid #DCE3E2;">
         <tr>
             <td style="{{ $label }}">Veranstaltung</td>
             <td style="{{ $value }}">{{ $event->title }}</td>
@@ -40,10 +44,20 @@
     </table>
 
     <h2 style="{{ $h2 }}">Möchten Sie die Hervorhebung verlängern?</h2>
-    <p style="margin: 0;">Um die Sichtbarkeit Ihrer Veranstaltung weiterhin zu maximieren, können Sie den Hervorhebungs-Status jetzt verlängern:</p>
+    <p style="margin: 0;">Um die Sichtbarkeit Ihrer Veranstaltung weiterhin zu maximieren, können Sie den
+        Hervorhebungs-Status jetzt verlängern:</p>
 
-    @include('emails.partials.button', ['url' => route('organizer.featured-events.extend', $event), 'label' => 'Jetzt verlängern', 'margin' => '24px 0 8px 0'])
-    @include('emails.partials.button', ['url' => route('organizer.featured-events.history'), 'label' => 'Hervorhebungs-Historie ansehen', 'variant' => 'secondary', 'margin' => '8px 0 0 0'])
+    @include('emails.partials.button', [
+        'url' => route('organizer.featured-events.extend', $event),
+        'label' => 'Jetzt verlängern',
+        'margin' => '24px 0 8px 0',
+    ])
+    @include('emails.partials.button', [
+        'url' => route('organizer.featured-events.history'),
+        'label' => 'Hervorhebungs-Historie ansehen',
+        'variant' => 'secondary',
+        'margin' => '8px 0 0 0',
+    ])
 
     <h2 style="{{ $h2 }}">Was passiert nach Ablauf?</h2>
     <p style="margin: 0 0 8px 0;">Nach dem Ablaufdatum wird Ihre Veranstaltung:</p>
@@ -64,5 +78,6 @@
 
 @section('footer_note')
     Diese E-Mail wurde automatisch versendet.<br>
-    Sie können Benachrichtigungen in Ihren <a href="{{ route('settings.notifications.edit') }}" style="color: #55676A; text-decoration: underline;">Einstellungen</a> verwalten.
+    Sie können Benachrichtigungen in Ihren <a href="{{ route('settings.notifications.edit') }}"
+        style="color: #55676A; text-decoration: underline;">Einstellungen</a> verwalten.
 @endsection

@@ -35,7 +35,8 @@
     </p>
 
     <p style="margin: 0 0 24px 0; font-size: 14px; color: #55676A;">
-        Sie haben sich nicht bei {{ config('app.name') }} registriert? Dann können Sie diese E-Mail einfach ignorieren. Ihr Konto wird nicht aktiviert.
+        Sie haben sich nicht bei {{ config('app.name') }} registriert? Dann können Sie diese E-Mail einfach ignorieren. Ihr
+        Konto wird nicht aktiviert.
     </p>
 
     <p style="margin: 0;">

@@ -12,7 +12,8 @@
     </p>
 
     <p style="margin: 0 0 16px 0;">
-        wir haben eine Anfrage erhalten, das Passwort für Ihr Konto bei <strong>{{ config('app.name') }}</strong> zurückzusetzen.
+        wir haben eine Anfrage erhalten, das Passwort für Ihr Konto bei <strong>{{ config('app.name') }}</strong>
+        zurückzusetzen.
         Klicken Sie auf den folgenden Button, um ein neues Passwort festzulegen:
     </p>
 
@@ -21,7 +22,7 @@
     @component('emails.partials.notice', ['type' => 'info', 'title' => 'Hinweis'])
         <p style="margin: 0;">
             Dieser Link ist aus Sicherheitsgründen
-            <strong>{{ config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60) }} Minuten</strong> gültig.
+            <strong>{{ config('auth.passwords.' . config('auth.defaults.passwords') . '.expire', 60) }} Minuten</strong> gültig.
             Danach müssen Sie erneut eine Passwort-Zurücksetzen-Anfrage stellen.
         </p>
     @endcomponent

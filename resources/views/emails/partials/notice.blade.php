@@ -14,11 +14,15 @@
         'info' => ['text' => '#1E3135', 'bg' => '#F3F6F5', 'border' => '#DCE3E2'],
     ][$type ?? 'info'] ?? ['text' => '#1E3135', 'bg' => '#F3F6F5', 'border' => '#DCE3E2'];
 @endphp
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width: 100%; margin: {{ $margin ?? '0 0 24px 0' }}; border-collapse: separate;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+    style="width: 100%; margin: {{ $margin ?? '0 0 24px 0' }}; border-collapse: separate;">
     <tr>
-        <td style="padding: 16px 20px; background-color: {{ $tone['bg'] }}; border: 1px solid {{ $tone['border'] }}; border-radius: 12px; color: {{ $tone['text'] }}; font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; line-height: 1.5;">
+        <td
+            style="padding: 16px 20px; background-color: {{ $tone['bg'] }}; border: 1px solid {{ $tone['border'] }}; border-radius: 12px; color: {{ $tone['text'] }}; font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size: 15px; line-height: 1.5;">
             @if (!empty($title))
-                <p style="margin: 0 0 4px 0; font-size: 16px; line-height: 1.4; font-weight: 600; color: {{ $tone['text'] }};">{{ $title }}</p>
+                <p
+                    style="margin: 0 0 4px 0; font-size: 16px; line-height: 1.4; font-weight: 600; color: {{ $tone['text'] }};">
+                    {{ $title }}</p>
             @endif
             {{ $slot }}
         </td>
