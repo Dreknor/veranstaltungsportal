@@ -218,6 +218,7 @@ Button oder Link in Button-Optik. Mit `href` ein `<a>`, sonst `<button type="but
 | `full` | `false` | volle Breite |
 | `disabled` | `false` | auch bei `href` (dann `<a aria-disabled>` ohne Ziel) |
 | `arrow` | `false` | Pfeil-Icon hinter dem Text (für `link`-Variante „Alle Veranstaltungen →") |
+| `wrap` | `false` | mehrzeilige Beschriftung: Höhe wächst mit (Mindesthöhe wie `size`), Text bricht um, höchstens volle Breite; linksbündig, mit `full` zentriert |
 
 Slots: Standard (Text), `icon` (16 px, vor dem Text).
 
@@ -229,7 +230,10 @@ Slots: Standard (Text), `icon` (16 px, vor dem Text).
 </x-ui.button>
 <x-ui.button variant="link" :href="route('events.index')" arrow>Alle Veranstaltungen</x-ui.button>
 <x-ui.button variant="secondary" size="sm" x-on:click="open = true" :disabled="! $canEdit">Bearbeiten</x-ui.button>
+<x-ui.button type="submit" wrap>Zahlung eingegangen – Rechnung und Tickets senden</x-ui.button>
 ```
+
+Lange Beschriftungen nicht mit `!h-auto !whitespace-normal` erzwingen, sondern `wrap` setzen.
 
 Nicht verwenden: mehr als ein `primary` pro Abschnitt; `danger` für etwas anderes als endgültiges
 Löschen/Stornieren (sonst `secondary`). Reine Fließtext-Links bleiben `<a class="font-medium underline underline-offset-[3px]">`.
@@ -282,7 +286,7 @@ Feldname ohne Klammern (`tickets_0_quantity`). Gemeinsame Props:
 | `name`, `id` | `null` | `id` aus `name` abgeleitet |
 | `required` | `false` | „*" am Label (`aria-hidden`) + `required` |
 | `optional` | `false` | „(optional)" am Label |
-| `hint` | `null` | Hinweis unter dem Feld |
+| `hint` | `null` | Hinweis unter dem Feld (Text); mit HTML (Link, Umbruch) als Slot `<x-slot:hint>` |
 | `error` | auto | eigener Fehlertext; `:error="false"` unterdrückt die Automatik |
 | `old` | `true` | `false`: `old()` ignorieren (z. B. Passwort-Bestätigung) |
 | `bag` | `default` | benannter Error-Bag |
@@ -308,6 +312,17 @@ demselben Label).
 <x-ui.field label="Beginn" name="start_date" type="datetime-local" x-model="start" required />
 ```
 
+Hinweis mit Link oder Bedingung – Slot statt Einzelteilen (`label` + `input` + `hint`):
+
+```blade
+<x-ui.field label="Client ID" name="paypal_client_id" :required="! $organization->paypal_client_id">
+    <x-slot:hint>
+        Erhältlich im <a href="https://developer.paypal.com/dashboard/" class="font-medium text-ink underline underline-offset-[3px]">PayPal Developer Dashboard</a>.
+    </x-slot:hint>
+</x-ui.field>
+```
+
+Der Slot `hint` funktioniert genauso bei `x-ui.select` und `x-ui.textarea`; `aria-describedby` wird gesetzt.
 Passwort- und Dateifelder bekommen nie einen Wert vorbelegt.
 
 ### `<x-ui.select>`
@@ -334,11 +349,14 @@ Wie `field`, Mindesthöhe 120 px. Inhalt über `value` oder den Slot; `rows` (4)
 20 px, Zeile mindestens 44 px, Label klickbar. Beschriftung über `label` oder den Slot (Slot erlaubt
 Links). Props: `name`, `id`, `value` (Checkbox `1`), `checked`, `label`, `hint`, `required`; Checkbox
 zusätzlich `error` (automatisch) und `size` (`ui` 15 px · `small` 14 px). `id` wird aus Name und Wert
-gebildet. `class` landet am äußeren `<div>`, alles andere am `<input>`.
+gebildet. `class` landet am äußeren `<div>`, alles andere (`data-*`, `x-model`, `@change`, `form`,
+`disabled` …) am `<input>`. Klassen für das `<input>` selbst (z. B. JS-Selektoren): `input-class`.
 Für Checkbox-Gruppen `name="tags[]"`; `checked` wird nach Fehlern aus `old('tags')` abgeleitet.
 
 ```blade
 <x-ui.checkbox name="newsletter" :checked="$user->newsletter" label="Newsletter abonnieren" />
+<x-ui.checkbox name="permissions[]" :value="$permission->name" :label="$permission->name"
+               data-perm="{{ Str::slug($group) }}" input-class="permission-checkbox" />
 <x-ui.checkbox name="privacy" required size="small">
     Ich habe die <a href="…" class="font-medium underline underline-offset-[3px]">Datenschutzerklärung</a> gelesen.
 </x-ui.checkbox>
@@ -358,7 +376,8 @@ Hinweis: Checkboxen ohne `name`-Bindung an Laravel (reine Alpine-Schalter) einfa
 Auswahlkarte (Zahlungsmethode, Ticketart mit Einzelauswahl). Props: `name`, `id`, `value`, `type`
 (`radio` · `checkbox`), `checked`, `title`, `description`, `required`; Slot `aside` (rechts, z. B. Preis),
 Standard-Slot für weitere Zeilen. Gewählt: Fläche `zone`, doppelte Kontur `ink`. Deaktiviert über
-`disabled`.
+`disabled`. `compact`: ohne Mindesthöhe 88 px, Inhalt senkrecht mittig – für einzeilige Optionen in
+Listen (z. B. Empfängergruppen mit Anzahl im `aside`); statt lokaler `min-h-0`. `input-class`: Klassen am `<input>`.
 
 ```blade
 <fieldset class="m-0 min-w-0 border-0 p-0">
@@ -369,6 +388,10 @@ Standard-Slot für weitere Zeilen. Gewählt: Fläche `zone`, doppelte Kontur `in
     </div>
     <x-ui.field-error name="payment_method" />
 </fieldset>
+
+<x-ui.choice name="segment" value="all" title="Alle Teilnehmenden" compact x-model="segment">
+    <x-slot:aside>42</x-slot:aside>
+</x-ui.choice>
 ```
 
 ### `<x-ui.stepper>`
@@ -562,6 +585,53 @@ Unter 1024 px: Lead + Hauptspalte, darunter Meta links / Aside rechts, darunter 
 </x-ui.row-list>
 ```
 
+### `<x-ui.avatar>`
+
+Personenbild: Foto (rund, Kontur `line`) oder Initialen im `zone`-Kreis (`ink-soft`).
+
+| Prop | Default | |
+|---|---|---|
+| `user` | `null` | `App\Models\User` – Foto nur bei eigenem Upload (`profile_photo`), sonst Initialen; keine Gravatar-Anfrage |
+| `src` / `name` / `initials` | `null` | einzeln statt `user`; Initialen werden aus `name` gebildet |
+| `size` | `md` | `sm` 40 px (Tabellen) · `md` 56 px (Listenzeilen) · `lg` 96 px (Profilkopf) |
+| `label` | `null` | Name für Screenreader; ohne `label` ist das Bild Schmuck (`alt=""` / `aria-hidden`), weil der Name daneben steht |
+
+```blade
+<x-ui.avatar :user="$user" size="lg" />
+<x-ui.avatar name="Maria Muster" size="sm" />
+```
+
+### `<x-ui.person-row>`
+
+Listenzeile für eine Person (Verbindungen, Follower, Suche) auf Basis von `<x-ui.row>`, in
+`<x-ui.row-list>`: Avatar (56 px) | Typ (`small` `muted`), Name (`h3`, Link), Bio (`small` `ink-soft`,
+zwei Zeilen) | `meta` | `aside` | `action`.
+
+| Prop | Default | |
+|---|---|---|
+| `user` | `null` | liefert Avatar, Name (`fullName()`), Typ (`userTypeLabel()`), Bio, Link auf `users.show` |
+| `name`, `type`, `bio`, `avatar`, `initials` | `null` | einzeln statt bzw. zusätzlich zu `user` |
+| `href` | Profil | Ziel des Namens; `:href="false"` ohne Link (z. B. blockierte Nutzer) |
+| `bio-lines` | `2` | `2` · `3` Zeilen, danach abgeschnitten |
+| `show-bio` | `true` | `false` blendet die Bio aus |
+
+Slots: Standard (weitere Zeilen unter der Bio), `meta`, `aside`, `action` (Buttons mit `full`, Formulare).
+
+```blade
+<x-ui.row-list>
+    @foreach ($followers as $follower)
+        <x-ui.person-row :user="$follower">
+            <x-slot:meta>
+                <span class="text-ui font-medium tabular-nums">{{ $follower->events_count }} Veranstaltungen</span>
+            </x-slot:meta>
+            <x-slot:action>
+                <x-ui.button variant="secondary" :href="route('users.show', $follower)" full>Profil ansehen</x-ui.button>
+            </x-slot:action>
+        </x-ui.person-row>
+    @endforeach
+</x-ui.row-list>
+```
+
 ### `<x-ui.date-block>`
 
 80 × 80 px als `<time datetime>`. Props: `date` (Carbon oder String), `end` (optional), `tone`
@@ -715,6 +785,37 @@ Leerer Zustand: ein Satz (Slot), optional `title`, genau eine Aktion (`action-hr
 </x-ui.empty>
 ```
 
+### `<x-ui.auth-frame>`
+
+Seitenrahmen für schmale Einzelformulare in `layouts.public` (Anmeldung, Registrierung, Passwort,
+E-Mail bestätigen, Bestätigungs- und Ergebnisseiten): Seitenbreite mit `px-page`, Abstand
+`clamp(32px, 6vw, 64px)` oben und unten, darin eine zentrierte Spalte von 440 px. `class` landet an der Spalte.
+
+```blade
+<x-layouts.public :title="__('Anmelden')">
+    <x-ui.auth-frame>
+        <x-ui.page-header :title="__('Bei Ihrem Konto anmelden')" />
+        <form …>…</form>
+    </x-ui.auth-frame>
+</x-layouts.public>
+```
+
+### Lesetext `.richtext`
+
+CSS-Klasse in `app.css` für HTML aus Editor oder Markdown (Rechtstexte, Beschreibungen, Antworten):
+Absätze 16 px / 1,6, `h1`/`h2` wie `h2` (24 px), `h3` wie `h3` (18 px), `h4` 16 px/600, Listen mit
+Aufzählungszeichen bzw. Ziffern, Links `ink` unterstrichen (3 px Abstand), Zitate mit Linie
+`line-strong`, Tabellen mit Linien `line` und Kopf auf `zone` (scrollen bei Bedarf waagrecht),
+Trennlinien `line`. Erstes Element ohne Abstand oben. Die Breite setzt der Aufrufer.
+
+```blade
+<div class="richtext max-w-prose">{!! $page->content !!}</div>
+<x-legal.prose>{!! $page->content !!}</x-legal.prose>   {{-- = richtext + max-w-prose --}}
+```
+
+Im TipTap-Editor sitzt `.richtext` am Container des Editors (`admin/legal-pages/edit`), damit
+Bearbeitung und Anzeige gleich aussehen. Keine `[&_p]:…`-Ketten mehr für Lesetext.
+
 ## Meldungen
 
 ### `<x-ui.alert>`
@@ -766,10 +867,26 @@ innen auch `close()`.
 
 Ersetzt `confirm()`-Abfragen und eigene Overlays (`fixed inset-0 bg-black/50 …`).
 
+**Auslöser außerhalb eines Alpine-Bereichs:** `$dispatch` gibt es nur innerhalb von `x-data`. Ein Button,
+der nicht in einem Element mit `x-data` steht (z. B. direkt in einer Tabellenzelle), braucht deshalb
+selbst ein leeres `x-data`, sonst passiert beim Klick nichts:
+
+```blade
+<x-ui.button variant="danger" size="sm" x-data x-on:click="$dispatch('open-modal', 'delete-{{ $event->id }}')">Löschen</x-ui.button>
+```
+
+Innerhalb von `<x-ui.dropdown>` oder eines anderen `x-data`-Bereichs ist das nicht nötig.
+
 ### `<x-ui.tabs>` und `<x-ui.tab>`
 
-Reiter als Links (Seitenwechsel, kein JavaScript). `tabs`: `label` (Name der Navigation). `tab`:
-`href`, `active`, `count`. Aktiv: Gewicht 600, 2-px-Linie `ink`, `aria-current="page"`.
+Reiter als Links (Seitenwechsel, kein JavaScript) oder als Umschalter innerhalb einer Seite.
+`tabs`: `label` (Name der Navigation bzw. Gruppe), `variant` (`links` → `<nav>` · `toggle` →
+`<div role="group">`). `tab`: `href`, `active`, `count`. Aktiv: Gewicht 600, 2-px-Linie `ink`.
+
+- Mit `href`: Link, aktiv mit `aria-current="page"`.
+- Ohne `href`: `<button type="button" aria-pressed>`. Die Optik folgt `aria-pressed="true"`; `active` setzt
+  den Startwert, Alpine (`:aria-pressed`) oder ein bestehendes Skript (`setAttribute('aria-pressed', …)`)
+  hält ihn aktuell. Klassen für den Zustand muss niemand mehr umschalten.
 
 ```blade
 <x-ui.tabs label="Bereiche der Veranstaltung">
@@ -778,7 +895,20 @@ Reiter als Links (Seitenwechsel, kein JavaScript). `tabs`: `label` (Name der Nav
 </x-ui.tabs>
 ```
 
-Für Umschalter innerhalb einer Seite (Alpine) nicht verwenden – dort Sekundärbuttons mit `aria-pressed`.
+Umschalter innerhalb einer Seite (Inhalt per `x-show` bzw. `hidden`):
+
+```blade
+<div x-data="{ tab: 'participants' }">
+    <x-ui.tabs label="Bereiche" variant="toggle" class="mb-6">
+        <x-ui.tab x-on:click="tab = 'participants'" x-bind:aria-pressed="(tab === 'participants').toString()" active>Für Teilnehmer</x-ui.tab>
+        <x-ui.tab x-on:click="tab = 'organizers'" x-bind:aria-pressed="(tab === 'organizers').toString()">Für Veranstalter</x-ui.tab>
+    </x-ui.tabs>
+    <div x-show="tab === 'participants'">…</div>
+    <div x-show="tab === 'organizers'" x-cloak>…</div>
+</div>
+```
+
+Umschalter und Links dürfen in einer Leiste gemischt stehen (`connections/index`); dann `variant="links"`.
 
 ### `<x-ui.stat>`
 
@@ -788,6 +918,28 @@ Kennzahl als schlichter Kasten: `label`, `value` (oder Slot), `sub`, `href`. Ras
 ```blade
 <x-ui.stat label="Buchungen (30 Tage)" :value="$bookingCount" sub="davon {{ $pending }} offen" />
 ```
+
+### `<x-ui.progress>`
+
+Fortschrittsbalken: Balken `primary` auf Fläche `line`, rund, 8 px (`size="lg"`: 12 px). Als
+`role="progressbar"` mit `aria-valuenow/-min/-max`; Wert wird auf 0 … `max` begrenzt.
+
+| Prop | Default | |
+|---|---|---|
+| `value` / `max` | `0` / `100` | Wert und Höchstwert (`max` z. B. größter Monatswert eines Diagramms) |
+| `label` | `null` | Name für Screenreader (`aria-label`); alternativ `aria-labelledby="…"` durchreichen |
+| `value-text` | `null` | `aria-valuetext`, z. B. „12 von 40 eingecheckt" |
+| `size` | `md` | `md` 8 px · `lg` 12 px |
+| `decorative` | `false` | nur Schmuck (`aria-hidden`, keine Rolle) – wenn die Zahl daneben als Text steht, z. B. Balken in Tabellen |
+
+```blade
+<span id="checkin-label">Check-in-Fortschritt</span> <span>{{ $progress }} %</span>
+<x-ui.progress :value="$progress" aria-labelledby="checkin-label" />
+
+<td><x-ui.progress :value="$month->count" :max="$maxMonthly" decorative /></td>
+```
+
+Keine eigenen `<div class="h-2 bg-line"><div class="bg-primary" style="width: …">` mehr.
 
 ### `<x-ui.dl>` und `<x-ui.dl-item>`
 
@@ -825,8 +977,8 @@ Eintrag der Seitenleiste im angemeldeten Bereich: 44 px, Text `ui`, Icon 20 px i
 Fläche `zone`, Gewicht 600, `aria-current="page"` (kein farbiger Balken). Props: `href` (ohne:
 `<button>`), `active`, `icon`, `count` (Zahl rechts), `count-label` (Ergänzung für Screenreader, Standard
 „neu"). `icon` nimmt einen Icon-Namen (`calendar`) **oder** einen alten Font-Awesome-Namen
-(`fas-calendar-days`, `fa-solid fa-ticket`) – eine Zuordnung im Baustein bildet ihn auf ein Linien-Icon
-ab, unbekannte Namen fallen auf `list` zurück. Ältere Icons mit Strich 2 werden in der Leiste auf 1,6 gesetzt.
+(`fas-calendar-days`, `fa-solid fa-ticket`) – `App\Support\Ui::icon()` bildet ihn auf ein Linien-Icon
+ab, unbekannte Namen fallen auf `list` zurück.
 
 `sidebar-group`: Gruppe mit Label (`caption`, `muted`) und `<ul>` für die Einträge. Prop `label`.
 In der Seitenleiste werden Einträge über `<x-layouts.sidebar-link>` (= `<li>` + `sidebar-item`) gesetzt.
@@ -857,9 +1009,23 @@ Für helle Flächen (weiß, `zone`). Props: `size` (`md` Kopf 36 px · `sm` Fuß
 `arrow-left`, `arrow-right`, `chevron-down/-up/-left/-right`, `search`, `plus`, `minus`, `check`,
 `check-circle`, `x`, `info`, `warning`, `error`, `calendar`, `clock`, `location`, `monitor`, `ticket`,
 `download`, `upload`, `external-link`, `filter`, `more`, `mail`, `lock`, `eye`, `copy`, `trash`,
-`settings`, `home`, `menu`, `logout`, `medal`, `receipt`, `document`, `bank`, `tag`, `calendar-check`, `credit-card` – vollständige Liste auf `/styleguide`. Ältere Icons (`edit`,
-`user`, `bell` …) haben noch Strich 2 und werden beim Umbau angeglichen. Icon-Buttons ohne Text
-brauchen `aria-label`. Font Awesome (`<i class="fas …">`) und Emojis werden ersetzt oder entfallen.
+`settings`, `home`, `menu`, `logout`, `medal`, `receipt`, `document`, `bank`, `tag`, `calendar-check`,
+`credit-card`, `qr-code` – vollständige Liste auf `/styleguide`. Alle Icons haben Strich 1,6 und
+`aria-hidden`. Icon-Buttons ohne Text brauchen `aria-label`. Font Awesome (`<i class="fas …">`) und
+Emojis werden ersetzt oder entfallen.
+
+**Icon-Namen aus Datenbank oder Konfiguration** (Kategorie `icon`, Abzeichen `icon`, Seitenleiste):
+nie selbst zuordnen, sondern `<x-ui.icon :name="…" fallback="…">` bzw. `App\Support\Ui::icon($name, $fallback)`
+(liefert den Komponentennamen `icon.…`). Akzeptiert eigene Namen (`academic-cap`) und alte
+Font-Awesome-Namen in jeder Schreibweise (`fas fa-trophy`, `fa-solid fa-ticket`, `fas-calendar-days`, `fa-heart`);
+unbekannte Namen ergeben das Ersatz-Icon. Neue Zuordnungen in `Ui::FA_ICONS` eintragen.
+
+```blade
+<x-ui.icon :name="$category->icon" fallback="calendar" class="h-5 w-5 text-muted" />
+<x-dynamic-component :component="\App\Support\Ui::icon($badge->icon, 'medal')" class="h-6 w-6" />
+```
+
+`<x-badge-icon>` zeigt damit wieder das eigene Symbol des Abzeichens (Ersatz: Medaille).
 
 ## `App\Support\Ui` – Formate
 
@@ -874,3 +1040,6 @@ brauchen `aria-label`. Font Awesome (`<i class="fas …">`) und Emojis werden er
 | `Ui::format($event)` / `Ui::formatAndPlace($event)` | „Präsenz" / „Präsenz · Radebeul" |
 | `Ui::bookingTone($status)` / `Ui::paymentTone($status)` | Ton für `<x-ui.status>` |
 | `Ui::weekday($c)` / `Ui::month($c)` | „Do" / „Nov" |
+| `Ui::icon($name, $fallback = 'list')` | Komponentenname eines Linien-Icons zu einem Icon-/Font-Awesome-Namen: `icon.academic-cap` |
+| `Ui::logLevelTone($level)` | Ton für die Stufe eines System-Logs (`ERROR` → `danger`, `WARNING` → `warning`, `INFO`/`NOTICE` → `info`) |
+| `Ui::auditActionTone($action)` | Ton für eine Audit-Aktion (`…created` → `success`, `…updated` → `info`, `…deleted` → `danger`) |
