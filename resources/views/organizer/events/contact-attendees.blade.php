@@ -13,7 +13,7 @@
             <div class="flex flex-col gap-3">
                 @foreach ($segments as $key => $segment)
                     <x-ui.choice name="segment" :value="$key" :title="$segment['label']" :checked="$key === 'all'" x-model="segment"
-                        :class="$segment['count'] === 0 ? 'opacity-60' : ''">
+                        :class="'min-h-0 items-center' . ($segment['count'] === 0 ? ' opacity-60' : '')">
                         <x-slot:aside>{{ $segment['count'] }}</x-slot:aside>
                     </x-ui.choice>
                 @endforeach
@@ -34,7 +34,7 @@
             <x-ui.button variant="secondary" :href="route('organizer.events.edit', $event)">Abbrechen</x-ui.button>
             <x-ui.button type="submit" x-bind:disabled="counts[segment] === 0"
                 x-on:click="if (!confirm('Nachricht an ' + counts[segment] + ' Buchung(en) senden?')) $event.preventDefault()">
-                Nachricht senden (<span x-text="counts[segment]">{{ $attendeesCount }}</span> Buchungen)
+                <span>Nachricht senden (<span x-text="counts[segment]">{{ $attendeesCount }}</span> Buchungen)</span>
             </x-ui.button>
         </div>
     </form>

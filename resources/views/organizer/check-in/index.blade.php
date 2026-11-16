@@ -82,12 +82,11 @@
                             aria-label="Alle ausstehenden auswählen">
                     </th>
                     <th scope="col">Status</th>
-                    <th scope="col" class="hidden lg:table-cell">Ticket-Nr.</th>
                     <th scope="col">Name / Organisation</th>
-                    <th scope="col" class="hidden md:table-cell">E-Mail</th>
-                    <th scope="col" class="hidden lg:table-cell">Ticketart</th>
-                    <th scope="col" class="hidden xl:table-cell">Buchungs-Nr.</th>
-                    <th scope="col" class="hidden md:table-cell">Check-in-Zeit</th>
+                    <th scope="col" class="hidden xl:table-cell">E-Mail</th>
+                    <th scope="col" class="hidden 2xl:table-cell">Ticketart</th>
+                    <th scope="col" class="hidden 2xl:table-cell">Buchungs-Nr.</th>
+                    <th scope="col" class="hidden xl:table-cell">Check-in-Zeit</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                 </tr>
             </thead>
@@ -119,24 +118,23 @@
                             @endif
                         </td>
 
-                        <td class="hidden whitespace-nowrap text-small text-muted tabular-nums lg:table-cell">{{ $item->ticket_number }}</td>
-
                         <td>
                             <span class="block font-medium">{{ $name }}</span>
+                            <span class="block text-small text-muted tabular-nums">{{ $item->ticket_number }}</span>
                             @if ($org)
                                 <span class="block text-small text-muted">{{ $org }}</span>
                             @endif
-                            <span class="block break-all text-small text-muted md:hidden">{{ $email }}</span>
-                            <span class="block text-small text-muted lg:hidden">{{ $item->ticketType->name ?? '' }}</span>
+                            <span class="block break-all text-small text-muted xl:hidden">{{ $email }}</span>
+                            <span class="block text-small text-muted 2xl:hidden">{{ $item->ticketType->name ?? '' }}</span>
                         </td>
 
-                        <td class="hidden whitespace-nowrap text-muted md:table-cell">{{ $email }}</td>
+                        <td class="hidden whitespace-nowrap text-muted xl:table-cell">{{ $email }}</td>
 
-                        <td class="hidden whitespace-nowrap lg:table-cell">{{ $item->ticketType->name ?? '–' }}</td>
+                        <td class="hidden whitespace-nowrap 2xl:table-cell">{{ $item->ticketType->name ?? '–' }}</td>
 
-                        <td class="hidden whitespace-nowrap text-small text-muted tabular-nums xl:table-cell">{{ $item->booking->booking_number }}</td>
+                        <td class="hidden whitespace-nowrap text-small text-muted tabular-nums 2xl:table-cell">{{ $item->booking->booking_number }}</td>
 
-                        <td class="hidden whitespace-nowrap text-muted tabular-nums md:table-cell">
+                        <td class="hidden whitespace-nowrap text-muted tabular-nums xl:table-cell">
                             @if ($isChecked && $checkedAt)
                                 {{ $checkedAt->format('d.m.Y H:i') }}
                             @else
@@ -168,7 +166,7 @@
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">
-                        <td colspan="9" class="p-0">
+                        <td colspan="8" class="p-0">
                             <x-ui.empty :bordered="false">Keine bestätigten Buchungen vorhanden.</x-ui.empty>
                         </td>
                     </tr>

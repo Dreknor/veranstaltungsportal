@@ -32,8 +32,10 @@
                                     @if ($date->start_date->isSameDay($date->end_date))
                                         {{ \App\Support\Ui::dateTime($date->start_date, $date->end_date) }}
                                     @else
-                                        {{ \App\Support\Ui::date($date->start_date) }}, {{ $date->start_date->format('H:i') }} Uhr
-                                        – {{ \App\Support\Ui::date($date->end_date) }}, {{ $date->end_date->format('H:i') }} Uhr
+                                        {{ \App\Support\Ui::date($date->start_date) }},
+                                        {{ $date->start_date->format('H:i') }} Uhr
+                                        – {{ \App\Support\Ui::date($date->end_date) }},
+                                        {{ $date->end_date->format('H:i') }} Uhr
                                     @endif
                                 </span>
                                 @if ($date->is_cancelled)
@@ -61,11 +63,13 @@
 
                         <div class="flex flex-wrap items-center gap-2">
                             @if (!$date->is_cancelled)
-                                <x-ui.button variant="secondary" size="sm" onclick="editDate({{ $date->id }})">
+                                <x-ui.button variant="secondary" size="sm"
+                                    onclick="editDate({{ $date->id }})">
                                     <x-slot:icon><x-icon.edit /></x-slot:icon>
                                     Bearbeiten
                                 </x-ui.button>
-                                <x-ui.button variant="secondary" size="sm" onclick="cancelDate({{ $date->id }})">
+                                <x-ui.button variant="secondary" size="sm"
+                                    onclick="cancelDate({{ $date->id }})">
                                     <x-slot:icon><x-icon.x /></x-slot:icon>
                                     Absagen
                                 </x-ui.button>
@@ -116,17 +120,19 @@
             </div>
 
             <fieldset class="m-0 flex min-w-0 flex-col gap-y-5 border-0 border-t border-line p-0 pt-5">
-                <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort (optional)</legend>
-                <x-ui.field label="Veranstaltungsort" name="venue_name" id="add_venue_name" :old="false" :error="false"
-                    placeholder="{{ $event->venue_name }}"
+                <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort
+                    (optional)</legend>
+                <x-ui.field label="Veranstaltungsort" name="venue_name" id="add_venue_name" :old="false"
+                    :error="false" placeholder="{{ $event->venue_name }}"
                     hint="Standard: {{ $event->venue_name ?? 'Nicht angegeben' }}" />
-                <x-ui.field label="Adresse" name="venue_address" id="add_venue_address" :old="false" :error="false"
-                    placeholder="{{ $event->venue_address }}"
+                <x-ui.field label="Adresse" name="venue_address" id="add_venue_address" :old="false"
+                    :error="false" placeholder="{{ $event->venue_address }}"
                     hint="Standard: {{ $event->venue_address ?? 'Nicht angegeben' }}" />
                 <div class="flex flex-wrap gap-x-4 gap-y-5">
                     <x-ui.field label="Stadt" name="venue_city" id="add_venue_city" :old="false" :error="false"
                         placeholder="{{ $event->venue_city }}"
-                        hint="Standard: {{ $event->venue_city ?? 'Nicht angegeben' }}" class="min-w-0 flex-[3_1_200px]" />
+                        hint="Standard: {{ $event->venue_city ?? 'Nicht angegeben' }}"
+                        class="min-w-0 flex-[3_1_200px]" />
                     <x-ui.field label="PLZ" name="venue_postal_code" id="add_venue_postal_code" :old="false"
                         :error="false" placeholder="{{ $event->venue_postal_code }}"
                         hint="Standard: {{ $event->venue_postal_code ?? 'Nicht angegeben' }}"
@@ -175,16 +181,18 @@
             </div>
 
             <fieldset class="m-0 flex min-w-0 flex-col gap-y-5 border-0 border-t border-line p-0 pt-5">
-                <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort (optional)</legend>
+                <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort
+                    (optional)</legend>
                 <x-ui.field label="Veranstaltungsort" name="venue_name" id="edit_venue_name" :old="false"
                     :error="false" placeholder="{{ $event->venue_name }}" />
-                <x-ui.field label="Adresse" name="venue_address" id="edit_venue_address" :old="false" :error="false"
-                    placeholder="{{ $event->venue_address }}" />
+                <x-ui.field label="Adresse" name="venue_address" id="edit_venue_address" :old="false"
+                    :error="false" placeholder="{{ $event->venue_address }}" />
                 <div class="flex flex-wrap gap-x-4 gap-y-5">
-                    <x-ui.field label="Stadt" name="venue_city" id="edit_venue_city" :old="false" :error="false"
-                        placeholder="{{ $event->venue_city }}" class="min-w-0 flex-[3_1_200px]" />
-                    <x-ui.field label="PLZ" name="venue_postal_code" id="edit_venue_postal_code" :old="false"
-                        :error="false" placeholder="{{ $event->venue_postal_code }}" class="min-w-0 flex-[1_1_140px]" />
+                    <x-ui.field label="Stadt" name="venue_city" id="edit_venue_city" :old="false"
+                        :error="false" placeholder="{{ $event->venue_city }}" class="min-w-0 flex-[3_1_200px]" />
+                    <x-ui.field label="PLZ" name="venue_postal_code" id="edit_venue_postal_code"
+                        :old="false" :error="false" placeholder="{{ $event->venue_postal_code }}"
+                        class="min-w-0 flex-[1_1_140px]" />
                 </div>
             </fieldset>
 
@@ -201,7 +209,8 @@
     <script>
         function cancelDate(dateId) {
             const form = document.getElementById('cancel-date-form');
-            form.action = '{{ route('organizer.events.dates.cancel', [$event->slug, '__DATE_ID__']) }}'.replace('__DATE_ID__',
+            form.action = '{{ route('organizer.events.dates.cancel', [$event->slug, '__DATE_ID__']) }}'.replace(
+                '__DATE_ID__',
                 dateId);
             window.dispatchEvent(new CustomEvent('open-modal', {
                 detail: 'cancel-date'

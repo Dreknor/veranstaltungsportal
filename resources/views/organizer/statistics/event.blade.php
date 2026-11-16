@@ -13,14 +13,14 @@
             {{ $ticketsSold }}
             @if ($event->max_attendees)
                 <span class="mt-2 flex flex-col gap-1 text-small font-normal tracking-normal text-ink-soft">
-                    <span class="flex justify-between gap-2"><span>Auslastung</span><span class="tabular-nums">{{ $capacityPercentage }} %</span></span>
+                    <span class="flex justify-between gap-2"><span>Auslastung</span><span class="tabular-nums">{{ number_format((float) $capacityPercentage, 1, ',', '.') }} %</span></span>
                     <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
                         <span class="block h-2 rounded-full bg-primary" style="width: {{ min($capacityPercentage, 100) }}%"></span>
                     </span>
                 </span>
             @endif
         </x-ui.stat>
-        <x-ui.stat label="Check-in-Quote" value="{{ $checkInRate }} %" sub="{{ $checkedInCount }} von {{ $ticketsSold }} eingecheckt" />
+        <x-ui.stat label="Check-in-Quote" value="{{ number_format((float) $checkInRate, 1, ',', '.') }} %" sub="{{ $checkedInCount }} von {{ $ticketsSold }} eingecheckt" />
     </div>
 
     <x-ui.section title="Verkäufe nach Ticketart" class="mb-12">

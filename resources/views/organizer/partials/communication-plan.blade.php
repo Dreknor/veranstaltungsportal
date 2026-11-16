@@ -27,42 +27,56 @@
 @endphp
 
 <div {{ $attributes ?? '' }}>
-    <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-        {{-- Mobil: Liste, ab sm: Tabelle --}}
-        <ul class="sm:hidden divide-y divide-gray-200 dark:divide-gray-700">
-            @foreach($rows as [$trigger, $mail, $access])
-                <li class="p-3 text-sm">
-                    <p class="font-medium text-gray-900 dark:text-gray-100">{{ $trigger }}</p>
-                    <p class="text-gray-700 dark:text-gray-300">→ {{ $mail }}</p>
-                    @if($access)
-                        <p class="mt-1 text-xs font-medium text-green-700 dark:text-green-400">🎫 inkl. Tickets bzw. Online-Zugangsdaten</p>
-                    @endif
-                </li>
-            @endforeach
-        </ul>
-        <table class="hidden sm:table min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-            <thead class="bg-gray-50 dark:bg-gray-800">
+    {{-- Mobil: Liste, ab sm: Tabelle --}}
+    <ul class="m-0 list-none divide-y divide-line rounded-box border border-line p-0 sm:hidden">
+        @foreach ($rows as [$trigger, $mail, $access])
+            <li class="flex flex-col gap-1 p-4 text-small">
+                <p class="m-0 font-medium text-ink">{{ $trigger }}</p>
+                <p class="m-0 flex items-start gap-2 text-ink-soft">
+                    <x-icon.arrow-right class="mt-0.5 h-4 w-4 flex-none" />
+                    <span>{{ $mail }}</span>
+                </p>
+                @if ($access)
+                    <p class="m-0 flex items-center gap-2 font-medium text-success">
+                        <x-icon.ticket class="h-4 w-4 flex-none" />
+                        inkl. Tickets bzw. Online-Zugangsdaten
+                    </p>
+                @endif
+            </li>
+        @endforeach
+    </ul>
+    <x-ui.table label="Kommunikations-Fahrplan" class="hidden sm:block">
+        <thead>
+            <tr>
+                <th scope="col">Wann?</th>
+                <th scope="col">E-Mail an Teilnehmende</th>
+                <th scope="col" class="text-center">Tickets / Zugang</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($rows as [$trigger, $mail, $access])
                 <tr>
-                    <th scope="col" class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">Wann?</th>
-                    <th scope="col" class="px-3 py-2 text-left font-semibold text-gray-700 dark:text-gray-300">E-Mail an Teilnehmende</th>
-                    <th scope="col" class="px-3 py-2 text-center font-semibold text-gray-700 dark:text-gray-300">Tickets / Zugang</th>
+                    <th scope="row">{{ $trigger }}</th>
+                    <td>{{ $mail }}</td>
+                    <td class="text-center">
+                        @if ($access)
+                            <span class="inline-flex text-success" title="enthält Tickets bzw. Zugangsdaten">
+                                <x-icon.check class="h-5 w-5" />
+                                <span class="sr-only">ja, enthält Tickets bzw. Zugangsdaten</span>
+                            </span>
+                        @else
+                            <span class="text-muted">–<span class="sr-only"> nein</span></span>
+                        @endif
+                    </td>
                 </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-900">
-                @foreach($rows as [$trigger, $mail, $access])
-                    <tr>
-                        <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $trigger }}</td>
-                        <td class="px-3 py-2 text-gray-700 dark:text-gray-300">{{ $mail }}</td>
-                        <td class="px-3 py-2 text-center">{!! $access ? '<span class="text-green-600" title="enthält Tickets bzw. Zugangsdaten">✓</span>' : '<span class="text-gray-400">–</span>' !!}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    <p class="mt-3 text-sm text-gray-700 dark:text-gray-300">
-        <strong>Online-Zugangsdaten</strong> (Link und Code) sehen ausschließlich Buchungen, die <em>bestätigt und bezahlt</em> sind
+            @endforeach
+        </tbody>
+    </x-ui.table>
+    <p class="mt-3 mb-0 max-w-prose text-small text-ink-soft">
+        <strong class="font-semibold">Online-Zugangsdaten</strong> (Link und Code) sehen ausschließlich Buchungen, die
+        bestätigt und bezahlt sind
         (kostenfreie Anmeldungen nach Freigabe, extern fakturierte Buchungen gelten als bezahlt) –
         in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen.
-        Jede versendete E-Mail sehen Sie im <strong>E-Mail-Verlauf</strong> der Buchung und können sie dort erneut senden.
+        Jede versendete E-Mail sehen Sie im <strong class="font-semibold">E-Mail-Verlauf</strong> der Buchung und können sie dort erneut senden.
     </p>
 </div>

@@ -1,785 +1,502 @@
-<x-layouts.app title="Event erstellen">
-    <div class="min-h-screen bg-gray-50 py-8">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="mb-8">
-                <a href="{{ route('organizer.events.index') }}" class="text-blue-600 hover:text-blue-800 mb-4 inline-flex items-center">
-                    <x-icon.arrow-left class="w-4 h-4 mr-2" />
-                    Zurück zur Übersicht
-                </a>
-                <h1 class="text-3xl font-bold text-gray-900 mt-4">Neues Event erstellen</h1>
-            </div>
+<x-layouts.app title="Veranstaltung anlegen">
+    @php
+        $canPublish = auth()->user()->canPublishEvents();
+        // Label mit Sternchen, das das Skript je nach Veranstaltungsart ein- und ausblendet.
+        $star = fn(string $label, string $class = '') => new \Illuminate\Support\HtmlString(
+            e($label) . ' <span class="' . $class . '" aria-hidden="true">*</span>',
+        );
+    @endphp
 
-            @if(!auth()->user()->canPublishEvents())
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                    <div class="flex items-start gap-3">
-                        <svg class="w-6 h-6 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-yellow-900">Veröffentlichung nicht möglich</p>
-                            <p class="text-sm text-yellow-700 mt-1">
-                                Um Events zu veröffentlichen, müssen Sie zunächst Ihre
-                                @if(!auth()->user()->hasCompleteBillingData() && !auth()->user()->hasCompleteBankAccount())
-                                    Rechnungsdaten und Bankverbindung
-                                @elseif(!auth()->user()->hasCompleteBillingData())
-                                    Rechnungsdaten
-                                @else
-                                    Bankverbindung
-                                @endif
-                                vervollständigen.
-                            </p>
-                            <p class="text-sm text-yellow-600 mt-2">
-                                Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen an Teilnehmer versendet werden.
-                            </p>
-                            <div class="flex gap-2 mt-3">
-                                @if(!auth()->user()->hasCompleteBillingData())
-                                    <a href="{{ route('organizer.bank-account.billing-data') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm font-medium">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                        </svg>
-                                        Rechnungsdaten vervollständigen
-                                    </a>
-                                @endif
-                                @if(!auth()->user()->hasCompleteBankAccount())
-                                    <a href="{{ route('organizer.bank-account.index') }}"
-                                       class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 text-sm font-medium">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                                        </svg>
-                                        Bankverbindung vervollständigen
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
+    <x-ui.page-header title="Veranstaltung anlegen" :back-href="route('organizer.events.index')" back-label="Zurück zur Übersicht" />
+
+    @if (!$canPublish)
+        <x-ui.alert tone="warning" title="Veröffentlichung nicht möglich" class="mb-8 max-w-form">
+            <p class="mt-1">
+                Um Veranstaltungen zu veröffentlichen, müssen Sie zunächst Ihre
+                @if (!auth()->user()->hasCompleteBillingData() && !auth()->user()->hasCompleteBankAccount())
+                    Rechnungsdaten und Bankverbindung
+                @elseif(!auth()->user()->hasCompleteBillingData())
+                    Rechnungsdaten
+                @else
+                    Bankverbindung
+                @endif
+                vervollständigen.
+            </p>
+            <p class="mt-1">
+                Diese Angaben sind notwendig, da bei Buchungen automatisch Rechnungen an Teilnehmer versendet werden.
+            </p>
+            <p class="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+                @if (!auth()->user()->hasCompleteBillingData())
+                    <a href="{{ route('organizer.bank-account.billing-data') }}">Rechnungsdaten vervollständigen</a>
+                @endif
+                @if (!auth()->user()->hasCompleteBankAccount())
+                    <a href="{{ route('organizer.bank-account.index') }}">Bankverbindung vervollständigen</a>
+                @endif
+            </p>
+        </x-ui.alert>
+    @endif
+
+    <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,640px)_minmax(0,368px)] lg:justify-between lg:gap-x-12">
+        <form id="event-create-form" method="POST" action="{{ route('organizer.events.store') }}"
+            enctype="multipart/form-data" class="m-0 min-w-0">
+            @csrf
+
+            {{-- 1 Einstellungen --}}
+            <section aria-labelledby="schritt-1" class="border-t border-line py-8">
+                <x-ui.step-heading number="1" id="schritt-1" aside="* Pflichtfeld" class="mb-6">
+                    Einstellungen
+                </x-ui.step-heading>
+
+                <div class="flex flex-col gap-y-5">
+                    <x-ui.field label="Titel" name="title" required />
+
+                    <x-ui.select label="Kategorie" name="event_category_id" required placeholder="Bitte wählen"
+                        :options="$categories->pluck('name', 'id')" />
+
+                    <x-ui.select label="Veranstaltungsart" name="event_type" required selected="physical"
+                        :options="[
+                            'physical' => 'Präsenzveranstaltung',
+                            'online' => 'Online-Veranstaltung',
+                            'hybrid' => 'Hybrid (Präsenz & Online)',
+                            'external' => 'Externe Veranstaltung',
+                        ]" />
+
+                    <x-ui.textarea label="Beschreibung" name="description" required rows="6" />
+
+                    <x-ui.field label="Titelbild" name="featured_image" type="file" accept="image/*" optional />
                 </div>
-            @endif
+            </section>
 
-            <form method="POST" action="{{ route('organizer.events.store') }}" enctype="multipart/form-data" class="space-y-6">
-                @csrf
+            {{-- 2 Datum & Zeit --}}
+            <section aria-labelledby="schritt-2" class="border-t border-line py-8">
+                <x-ui.step-heading number="2" id="schritt-2" class="mb-6">Datum &amp; Zeit</x-ui.step-heading>
 
-                <!-- Einstellungen -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Einstellungen</h2>
-
-                    <!-- Cost Overview -->
-                    @if(isset($publishingCosts))
-                    <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded" id="cost-overview">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-3 flex-1">
-                                <h3 class="text-sm font-medium text-blue-800">Geschätzte Kosten bei Veröffentlichung</h3>
-                                <div class="mt-2 text-sm text-blue-700" id="cost-breakdown-content">
-                                    <p>Die Kosten werden nach Event-Ende basierend auf den tatsächlichen Buchungen abgerechnet.</p>
-                                    <div class="mt-3 text-xs">
-                                        <strong>Hinweis:</strong> Wenn Sie "Als Featured markieren" wählen, können Sie direkt den Zeitraum buchen.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="space-y-3">
-                        <div>
-                            <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Titel *</label>
-                            <input type="text" id="title" name="title" required value="{{ old('title') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('title')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="event_category_id" class="block text-sm font-medium text-gray-700 mb-1">Kategorie *</label>
-                            <select id="event_category_id" name="event_category_id" required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="">Bitte wählen...</option>
-                                @foreach($categories as $category)
-                                    <option value="{{ $category->id }}" {{ old('event_category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('event_category_id')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="event_type" class="block text-sm font-medium text-gray-700 mb-1">Veranstaltungsart *</label>
-                            <select id="event_type" name="event_type" required
-                                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <option value="physical" {{ old('event_type', 'physical') == 'physical' ? 'selected' : '' }}>Präsenzveranstaltung</option>
-                                <option value="online" {{ old('event_type') == 'online' ? 'selected' : '' }}>Online-Veranstaltung</option>
-                                <option value="hybrid" {{ old('event_type') == 'hybrid' ? 'selected' : '' }}>Hybrid (Präsenz & Online)</option>
-                                <option value="external" {{ old('event_type') == 'external' ? 'selected' : '' }}>Externe Veranstaltung</option>
-                            </select>
-                            @error('event_type')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Beschreibung *</label>
-                            <textarea id="description" name="description" required rows="6"
-                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('description') }}</textarea>
-                            @error('description')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="featured_image" class="block text-sm font-medium text-gray-700 mb-1">Titelbild</label>
-                            <input type="file" id="featured_image" name="featured_image" accept="image/*"
-                                   class="w-full border-gray-300 rounded-lg focus:border-blue-500 focus:ring-blue-500">
-                            @error('featured_image')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Datum & Zeit -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Datum & Zeit</h2>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start *</label>
-                            <input type="datetime-local" id="start_date" name="start_date" required value="{{ old('start_date') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('start_date')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">Ende *</label>
-                            <input type="datetime-local" id="end_date" name="end_date" required value="{{ old('end_date') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('end_date')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                <div class="flex flex-col gap-y-5">
+                    <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
+                        <x-ui.field label="Start" name="start_date" type="datetime-local" required />
+                        <x-ui.field label="Ende" name="end_date" type="datetime-local" required />
                     </div>
 
-                    <div class="mt-4">
-                        <!-- Hidden field ensures false value is sent when checkbox is unchecked -->
+                    <div>
+                        {{-- Hidden field ensures false value is sent when checkbox is unchecked --}}
                         <input type="hidden" name="has_multiple_dates" value="0">
-                        <label class="flex items-start cursor-pointer">
-                            <input type="checkbox" id="has_multiple_dates" name="has_multiple_dates" value="1" {{ old('has_multiple_dates') ? 'checked' : '' }}
-                                   class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 mt-1">
-                            <span class="ml-2">
-                                <span class="block text-sm font-medium text-gray-700">Event hat mehrere Termine</span>
-                                <span class="block text-xs text-gray-500 mt-1">
-                                    Aktivieren Sie diese Option, wenn die Veranstaltung aus mehreren aufeinanderfolgenden Terminen besteht (z.B. ein 8-Wochen-Kurs).
-                                    Teilnehmer buchen dann automatisch alle Termine gemeinsam.
-                                </span>
-                            </span>
-                        </label>
+                        <x-ui.checkbox name="has_multiple_dates" id="has_multiple_dates"
+                            label="Veranstaltung hat mehrere Termine"
+                            hint="Aktivieren Sie diese Option, wenn die Veranstaltung aus mehreren aufeinanderfolgenden Terminen besteht (z.B. ein 8-Wochen-Kurs). Teilnehmer buchen dann automatisch alle Termine gemeinsam." />
 
-                        <!-- Info Box für Multiple Dates -->
-                        <div id="multiple-dates-info" class="mt-3 p-4 bg-blue-50 border-l-4 border-blue-500 rounded" style="display: {{ old('has_multiple_dates') ? 'block' : 'none' }}">
-                            <div class="flex items-start">
-                                <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <div class="flex-1">
-                                    <p class="text-sm font-medium text-blue-900">Mehrere Termine aktiviert ✓</p>
-                                    <p class="text-xs text-blue-700 mt-1">
-                                        Das oben angegebene Start- und Enddatum wird als <strong>erster Termin</strong> gespeichert.
-                                        Nach dem Erstellen des Events können Sie auf der Bearbeitungsseite weitere Termine hinzufügen.
-                                    </p>
-                                    <ul class="mt-2 text-xs text-blue-700 space-y-1 list-disc list-inside">
-                                        <li>Alle Termine werden gemeinsam gebucht</li>
-                                        <li>Die Kapazität gilt für die gesamte Serie</li>
-                                        <li>Sie können jeden Termin einzeln absagen</li>
-                                    </ul>
-                                    <div class="mt-3 flex items-center gap-2 text-xs bg-white rounded p-2 border border-blue-200">
-                                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                        </svg>
-                                        <span class="text-blue-800">
-                                            <strong>So geht's weiter:</strong> Klicken Sie unten auf "Event erstellen". Auf der nächsten Seite können Sie dann weitere Termine hinzufügen.
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div id="multiple-dates-info" class="mt-3"
+                            style="display: {{ old('has_multiple_dates') ? 'block' : 'none' }}">
+                            <x-ui.alert tone="info" title="Mehrere Termine aktiviert">
+                                <p class="mt-1">
+                                    Das oben angegebene Start- und Enddatum wird als <strong
+                                        class="font-semibold">erster
+                                        Termin</strong> gespeichert. Nach dem Anlegen der Veranstaltung können Sie auf
+                                    der
+                                    Bearbeitungsseite weitere Termine hinzufügen.
+                                </p>
+                                <ul class="mt-2">
+                                    <li>Alle Termine werden gemeinsam gebucht</li>
+                                    <li>Die Kapazität gilt für die gesamte Serie</li>
+                                    <li>Sie können jeden Termin einzeln absagen</li>
+                                </ul>
+                                <p class="mt-2">
+                                    <strong class="font-semibold">So geht’s weiter:</strong> Klicken Sie unten auf
+                                    „Veranstaltung anlegen“. Auf der nächsten Seite können Sie dann weitere Termine
+                                    hinzufügen.
+                                </p>
+                            </x-ui.alert>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Veranstaltungsort (Nur für Präsenz & Hybrid) -->
-                <div id="venue-section" class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Veranstaltungsort</h2>
+            {{-- 3 Ort und Zugang: Veranstaltungsort (Präsenz, Hybrid), Online-Zugang (Online, Hybrid), externe Buchung --}}
+            <section aria-labelledby="schritt-3" class="border-t border-line py-8">
+                <x-ui.step-heading number="3" id="schritt-3" class="mb-6">Ort und Zugang</x-ui.step-heading>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label for="venue_name" class="block text-sm font-medium text-gray-700 mb-1">Name <span class="venue-required">*</span></label>
-                            <input type="text" id="venue_name" name="venue_name" value="{{ old('venue_name') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('venue_name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="venue_address" class="block text-sm font-medium text-gray-700 mb-1">Adresse <span class="venue-required">*</span></label>
-                            <input type="text" id="venue_address" name="venue_address" value="{{ old('venue_address') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('venue_address')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="venue_postal_code" class="block text-sm font-medium text-gray-700 mb-1">PLZ <span class="venue-required">*</span></label>
-                                <input type="text" id="venue_postal_code" name="venue_postal_code" value="{{ old('venue_postal_code') }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                @error('venue_postal_code')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                <div class="flex flex-col gap-8">
+                    {{-- Veranstaltungsort (Nur für Präsenz & Hybrid) --}}
+                    <div id="venue-section">
+                        <h3 class="m-0 mb-4 text-h3 text-ink">Veranstaltungsort</h3>
+                        <div class="flex flex-col gap-y-5">
+                            <x-ui.field :label="$star('Name', 'venue-required')" name="venue_name" />
+                            <x-ui.field :label="$star('Adresse', 'venue-required')" name="venue_address" />
+                            <div class="flex flex-wrap gap-x-4 gap-y-5">
+                                <x-ui.field :label="$star('PLZ', 'venue-required')" name="venue_postal_code" inputmode="numeric"
+                                    class="max-w-40 flex-[1_1_112px]" />
+                                <x-ui.field :label="$star('Stadt', 'venue-required')" name="venue_city" class="min-w-0 flex-[3_1_200px]" />
                             </div>
-
-                            <div>
-                                <label for="venue_city" class="block text-sm font-medium text-gray-700 mb-1">Stadt <span class="venue-required">*</span></label>
-                                <input type="text" id="venue_city" name="venue_city" value="{{ old('venue_city') }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                @error('venue_city')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                            <x-ui.field :label="$star('Land', 'venue-required')" name="venue_country" value="Germany" />
+                            <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-5">
+                                <x-ui.field label="Breitengrad" name="venue_latitude" type="number" step="0.0000001"
+                                    optional />
+                                <x-ui.field label="Längengrad" name="venue_longitude" type="number" step="0.0000001"
+                                    optional />
                             </div>
+                            <x-ui.textarea label="Anfahrtsbeschreibung" name="directions" rows="3" optional />
                         </div>
+                    </div>
 
-                        <div>
-                            <label for="venue_country" class="block text-sm font-medium text-gray-700 mb-1">Land <span class="venue-required">*</span></label>
-                            <input type="text" id="venue_country" name="venue_country" value="{{ old('venue_country', 'Germany') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            @error('venue_country')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                    {{-- Online-Zugang (Nur für Online & Hybrid) --}}
+                    <div id="online-section" style="display: none;">
+                        <h3 class="m-0 mb-4 text-h3 text-ink">Online-Zugang</h3>
+                        <div class="flex flex-col gap-y-5">
+                            <x-ui.field :label="$star('Meeting/Konferenz-URL', 'online-required')" name="online_url" type="url"
+                                placeholder="https://zoom.us/j/123456789 oder https://meet.google.com/..."
+                                hint="Sichtbar nur für bestätigte und bezahlte Buchungen: in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen 24 h und 3 h vor Beginn." />
+                            <x-ui.field label="Zugangs-/Meeting-Code" name="online_access_code" optional
+                                placeholder="z.B. Meeting-ID, Passwort"
+                                hint="Falls ein separater Zugangscode für die Online-Veranstaltung benötigt wird." />
                         </div>
+                    </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="venue_latitude" class="block text-sm font-medium text-gray-700 mb-1">Breitengrad</label>
-                                <input type="number" step="0.0000001" id="venue_latitude" name="venue_latitude" value="{{ old('venue_latitude') }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-
-                            <div>
-                                <label for="venue_longitude" class="block text-sm font-medium text-gray-700 mb-1">Längengrad</label>
-                                <input type="number" step="0.0000001" id="venue_longitude" name="venue_longitude" value="{{ old('venue_longitude') }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label for="directions" class="block text-sm font-medium text-gray-700 mb-1">Anfahrtsbeschreibung</label>
-                            <textarea id="directions" name="directions" rows="3"
-                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('directions') }}</textarea>
+                    {{-- Externe Buchung (Nur für externe Veranstaltungen) --}}
+                    <div id="external-section" style="display: none;">
+                        <h3 class="m-0 mb-4 text-h3 text-ink">Externe Buchungsseite</h3>
+                        <div class="flex flex-col gap-y-5">
+                            <x-ui.alert tone="info">
+                                Bei externen Veranstaltungen werden keine Tickets über diese Plattform verkauft.
+                                Besucher werden stattdessen zur angegebenen externen Buchungsseite weitergeleitet.
+                            </x-ui.alert>
+                            <x-ui.field :label="$star('Externe Buchungs-URL')" name="external_booking_url" type="url"
+                                placeholder="https://www.beispiel.de/anmeldung"
+                                hint="Die URL, zu der Besucher für die Buchung/Anmeldung weitergeleitet werden." />
+                            <x-ui.field label="Button-Text" name="external_booking_button_text" optional
+                                placeholder="Zur Anmeldung"
+                                hint="Text, der auf dem Weiterleitungs-Button angezeigt wird. Standard: „Zur Anmeldung“" />
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <!-- Online-Zugang (Nur für Online & Hybrid) -->
-                <div id="online-section" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Online-Zugang</h2>
+            {{-- 4 Zusatzinformationen --}}
+            <section aria-labelledby="schritt-4" class="border-t border-line py-8">
+                <x-ui.step-heading number="4" id="schritt-4"
+                    class="mb-6">Zusatzinformationen</x-ui.step-heading>
 
-                    <div class="space-y-4">
-                        <div>
-                            <label for="online_url" class="block text-sm font-medium text-gray-700 mb-1">Meeting/Konferenz-URL <span class="online-required">*</span></label>
-                            <input type="url" id="online_url" name="online_url" value="{{ old('online_url') }}"
-                                   placeholder="https://zoom.us/j/123456789 oder https://meet.google.com/..."
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Sichtbar nur für bestätigte und bezahlte Buchungen: in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen 24 h und 3 h vor Beginn.</p>
-                            @error('online_url')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                <div class="flex flex-col gap-y-5">
+                    <div id="pricing-section"
+                        class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-x-4 gap-y-5">
+                        <x-ui.field label="Preis ab (€)" name="price_from" type="number" step="0.01" optional />
+                        <x-ui.field label="Max. Teilnehmer" name="max_attendees" type="number" optional />
+                    </div>
 
-                        <div>
-                            <label for="online_access_code" class="block text-sm font-medium text-gray-700 mb-1">Zugangs-/Meeting-Code (optional)</label>
-                            <input type="text" id="online_access_code" name="online_access_code" value="{{ old('online_access_code') }}"
-                                   placeholder="z.B. Meeting-ID, Passwort"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Optional: Falls ein separater Zugangscode für die Online-Veranstaltung benötigt wird.</p>
-                            @error('online_access_code')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div>
+                        <x-ui.checkbox name="is_published" label="Veranstaltung veröffentlichen" :disabled="!$canPublish"
+                            :hint="$canPublish ? null : 'Rechnungsdaten erforderlich'" />
+
+                        <x-ui.checkbox name="is_featured" id="is_featured" label="Veranstaltung hervorheben" />
+
+                        <input type="hidden" id="featured_duration_type" name="featured_duration_type"
+                            value="">
+                        <input type="hidden" id="featured_custom_days" name="featured_custom_days" value="">
+                        <input type="hidden" id="featured_start_date" name="featured_start_date" value="">
+
+                        <x-ui.checkbox name="is_private" id="is_private"
+                            label="Private Veranstaltung (Zugriffscode erforderlich)" />
+                    </div>
+
+                    <div id="access_code_field" style="display: {{ old('is_private') ? 'block' : 'none' }}">
+                        <x-ui.field label="Zugriffscode" name="access_code" />
                     </div>
                 </div>
+            </section>
 
-                <!-- Externe Buchung (Nur für externe Veranstaltungen) -->
-                <div id="external-section" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">
-                        <svg class="w-5 h-5 inline-block mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                        </svg>
-                        Externe Buchungsseite
-                    </h2>
+            {{-- 5 Ticket-Einstellungen --}}
+            <section id="ticket-settings-section" aria-labelledby="schritt-5" class="border-t border-line py-8">
+                <x-ui.step-heading number="5" id="schritt-5"
+                    class="mb-6">Ticket-Einstellungen</x-ui.step-heading>
 
-                    <div class="mb-4 p-3 bg-orange-50 border-l-4 border-orange-400 rounded">
-                        <p class="text-sm text-orange-800">
-                            <strong>Hinweis:</strong> Bei externen Veranstaltungen werden keine Tickets über diese Plattform verkauft.
-                            Besucher werden stattdessen zur angegebenen externen Buchungsseite weitergeleitet.
-                        </p>
-                    </div>
+                <div class="flex flex-col gap-y-5">
+                    <x-ui.textarea label="Hinweise auf dem Ticket" name="ticket_notes" rows="4" optional
+                        placeholder="z.B. Bitte Personalausweis mitbringen, Einlass ab 18:30 Uhr, etc."
+                        hint="Diese Hinweise werden auf allen generierten Tickets für diese Veranstaltung angezeigt. Maximal 1000 Zeichen." />
 
-                    <div class="space-y-4">
-                        <div>
-                            <label for="external_booking_url" class="block text-sm font-medium text-gray-700 mb-1">Externe Buchungs-URL *</label>
-                            <input type="url" id="external_booking_url" name="external_booking_url" value="{{ old('external_booking_url') }}"
-                                   placeholder="https://www.beispiel.de/anmeldung"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Die URL, zu der Besucher für die Buchung/Anmeldung weitergeleitet werden.</p>
-                            @error('external_booking_url')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label for="external_booking_button_text" class="block text-sm font-medium text-gray-700 mb-1">Button-Text (optional)</label>
-                            <input type="text" id="external_booking_button_text" name="external_booking_button_text" value="{{ old('external_booking_button_text') }}"
-                                   placeholder="Zur Anmeldung"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <p class="mt-1 text-xs text-gray-500">Text, der auf dem Weiterleitungs-Button angezeigt wird. Standard: „Zur Anmeldung"</p>
-                            @error('external_booking_button_text')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Zusatzinformationen -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Zusatzinformationen</h2>
-
-                    <div class="space-y-4">
-                        <div id="pricing-section" class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label for="price_from" class="block text-sm font-medium text-gray-700 mb-1">Preis ab (€)</label>
-                                <input type="number" step="0.01" id="price_from" name="price_from" value="{{ old('price_from') }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-
-                            <div>
-                                <label for="max_attendees" class="block text-sm font-medium text-gray-700 mb-1">Max. Teilnehmer</label>
-                                <input type="number" id="max_attendees" name="max_attendees" value="{{ old('max_attendees') }}"
-                                       class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            </div>
-                        </div>
-
-
-                        <div class="space-y-3">
-                            <label class="flex items-center">
-                                <input type="checkbox" name="is_published" value="1"
-                                       {{ old('is_published') ? 'checked' : '' }}
-                                       {{ !auth()->user()->canPublishEvents() ? 'disabled' : '' }}
-                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 {{ !auth()->user()->canPublishEvents() ? 'opacity-50 cursor-not-allowed' : '' }}">
-                                <span class="ml-2 text-sm font-medium text-gray-700 {{ !auth()->user()->canPublishEvents() ? 'opacity-50' : '' }}">
-                                    Event veröffentlichen
-                                    @if(!auth()->user()->canPublishEvents())
-                                        <span class="text-yellow-600 text-xs">(Rechnungsdaten erforderlich)</span>
-                                    @endif
-                                </span>
-                            </label>
-
-                            <label class="flex items-center">
-                                <input type="checkbox" id="is_featured" name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-2 text-sm font-medium text-gray-700">Als Featured markieren</span>
-                            </label>
-
-                            <input type="hidden" id="featured_duration_type" name="featured_duration_type" value="">
-                            <input type="hidden" id="featured_custom_days" name="featured_custom_days" value="">
-                            <input type="hidden" id="featured_start_date" name="featured_start_date" value="">
-
-                            <label class="flex items-center">
-                                <input type="checkbox" name="is_private" value="1" id="is_private" {{ old('is_private') ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-2 text-sm font-medium text-gray-700">Privates Event (Zugriffscode erforderlich)</span>
-                            </label>
-                        </div>
-
-                        <div id="access_code_field" style="display: {{ old('is_private') ? 'block' : 'none' }}">
-                            <label for="access_code" class="block text-sm font-medium text-gray-700 mb-1">Zugriffscode</label>
-                            <input type="text" id="access_code" name="access_code" value="{{ old('access_code') }}"
-                                   class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Ticket-Einstellungen -->
-                <div id="ticket-settings-section" class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold text-gray-900 mb-4">Ticket-Einstellungen</h2>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label for="ticket_notes" class="block text-sm font-medium text-gray-700 mb-1">
-                                Hinweise auf dem Ticket
-                                <span class="text-gray-500 text-xs font-normal">(optional)</span>
-                            </label>
-                            <textarea id="ticket_notes" name="ticket_notes" rows="4"
-                                      placeholder="z.B. Bitte Personalausweis mitbringen, Einlass ab 18:30 Uhr, etc."
-                                      class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('ticket_notes') }}</textarea>
-                            <p class="mt-1 text-xs text-gray-500">
-                                Diese Hinweise werden auf allen generierten Tickets für diese Veranstaltung angezeigt.
-                                Maximal 1000 Zeichen.
-                            </p>
-                            @error('ticket_notes')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="flex items-center">
-                                <input type="hidden" name="requires_ticket" value="0">
-                                <input type="checkbox" name="requires_ticket" value="1"
-                                       {{ old('requires_ticket', true) ? 'checked' : '' }}
-                                       id="requires_ticket"
-                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-2 text-sm font-medium text-gray-700">Ticket-Versand erforderlich</span>
-                            </label>
-                            <p class="mt-1 ml-6 text-xs text-gray-500">
-                                Wenn deaktiviert, werden keine Tickets per E-Mail versendet. Teilnehmer erhalten nur eine Buchungsbestätigung mit Link zur Buchungsseite.
-                            </p>
-                        </div>
+                    <div>
+                        <input type="hidden" name="requires_ticket" value="0">
+                        <x-ui.checkbox name="requires_ticket" id="requires_ticket" :checked="true"
+                            label="Ticket-Versand erforderlich"
+                            hint="Wenn deaktiviert, werden keine Tickets per E-Mail versendet. Teilnehmer erhalten nur eine Buchungsbestätigung mit Link zur Buchungsseite." />
 
                         <div id="qr_code_option">
-                            <label class="flex items-center">
-                                <input type="hidden" name="show_qr_code_on_ticket" value="0">
-                                <input type="checkbox" name="show_qr_code_on_ticket" value="1"
-                                       {{ old('show_qr_code_on_ticket', true) ? 'checked' : '' }}
-                                       class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                <span class="ml-2 text-sm font-medium text-gray-700">QR-Code auf Tickets anzeigen</span>
-                            </label>
-                            <p class="mt-1 ml-6 text-xs text-gray-500">
-                                Wenn aktiviert, wird auf jedem Ticket ein QR-Code für den Check-In angezeigt.
-                            </p>
-                        </div>
-
-                        <!-- Stornierungsrichtlinie -->
-                        <div class="border-t border-gray-200 pt-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-3">Stornierungsrichtlinie</h3>
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="hidden" name="cancellation_allowed" value="0">
-                                    <input type="checkbox" name="cancellation_allowed" value="1"
-                                           id="cancellation_allowed_create"
-                                           {{ old('cancellation_allowed') ? 'checked' : '' }}
-                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                                    <span class="ml-2 text-sm font-medium text-gray-700">Stornierung durch Teilnehmer erlauben</span>
-                                </label>
-                                <p class="mt-1 ml-6 text-xs text-gray-500">
-                                    Wenn aktiviert, können Teilnehmer ihre Buchung selbst stornieren.
-                                </p>
-                            </div>
-
-                            <div id="cancellation_days_field_create" class="{{ old('cancellation_allowed') ? '' : 'hidden' }} mt-3 ml-6">
-                                <label for="cancellation_days_before_create" class="block text-sm font-medium text-gray-700 mb-1">
-                                    Stornierungsfrist (Tage vor Veranstaltungsbeginn)
-                                </label>
-                                <input type="number" id="cancellation_days_before_create" name="cancellation_days_before"
-                                       value="{{ old('cancellation_days_before') }}"
-                                       min="0" placeholder="z.B. 3"
-                                       class="w-32 rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                <p class="mt-1 text-xs text-gray-500">
-                                    Stornierung muss mindestens diese Anzahl an Tagen vor Beginn erfolgen. Leer lassen = bis Veranstaltungsbeginn.
-                                </p>
-                                @error('cancellation_days_before')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <!-- Organisationsfeld -->
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Organisationsfeld bei Buchung &amp; Personalisierung
-                                </label>
-                                <select name="organization_field_mode"
-                                        class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="none" {{ old('organization_field_mode', 'none') === 'none' ? 'selected' : '' }}>
-                                        Nicht anzeigen
-                                    </option>
-                                    <option value="optional" {{ old('organization_field_mode') === 'optional' ? 'selected' : '' }}>
-                                        Optional anzeigen
-                                    </option>
-                                    <option value="required" {{ old('organization_field_mode') === 'required' ? 'selected' : '' }}>
-                                        Pflichtfeld
-                                    </option>
-                                </select>
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Legt fest, ob Teilnehmer bei der Buchung und Personalisierung ihre Organisation/Einrichtung angeben müssen.
-                                </p>
-                            </div>
-
-                            <!-- Bestätigungsmodus für kostenfreie Anmeldungen -->
-                            <div class="mt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">
-                                    Bestätigungsmodus für kostenfreie Anmeldungen
-                                </label>
-                                <div class="space-y-2">
-                                    <label class="flex items-start gap-3 cursor-pointer">
-                                        <input type="radio" name="free_ticket_auto_confirm" value="1"
-                                               {{ old('free_ticket_auto_confirm', '1') === '1' ? 'checked' : '' }}
-                                               class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                        <div>
-                                            <span class="text-sm font-medium text-gray-900">Automatisch bestätigen</span>
-                                            <p class="text-xs text-gray-500">Anmeldungen werden sofort bestätigt. Zugangsdaten und Tickets werden automatisch versendet.</p>
-                                        </div>
-                                    </label>
-                                    <label class="flex items-start gap-3 cursor-pointer">
-                                        <input type="radio" name="free_ticket_auto_confirm" value="0"
-                                               {{ old('free_ticket_auto_confirm') === '0' ? 'checked' : '' }}
-                                               class="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-                                        <div>
-                                            <span class="text-sm font-medium text-gray-900">Manuelle Bestätigung erforderlich</span>
-                                            <p class="text-xs text-gray-500">Anmeldungen müssen erst durch den Veranstalter freigegeben werden. Zugangsdaten werden erst nach Bestätigung versendet.</p>
-                                        </div>
-                                    </label>
-                                </div>
-                            </div>
-
-                            @include('organizer.events.partials.invoice-ticket-mode', [
-                                'organization' => $organization,
-                                'value' => old('tickets_before_invoice') === '1',
-                            ])
+                            <input type="hidden" name="show_qr_code_on_ticket" value="0">
+                            <x-ui.checkbox name="show_qr_code_on_ticket" :checked="true"
+                                label="QR-Code auf Tickets anzeigen"
+                                hint="Wenn aktiviert, wird auf jedem Ticket ein QR-Code für den Check-In angezeigt." />
                         </div>
                     </div>
-                </div>
 
+                    {{-- Stornierungsrichtlinie --}}
+                    <div class="flex flex-col gap-y-5 border-t border-line pt-6">
+                        <h3 class="m-0 text-h3 text-ink">Stornierungsrichtlinie</h3>
 
-                <!-- Buttons -->
-                <div class="flex justify-end gap-4">
-                    <a href="{{ route('organizer.events.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
-                        Abbrechen
-                    </a>
-                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Event erstellen
-                    </button>
+                        <div>
+                            <input type="hidden" name="cancellation_allowed" value="0">
+                            <x-ui.checkbox name="cancellation_allowed" id="cancellation_allowed_create"
+                                label="Stornierung durch Teilnehmer erlauben"
+                                hint="Wenn aktiviert, können Teilnehmer ihre Buchung selbst stornieren." />
+
+                            <div id="cancellation_days_field_create"
+                                class="{{ old('cancellation_allowed') ? '' : 'hidden' }} mt-3 pl-8">
+                                <x-ui.field label="Stornierungsfrist (Tage vor Veranstaltungsbeginn)"
+                                    name="cancellation_days_before" id="cancellation_days_before_create"
+                                    type="number" min="0" placeholder="z.B. 3" input-class="max-w-32"
+                                    hint="Stornierung muss mindestens diese Anzahl an Tagen vor Beginn erfolgen. Leer lassen = bis Veranstaltungsbeginn." />
+                            </div>
+                        </div>
+
+                        {{-- Organisationsfeld --}}
+                        <x-ui.select label="Organisationsfeld bei Buchung & Personalisierung"
+                            name="organization_field_mode" selected="none" :options="[
+                                'none' => 'Nicht anzeigen',
+                                'optional' => 'Optional anzeigen',
+                                'required' => 'Pflichtfeld',
+                            ]"
+                            hint="Legt fest, ob Teilnehmer bei der Buchung und Personalisierung ihre Organisation/Einrichtung angeben müssen." />
+
+                        {{-- Bestätigungsmodus für kostenfreie Anmeldungen --}}
+                        <fieldset class="m-0 min-w-0 border-0 p-0">
+                            <x-ui.label as="legend">Bestätigungsmodus für kostenfreie Anmeldungen</x-ui.label>
+                            <x-ui.radio name="free_ticket_auto_confirm" value="1" :checked="true"
+                                label="Automatisch bestätigen"
+                                hint="Anmeldungen werden sofort bestätigt. Zugangsdaten und Tickets werden automatisch versendet." />
+                            <x-ui.radio name="free_ticket_auto_confirm" value="0"
+                                label="Manuelle Bestätigung erforderlich"
+                                hint="Anmeldungen müssen erst durch den Veranstalter freigegeben werden. Zugangsdaten werden erst nach Bestätigung versendet." />
+                        </fieldset>
+
+                        @include('organizer.events.partials.invoice-ticket-mode', [
+                            'organization' => $organization,
+                            'value' => old('tickets_before_invoice') === '1',
+                        ])
+                    </div>
                 </div>
-            </form>
-        </div>
+            </section>
+
+            <div class="flex flex-wrap gap-3 border-t border-line pt-8">
+                <x-ui.button type="submit">Veranstaltung anlegen</x-ui.button>
+                <x-ui.button variant="secondary" :href="route('organizer.events.index')">Abbrechen</x-ui.button>
+            </div>
+        </form>
+
+        @if (isset($publishingCosts))
+            <aside aria-labelledby="kosten-titel" class="min-w-0 lg:sticky lg:top-24">
+                <x-ui.box tone="zone" id="cost-overview">
+                    <h2 id="kosten-titel" class="m-0 mb-3 text-h3 text-ink">Geschätzte Kosten bei Veröffentlichung
+                    </h2>
+                    <div class="text-small text-ink" id="cost-breakdown-content">
+                        <p class="m-0">Die Kosten werden nach Ende der Veranstaltung basierend auf den tatsächlichen
+                            Buchungen abgerechnet.</p>
+                        <p class="mt-3 mb-0 text-muted">
+                            <strong class="font-semibold text-ink">Hinweis:</strong> Wenn Sie „Veranstaltung
+                            hervorheben“ wählen, können Sie direkt den Zeitraum buchen.
+                        </p>
+                    </div>
+                </x-ui.box>
+            </aside>
+        @endif
     </div>
 
     @push('scripts')
-    <script>
-        // Toggle Access Code field
-        document.getElementById('is_private').addEventListener('change', function() {
-            document.getElementById('access_code_field').style.display = this.checked ? 'block' : 'none';
-        });
-
-        // Toggle QR Code option based on requires_ticket
-        const requiresTicketCheckbox = document.getElementById('requires_ticket');
-        const qrCodeOption = document.getElementById('qr_code_option');
-
-        if (requiresTicketCheckbox && qrCodeOption) {
-            // Initial state
-            qrCodeOption.style.display = requiresTicketCheckbox.checked ? 'block' : 'none';
-
-            requiresTicketCheckbox.addEventListener('change', function() {
-                qrCodeOption.style.display = this.checked ? 'block' : 'none';
+        <script>
+            // Toggle Access Code field
+            document.getElementById('is_private').addEventListener('change', function() {
+                document.getElementById('access_code_field').style.display = this.checked ? 'block' : 'none';
             });
-        }
 
-        // Toggle Multiple Dates Info Box
-        const multipleDatesCheckbox = document.getElementById('has_multiple_dates');
-        const multipleDatesInfo = document.getElementById('multiple-dates-info');
+            // Toggle QR Code option based on requires_ticket
+            const requiresTicketCheckbox = document.getElementById('requires_ticket');
+            const qrCodeOption = document.getElementById('qr_code_option');
 
-        if (multipleDatesCheckbox && multipleDatesInfo) {
-            multipleDatesCheckbox.addEventListener('change', function() {
-                multipleDatesInfo.style.display = this.checked ? 'block' : 'none';
+            if (requiresTicketCheckbox && qrCodeOption) {
+                // Initial state
+                qrCodeOption.style.display = requiresTicketCheckbox.checked ? 'block' : 'none';
 
-                // Visuelle Rückmeldung
-                if (this.checked) {
-                    multipleDatesInfo.classList.add('animate-fadeIn');
-                }
-            });
-        }
-
-        // Toggle Venue/Online/External sections based on event type
-        const eventTypeSelect = document.getElementById('event_type');
-        const venueSection = document.getElementById('venue-section');
-        const onlineSection = document.getElementById('online-section');
-        const externalSection = document.getElementById('external-section');
-        const pricingSection = document.getElementById('pricing-section');
-        const ticketSettingsSection = document.getElementById('ticket-settings-section');
-
-        function updateSections() {
-            const eventType = eventTypeSelect.value;
-            const isExternal = eventType === 'external';
-
-            // Venue section
-            if (eventType === 'physical' || eventType === 'hybrid') {
-                venueSection.style.display = 'block';
-                setVenueFieldsRequired(true);
-            } else {
-                venueSection.style.display = 'none';
-                setVenueFieldsRequired(false);
+                requiresTicketCheckbox.addEventListener('change', function() {
+                    qrCodeOption.style.display = this.checked ? 'block' : 'none';
+                });
             }
 
-            // Online section
-            if (eventType === 'online' || eventType === 'hybrid') {
-                onlineSection.style.display = 'block';
-                setOnlineFieldsRequired(true);
-            } else {
-                onlineSection.style.display = 'none';
-                setOnlineFieldsRequired(false);
+            // Toggle Multiple Dates Info Box
+            const multipleDatesCheckbox = document.getElementById('has_multiple_dates');
+            const multipleDatesInfo = document.getElementById('multiple-dates-info');
+
+            if (multipleDatesCheckbox && multipleDatesInfo) {
+                multipleDatesCheckbox.addEventListener('change', function() {
+                    multipleDatesInfo.style.display = this.checked ? 'block' : 'none';
+                });
             }
 
-            // External section
-            externalSection.style.display = isExternal ? 'block' : 'none';
-            const externalUrl = document.getElementById('external_booking_url');
-            if (externalUrl) {
-                externalUrl.required = isExternal;
-            }
+            // Toggle Venue/Online/External sections based on event type
+            const eventTypeSelect = document.getElementById('event_type');
+            const venueSection = document.getElementById('venue-section');
+            const onlineSection = document.getElementById('online-section');
+            const externalSection = document.getElementById('external-section');
+            const pricingSection = document.getElementById('pricing-section');
+            const ticketSettingsSection = document.getElementById('ticket-settings-section');
 
-            // Hide pricing & ticket settings for external events
-            pricingSection.style.display = isExternal ? 'none' : '';
-            ticketSettingsSection.style.display = isExternal ? 'none' : '';
-        }
+            function updateSections() {
+                const eventType = eventTypeSelect.value;
+                const isExternal = eventType === 'external';
 
-        function setVenueFieldsRequired(required) {
-            ['venue_name', 'venue_address', 'venue_city', 'venue_postal_code', 'venue_country'].forEach(id => {
-                const field = document.getElementById(id);
-                if (field) {
-                    field.required = required;
-                }
-            });
-            document.querySelectorAll('.venue-required').forEach(el => {
-                el.style.display = required ? 'inline' : 'none';
-            });
-        }
-
-        function setOnlineFieldsRequired(required) {
-            const onlineUrl = document.getElementById('online_url');
-            if (onlineUrl) {
-                onlineUrl.required = required;
-            }
-            document.querySelectorAll('.online-required').forEach(el => {
-                el.style.display = required ? 'inline' : 'none';
-            });
-        }
-
-        eventTypeSelect.addEventListener('change', updateSections);
-
-        // Initialize on page load
-        updateSections();
-
-        // Featured Event Handling
-        const featuredCheckbox = document.getElementById('is_featured');
-
-        if (featuredCheckbox) {
-            featuredCheckbox.addEventListener('change', function() {
-                if (this.checked) {
-                    // Open modal for booking
-                    window.dispatchEvent(new CustomEvent('featured-modal-open'));
+                // Venue section
+                if (eventType === 'physical' || eventType === 'hybrid') {
+                    venueSection.style.display = 'block';
+                    setVenueFieldsRequired(true);
                 } else {
-                    // Clear hidden fields
-                    document.getElementById('featured_duration_type').value = '';
-                    document.getElementById('featured_custom_days').value = '';
-                    document.getElementById('featured_start_date').value = '';
+                    venueSection.style.display = 'none';
+                    setVenueFieldsRequired(false);
                 }
+
+                // Online section
+                if (eventType === 'online' || eventType === 'hybrid') {
+                    onlineSection.style.display = 'block';
+                    setOnlineFieldsRequired(true);
+                } else {
+                    onlineSection.style.display = 'none';
+                    setOnlineFieldsRequired(false);
+                }
+
+                // External section
+                externalSection.style.display = isExternal ? 'block' : 'none';
+                const externalUrl = document.getElementById('external_booking_url');
+                if (externalUrl) {
+                    externalUrl.required = isExternal;
+                }
+
+                // Hide pricing & ticket settings for external events
+                pricingSection.style.display = isExternal ? 'none' : '';
+                ticketSettingsSection.style.display = isExternal ? 'none' : '';
+            }
+
+            function setVenueFieldsRequired(required) {
+                ['venue_name', 'venue_address', 'venue_city', 'venue_postal_code', 'venue_country'].forEach(id => {
+                    const field = document.getElementById(id);
+                    if (field) {
+                        field.required = required;
+                    }
+                });
+                document.querySelectorAll('.venue-required').forEach(el => {
+                    el.style.display = required ? 'inline' : 'none';
+                });
+            }
+
+            function setOnlineFieldsRequired(required) {
+                const onlineUrl = document.getElementById('online_url');
+                if (onlineUrl) {
+                    onlineUrl.required = required;
+                }
+                document.querySelectorAll('.online-required').forEach(el => {
+                    el.style.display = required ? 'inline' : 'none';
+                });
+            }
+
+            eventTypeSelect.addEventListener('change', updateSections);
+
+            // Initialize on page load
+            updateSections();
+
+            // Featured Event Handling
+            const featuredCheckbox = document.getElementById('is_featured');
+
+            if (featuredCheckbox) {
+                featuredCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Open modal for booking
+                        window.dispatchEvent(new CustomEvent('featured-modal-open'));
+                    } else {
+                        // Clear hidden fields
+                        document.getElementById('featured_duration_type').value = '';
+                        document.getElementById('featured_custom_days').value = '';
+                        document.getElementById('featured_start_date').value = '';
+                    }
+                });
+            }
+
+            // Listen for featured booking confirmation
+            window.addEventListener('featured-booking-confirm', function(e) {
+                const {
+                    durationType,
+                    customDays,
+                    startDate
+                } = e.detail;
+
+                // Store in hidden fields
+                document.getElementById('featured_duration_type').value = durationType;
+                document.getElementById('featured_custom_days').value = customDays;
+                document.getElementById('featured_start_date').value = startDate;
+
+                // Update cost overview
+                updateCostEstimateForFeatured(durationType, customDays);
             });
-        }
 
-        // Listen for featured booking confirmation
-        window.addEventListener('featured-booking-confirm', function(e) {
-            const { durationType, customDays, startDate } = e.detail;
+            function updateCostEstimateForFeatured(durationType, customDays) {
+                const rates = {
+                    'daily': {{ config('monetization.featured_event_rates.daily', 5.0) }},
+                    'weekly': {{ config('monetization.featured_event_rates.weekly', 25.0) }},
+                    'monthly': {{ config('monetization.featured_event_rates.monthly', 80.0) }},
+                    'custom': customDays * {{ config('monetization.featured_event_rates.daily', 5.0) }}
+                };
 
-            // Store in hidden fields
-            document.getElementById('featured_duration_type').value = durationType;
-            document.getElementById('featured_custom_days').value = customDays;
-            document.getElementById('featured_start_date').value = startDate;
+                const amount = rates[durationType];
+                const vatAmount = amount * 0.19;
+                const totalAmount = amount * 1.19;
 
-            // Update cost overview
-            updateCostEstimateForFeatured(durationType, customDays);
-        });
+                const durationLabels = {
+                    'daily': '1 Tag',
+                    'weekly': '7 Tage',
+                    'monthly': '30 Tage',
+                    'custom': customDays + ' Tage'
+                };
 
-        function updateCostEstimateForFeatured(durationType, customDays) {
-            const rates = {
-                'daily': {{ config('monetization.featured_event_rates.daily', 5.00) }},
-                'weekly': {{ config('monetization.featured_event_rates.weekly', 25.00) }},
-                'monthly': {{ config('monetization.featured_event_rates.monthly', 80.00) }},
-                'custom': customDays * {{ config('monetization.featured_event_rates.daily', 5.00) }}
-            };
-
-            const amount = rates[durationType];
-            const vatAmount = amount * 0.19;
-            const totalAmount = amount * 1.19;
-
-            const durationLabels = {
-                'daily': '1 Tag',
-                'weekly': '7 Tage',
-                'monthly': '30 Tage',
-                'custom': customDays + ' Tage'
-            };
-
-            const content = document.getElementById('cost-breakdown-content');
-            if (content) {
-                content.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-start">
-                            <div class="flex-1">
-                                <div class="font-medium">Featured Event Gebühr (geschätzt)</div>
-                                <div class="text-xs text-blue-600">Standardpreis für ${durationLabels[durationType]} Featured-Zeitraum</div>
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
-                                    Wird bei Erstellung gebucht
-                                </span>
+                const content = document.getElementById('cost-breakdown-content');
+                if (content) {
+                    content.innerHTML = `
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="min-w-0">
+                                    <div class="font-medium">Gebühr für die Hervorhebung (geschätzt)</div>
+                                    <div class="text-muted">Standardpreis für ${durationLabels[durationType]} Hervorhebung</div>
+                                    <div class="text-muted">Wird beim Anlegen gebucht</div>
+                                </div>
+                                <div class="font-semibold tabular-nums whitespace-nowrap">${formatCurrency(amount)}</div>
                             </div>
-                            <div class="font-semibold ml-4 whitespace-nowrap">
-                                ${formatCurrency(amount)}
-                            </div>
-                        </div>
-
-                        <div class="border-t border-blue-200 pt-2 mt-2">
-                            <div class="flex justify-between items-center">
-                                <div class="font-bold text-blue-900">Geschätzte Gesamtkosten (netto):</div>
-                                <div class="font-bold text-blue-900 text-lg">
-                                    ${formatCurrency(amount)}
+                            <div class="border-t border-line pt-3">
+                                <div class="flex items-baseline justify-between gap-4">
+                                    <div class="font-semibold">Geschätzte Gesamtkosten (netto)</div>
+                                    <div class="text-h3 tabular-nums whitespace-nowrap">${formatCurrency(amount)}</div>
+                                </div>
+                                <div class="mt-1 text-muted tabular-nums">
+                                    + ${formatCurrency(vatAmount)} MwSt. (19 %) = ${formatCurrency(totalAmount)} brutto
                                 </div>
                             </div>
-                            <div class="text-xs text-blue-600 mt-1">
-                                + ${formatCurrency(vatAmount)} MwSt. (19%) = ${formatCurrency(totalAmount)} brutto
-                            </div>
                         </div>
-                    </div>
-                    <div class="mt-3 text-xs">
-                        <strong>Hinweis:</strong> Die Featured Event Gebühr wird nach der Event-Erstellung zur Zahlung fällig.
-                        Plattformgebühren für Buchungen werden nach Event-Ende abgerechnet.
-                    </div>
-                `;
+                        <p class="mt-3 mb-0 text-muted">
+                            <strong class="font-semibold text-ink">Hinweis:</strong> Die Gebühr für die Hervorhebung wird nach dem Anlegen der Veranstaltung zur Zahlung fällig.
+                            Plattformgebühren für Buchungen werden nach Ende der Veranstaltung abgerechnet.
+                        </p>
+                    `;
+                }
             }
-        }
 
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('de-DE', {
-                style: 'currency',
-                currency: 'EUR'
-            }).format(amount);
-        }
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('de-DE', {
+                    style: 'currency',
+                    currency: 'EUR'
+                }).format(amount);
+            }
 
-        // Toggle cancellation days field
-        const cancellationCheckboxCreate = document.getElementById('cancellation_allowed_create');
-        const cancellationDaysFieldCreate = document.getElementById('cancellation_days_field_create');
-        if (cancellationCheckboxCreate && cancellationDaysFieldCreate) {
-            cancellationCheckboxCreate.addEventListener('change', function () {
-                cancellationDaysFieldCreate.classList.toggle('hidden', !this.checked);
-            });
-        }
-    </script>
+            // Toggle cancellation days field
+            const cancellationCheckboxCreate = document.getElementById('cancellation_allowed_create');
+            const cancellationDaysFieldCreate = document.getElementById('cancellation_days_field_create');
+            if (cancellationCheckboxCreate && cancellationDaysFieldCreate) {
+                cancellationCheckboxCreate.addEventListener('change', function() {
+                    cancellationDaysFieldCreate.classList.toggle('hidden', !this.checked);
+                });
+            }
+        </script>
     @endpush
 
-    <!-- Featured Booking Modal -->
+    {{-- Dialog „Veranstaltung hervorheben“ --}}
     <x-featured-booking-modal :event="new \App\Models\Event()" />
 </x-layouts.app>
-

@@ -1,141 +1,94 @@
-<x-layouts.app>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                Verbindungen Statistiken
-            </h2>
-            <a href="{{ route('admin.connections.index') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Zurück zur Übersicht
-            </a>
+<x-layouts.app title="Verbindungen: Statistiken">
+    @php
+        $statusLabel = ['accepted' => 'Akzeptiert', 'pending' => 'Ausstehend', 'blocked' => 'Blockiert'];
+    @endphp
+
+    <x-ui.page-header title="Verbindungen: Statistiken" :back-href="route('admin.connections.index')" back-label="Zur Übersicht der Verbindungen" />
+
+    <!-- Period Filter -->
+    <form method="GET" action="{{ route('admin.connections.statistics') }}" class="mb-10 max-w-64">
+        <x-ui.select label="Zeitraum" name="period" id="period" :old="false" :selected="$period" onchange="this.form.submit()"
+            :options="['7' => 'Letzte 7 Tage', '30' => 'Letzte 30 Tage', '90' => 'Letzte 90 Tage', '365' => 'Letztes Jahr']" />
+    </form>
+
+    <!-- By Status -->
+    <x-ui.section title="Nach Status" class="mb-12">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach ($byStatus as $status)
+                <x-ui.stat :label="$statusLabel[$status->status] ?? ucfirst($status->status)" :value="$status->count" />
+            @endforeach
         </div>
-    </x-slot>
+    </x-ui.section>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <!-- Period Filter -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6">
-                <form method="GET" action="{{ route('admin.connections.statistics') }}" class="flex gap-4 items-end">
-                    <div>
-                        <label for="period" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Zeitraum</label>
-                        <select name="period" id="period" class="input" onchange="this.form.submit()">
-                            <option value="7" {{ $period == 7 ? 'selected' : '' }}>Letzte 7 Tage</option>
-                            <option value="30" {{ $period == 30 ? 'selected' : '' }}>Letzte 30 Tage</option>
-                            <option value="90" {{ $period == 90 ? 'selected' : '' }}>Letzte 90 Tage</option>
-                            <option value="365" {{ $period == 365 ? 'selected' : '' }}>Letztes Jahr</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
+    <!-- Connections Over Time -->
+    <x-ui.section title="Verbindungen über Zeit" class="mb-12">
+        <x-ui.table label="Verbindungen über Zeit">
+            <thead>
+                <tr>
+                    <th scope="col">Datum</th>
+                    <th scope="col" class="num">Anzahl</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($connectionsByDay as $day)
+                    <tr>
+                        <td class="tabular-nums">{{ \Carbon\Carbon::parse($day->date)->format('d.m.Y') }}</td>
+                        <td class="num">{{ $day->count }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="2" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten für diesen Zeitraum.</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+            @if ($connectionsByDay->isNotEmpty())
+                <tfoot>
+                    <tr>
+                        <td>Gesamt</td>
+                        <td class="num">{{ $connectionsByDay->sum('count') }}</td>
+                    </tr>
+                </tfoot>
+            @endif
+        </x-ui.table>
+    </x-ui.section>
 
-            <!-- Connections Over Time -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Verbindungen über Zeit</h3>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Datum</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Anzahl</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($connectionsByDay as $day)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                        {{ \Carbon\Carbon::parse($day->date)->format('d.m.Y') }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
-                                        {{ $day->count }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                        Keine Daten für diesen Zeitraum.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                        @if($connectionsByDay->isNotEmpty())
-                            <tfoot class="bg-gray-50 dark:bg-gray-900">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">Gesamt</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 dark:text-white">
-                                        {{ $connectionsByDay->sum('count') }}
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        @endif
-                    </table>
-                </div>
-            </div>
-
-            <!-- By Status -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Nach Status</h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    @foreach($byStatus as $status)
-                        <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-4">
-                            <div class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                {{ ucfirst($status->status) }}
-                            </div>
-                            <div class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">
-                                {{ $status->count }}
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-
-            <!-- Most Active Users -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Top 10 Aktivste Benutzer</h3>
-
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead class="bg-gray-50 dark:bg-gray-900">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rang</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Benutzer</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Verbindungen</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($mostActiveUsers as $index => $item)
-                                @if($item['user'])
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                            #{{ $index + 1 }}
-                                        </td>
-                                        <td class="px-6 py-4">
-                                            <div class="flex items-center">
-                                                <img src="{{ $item['user']->profilePhotoUrl() }}" alt="{{ $item['user']->name }}" class="w-10 h-10 rounded-full mr-3">
-                                                <div>
-                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $item['user']->name }}</div>
-                                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $item['user']->email }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">
-                                            {{ $item['count'] }}
-                                        </td>
-                                    </tr>
-                                @endif
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                        Keine Daten für diesen Zeitraum.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Most Active Users -->
+    <x-ui.section title="Die 10 aktivsten Benutzer">
+        <x-ui.table label="Aktivste Benutzer">
+            <thead>
+                <tr>
+                    <th scope="col">Rang</th>
+                    <th scope="col">Benutzer</th>
+                    <th scope="col" class="num">Verbindungen</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($mostActiveUsers as $index => $item)
+                    @if ($item['user'])
+                        <tr>
+                            <td class="tabular-nums">{{ $index + 1 }}</td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <img src="{{ $item['user']->profilePhotoUrl() }}" alt="" class="h-10 w-10 flex-none rounded-full">
+                                    <div class="min-w-0">
+                                        {{ $item['user']->name }}
+                                        <span class="block text-small text-muted">{{ $item['user']->email }}</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="num">{{ $item['count'] }}</td>
+                        </tr>
+                    @endif
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="3" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten für diesen Zeitraum.</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
 </x-layouts.app>
-

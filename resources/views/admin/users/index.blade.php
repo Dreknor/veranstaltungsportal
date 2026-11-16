@@ -61,8 +61,8 @@
                             <span class="text-muted">Keine Rolle</span>
                         @endif
                     </td>
-                    <td class="num">{{ $user->events_count }}</td>
-                    <td class="num">{{ $user->bookings_count }}</td>
+                    <td class="num">{{ $user->events_count ?? 0 }}</td>
+                    <td class="num">{{ $user->bookings_count ?? 0 }}</td>
                     <td class="tabular-nums whitespace-nowrap">{{ $user->created_at->format('d.m.Y') }}</td>
                     <td class="actions">
                         <x-ui.dropdown label="Aktionen" width="w-64">

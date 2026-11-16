@@ -15,7 +15,7 @@
 
         <x-ui.field label="Icon (Symbolname)" name="icon"  placeholder="fa-calendar" optional />
 
-        <x-ui.field label="Farbe (Hex)" name="color" type="color" value="#3B82F6" input-class="h-12 w-24 cursor-pointer p-1" />
+        <x-ui.field label="Farbe (Hex)" name="color" type="color" value="#3B82F6" input-class="!w-24 cursor-pointer !p-1" />
 
         <x-ui.checkbox name="is_active" :checked="true" label="Aktiv" />
 
