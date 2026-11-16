@@ -81,13 +81,15 @@
         'status' => 'Status',
         'suche' => 'Suchzeile',
         'listen' => 'Listenzeilen',
+        'personen' => 'Personen: Avatar und Zeile',
         'buchung' => 'Abschnittsmarke und Zusammenfassung',
         'meldungen' => 'Meldungen',
         'tabelle' => 'Tabelle',
         'kopf' => 'Seitenkopf, Abschnitt, Leer',
         'flaechen' => 'Zone und Kasten',
+        'rahmen' => 'Anmelderahmen und Lesetext',
         'menues' => 'Dialog, Menü, Reiter',
-        'kennzahlen' => 'Kennzahlen und Detail-Paare',
+        'kennzahlen' => 'Kennzahlen, Fortschritt, Detail-Paare',
         'seiten' => 'Seitennavigation',
         'icons' => 'Icons',
     ];
@@ -217,6 +219,13 @@
                 <div class="max-w-summary">
                     <x-ui.button full>Volle Breite (full)</x-ui.button>
                 </div>
+                <div class="flex max-w-summary flex-col items-start gap-3">
+                    <x-ui.button wrap>Als fakturiert markieren &amp; Rechnung und Tickets senden</x-ui.button>
+                    <x-ui.button variant="secondary" wrap full>Zahlung eingegangen – Rechnung und Tickets
+                        senden</x-ui.button>
+                    <span class="text-small text-muted">wrap: mehrzeilige Beschriftung, Mindesthöhe wie size (mit full
+                        zentriert)</span>
+                </div>
             </div>
         </x-ui.section>
 
@@ -235,6 +244,13 @@
                     <x-ui.field label="Buchungsnummer" name="sg_number" value="BK-6735A1F2" disabled />
                     <x-ui.field label="Kundennummer" name="sg_customer" value="100245" readonly
                         hint="Wird automatisch vergeben." />
+                    <x-ui.field label="Client ID" name="sg_client_id" placeholder="Ihre PayPal Client ID">
+                        <x-slot:hint>
+                            Hinweis als Slot mit Link: erhältlich im <a href="#felder"
+                                class="font-medium text-ink underline underline-offset-[3px]">PayPal Developer
+                                Dashboard</a>.
+                        </x-slot:hint>
+                    </x-ui.field>
                 </div>
 
                 <div class="flex flex-wrap gap-x-4 gap-y-5">
@@ -315,6 +331,23 @@
                             aside="35,00 €" />
                     </div>
                 </fieldset>
+
+                <fieldset class="m-0 min-w-0 border-0 p-0">
+                    <x-ui.label as="legend" class="mb-2">Empfänger (choice compact)</x-ui.label>
+                    <div class="flex flex-col gap-3">
+                        <x-ui.choice name="sg_segment" value="all" title="Alle Teilnehmenden" compact checked>
+                            <x-slot:aside>42</x-slot:aside>
+                        </x-ui.choice>
+                        <x-ui.choice name="sg_segment" value="waitlist" title="Warteliste" compact>
+                            <x-slot:aside>3</x-slot:aside>
+                        </x-ui.choice>
+                    </div>
+                </fieldset>
+
+                <div>
+                    <x-ui.checkbox name="sg_perm[]" value="events.edit" label="events.edit" data-perm="events"
+                        input-class="sg-permission" hint="data-perm und input-class landen am Eingabefeld." />
+                </div>
             </div>
         </x-ui.section>
 
@@ -454,6 +487,43 @@
                         </x-ui.row>
                     </x-ui.row-list>
                 </div>
+            </div>
+        </x-ui.section>
+
+        {{-- Personen --}}
+        <x-ui.section title="Personen: Avatar und Zeile" id="personen"
+            description="ui.avatar (Foto oder Initialen im zone-Kreis; sm 40, md 56, lg 96 px) und ui.person-row für Verbindungen, Follower und Suche.">
+            <div class="flex flex-col gap-8">
+                <div class="flex flex-wrap items-center gap-4">
+                    <x-ui.avatar name="Maria Muster" size="sm" />
+                    <x-ui.avatar name="Maria Muster" />
+                    <x-ui.avatar name="Maria Muster" size="lg" />
+                    <x-ui.avatar name="Jonas Beispiel" size="lg" label="Jonas Beispiel" />
+                    <span class="text-small text-muted">ohne Foto: Initialen; label macht das Bild für Screenreader
+                        sichtbar</span>
+                </div>
+                <x-ui.row-list>
+                    <x-ui.person-row name="Maria Muster" type="Organisator" href="#personen"
+                        bio="Lehrerin für Deutsch und Ethik, Fachberaterin für Schulentwicklung. Interessiert an Formaten, die Beziehung vor Stoff stellen und Kollegien stärken.">
+                        <x-slot:meta>
+                            <span class="text-ui font-medium tabular-nums">12 Veranstaltungen</span>
+                            <span class="text-small text-muted tabular-nums">4 Buchungen</span>
+                        </x-slot:meta>
+                        <x-slot:action>
+                            <x-ui.button variant="secondary" href="#personen" full>Profil</x-ui.button>
+                            <x-ui.button full>Verbinden</x-ui.button>
+                        </x-slot:action>
+                    </x-ui.person-row>
+                    <x-ui.person-row name="Jonas Beispiel" type="Teilnehmer" :href="false">
+                        <span class="text-small text-muted">Gemeinsame Interessen: Hauptfach Mensch</span>
+                        <x-slot:meta>
+                            <span class="text-small text-muted">Blockiert vor 2 Tagen</span>
+                        </x-slot:meta>
+                        <x-slot:action>
+                            <x-ui.button variant="secondary" full>Entsperren</x-ui.button>
+                        </x-slot:action>
+                    </x-ui.person-row>
+                </x-ui.row-list>
             </div>
         </x-ui.section>
 
@@ -668,6 +738,59 @@
             </div>
         </x-ui.section>
 
+        {{-- Anmelderahmen und Lesetext --}}
+        <x-ui.section title="Anmelderahmen und Lesetext" id="rahmen"
+            description="ui.auth-frame (Seitenrand, zentrierte Spalte 440 px) für Anmeldung, Registrierung und Passwort; .richtext für HTML aus Editor oder Markdown.">
+            <div class="flex flex-col gap-10">
+                <div class="rounded-box border border-dashed border-line">
+                    <x-ui.auth-frame>
+                        <p class="m-0 mb-3 text-h2-form">Bei Ihrem Konto anmelden</p>
+                        <div class="flex flex-col gap-5">
+                            <x-ui.field label="E-Mail" name="sg_login_email" type="email" required />
+                            <x-ui.button full>Anmelden</x-ui.button>
+                        </div>
+                    </x-ui.auth-frame>
+                </div>
+                <div class="richtext max-w-prose">
+                    <h2>Überschrift h2 im Lesetext</h2>
+                    <p>Absatz mit <strong>Hervorhebung</strong> und einem <a href="#rahmen">Link in ink,
+                            unterstrichen</a>. Lesetext steht maximal 760 px breit.</p>
+                    <h3>Überschrift h3</h3>
+                    <ul>
+                        <li>Listen haben normale Aufzählungszeichen</li>
+                        <li>auch verschachtelt:
+                            <ol>
+                                <li>erster Punkt</li>
+                                <li>zweiter Punkt</li>
+                            </ol>
+                        </li>
+                    </ul>
+                    <h4>Überschrift h4</h4>
+                    <blockquote>Ein Zitat mit Linie links, Text in ink-soft.</blockquote>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Leistung</th>
+                                <th>Preis</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Teilnahme</td>
+                                <td>45,00 €</td>
+                            </tr>
+                            <tr>
+                                <td>Ermäßigt</td>
+                                <td>30,00 €</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <p>Absatz nach der Trennlinie.</p>
+                </div>
+            </div>
+        </x-ui.section>
+
         {{-- Dialog, Menü, Reiter --}}
         <x-ui.section title="Dialog, Menü, Reiter" id="menues">
             <div class="flex flex-col gap-8">
@@ -713,12 +836,53 @@
                     <x-ui.tab href="#menues">Rabattcodes</x-ui.tab>
                     <x-ui.tab href="#menues">Check-in</x-ui.tab>
                 </x-ui.tabs>
+
+                <div x-data="{ sgTab: 'participants' }" class="flex flex-col gap-4">
+                    <x-ui.tabs label="Bereiche (Umschalter)" variant="toggle">
+                        <x-ui.tab x-on:click="sgTab = 'participants'"
+                            x-bind:aria-pressed="(sgTab === 'participants').toString()" active>Für Teilnehmer</x-ui.tab>
+                        <x-ui.tab x-on:click="sgTab = 'organizers'"
+                            x-bind:aria-pressed="(sgTab === 'organizers').toString()" :count="12">Für
+                            Veranstalter</x-ui.tab>
+                        <x-ui.tab x-on:click="sgTab = 'technical'"
+                            x-bind:aria-pressed="(sgTab === 'technical').toString()">Technisches</x-ui.tab>
+                    </x-ui.tabs>
+                    <p class="m-0 text-small text-muted">variant="toggle": Buttons mit aria-pressed. Gewählt: <span
+                            x-text="sgTab" class="font-medium text-ink">participants</span></p>
+                </div>
+
+                <p class="m-0 text-small text-muted">Dialog-Auslöser außerhalb eines x-data-Bereichs brauchen
+                    selbst <code>x-data</code> am Button, damit <code>$dispatch('open-modal', …)</code> funktioniert
+                    (Beispiel „Dialog per Ereignis öffnen“ oben).</p>
             </div>
         </x-ui.section>
 
         {{-- Kennzahlen und Detail-Paare --}}
-        <x-ui.section title="Kennzahlen und Detail-Paare" id="kennzahlen">
+        <x-ui.section title="Kennzahlen, Fortschritt, Detail-Paare" id="kennzahlen">
             <div class="flex flex-col gap-10">
+                <div class="flex max-w-form flex-col gap-6">
+                    <div>
+                        <div class="mb-2 flex items-center justify-between gap-4 text-small">
+                            <span class="font-medium text-ink" id="sg-progress-label">Check-in-Fortschritt</span>
+                            <span class="text-muted tabular-nums">62,5 %</span>
+                        </div>
+                        <x-ui.progress :value="62.5" aria-labelledby="sg-progress-label" />
+                    </div>
+                    <div>
+                        <div class="mb-2 flex items-center justify-between gap-4 text-small">
+                            <span class="font-medium text-ink">Abzeichen „Stammgast“</span>
+                            <span class="text-muted tabular-nums">3 / 5</span>
+                        </div>
+                        <x-ui.progress :value="3" :max="5" size="lg" label="Fortschritt Abzeichen"
+                            value-text="3 von 5 Veranstaltungen" />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <x-ui.progress :value="0" decorative />
+                        <x-ui.progress :value="100" decorative />
+                        <span class="text-small text-muted">0 % und 100 %; decorative (aria-hidden), wenn die Zahl
+                            daneben steht</span>
+                    </div>
+                </div>
                 <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <x-ui.stat label="Kommende Veranstaltungen" :value="$events->count()" />
                     <x-ui.stat label="Buchungen (30 Tage)" value="128" sub="davon 6 offen" />
@@ -751,12 +915,23 @@
 
         {{-- Icons --}}
         <x-ui.section title="Icons" id="icons"
-            description="Linien-Icons unter components/icon (viewBox 24, Strich 1,6). Ältere Icons mit Strich 2 werden beim Umbau angeglichen.">
+            description="Linien-Icons unter components/icon (viewBox 24, Strich 1,6, aria-hidden). Namen aus der Datenbank über ui.icon / Ui::icon().">
             <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-x-4 gap-y-3 p-0">
                 @foreach ($icons as $icon)
                     <li class="flex items-center gap-3 text-small">
                         <x-dynamic-component :component="'icon.' . $icon" class="h-5 w-5 flex-none" />
                         <span class="min-w-0 truncate">{{ $icon }}</span>
+                    </li>
+                @endforeach
+            </ul>
+
+            <h3 class="m-0 mt-10 mb-4 text-h3">Zuordnung von Namen aus der Datenbank (ui.icon)</h3>
+            <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-4 gap-y-3 p-0">
+                @foreach (['fas fa-trophy' => 'medal', 'fa-solid fa-ticket' => 'list', 'fas-calendar-days' => 'list', 'fa-graduation-cap' => 'calendar', 'academic-cap' => 'calendar', 'fas fa-qrcode' => 'list', 'unbekannt' => 'medal'] as $sgName => $sgFallback)
+                    <li class="flex items-center gap-3 text-small">
+                        <x-ui.icon :name="$sgName" :fallback="$sgFallback" class="h-5 w-5 flex-none" />
+                        <span class="min-w-0">{{ $sgName }} <span class="text-muted">ergibt
+                                {{ \Illuminate\Support\Str::after(Ui::icon($sgName, $sgFallback), 'icon.') }}</span></span>
                     </li>
                 @endforeach
             </ul>

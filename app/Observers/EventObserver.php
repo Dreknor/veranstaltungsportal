@@ -95,7 +95,7 @@ class EventObserver
                 }
             }
 
-            $changes[$label] = ($oldValue ?: '–') . ' → ' . ($newValue ?: '–');
+            $changes[$label] = 'bisher ' . ($oldValue ?: '–') . ', jetzt ' . ($newValue ?: '–');
         }
 
         $accessChanged = $event->requiresOnlineInfo()

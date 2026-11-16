@@ -1,0 +1,7 @@
+# Markdown-Mails: eingerückter Markdown würde sonst als Codeblock gerendert
+resources/views/vendor/mail/
+resources/views/emails/waitlist/
+resources/views/emails/new-user-account-created.blade.php
+resources/views/emails/organization-invitation.blade.php
+resources/views/emails/organization-role-changed.blade.php
+resources/views/emails/registration-cancelled-confirmation.blade.php
