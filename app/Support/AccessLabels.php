@@ -33,7 +33,11 @@ class AccessLabels
         return config('permission-labels.groups.'.$name) ?? Str::ucfirst($name);
     }
 
-    /** Auswahl für das Formular: Schlüssel => Bezeichnung. */
+    /**
+     * Auswahl für das Formular: Schlüssel => Bezeichnung.
+     *
+     * @return array<string, string>
+     */
     public static function toneOptions(): array
     {
         return array_map(fn (array $t) => $t['label'], config('permission-labels.tones'));
