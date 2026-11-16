@@ -18,7 +18,7 @@
 @php
     $max = (float) $max > 0 ? (float) $max : 100.0;
     $current = max(0.0, min((float) $value, $max));
-    $percent = round($current / $max * 100, 1);
+    $percent = round(($current / $max) * 100, 1);
     $format = fn(float $n): string => rtrim(rtrim(number_format($n, 2, '.', ''), '0'), '.');
 @endphp
 
@@ -27,7 +27,7 @@
     @else
         role="progressbar" aria-valuemin="0" aria-valuemax="{{ $format($max) }}" aria-valuenow="{{ $format($current) }}"
         @if ($label) aria-label="{{ $label }}" @endif
-        @if ($valueText) aria-valuetext="{{ $valueText }}" @endif @endif
+    @if ($valueText) aria-valuetext="{{ $valueText }}" @endif @endif
     {{ $attributes->class([
         'block w-full overflow-hidden rounded-full bg-line',
         'h-2' => $size !== 'lg',

@@ -46,7 +46,6 @@
     <img src="{{ $src }}" alt="{{ $label ?? '' }}" loading="lazy"
         {{ $attributes->class([$base, $sizeClasses, 'bg-zone object-cover']) }}>
 @else
-    <span
-        @if ($label) role="img" aria-label="{{ $label }}" @else aria-hidden="true" @endif
+    <span @if ($label) role="img" aria-label="{{ $label }}" @else aria-hidden="true" @endif
         {{ $attributes->class([$base, $sizeClasses, 'inline-flex items-center justify-center bg-zone text-ink-soft select-none']) }}>{{ $initials }}</span>
 @endif

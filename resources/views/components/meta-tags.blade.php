@@ -1,7 +1,7 @@
 {{--
     SEO- und Social-Media-Angaben (Open Graph, Twitter, Schema.org, canonical) für @push('meta').
-    <meta name="description"> und viewport setzt das Layout (layouts.public, Prop description) –
-    hier nicht noch einmal, damit jede Seite genau eine Beschreibung hat.
+    <meta name="description"> und viewport setzt das Layout (layouts.public, Prop description), theme-color
+    (#2B4347, primary) das Favicon-Partial beider Layouts – hier nicht noch einmal, damit nichts doppelt steht.
 --}}
 @props(['event' => null, 'title' => null, 'description' => null, 'image' => null, 'breadcrumbs' => null, 'canonical' => null])
 
@@ -36,7 +36,6 @@
 @endphp
 <meta name="keywords" content="{{ $keywordString }}">
 <meta name="author" content="{{ config('app.name') }}">
-<meta name="theme-color" content="#2B4347">
 <meta name="language" content="de">
 <meta name="geo.region" content="DE">
 @if($event && $event->venue_city)
