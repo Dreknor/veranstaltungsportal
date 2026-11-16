@@ -35,20 +35,20 @@
             <thead>
                 <tr>
                     <th scope="col">Benutzer</th>
-                    <th scope="col">E-Mail</th>
-                    <th scope="col">Rolle</th>
+                    <th scope="col" class="max-sm:hidden">E-Mail</th>
+                    <th scope="col" class="max-sm:hidden">Rolle</th>
                     <th scope="col" class="num">Buchungen</th>
-                    <th scope="col">Registriert</th>
+                    <th scope="col" class="max-sm:hidden">Registriert</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($data['top_users'] as $user)
                     <tr>
                         <th scope="row">{{ $user->name }}</th>
-                        <td>{{ $user->email }}</td>
-                        <td><x-ui.status tone="neutral">{{ $user->is_organizer ? 'Veranstalter' : 'Teilnehmer' }}</x-ui.status></td>
+                        <td class="max-sm:hidden">{{ $user->email }}</td>
+                        <td class="max-sm:hidden"><x-ui.status tone="neutral">{{ $user->is_organizer ? 'Veranstalter' : 'Teilnehmer' }}</x-ui.status></td>
                         <td class="num">{{ $user->bookings_count }}</td>
-                        <td class="tabular-nums whitespace-nowrap">{{ $user->created_at->format('d.m.Y') }}</td>
+                        <td class="max-sm:hidden tabular-nums whitespace-nowrap">{{ $user->created_at->format('d.m.Y') }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">

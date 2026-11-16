@@ -34,11 +34,11 @@
         <thead>
             <tr>
                 <th scope="col">Rechnung</th>
-                <th scope="col">Typ</th>
-                <th scope="col">Datum</th>
-                <th scope="col">Empfänger</th>
-                <th scope="col">Veranstaltung</th>
-                <th scope="col" class="num">Betrag</th>
+                <th scope="col" class="max-sm:hidden">Typ</th>
+                <th scope="col" class="max-sm:hidden">Datum</th>
+                <th scope="col" class="max-sm:hidden">Empfänger</th>
+                <th scope="col" class="max-sm:hidden">Veranstaltung</th>
+                <th scope="col" class="max-sm:hidden num">Betrag</th>
                 <th scope="col">Status</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
             </tr>
@@ -50,17 +50,17 @@
                         <a href="{{ route('admin.invoices.show', $invoice) }}"
                             class="text-ink underline underline-offset-[3px]">{{ $invoice->invoice_number }}</a>
                     </th>
-                    <td>{{ $invoice->type === 'platform_fee' ? 'Plattformgebühr' : 'Teilnehmende' }}</td>
-                    <td class="whitespace-nowrap tabular-nums">
+                    <td class="max-sm:hidden">{{ $invoice->type === 'platform_fee' ? 'Plattformgebühr' : 'Teilnehmende' }}</td>
+                    <td class="max-sm:hidden whitespace-nowrap tabular-nums">
                         {{ $invoice->invoice_date->format('d.m.Y') }}
                         <span class="block text-small text-muted">Fällig:
                             {{ $invoice->due_date->format('d.m.Y') }}</span>
                     </td>
-                    <td>
+                    <td class="max-sm:hidden">
                         {{ $invoice->recipient_name }}
                         <span class="block text-small text-muted">{{ $invoice->recipient_email }}</span>
                     </td>
-                    <td>
+                    <td class="max-sm:hidden">
                         @if ($invoice->event)
                             <a href="{{ route('events.show', $invoice->event->slug) }}"
                                 class="text-ink underline underline-offset-[3px]">{{ Str::limit($invoice->event->title, 30) }}</a>
@@ -68,7 +68,7 @@
                             –
                         @endif
                     </td>
-                    <td class="num">{{ \App\Support\Ui::money($invoice->total_amount) }}</td>
+                    <td class="max-sm:hidden num">{{ \App\Support\Ui::money($invoice->total_amount) }}</td>
                     <td>
                         @if ($invoice->status === 'paid')
                             <x-ui.status tone="success">Bezahlt</x-ui.status>

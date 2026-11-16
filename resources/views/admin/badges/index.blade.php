@@ -43,10 +43,10 @@
         <thead>
             <tr>
                 <th scope="col">Abzeichen</th>
-                <th scope="col">Typ</th>
-                <th scope="col" class="num">Punkte</th>
-                <th scope="col" class="num">Vergeben</th>
-                <th scope="col">Anforderung</th>
+                <th scope="col" class="max-sm:hidden">Typ</th>
+                <th scope="col" class="max-sm:hidden num">Punkte</th>
+                <th scope="col" class="max-sm:hidden num">Vergeben</th>
+                <th scope="col" class="max-sm:hidden">Anforderung</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
             </tr>
         </thead>
@@ -56,23 +56,23 @@
                     <th scope="row">
                         <div class="flex items-center gap-4">
                             <x-badge-icon :badge="$badge" size="sm" class="flex-none" />
-                            <div class="min-w-0">
+                            <div class="min-w-0 max-sm:hyphens-auto">
                                 <a href="{{ route('admin.badges.show', $badge) }}"
                                     class="text-ink underline underline-offset-[3px]">{{ $badge->name }}</a>
                                 <span
-                                    class="block text-small font-normal text-muted">{{ Str::limit($badge->description, 80) }}</span>
+                                    class="block text-small font-normal text-muted max-sm:hidden">{{ Str::limit($badge->description, 80) }}</span>
                             </div>
                         </div>
                     </th>
-                    <td><x-ui.status
+                    <td class="max-sm:hidden"><x-ui.status
                             tone="neutral">{{ $typeLabels[$badge->type] ?? ucfirst($badge->type) }}</x-ui.status></td>
-                    <td class="num">{{ $badge->points }}</td>
-                    <td class="num">{{ $badge->users_count }}</td>
-                    <td>{{ $badge->requirement_value }}
+                    <td class="max-sm:hidden num">{{ $badge->points }}</td>
+                    <td class="max-sm:hidden num">{{ $badge->users_count }}</td>
+                    <td class="max-sm:hidden">{{ $badge->requirement_value }}
                         {{ \App\Models\Badge::REQUIREMENT_TYPES[\App\Models\Badge::normalizeRequirement((string) $badge->requirement_type)] ?? str_replace('_', ' ', $badge->requirement_type) }}
                     </td>
                     <td class="actions">
-                        <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.show', $badge)">Details</x-ui.button>
+                        <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.show', $badge)" class="max-sm:hidden">Details</x-ui.button>
                         <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.edit', $badge)">Bearbeiten</x-ui.button>
                     </td>
                 </tr>

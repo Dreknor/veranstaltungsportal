@@ -43,8 +43,8 @@
                 <thead>
                     <tr>
                         <th scope="col">Name</th>
-                        <th scope="col">E-Mail</th>
-                        <th scope="col">Rolle</th>
+                        <th scope="col" class="max-sm:hidden">E-Mail</th>
+                        <th scope="col" class="max-sm:hidden">Rolle</th>
                         <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                     </tr>
                 </thead>
@@ -52,8 +52,8 @@
                     @foreach ($usersWithPermission as $user)
                         <tr>
                             <th scope="row">{{ $user->name }}</th>
-                            <td>{{ $user->email }}</td>
-                            <td>
+                            <td class="max-sm:hidden">{{ $user->email }}</td>
+                            <td class="max-sm:hidden">
                                 <x-ui.status
                                     tone="neutral">{{ $user->hasRole('admin') ? 'Admin' : 'Benutzer' }}</x-ui.status>
                             </td>

@@ -63,7 +63,7 @@
             <thead>
                 <tr>
                     <th scope="col">Veranstaltung</th>
-                    <th scope="col" class="num">Buchungen</th>
+                    <th scope="col" class="max-sm:hidden num">Buchungen</th>
                     <th scope="col" class="num">Umsatz</th>
                 </tr>
             </thead>
@@ -74,7 +74,7 @@
                             <a href="{{ route('events.show', $event->slug) }}"
                                 class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
                         </th>
-                        <td class="num">{{ $event->bookings_count }}</td>
+                        <td class="max-sm:hidden num">{{ $event->bookings_count }}</td>
                         <td class="num">{{ \App\Support\Ui::money($event->bookings_sum_total ?? 0) }}</td>
                     </tr>
                 @empty

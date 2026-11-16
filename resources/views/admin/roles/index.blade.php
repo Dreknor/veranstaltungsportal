@@ -15,9 +15,9 @@
             <thead>
                 <tr>
                     <th scope="col">Rolle</th>
-                    <th scope="col">Berechtigungen</th>
-                    <th scope="col" class="num">Benutzer</th>
-                    <th scope="col" class="num">Anzahl</th>
+                    <th scope="col" class="max-sm:hidden">Berechtigungen</th>
+                    <th scope="col" class="max-sm:hidden num">Benutzer</th>
+                    <th scope="col" class="max-sm:hidden num">Anzahl</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                 </tr>
             </thead>
@@ -34,7 +34,7 @@
                                 <x-ui.status tone="neutral" class="mt-1">System-Rolle</x-ui.status>
                             @endif
                         </th>
-                        <td class="text-small">
+                        <td class="max-sm:hidden text-small">
                             @foreach ($role->permissions->take(4) as $permission)
                                 <span
                                     class="whitespace-nowrap">{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
@@ -46,8 +46,8 @@
                                 <span class="text-muted">+{{ $role->permissions->count() - 4 }} mehr</span>
                             @endif
                         </td>
-                        <td class="num">{{ $role->users_count }}</td>
-                        <td class="num">{{ $role->permissions->count() }}</td>
+                        <td class="max-sm:hidden num">{{ $role->users_count }}</td>
+                        <td class="max-sm:hidden num">{{ $role->permissions->count() }}</td>
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('admin.roles.edit', $role)">Bearbeiten</x-ui.button>
                             @if (!$role->is_system)

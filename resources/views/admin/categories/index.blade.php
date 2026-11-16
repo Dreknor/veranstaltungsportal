@@ -23,9 +23,9 @@
         <thead>
             <tr>
                 <th scope="col">Name</th>
-                <th scope="col">Slug</th>
-                <th scope="col">Icon</th>
-                <th scope="col" class="num">Veranstaltungen</th>
+                <th scope="col" class="max-sm:hidden">Slug</th>
+                <th scope="col" class="max-sm:hidden">Icon</th>
+                <th scope="col" class="max-sm:hidden num">Veranstaltungen</th>
                 <th scope="col">Status</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
             </tr>
@@ -33,15 +33,15 @@
         <tbody>
             @forelse ($categories as $category)
                 <tr>
-                    <th scope="row">{{ $category->name }}</th>
-                    <td class="text-muted">{{ $category->slug }}</td>
-                    <td class="text-muted">
+                    <th scope="row" class="max-sm:w-32 max-sm:hyphens-auto">{{ $category->name }}</th>
+                    <td class="max-sm:hidden text-muted">{{ $category->slug }}</td>
+                    <td class="max-sm:hidden text-muted">
                         <span class="inline-flex items-center gap-2">
                             <x-ui.icon :name="$category->icon" fallback="calendar" class="h-5 w-5 flex-none text-ink" />
                             {{ $category->icon }}
                         </span>
                     </td>
-                    <td class="num">{{ $category->events_count }}</td>
+                    <td class="max-sm:hidden num">{{ $category->events_count }}</td>
                     <td>
                         @if ($category->is_active)
                             <x-ui.status tone="success">Aktiv</x-ui.status>

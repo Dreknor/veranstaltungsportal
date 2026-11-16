@@ -59,8 +59,8 @@
                 <thead>
                     <tr>
                         <th scope="col">Benutzer</th>
-                        <th scope="col">E-Mail</th>
-                        <th scope="col">Erhalten am</th>
+                        <th scope="col" class="max-sm:hidden">E-Mail</th>
+                        <th scope="col" class="max-sm:hidden">Erhalten am</th>
                         <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                     </tr>
                 </thead>
@@ -79,8 +79,8 @@
                                     </div>
                                 </div>
                             </th>
-                            <td>{{ $user->email }}</td>
-                            <td class="tabular-nums whitespace-nowrap">
+                            <td class="max-sm:hidden">{{ $user->email }}</td>
+                            <td class="max-sm:hidden tabular-nums whitespace-nowrap">
                                 {{ $user->pivot->earned_at->format('d.m.Y H:i') }}</td>
                             <td class="actions">
                                 <form method="POST" action="{{ route('admin.badges.revoke', $badge) }}"

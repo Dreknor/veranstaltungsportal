@@ -23,10 +23,10 @@
         <thead>
             <tr>
                 <th scope="col">Organisation</th>
-                <th scope="col">Eigentümer</th>
-                <th scope="col" class="num">Veranstaltungen</th>
+                <th scope="col" class="max-sm:hidden">Eigentümer</th>
+                <th scope="col" class="max-sm:hidden num">Veranstaltungen</th>
                 <th scope="col">Status</th>
-                <th scope="col">Gebühren</th>
+                <th scope="col" class="max-sm:hidden">Gebühren</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
             </tr>
         </thead>
@@ -45,11 +45,11 @@
                             </span>
                         </span>
                     </th>
-                    <td>
+                    <td class="max-sm:hidden">
                         <span class="block">{{ $organization->owner->name ?? 'N/A' }}</span>
                         <span class="block text-small text-muted">{{ $organization->owner->email ?? 'N/A' }}</span>
                     </td>
-                    <td class="num">{{ $organization->events_count }}</td>
+                    <td class="max-sm:hidden num">{{ $organization->events_count }}</td>
                     <td>
                         @if ($organization->is_active)
                             <x-ui.status tone="success">Aktiv</x-ui.status>
@@ -57,7 +57,7 @@
                             <x-ui.status tone="neutral">Inaktiv</x-ui.status>
                         @endif
                     </td>
-                    <td class="whitespace-nowrap tabular-nums">
+                    <td class="max-sm:hidden whitespace-nowrap tabular-nums">
                         @if ($organization->custom_platform_fee && ($organization->custom_platform_fee['enabled'] ?? false))
                             @php
                                 $customFee = $organization->custom_platform_fee;

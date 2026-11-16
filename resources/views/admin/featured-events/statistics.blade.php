@@ -65,8 +65,8 @@
                 <tr>
                     <th scope="col">Rang</th>
                     <th scope="col">Veranstaltung</th>
-                    <th scope="col">Veranstalter</th>
-                    <th scope="col" class="num">Anzahl</th>
+                    <th scope="col" class="max-sm:hidden">Veranstalter</th>
+                    <th scope="col" class="max-sm:hidden num">Anzahl</th>
                     <th scope="col" class="num">Umsatz</th>
                 </tr>
             </thead>
@@ -75,8 +75,8 @@
                     <tr>
                         <td class="tabular-nums">{{ $index + 1 }}</td>
                         <td>{{ Str::limit($item->event->title, 40) }}</td>
-                        <td>{{ $item->event->organizer->name }}</td>
-                        <td class="num">{{ $item->count }}</td>
+                        <td class="max-sm:hidden">{{ $item->event->organizer->name }}</td>
+                        <td class="max-sm:hidden num">{{ $item->count }}</td>
                         <td class="num">{{ \App\Support\Ui::money($item->total) }}</td>
                     </tr>
                 @empty

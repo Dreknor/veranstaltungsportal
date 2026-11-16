@@ -30,9 +30,9 @@
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
-                            <th scope="col">Beschreibung</th>
-                            <th scope="col">Rollen</th>
-                            <th scope="col">System</th>
+                            <th scope="col" class="max-sm:hidden">Beschreibung</th>
+                            <th scope="col" class="max-sm:hidden">Rollen</th>
+                            <th scope="col" class="max-sm:hidden">System</th>
                             <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                         </tr>
                     </thead>
@@ -44,8 +44,8 @@
                                         class="block">{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
                                     <span class="block text-small font-normal text-muted">{{ $permission->name }}</span>
                                 </th>
-                                <td class="text-muted">{{ $permission->description ?? '–' }}</td>
-                                <td>
+                                <td class="max-sm:hidden text-muted">{{ $permission->description ?? '–' }}</td>
+                                <td class="max-sm:hidden">
                                     @foreach ($permission->roles->take(3) as $role)
                                         {{ \App\Support\AccessLabels::role($role->name) }}@if (!$loop->last)
                                             ,
@@ -58,12 +58,12 @@
                                         <span class="text-muted">keine</span>
                                     @endif
                                 </td>
-                                <td>{{ $permission->is_system ? 'System' : '–' }}</td>
+                                <td class="max-sm:hidden">{{ $permission->is_system ? 'System' : '–' }}</td>
                                 <td class="actions">
                                     <x-ui.button size="sm" variant="secondary"
                                         :href="route('admin.permissions.edit', $permission)">Bearbeiten</x-ui.button>
                                     @if (!$permission->is_system)
-                                        <x-ui.button size="sm" variant="secondary" type="submit"
+                                        <x-ui.button size="sm" variant="secondary" type="submit" class="max-sm:hidden"
                                             form="delete-permission-{{ $permission->id }}">Löschen</x-ui.button>
                                         <form id="delete-permission-{{ $permission->id }}"
                                             action="{{ route('admin.permissions.destroy', $permission) }}"

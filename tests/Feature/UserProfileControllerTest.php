@@ -230,7 +230,8 @@ test('profile shows activity feed', function () {
         ->get(route('users.show', $this->profileUser))
         ->assertOk()
         ->assertSee('Aktivität')
-        ->assertSee('Veranstaltung(en) besucht')
+        ->assertSee('Veranstaltung besucht')
+        ->assertDontSee('Veranstaltung(en)')
         ->assertSee('Abzeichen verdient');
 });
 

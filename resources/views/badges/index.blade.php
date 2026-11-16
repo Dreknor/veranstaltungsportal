@@ -107,7 +107,7 @@
                                 </span>
                             @endif
                         </x-slot:meta>
-                        <x-slot:aside class="lg:w-[184px]">
+                        <x-slot:aside>
                             @if ($allMet)
                                 <x-ui.status tone="success">Anforderungen erfüllt</x-ui.status>
                             @elseif ($open)

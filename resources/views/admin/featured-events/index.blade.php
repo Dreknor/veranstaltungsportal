@@ -68,15 +68,15 @@
         <x-ui.table label="Gebühren für Hervorhebungen">
             <thead>
                 <tr>
-                    <th scope="col">
+                    <th scope="col" class="max-sm:hidden">
                         <input type="checkbox" id="selectAll" class="ui-checkbox" aria-label="Alle Gebühren auswählen">
                     </th>
                     <th scope="col">Veranstaltung</th>
-                    <th scope="col">Veranstalter</th>
-                    <th scope="col" class="num">Betrag</th>
-                    <th scope="col">Zeitraum</th>
+                    <th scope="col" class="max-sm:hidden">Veranstalter</th>
+                    <th scope="col" class="max-sm:hidden num">Betrag</th>
+                    <th scope="col" class="max-sm:hidden">Zeitraum</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Läuft ab</th>
+                    <th scope="col" class="max-sm:hidden">Läuft ab</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                 </tr>
             </thead>
@@ -90,19 +90,19 @@
                             ->diffInDays($endDate->copy()->startOfDay(), false);
                     @endphp
                     <tr>
-                        <td>
+                        <td class="max-sm:hidden">
                             <input type="checkbox" name="fee_ids[]" value="{{ $fee->id }}"
                                 class="fee-checkbox ui-checkbox"
                                 aria-label="Gebühr für {{ $fee->event->title }} auswählen">
                         </td>
-                        <td>
+                        <td class="max-sm:w-32 max-sm:hyphens-auto">
                             {{ Str::limit($fee->event->title, 40) }}
                             <span
                                 class="block text-small tabular-nums text-muted">{{ $fee->created_at->format('d.m.Y H:i') }}</span>
                         </td>
-                        <td>{{ $fee->event->organizer->name }}</td>
-                        <td class="num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
-                        <td class="whitespace-nowrap">
+                        <td class="max-sm:hidden">{{ $fee->event->organizer->name }}</td>
+                        <td class="max-sm:hidden num">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
+                        <td class="max-sm:hidden whitespace-nowrap">
                             {{ (int) $startDate->diffInDays($endDate) }}
                             {{ (int) $startDate->diffInDays($endDate) === 1 ? 'Tag' : 'Tage' }}
                             <span class="block text-small tabular-nums text-muted">{{ $startDate->format('d.m.Y') }} –
@@ -112,7 +112,7 @@
                             <x-ui.status
                                 :tone="$payTone[$fee->payment_status] ?? 'neutral'">{{ $payLabel[$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status>
                         </td>
-                        <td class="whitespace-nowrap tabular-nums">
+                        <td class="max-sm:hidden whitespace-nowrap tabular-nums">
                             {{ $endDate->format('d.m.Y') }}
                             @if ($endDate->isPast())
                                 <span class="block text-small text-danger">Abgelaufen</span>

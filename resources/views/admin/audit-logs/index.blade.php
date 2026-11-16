@@ -40,11 +40,11 @@
         <thead>
             <tr>
                 <th scope="col">Datum/Zeit</th>
-                <th scope="col">Benutzer</th>
+                <th scope="col" class="max-sm:hidden">Benutzer</th>
                 <th scope="col">Aktion</th>
-                <th scope="col">Modell</th>
-                <th scope="col">IP</th>
-                <th scope="col">Beschreibung</th>
+                <th scope="col" class="max-sm:hidden">Modell</th>
+                <th scope="col" class="max-sm:hidden">IP</th>
+                <th scope="col" class="max-sm:hidden">Beschreibung</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
             </tr>
         </thead>
@@ -55,19 +55,19 @@
                 @endphp
                 <tr>
                     <td class="tabular-nums whitespace-nowrap">{{ $log->created_at->format('d.m.Y H:i') }}</td>
-                    <td class="whitespace-nowrap">{{ $log->user?->name ?? 'System' }}</td>
+                    <td class="max-sm:hidden whitespace-nowrap">{{ $log->user?->name ?? 'System' }}</td>
                     <td><x-ui.status
                             :tone="$actionTone">{{ \App\Support\AdminLabels::auditAction($log->action) }}</x-ui.status>
                     </td>
-                    <td class="whitespace-nowrap">
+                    <td class="max-sm:hidden whitespace-nowrap">
                         {{ $log->auditable_type ? \App\Support\AdminLabels::auditModel($log->auditable_type) : '-' }}
                     </td>
-                    <td class="tabular-nums whitespace-nowrap text-muted">{{ $log->ip_address }}</td>
-                    <td class="max-w-[220px] truncate" title="{{ $log->description }}">{{ $log->description ?? '-' }}
+                    <td class="max-sm:hidden tabular-nums whitespace-nowrap text-muted">{{ $log->ip_address }}</td>
+                    <td class="max-sm:hidden max-w-[220px] truncate" title="{{ $log->description }}">{{ $log->description ?? '-' }}
                     </td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.audit-logs.show', $log)">Details</x-ui.button>
-                        <x-ui.button variant="secondary" size="sm" type="submit"
+                        <x-ui.button variant="secondary" size="sm" type="submit" class="max-sm:hidden"
                             form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>
                         <form id="destroy-log-{{ $log->id }}"
                             action="{{ route('admin.audit-logs.destroy', $log) }}" method="POST" class="hidden"

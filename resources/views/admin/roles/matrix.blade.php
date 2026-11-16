@@ -12,7 +12,7 @@
     <x-ui.table label="Berechtigungen je Rolle" table-class="min-w-full">
         <thead>
             <tr>
-                <th scope="col" class="min-w-56">Berechtigung</th>
+                <th scope="col" class="sticky left-0 z-10 min-w-56 bg-zone max-sm:min-w-40">Berechtigung</th>
                 @foreach ($roles as $role)
                     <th scope="col" class="text-center">
                         {{ \App\Support\AccessLabels::role($role->name) }}
@@ -26,7 +26,7 @@
         <tbody>
             @foreach ($permissions as $group => $groupPermissions)
                 <tr class="bg-zone hover:bg-zone">
-                    <th scope="colgroup" colspan="{{ $roles->count() + 1 }}" ">
+                    <th scope="colgroup" colspan="{{ $roles->count() + 1 }}">
                         {{ \App\Support\AccessLabels::group($group) }}
                         <span class="font-normal text-muted tabular-nums">({{ $groupPermissions->count() }})</span>
                     </th>
@@ -34,7 +34,7 @@
 
                   @foreach ($groupPermissions as $permission)
                 <tr>
-                    <th scope="row">
+                    <th scope="row" class="sticky left-0 z-10 bg-surface max-sm:min-w-40">
                         <span>{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
                         @if ($permission->is_system)
                             <span class="text-caption font-normal text-muted">(System)</span>

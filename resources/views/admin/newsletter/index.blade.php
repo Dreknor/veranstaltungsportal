@@ -36,7 +36,7 @@
                     <tr>
                         <th scope="col">Veranstaltung</th>
                         <th scope="col">Beginn</th>
-                        <th scope="col">Ort</th>
+                        <th scope="col" class="max-sm:hidden">Ort</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,7 +45,7 @@
                             <th scope="row">{{ $event->title }}</th>
                             <td class="tabular-nums whitespace-nowrap">{{ $event->start_date->format('d.m.Y H:i') }} Uhr
                             </td>
-                            <td>{{ $event->isOnline() ? 'Online' : $event->venue_city }}</td>
+                            <td class="max-sm:hidden">{{ $event->isOnline() ? 'Online' : $event->venue_city }}</td>
                         </tr>
                     @endforeach
                 </tbody>

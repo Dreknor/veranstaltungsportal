@@ -38,8 +38,8 @@
             <tr>
                 <th scope="col">Datum/Zeit</th>
                 <th scope="col">Schweregrad</th>
-                <th scope="col">Kanal</th>
-                <th scope="col">Nachricht</th>
+                <th scope="col" class="max-sm:hidden">Kanal</th>
+                <th scope="col" class="max-sm:hidden">Nachricht</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
             </tr>
         </thead>
@@ -49,7 +49,7 @@
                     $levelTone = \App\Support\Ui::logLevelTone($log->level_name);
                 @endphp
                 <tr>
-                    <td class="tabular-nums whitespace-nowrap">
+                    <td class="tabular-nums whitespace-nowrap max-sm:whitespace-normal">
                         @if ($log->datetime)
                             @php
                                 try {
@@ -72,11 +72,11 @@
                         @endif
                     </td>
                     <td><x-ui.status :tone="$levelTone">{{ $log->level_name }}</x-ui.status></td>
-                    <td class="whitespace-nowrap">{{ $log->channel ?? '-' }}</td>
-                    <td class="max-w-[320px] truncate" title="{{ $log->message }}">{{ $log->message }}</td>
+                    <td class="max-sm:hidden whitespace-nowrap">{{ $log->channel ?? '-' }}</td>
+                    <td class="max-sm:hidden max-w-[320px] truncate" title="{{ $log->message }}">{{ $log->message }}</td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.system-logs.show', $log->id)">Details</x-ui.button>
-                        <x-ui.button variant="secondary" size="sm" type="submit"
+                        <x-ui.button variant="secondary" size="sm" type="submit" class="max-sm:hidden"
                             form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>
                         <form id="destroy-log-{{ $log->id }}"
                             action="{{ route('admin.system-logs.destroy', $log->id) }}" method="POST" class="hidden"

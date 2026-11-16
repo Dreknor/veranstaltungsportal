@@ -14,8 +14,8 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">E-Mail</th>
-                    <th scope="col">Abonniert seit</th>
+                    <th scope="col" class="max-sm:hidden">E-Mail</th>
+                    <th scope="col" class="max-sm:hidden">Abonniert seit</th>
                     <th scope="col">Rolle</th>
                 </tr>
             </thead>
@@ -26,11 +26,11 @@
                             <span class="flex items-center gap-3">
                                 <img class="h-10 w-10 flex-none rounded-full" src="{{ $subscriber->profilePhotoUrl() }}"
                                     alt="">
-                                {{ $subscriber->fullName() }}
+                                <span class="min-w-0">{{ $subscriber->fullName() }}<span class="block text-small font-normal break-all text-muted sm:hidden">{{ $subscriber->email }}</span></span>
                             </span>
                         </th>
-                        <td>{{ $subscriber->email }}</td>
-                        <td class="tabular-nums whitespace-nowrap">
+                        <td class="max-sm:hidden">{{ $subscriber->email }}</td>
+                        <td class="max-sm:hidden tabular-nums whitespace-nowrap">
                             {{ $subscriber->newsletter_subscribed_at ? $subscriber->newsletter_subscribed_at->format('d.m.Y H:i') : '–' }}
                         </td>
                         <td>
@@ -59,17 +59,17 @@
                 <tr>
                     <th scope="col">E-Mail</th>
                     <th scope="col">Abonniert seit</th>
-                    <th scope="col">Typ</th>
+                    <th scope="col" class="max-sm:hidden">Typ</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($guestSubscribers as $subscriber)
                     <tr>
-                        <th scope="row">{{ $subscriber->email }}</th>
+                        <th scope="row" class="break-all">{{ $subscriber->email }}</th>
                         <td class="tabular-nums whitespace-nowrap">
                             {{ $subscriber->subscribed_at ? date('d.m.Y H:i', strtotime($subscriber->subscribed_at)) : '–' }}
                         </td>
-                        <td>
+                        <td class="max-sm:hidden">
                             <x-ui.status tone="neutral">Gast</x-ui.status>
                         </td>
                     </tr>

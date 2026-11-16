@@ -106,7 +106,7 @@ test('Abzeichen-Seite mit deutschen Zahlen und gedeckeltem Fortschritt', functio
     $user->awardBadge($earned);
 
     // 2 Stunden eingecheckt: 2 von 3 Stunden (nicht 120 Minuten)
-    $event = Event::factory()->create(['start_date' => now()->subDay(), 'end_date' => now()->subDay()->addHours(2)]);
+    $event = Event::factory()->create(['start_date' => now()->subDay(), 'end_date' => now()->subDay()->addHours(2), 'duration' => 120]);
     Booking::factory()->create(['user_id' => $user->id, 'event_id' => $event->id, 'checked_in' => true]);
 
     $this->actingAs($user)->get(route('badges.index'))

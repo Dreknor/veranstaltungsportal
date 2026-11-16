@@ -61,21 +61,21 @@
         <x-ui.table label="Verbindungen">
             <thead>
                 <tr>
-                    <th scope="col">
+                    <th scope="col" class="max-sm:hidden">
                         <input type="checkbox" id="selectAll" class="ui-checkbox"
                             aria-label="Alle Verbindungen auswählen">
                     </th>
                     <th scope="col">Folgende Person</th>
-                    <th scope="col">Gefolgte Person</th>
+                    <th scope="col" class="max-sm:hidden">Gefolgte Person</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Erstellt</th>
+                    <th scope="col" class="max-sm:hidden">Erstellt</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($connections as $connection)
                     <tr>
-                        <td>
+                        <td class="max-sm:hidden">
                             <input type="checkbox" name="connection_ids[]" value="{{ $connection->id }}"
                                 class="connection-checkbox ui-checkbox"
                                 aria-label="Verbindung von {{ $connection->follower->name }} zu {{ $connection->following->name }} auswählen">
@@ -83,17 +83,17 @@
                         <td>
                             <div class="flex items-center gap-3">
                                 <img src="{{ $connection->follower->profilePhotoUrl() }}" alt=""
-                                    class="h-10 w-10 flex-none rounded-full">
+                                    class="h-10 w-10 flex-none rounded-full max-sm:hidden">
                                 <div class="min-w-0">
                                     {{ $connection->follower->name }}
-                                    <span class="block text-small text-muted">{{ $connection->follower->email }}</span>
+                                    <span class="block text-small break-all text-muted">{{ $connection->follower->email }}</span>
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td class="max-sm:hidden">
                             <div class="flex items-center gap-3">
                                 <img src="{{ $connection->following->profilePhotoUrl() }}" alt=""
-                                    class="h-10 w-10 flex-none rounded-full">
+                                    class="h-10 w-10 flex-none rounded-full max-sm:hidden">
                                 <div class="min-w-0">
                                     {{ $connection->following->name }}
                                     <span
@@ -105,11 +105,11 @@
                             <x-ui.status
                                 :tone="$statusTone[$connection->status] ?? 'neutral'">{{ $statusLabel[$connection->status] ?? ucfirst($connection->status) }}</x-ui.status>
                         </td>
-                        <td class="tabular-nums whitespace-nowrap">{{ $connection->created_at->format('d.m.Y H:i') }}
+                        <td class="max-sm:hidden tabular-nums whitespace-nowrap">{{ $connection->created_at->format('d.m.Y H:i') }}
                         </td>
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('admin.connections.show', $connection)">Details</x-ui.button>
-                            <x-ui.button size="sm" variant="secondary" type="submit"
+                            <x-ui.button size="sm" variant="secondary" type="submit" class="max-sm:hidden"
                                 :form="'delete-connection-' . $connection->id">Löschen</x-ui.button>
                         </td>
                     </tr>

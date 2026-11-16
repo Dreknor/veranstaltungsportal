@@ -12,7 +12,7 @@
                 description="Verwalten Sie Ihre E-Mail- und Push-Benachrichtigungen">
                 <!-- Email Notifications -->
                 <fieldset class="m-0 min-w-0 border-0 p-0">
-                    <legend class="mb-2 p-0 text-h3">E-Mail Benachrichtigungen</legend>
+                    <legend class="mb-2 p-0 text-h3">E-Mail-Benachrichtigungen</legend>
                     <div class="divide-y divide-line border-y border-line">
                         <x-ui.checkbox name="email_booking_confirmed" label="Buchungsbestätigung"
                             hint="Erhalten Sie eine E-Mail, wenn Ihre Buchung bestätigt wurde" :checked="$preferences['email_booking_confirmed'] ?? true" />

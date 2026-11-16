@@ -56,7 +56,7 @@
                         <tr>
                             <th scope="row">
                                 <span class="block">{{ $user->name }}</span>
-                                <span class="block text-small font-normal text-muted">{{ $user->email }}</span>
+                                <span class="block text-small font-normal break-all text-muted">{{ $user->email }}</span>
                                 @if ($user->hasRole('organizer'))
                                     <span class="block text-small font-normal text-ink-soft">Veranstalter</span>
                                 @endif
@@ -80,7 +80,7 @@
                     <tr>
                         <th scope="col">Veranstaltung</th>
                         <th scope="col">Status</th>
-                        <th scope="col">Angelegt</th>
+                        <th scope="col" class="max-sm:hidden">Angelegt</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -97,7 +97,7 @@
                                     <x-ui.status tone="warning">Entwurf</x-ui.status>
                                 @endif
                             </td>
-                            <td class="whitespace-nowrap text-muted">{{ $event->created_at->diffForHumans() }}</td>
+                            <td class="max-sm:hidden whitespace-nowrap text-muted">{{ $event->created_at->diffForHumans() }}</td>
                         </tr>
                     @empty
                         <tr class="hover:bg-transparent">

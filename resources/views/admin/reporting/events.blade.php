@@ -48,14 +48,14 @@
             <thead>
                 <tr>
                     <th scope="col">Kategorie</th>
-                    <th scope="col" class="num">Anzahl Veranstaltungen</th>
+                    <th scope="col" class="num">Anzahl</th>
                     <th scope="col" class="num">Umsatz</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($data['events_by_category'] as $category)
                     <tr>
-                        <th scope="row">{{ $category->name }}</th>
+                        <th scope="row" class="max-sm:w-32 max-sm:hyphens-auto">{{ $category->name }}</th>
                         <td class="num">{{ $category->events_count }}</td>
                         <td class="num">{{ \App\Support\Ui::money($category->bookings_sum_total ?? 0) }}</td>
                     </tr>

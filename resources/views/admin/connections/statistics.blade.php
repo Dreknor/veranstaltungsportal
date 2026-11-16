@@ -71,10 +71,10 @@
                             <td class="tabular-nums">{{ $index + 1 }}</td>
                             <td>
                                 <div class="flex items-center gap-3">
-                                    <img src="{{ $item['user']->profilePhotoUrl() }}" alt="" class="h-10 w-10 flex-none rounded-full">
+                                    <img src="{{ $item['user']->profilePhotoUrl() }}" alt="" class="h-10 w-10 flex-none rounded-full max-sm:hidden">
                                     <div class="min-w-0">
                                         {{ $item['user']->name }}
-                                        <span class="block text-small text-muted">{{ $item['user']->email }}</span>
+                                        <span class="block text-small break-all text-muted">{{ $item['user']->email }}</span>
                                     </div>
                                 </div>
                             </td>

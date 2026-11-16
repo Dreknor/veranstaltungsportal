@@ -22,34 +22,34 @@
             <thead>
                 <tr>
                     <th scope="col">Veranstaltung</th>
-                    <th scope="col">Veranstalter</th>
-                    <th scope="col">Zeitraum</th>
-                    <th scope="col">Dauer</th>
+                    <th scope="col" class="max-sm:hidden">Veranstalter</th>
+                    <th scope="col" class="max-sm:hidden">Zeitraum</th>
+                    <th scope="col" class="max-sm:hidden">Dauer</th>
                     <th scope="col" class="num">Gebühr</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Bezahlt am</th>
+                    <th scope="col" class="max-sm:hidden">Bezahlt am</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($featuredFees as $fee)
                     <tr>
-                        <th scope="row">
+                        <th scope="row" class="max-sm:w-32 max-sm:hyphens-auto">
                             {{ $fee->event->title ?? 'Veranstaltung gelöscht' }}
                             @if ($fee->event)
                                 <span
                                     class="block text-small font-normal tabular-nums text-muted">{{ $fee->event->start_date->format('d.m.Y H:i') }}</span>
                             @endif
                         </th>
-                        <td>
+                        <td class="max-sm:hidden">
                             {{ $fee->user->name ?? '–' }}
                             <span class="block text-small text-muted">{{ $fee->user->email ?? '' }}</span>
                         </td>
-                        <td class="whitespace-nowrap tabular-nums">
+                        <td class="max-sm:hidden whitespace-nowrap tabular-nums">
                             {{ $fee->featured_start_date->format('d.m.Y') }}
                             <span class="block text-small text-muted">bis
                                 {{ $fee->featured_end_date->format('d.m.Y') }}</span>
                         </td>
-                        <td class="whitespace-nowrap">
+                        <td class="max-sm:hidden whitespace-nowrap">
                             @if ($fee->duration_type === 'daily')
                                 1 Tag
                             @elseif ($fee->duration_type === 'weekly')
@@ -65,7 +65,7 @@
                             <x-ui.status
                                 :tone="$payTone[$fee->payment_status] ?? 'neutral'">{{ $payLabel[$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status>
                         </td>
-                        <td class="whitespace-nowrap tabular-nums">
+                        <td class="max-sm:hidden whitespace-nowrap tabular-nums">
                             @if ($fee->paid_at)
                                 {{ $fee->paid_at->format('d.m.Y H:i') }}
                                 @if ($fee->payment_method)
