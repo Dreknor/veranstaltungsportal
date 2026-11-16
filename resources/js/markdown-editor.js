@@ -39,15 +39,20 @@ export function markdownEditor({ previewUrl }) {
             if (lineEnd === -1) lineEnd = value.length;
 
             const lines = value.slice(lineStart, lineEnd).split('\n');
+            let n = 0;
             const text = lines
-                .map((line, i) => {
+                .map((line) => {
+                    // Leere Zeilen bleiben leer (sie trennen Absätze und Listen).
+                    if (line.trim() === '') return line;
                     const clean = line.replace(
                         /^(#{1,6}\s+|[-*+]\s+|\d+\.\s+)/,
                         '',
                     );
+                    n += 1;
                     return (
-                        (typeof prefix === 'function' ? prefix(i) : prefix) +
-                        clean
+                        (typeof prefix === 'function'
+                            ? prefix(n - 1)
+                            : prefix) + clean
                     );
                 })
                 .join('\n');
