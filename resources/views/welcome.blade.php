@@ -19,6 +19,7 @@
             @include('events.partials.search-bar', [
                 'categoryOptions' => $allCategories,
                 'searchClass' => 'max-w-[960px]',
+                'withFilters' => false,
             ])
         </div>
     </x-ui.zone>

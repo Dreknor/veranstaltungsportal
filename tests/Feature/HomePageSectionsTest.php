@@ -82,3 +82,16 @@ test('Startseite zeigt nur die acht Kategorien mit den meisten kommenden Veranst
         ->assertDontSee('href="'.route('events.index', ['category' => $categories[8]->id]).'"', false)
         ->assertDontSee('href="'.route('events.index', ['category' => $inactive->id]).'"', false);
 });
+
+it('shows the search row without the filter button on the start page', function () {
+    $html = $this->get('/')->assertOk()->getContent();
+
+    expect($html)->toContain('name="format"')
+        ->and($html)->toContain('name="zeitraum"')
+        ->and($html)->not->toContain('name="city"')
+        ->and($html)->not->toContain('filtersOpen');
+});
+
+it('keeps the filter button on the events page', function () {
+    $this->get(route('events.index'))->assertOk()->assertSee('name="city"', false);
+});
