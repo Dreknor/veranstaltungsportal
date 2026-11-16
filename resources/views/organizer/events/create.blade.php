@@ -7,7 +7,7 @@
         );
     @endphp
 
-    <x-ui.page-header title="Veranstaltung anlegen" :back-href="route('organizer.events.index')" back-label="Zurück zur Übersicht" />
+    <x-ui.page-header title="Veranstaltung anlegen" :back-href="route('organizer.events.index')" back-label="Zu den Veranstaltungen" />
 
     @if (!$canPublish)
         <x-ui.alert tone="warning" title="Veröffentlichung nicht möglich" class="mb-8 max-w-form">
@@ -73,7 +73,7 @@
 
                 <div class="flex flex-col gap-y-5">
                     <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                        <x-ui.field label="Start" name="start_date" type="datetime-local" required />
+                        <x-ui.field label="Beginn" name="start_date" type="datetime-local" required />
                         <x-ui.field label="Ende" name="end_date" type="datetime-local" required />
                     </div>
 
@@ -141,10 +141,10 @@
                     <div id="online-section" style="display: none;">
                         <h3 class="m-0 mb-4 text-h3 text-ink">Online-Zugang</h3>
                         <div class="flex flex-col gap-y-5">
-                            <x-ui.field :label="$star('Meeting/Konferenz-URL', 'online-required')" name="online_url" type="url"
+                            <x-ui.field :label="$star('Meeting- bzw. Konferenz-URL', 'online-required')" name="online_url" type="url"
                                 placeholder="https://zoom.us/j/123456789 oder https://meet.google.com/..."
                                 hint="Sichtbar nur für bestätigte und bezahlte Buchungen: in der Bestätigungs-E-Mail, auf der Buchungsseite und in den Erinnerungen 24 h und 3 h vor Beginn." />
-                            <x-ui.field label="Zugangs-/Meeting-Code" name="online_access_code" optional
+                            <x-ui.field label="Zugangs- bzw. Meeting-Code" name="online_access_code" optional
                                 placeholder="z. B. Meeting-ID, Passwort"
                                 hint="Falls ein separater Zugangscode für die Online-Veranstaltung benötigt wird." />
                         </div>
@@ -210,7 +210,7 @@
                 <div class="flex flex-col gap-y-5">
                     <x-ui.textarea label="Hinweise auf dem Ticket" name="ticket_notes" rows="4" optional
                         placeholder="z. B. Bitte Personalausweis mitbringen, Einlass ab 18:30 Uhr, etc."
-                        hint="Diese Hinweise werden auf allen generierten Tickets für diese Veranstaltung angezeigt. Maximal 1000 Zeichen." />
+                        hint="Diese Hinweise werden auf allen Tickets dieser Veranstaltung angezeigt. Höchstens 1000 Zeichen." />
 
                     <div>
                         <input type="hidden" name="requires_ticket" value="0">
@@ -246,7 +246,7 @@
                         </div>
 
                         {{-- Organisationsfeld --}}
-                        <x-ui.select label="Organisationsfeld bei Buchung & Personalisierung"
+                        <x-ui.select label="Organisationsfeld bei Buchung und Personalisierung"
                             name="organization_field_mode" selected="none" :options="[
                                 'none' => 'Nicht anzeigen',
                                 'optional' => 'Optional anzeigen',

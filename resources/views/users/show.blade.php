@@ -50,7 +50,7 @@
         <p class="m-0 mb-8 max-w-prose text-base text-ink">{{ $user->bio }}</p>
     @endif
 
-    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-5">
         <x-ui.stat label="Veranstaltungen besucht" :value="$stats['events_attended']" />
         @if ($user->isOrganizer())
             <x-ui.stat label="Veranstaltungen organisiert" :value="$stats['events_organized']" />

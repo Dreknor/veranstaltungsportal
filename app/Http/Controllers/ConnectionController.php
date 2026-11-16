@@ -21,9 +21,11 @@ class ConnectionController extends Controller
         $user = $request->user();
 
         $following = $user->following()
+            ->withCount(['bookings as events_attended_count' => fn ($query) => $query->where('checked_in', true)])
             ->paginate(12, ['*'], 'following');
 
         $followers = $user->followers()
+            ->withCount(['bookings as events_attended_count' => fn ($query) => $query->where('checked_in', true)])
             ->paginate(12, ['*'], 'followers');
 
         $stats = [
@@ -84,6 +86,10 @@ class ConnectionController extends Controller
                         ->orWhere('email', 'like', "%{$query}%");
                 });
             })
+            ->withCount([
+                'bookings as events_attended_count' => fn ($query) => $query->where('checked_in', true),
+                'followers',
+            ])
             ->paginate(12);
 
         return view('connections.search', compact('users', 'query'));
@@ -103,7 +109,7 @@ class ConnectionController extends Controller
 
         // Check if user allows connections
         $allowNetworking = isset($user->allow_networking) ? $user->allow_networking : true;
-        if (!$allowNetworking) {
+        if (! $allowNetworking) {
             return back()->with('error', 'Dieser Benutzer akzeptiert keine Verbindungsanfragen.');
         }
 
@@ -128,10 +134,12 @@ class ConnectionController extends Controller
         if ($connection->status === 'accepted') {
             // Auto-accepted because of mutual connection
             $user->notify(new ConnectionAcceptedNotification($currentUser));
+
             return back()->with('success', 'Sie folgen sich jetzt gegenseitig.');
         } else {
             // Pending - needs approval
             $user->notify(new ConnectionRequestNotification($currentUser));
+
             return back()->with('success', 'Verbindungsanfrage gesendet.');
         }
     }
@@ -250,4 +258,3 @@ class ConnectionController extends Controller
         return back()->with('error', 'Verbindungsanfrage nicht gefunden.');
     }
 }
-

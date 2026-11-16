@@ -30,7 +30,7 @@
     <section>
         <h2>Zahlungsstatus</h2>
         <ul>
-            <li><strong>Ausstehend:</strong> Zahlung noch nicht eingegangen</li>
+            <li><strong>Offen:</strong> Zahlung noch nicht eingegangen</li>
             <li><strong>Bezahlt:</strong> Zahlung bestätigt, Tickets verfügbar</li>
             <li><strong>Storniert:</strong> Buchung wurde storniert</li>
         </ul>

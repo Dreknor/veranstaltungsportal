@@ -15,38 +15,22 @@
 
     <section id="visibility">
         <h2>1. Profil-Sichtbarkeit steuern</h2>
-        <p>Sie können genau festlegen, wer welche Informationen Ihres Profils sehen kann.</p>
+        <p>Unter <strong>Einstellungen</strong> › <strong>Datenschutz</strong> legen Sie fest, wer was von Ihrem
+            Profil sehen kann.</p>
 
-        <h3>Sichtbarkeits-Stufen</h3>
-        <h3>Öffentlich</h3>
-        <p>Alle Nutzer können Ihr Profil sehen</p>
         <ul>
-            <li>Empfohlen für aktives Networking</li>
-            <li>Maximale Sichtbarkeit in der Community</li>
-            <li>Erhöht Chancen auf neue Verbindungen</li>
+            <li><strong>Vernetzung erlauben:</strong> Andere Nutzer können Ihnen Verbindungsanfragen senden und
+                Ihnen folgen</li>
+            <li><strong>Öffentliches Profil:</strong> Ihr Profil ist für alle angemeldeten Nutzer sichtbar, auch ohne
+                Verbindung.</li>
+            <li><strong>E-Mail und Telefonnummer an Verbindungen zeigen:</strong> Nur verbundene Nutzer sehen Ihre
+                Kontaktdaten, und nur, wenn Sie das jeweils einschalten</li>
         </ul>
 
-        <h3>Nur Verbindungen</h3>
-        <p>Nur Nutzer, denen Sie folgen oder die Ihnen folgen</p>
-        <ul>
-            <li>Ausgewogene Privatsphäre</li>
-            <li>Kontrollierter Zugriff</li>
-            <li>Ideal für selektives Networking</li>
-        </ul>
-
-        <h3>Privat</h3>
-        <p>Minimale Informationen sichtbar</p>
-        <ul>
-            <li>Nur Name und Profilbild</li>
-            <li>Keine Aktivitäten sichtbar</li>
-            <li>Maximale Privatsphäre</li>
-        </ul>
-
-        <h3>Einstellungen anpassen</h3>
         <ol>
             <li>Gehen Sie zu <strong>Einstellungen</strong> › <strong>Datenschutz</strong></li>
-            <li>Wählen Sie Ihre bevorzugte Sichtbarkeits-Stufe</li>
-            <li>Klicken Sie auf <strong>„Speichern“</strong></li>
+            <li>Schalten Sie die gewünschten Optionen ein oder aus</li>
+            <li>Speichern Sie Ihre Einstellungen</li>
         </ol>
     </section>
 
@@ -55,60 +39,29 @@
 
         <h3>Welche Daten speichern wir?</h3>
         <ul>
-            <li>
-                <strong>Profildaten:</strong>
-                <ul>
-                    <li>Name und E-Mail</li>
-                    <li>Profilbild</li>
-                    <li>Bio und Interessen</li>
-                    <li>Institution/Schule</li>
-                </ul>
-            </li>
-            <li>
-                <strong>Aktivitätsdaten:</strong>
-                <ul>
-                    <li>Gebuchte Veranstaltungen</li>
-                    <li>Bewertungen</li>
-                    <li>Favoriten</li>
-                    <li>Verbindungen</li>
-                </ul>
-            </li>
-            <li>
-                <strong>Sicherheitsdaten:</strong>
-                <ul>
-                    <li>Passwort (verschlüsselt)</li>
-                    <li>Login-Historie</li>
-                    <li>Sicherheitseinstellungen</li>
-                </ul>
-            </li>
-            <li>
-                <strong>Nutzungsdaten:</strong>
-                <ul>
-                    <li>Seitenaufrufe (anonymisiert)</li>
-                    <li>Suchverläufe</li>
-                    <li>Einstellungen</li>
-                </ul>
-            </li>
+            <li><strong>Profildaten:</strong> Name, E-Mail-Adresse, Telefonnummer, Profilbild, Bio und Interessen</li>
+            <li><strong>Aktivitätsdaten:</strong> Buchungen, Bewertungen, Favoriten, Verbindungen und Abzeichen</li>
+            <li><strong>Zugangsdaten:</strong> Ihr Passwort wird verschlüsselt gespeichert</li>
         </ul>
 
         <h3>Daten exportieren</h3>
         <ol>
             <li>Gehen Sie zu <strong>Einstellungen</strong> › <strong>Datenschutz</strong></li>
-            <li>Klicken Sie auf <strong>„Meine Daten exportieren“</strong></li>
-            <li>Sie erhalten eine JSON-Datei mit allen Ihren Daten</li>
+            <li>Öffnen Sie unter „Ihre Rechte nach DSGVO“ den Link <strong>„Meine Daten“</strong> und klicken Sie auf
+                <strong>„Daten als JSON exportieren“</strong></li>
+            <li>Laden Sie Ihre Daten als Datei herunter</li>
         </ol>
     </section>
 
     <section id="permissions">
         <h2>3. Berechtigungen</h2>
-        <p>Kontrollieren Sie, welche Funktionen auf Ihre Daten zugreifen dürfen.</p>
         <ul>
-            <li><strong>E-Mail-Benachrichtigungen:</strong> Erlauben Sie uns, Ihnen wichtige Updates per E-Mail zu
-                senden</li>
-            <li><strong>Push-Benachrichtigungen:</strong> Echtzeit-Updates im Browser</li>
-            <li><strong>Analyse & Verbesserung:</strong> Anonymisierte Nutzungsdaten zur Verbesserung der Plattform
-            </li>
-            <li><strong>Marketing:</strong> Informationen über neue Features und Angebote</li>
+            <li><strong>E-Mail-Benachrichtigungen:</strong> Legen Sie unter Einstellungen › Benachrichtigungen fest,
+                welche E-Mails Sie erhalten</li>
+            <li><strong>Push-Benachrichtigungen:</strong> Mitteilungen im Browser, einzeln pro Browser ein- und
+                ausschaltbar</li>
+            <li><strong>Datenanalyse:</strong> Anonymisierte Nutzungsdaten zur Verbesserung der Plattform; Sie können
+                dem unter Einstellungen › Datenschutz widersprechen</li>
         </ul>
     </section>
 
@@ -130,6 +83,6 @@
 
         <x-ui.alert tone="warning" title="Fragen zum Datenschutz?">Kontaktieren Sie unseren
             Datenschutzbeauftragten unter: <a
-                href="mailto:datenschutz@bildungsportal.de">datenschutz@bildungsportal.de</a></x-ui.alert>
+                href="mailto:datenschutz@esdigmbh.de">datenschutz@esdigmbh.de</a></x-ui.alert>
     </section>
 </x-help.article>

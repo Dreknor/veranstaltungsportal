@@ -30,8 +30,11 @@ class PushSubscriptionController extends Controller
         $validated = $request->validate([
             'endpoint' => ['required', 'string', 'url:https', 'max:'.PushSubscription::ENDPOINT_MAX_LENGTH],
             'keys' => ['required', 'array'],
-            'keys.p256dh' => ['required', 'string', 'max:255'],
-            'keys.auth' => ['required', 'string', 'max:255'],
+            // Browser liefern den öffentlichen Schlüssel (65 Byte, unkomprimierter P-256-Punkt) und das
+            // Auth-Geheimnis (16 Byte) base64url-kodiert. Anderes lässt sich später nicht verschlüsseln
+            // (Fehler "Base64Url::encode(): Argument #1 must be of type string, false given" beim Versand).
+            'keys.p256dh' => ['required', 'string', 'max:255', fn ($attribute, $value, $fail) => self::decodedLength($value) === 65 && str_starts_with((string) self::decode($value), "\x04") ?: $fail('Der Schlüssel des Browsers ist ungültig.')],
+            'keys.auth' => ['required', 'string', 'max:255', fn ($attribute, $value, $fail) => self::decodedLength($value) === 16 ?: $fail('Das Auth-Geheimnis des Browsers ist ungültig.')],
             'contentEncoding' => ['nullable', 'string', Rule::enum(ContentEncoding::class)],
         ]);
 
@@ -114,5 +117,23 @@ class PushSubscriptionController extends Controller
         $preferences[PushNotifications::PREFERENCE] = $enabled;
 
         $user->forceFill(['notification_preferences' => $preferences])->save();
+    }
+
+    private static function decode(mixed $value): string|false
+    {
+        if (! is_string($value) || $value === '' || preg_match('/^[A-Za-z0-9_-]+={0,2}$/', $value) !== 1) {
+            return false;
+        }
+
+        $value = rtrim(strtr($value, '-_', '+/'), '=');
+
+        return base64_decode($value.str_repeat('=', (4 - strlen($value) % 4) % 4), true);
+    }
+
+    private static function decodedLength(mixed $value): ?int
+    {
+        $decoded = self::decode($value);
+
+        return $decoded === false ? null : strlen($decoded);
     }
 }

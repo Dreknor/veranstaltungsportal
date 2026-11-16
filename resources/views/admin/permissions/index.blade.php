@@ -1,4 +1,9 @@
 <x-layouts.app title="Berechtigungen verwalten">
+    @php
+        // Spalten nur, wenn es etwas zu zeigen gibt (sonst steht in jeder Zeile "–")
+        $showDescription = $permissions->flatten()->contains(fn($permission) => filled($permission->description));
+        $showSystem = $permissions->flatten()->contains(fn($permission) => $permission->is_system);
+    @endphp
     <x-ui.page-header title="Berechtigungen verwalten" :subtitle="$permissions->flatten()->count() . ' Berechtigungen gesamt'" :back-href="route('admin.roles.index')" back-label="Zurück zu Rollen">
         <x-slot:actions>
             <x-ui.button :href="route('admin.permissions.create')">
@@ -30,9 +35,13 @@
                     <thead>
                         <tr>
                             <th scope="col">Name</th>
-                            <th scope="col" class="max-sm:hidden">Beschreibung</th>
+                            @if ($showDescription)
+                                <th scope="col" class="max-sm:hidden">Beschreibung</th>
+                            @endif
                             <th scope="col" class="max-sm:hidden">Rollen</th>
-                            <th scope="col" class="max-sm:hidden">System</th>
+                            @if ($showSystem)
+                                <th scope="col" class="max-sm:hidden">System</th>
+                            @endif
                             <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                         </tr>
                     </thead>
@@ -44,13 +53,11 @@
                                         class="block">{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
                                     <span class="block text-small font-normal text-muted">{{ $permission->name }}</span>
                                 </th>
-                                <td class="max-sm:hidden text-muted">{{ $permission->description ?? '–' }}</td>
+                                @if ($showDescription)
+                                    <td class="max-sm:hidden text-muted">{{ $permission->description ?? '–' }}</td>
+                                @endif
                                 <td class="max-sm:hidden">
-                                    @foreach ($permission->roles->take(3) as $role)
-                                        {{ \App\Support\AccessLabels::role($role->name) }}@if (!$loop->last)
-                                            ,
-                                        @endif
-                                    @endforeach
+                                    {{ $permission->roles->take(3)->map(fn($role) => \App\Support\AccessLabels::role($role->name))->implode(', ') }}
                                     @if ($permission->roles->count() > 3)
                                         <span class="text-muted">+{{ $permission->roles->count() - 3 }} mehr</span>
                                     @endif
@@ -58,12 +65,15 @@
                                         <span class="text-muted">keine</span>
                                     @endif
                                 </td>
-                                <td class="max-sm:hidden">{{ $permission->is_system ? 'System' : '–' }}</td>
+                                @if ($showSystem)
+                                    <td class="max-sm:hidden">{{ $permission->is_system ? 'System' : '–' }}</td>
+                                @endif
                                 <td class="actions">
                                     <x-ui.button size="sm" variant="secondary"
                                         :href="route('admin.permissions.edit', $permission)">Bearbeiten</x-ui.button>
                                     @if (!$permission->is_system)
-                                        <x-ui.button size="sm" variant="secondary" type="submit" class="max-sm:hidden"
+                                        <x-ui.button size="sm" variant="secondary" type="submit"
+                                            class="max-sm:hidden"
                                             form="delete-permission-{{ $permission->id }}">Löschen</x-ui.button>
                                         <form id="delete-permission-{{ $permission->id }}"
                                             action="{{ route('admin.permissions.destroy', $permission) }}"

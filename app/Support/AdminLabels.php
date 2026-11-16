@@ -46,7 +46,7 @@ class AdminLabels
 
     private const PAYMENT_STATUS = [
         'paid' => 'Bezahlt',
-        'pending' => 'Ausstehend',
+        'pending' => 'Offen',
         'refunded' => 'Erstattet',
         'failed' => 'Fehlgeschlagen',
         'extern' => 'Extern',

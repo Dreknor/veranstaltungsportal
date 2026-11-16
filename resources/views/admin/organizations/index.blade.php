@@ -46,7 +46,7 @@
                         </span>
                     </th>
                     <td class="max-sm:hidden">
-                        <span class="block">{{ $organization->owner->name ?? 'N/A' }}</span>
+                        <span class="block">{{ $organization->owner?->fullName() ?? '–' }}</span>
                         <span class="block text-small text-muted">{{ $organization->owner->email ?? 'N/A' }}</span>
                     </td>
                     <td class="max-sm:hidden num">{{ $organization->events_count }}</td>

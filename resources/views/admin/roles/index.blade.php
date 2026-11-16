@@ -17,7 +17,7 @@
                     <th scope="col">Rolle</th>
                     <th scope="col" class="max-sm:hidden">Berechtigungen</th>
                     <th scope="col" class="max-sm:hidden num">Benutzer</th>
-                    <th scope="col" class="max-sm:hidden num">Anzahl</th>
+                    <th scope="col" class="max-sm:hidden num">Rechte gesamt</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                 </tr>
             </thead>
@@ -35,13 +35,7 @@
                             @endif
                         </th>
                         <td class="max-sm:hidden text-small">
-                            @foreach ($role->permissions->take(4) as $permission)
-                                <span
-                                    class="whitespace-nowrap">{{ \App\Support\AccessLabels::permission($permission->name) }}</span>
-                                @if (!$loop->last)
-                                    ,
-                                @endif
-                            @endforeach
+                            {{ $role->permissions->take(4)->map(fn($permission) => \App\Support\AccessLabels::permission($permission->name))->implode(', ') }}
                             @if ($role->permissions->count() > 4)
                                 <span class="text-muted">+{{ $role->permissions->count() - 4 }} mehr</span>
                             @endif

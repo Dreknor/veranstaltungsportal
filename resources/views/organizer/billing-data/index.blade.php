@@ -38,7 +38,7 @@
     <div class="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
         <p class="m-0 text-ui text-muted tabular-nums">
             {{ trans_choice('{1} :count Buchung|[0,*] :count Buchungen', $bookings->total()) }}</p>
-        <x-ui.button type="submit" form="bulk-form" size="sm" variant="secondary">Auswahl als fakturiert
+        <x-ui.button type="submit" form="bulk-form" variant="secondary">Auswahl als fakturiert
             markieren</x-ui.button>
     </div>
 
@@ -52,13 +52,13 @@
                     </label>
                 </th>
                 <th scope="col">Buchungsnr.</th>
-                <th scope="col">Veranstaltung</th>
-                <th scope="col">Kunde</th>
-                <th scope="col">Firma</th>
-                <th scope="col" class="num">Betrag</th>
-                <th scope="col">Datum</th>
-                <th scope="col">Status</th>
-                <th scope="col">Ext. Rechnungsnr.</th>
+                <th scope="col" class="max-sm:hidden">Veranstaltung</th>
+                <th scope="col" class="max-sm:hidden">Kunde</th>
+                <th scope="col" class="max-sm:hidden">Firma</th>
+                <th scope="col" class="num max-sm:hidden">Betrag</th>
+                <th scope="col" class="max-sm:hidden">Datum</th>
+                <th scope="col" class="max-sm:hidden">Status</th>
+                <th scope="col" class="max-sm:hidden">Ext. Rechnungsnr.</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktion</span></th>
             </tr>
         </thead>
@@ -72,25 +72,39 @@
                             <span class="sr-only">Buchung {{ $booking->booking_number }} auswählen</span>
                         </label>
                     </td>
-                    <td class="tabular-nums whitespace-nowrap">{{ $booking->booking_number }}</td>
-                    <td>
+                    <td class="tabular-nums max-sm:min-w-0 sm:whitespace-nowrap">
+                        {{ $booking->booking_number }}
+                        <span
+                            class="mt-1 block text-small text-muted sm:hidden">{{ $booking->event->title ?? '–' }}</span>
+                        <span class="block text-small text-muted sm:hidden">{{ $booking->customer_name }} ·
+                            {{ format_currency($booking->total) }}</span>
+                        <span class="mt-1 block sm:hidden">
+                            @if ($booking->externally_invoiced)
+                                <x-ui.status tone="success">Fakturiert</x-ui.status>
+                            @else
+                                <x-ui.status tone="warning">Offen</x-ui.status>
+                            @endif
+                        </span>
+                    </td>
+                    <td class="max-sm:hidden">
                         {{ $booking->event->title ?? '–' }}
                         <span
                             class="block text-small text-muted tabular-nums">{{ $booking->event->start_date?->format('d.m.Y') }}</span>
                     </td>
-                    <td>
+                    <td class="max-sm:hidden">
                         {{ $booking->customer_name }}
                         <span class="block text-small text-muted">{{ $booking->customer_email }}</span>
                     </td>
-                    <td>
+                    <td class="max-sm:hidden">
                         {{ $booking->billing_company ?: '–' }}
                         @if ($booking->billing_vat_id)
                             <span class="block text-small text-muted">USt: {{ $booking->billing_vat_id }}</span>
                         @endif
                     </td>
-                    <td class="num">{{ format_currency($booking->total) }}</td>
-                    <td class="tabular-nums whitespace-nowrap">{{ $booking->created_at->format('d.m.Y') }}</td>
-                    <td>
+                    <td class="num max-sm:hidden">{{ format_currency($booking->total) }}</td>
+                    <td class="tabular-nums whitespace-nowrap max-sm:hidden">
+                        {{ $booking->created_at->format('d.m.Y') }}</td>
+                    <td class="max-sm:hidden">
                         @if ($booking->externally_invoiced)
                             <x-ui.status tone="success">Fakturiert</x-ui.status>
                             @if ($booking->externally_invoiced_at)
@@ -98,10 +112,10 @@
                                     class="mt-0.5 block text-small text-muted tabular-nums">{{ $booking->externally_invoiced_at->format('d.m.Y') }}</span>
                             @endif
                         @else
-                            <x-ui.status tone="warning">Ausstehend</x-ui.status>
+                            <x-ui.status tone="warning">Offen</x-ui.status>
                         @endif
                     </td>
-                    <td class="tabular-nums">{{ $booking->external_invoice_number ?: '–' }}</td>
+                    <td class="tabular-nums max-sm:hidden">{{ $booking->external_invoice_number ?: '–' }}</td>
                     <td class="actions">
                         @if (!$booking->externally_invoiced)
                             <form method="POST" action="{{ route('organizer.billing-data.mark-invoiced', $booking) }}"
@@ -113,7 +127,8 @@
                                         size="sm" :old="false" aria-label="Externe Rechnungsnummer (optional)"
                                         placeholder="Ext. Rechnungsnr. (optional)" class="w-48" />
                                 </div>
-                                <x-ui.button size="sm" variant="secondary" x-show="!open" @click="open = true">Als
+                                <x-ui.button size="sm" variant="secondary" wrap x-show="!open"
+                                    @click="open = true">Als
                                     fakturiert markieren</x-ui.button>
                                 <x-ui.button type="submit" size="sm" x-show="open"
                                     x-cloak>Speichern</x-ui.button>

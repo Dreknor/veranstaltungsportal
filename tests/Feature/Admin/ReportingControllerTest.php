@@ -145,5 +145,31 @@ class ReportingControllerTest extends TestCase
         $this->assertEquals(2, $funnel['bookings_completed']);
         $this->assertEquals(40, $funnel['completion_rate']);
     }
-}
 
+    public function test_revenue_by_category_counts_paid_bookings_of_older_events(): void
+    {
+        $category = \App\Models\EventCategory::factory()->create();
+        $event = \App\Models\Event::factory()->create(['event_category_id' => $category->id, 'created_at' => now()->subYear()]);
+        \App\Models\Booking::factory()->create(['event_id' => $event->id, 'payment_status' => 'paid', 'total' => 120]);
+        \App\Models\Booking::factory()->create(['event_id' => $event->id, 'payment_status' => 'pending', 'total' => 999]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.reporting.revenue', ['period' => '30days']));
+
+        $response->assertOk();
+        $row = $response->viewData('data')['revenue_by_category']->firstWhere('id', $category->id);
+        $this->assertEquals(120, $row->bookings_sum_total);
+    }
+
+    public function test_users_report_lists_real_roles_and_full_names(): void
+    {
+        $admin = User::factory()->create(['first_name' => 'Ada', 'last_name' => 'Admin']);
+        $admin->assignRole('admin');
+
+        $response = $this->actingAs($admin)->get(route('admin.reporting.users'));
+
+        $response->assertOk();
+        $labels = collect($response->viewData('data')['user_roles'])->pluck('label');
+        $this->assertTrue($labels->contains('Administrator'));
+        $response->assertSee('Ada Admin');
+    }
+}

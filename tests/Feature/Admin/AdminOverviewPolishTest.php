@@ -208,4 +208,36 @@ class AdminOverviewPolishTest extends TestCase
         $this->assertSame('4,5 %', Ui::percent(4.5));
         $this->assertSame('33,3 %', Ui::percent(33.333));
     }
+
+    // Runde 2: Abzeichen-Anforderung und Organisationsseite
+
+    public function test_badge_pages_show_requirement_from_requirements_array(): void
+    {
+        $badge = Badge::factory()->create(['requirements' => ['events_attended' => 25]]);
+
+        $this->actingAs($this->admin)->get(route('admin.badges.index'))
+            ->assertOk()
+            ->assertSee('25 Veranstaltungen besucht (eingecheckt)');
+        $this->actingAs($this->admin)->get(route('admin.badges.show', $badge))
+            ->assertOk()
+            ->assertSee('25 Veranstaltungen besucht (eingecheckt)');
+    }
+
+    public function test_badge_requirement_summary_handles_aliases_and_empty(): void
+    {
+        $this->assertSame('3 Bezahlte Buchungen', Badge::factory()->make(['requirements' => ['bookings_made' => 3]])->requirementSummary());
+        $this->assertSame('', Badge::factory()->make(['requirements' => null])->requirementSummary());
+    }
+
+    public function test_organization_detail_has_no_text_after_layout(): void
+    {
+        $organization = Organization::factory()->create();
+
+        $html = $this->actingAs($this->admin)->get(route('admin.organizations.show', $organization))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('~</html>\s*\S~', $html);
+        $this->assertStringEndsNotWith(')', rtrim($html));
+    }
 }

@@ -1,5 +1,5 @@
 <x-layouts.app title="Veranstalter-Dashboard">
-    <x-ui.page-header title="Veranstalter-Dashboard" subtitle="Willkommen zurück, {{ auth()->user()->name }}.">
+    <x-ui.page-header title="Veranstalter-Dashboard" subtitle="Willkommen zurück, {{ auth()->user()->fullName() }}.">
         <x-slot:actions>
             <x-ui.button :href="route('organizer.events.create')">
                 <x-slot:icon><x-icon.plus /></x-slot:icon>
@@ -13,7 +13,7 @@
     @endphp
 
     <div @class([
-        'mb-12 grid gap-4 sm:grid-cols-2',
+        'mb-12 grid grid-cols-2 gap-4',
         'lg:grid-cols-4' => !$showPendingInvoices,
         'lg:grid-cols-3 xl:grid-cols-5' => $showPendingInvoices,
     ])>
@@ -74,7 +74,7 @@
                         </x-slot:meta>
                         <x-slot:aside>
                             <span
-                                class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
+                                class="text-base font-semibold whitespace-nowrap">{{ $booking->total > 0 ? \App\Support\Ui::money($booking->total) : 'kostenfrei' }}</span>
                             <x-ui.status :tone="\App\Support\Ui::bookingTone($booking->status)">{{ $booking->statusLabel() }}</x-ui.status>
                         </x-slot:aside>
                         <x-slot:action>

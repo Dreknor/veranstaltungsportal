@@ -2,7 +2,7 @@
     <x-ui.page-header title="Meine Verbindungen" subtitle="Vernetzen Sie sich mit anderen Pädagogen und Veranstalter" />
 
     <!-- Stats -->
-    <div class="mb-12 grid gap-4 sm:grid-cols-3">
+    <div class="mb-12 grid grid-cols-3 gap-4">
         <x-ui.stat label="Folge ich" :value="$stats['following_count']" />
         <x-ui.stat label="Folgen mir" :value="$stats['followers_count']" />
         <x-ui.stat label="Offene Anfragen" :value="$stats['pending_requests_count']" />
@@ -35,8 +35,7 @@
                 @foreach ($following as $user)
                     <x-ui.person-row :user="$user">
                         <x-slot:meta>
-                            <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
-                            <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen</span>
+                            <span class="text-ui font-medium tabular-nums">{{ trans_choice('{0} Keine besuchten Veranstaltungen|{1} 1 besuchte Veranstaltung|[2,*] :count besuchte Veranstaltungen', $user->events_attended_count) }}</span>
                         </x-slot:meta>
                         <x-slot:action>
                             <x-ui.button variant="secondary" :href="route('users.show', $user)" full>Profil</x-ui.button>
@@ -66,8 +65,7 @@
                 @foreach ($followers as $user)
                     <x-ui.person-row :user="$user">
                         <x-slot:meta>
-                            <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
-                            <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen</span>
+                            <span class="text-ui font-medium tabular-nums">{{ trans_choice('{0} Keine besuchten Veranstaltungen|{1} 1 besuchte Veranstaltung|[2,*] :count besuchte Veranstaltungen', $user->events_attended_count) }}</span>
                         </x-slot:meta>
                         <x-slot:action>
                             <x-ui.button variant="secondary" :href="route('users.show', $user)" full>Profil</x-ui.button>

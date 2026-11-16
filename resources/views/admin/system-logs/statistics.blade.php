@@ -25,12 +25,14 @@
                         $levelTone = \App\Support\Ui::logLevelTone($level->level_name);
                     @endphp
                     <tr>
-                        <th scope="row"><x-ui.status :tone="$levelTone">{{ $level->level_name }}</x-ui.status></th>
+                        <th scope="row"><x-ui.status
+                                :tone="$levelTone">{{ \App\Support\Ui::logLevelLabel($level->level_name) }}</x-ui.status>
+                        </th>
                         <td class="num">{{ number_format($level->count) }}</td>
                         <td class="hidden md:table-cell">
                             <x-ui.progress :value="$percentage" decorative />
                         </td>
-                        <td class="num">{{ \App\Support\Ui::percent($percentage) }}</td>
+                        <td class="num">{{ \App\Support\Ui::percent($percentage, 1, false) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">
@@ -60,7 +62,7 @@
                     <tr>
                         <th scope="row">{{ $channel->channel }}</th>
                         <td class="num">{{ number_format($channel->count) }}</td>
-                        <td class="num">{{ \App\Support\Ui::percent($percentage) }}</td>
+                        <td class="num">{{ \App\Support\Ui::percent($percentage, 1, false) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">
@@ -73,12 +75,13 @@
         </x-ui.table>
     </x-ui.section>
 
-    <x-ui.section title="Letzte Fehler (ERROR, CRITICAL, ALERT, EMERGENCY)">
+    <x-ui.section title="Letzte Fehler" description="Stufen Fehler, Kritisch, Alarm und Notfall">
         @forelse ($stats['recent_errors'] as $error)
             <div class="flex items-start justify-between gap-4 border-t border-line py-4 last:border-b">
                 <div class="min-w-0 flex-1">
                     <div class="mb-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                        <x-ui.status tone="danger">{{ $error->level_name }}</x-ui.status>
+                        <x-ui.status
+                            tone="danger">{{ \App\Support\Ui::logLevelLabel($error->level_name) }}</x-ui.status>
                         <span class="text-small text-muted tabular-nums">
                             @php
                                 try {

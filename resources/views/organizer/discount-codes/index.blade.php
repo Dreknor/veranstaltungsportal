@@ -13,32 +13,48 @@
             <thead>
                 <tr>
                     <th scope="col">Code</th>
-                    <th scope="col">Typ</th>
-                    <th scope="col" class="num">Wert</th>
-                    <th scope="col" class="num">Verwendet</th>
-                    <th scope="col">Gültig</th>
-                    <th scope="col">Status</th>
+                    <th scope="col" class="max-sm:hidden">Typ</th>
+                    <th scope="col" class="num max-sm:hidden">Wert</th>
+                    <th scope="col" class="num max-sm:hidden">Verwendet</th>
+                    <th scope="col" class="max-sm:hidden">Gültig</th>
+                    <th scope="col" class="max-sm:hidden">Status</th>
                     <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($discountCodes as $code)
                     <tr>
-                        <th scope="row" class="tabular-nums">{{ $code->code }}</th>
-                        <td>{{ $code->type === 'percentage' ? 'Prozent' : 'Festbetrag' }}</td>
-                        <td class="num">
-                            @if ($code->type === 'percentage')
-                                {{ rtrim(rtrim(number_format($code->value, 2, ',', '.'), '0'), ',') }} %
-                            @else
-                                {{ \App\Support\Ui::money($code->value) }}
-                            @endif
-                        </td>
-                        <td class="num">
+                        @php
+                            $valueText =
+                                $code->type === 'percentage'
+                                    ? rtrim(rtrim(number_format($code->value, 2, ',', '.'), '0'), ',') . ' %'
+                                    : \App\Support\Ui::money($code->value);
+                        @endphp
+                        <th scope="row" class="tabular-nums">
+                            {{ $code->code }}
+                            <span class="mt-1 block text-small font-normal text-muted sm:hidden">
+                                {{ $valueText }} ·
+                                {{ $code->usage_count }}{{ $code->usage_limit ? ' von ' . $code->usage_limit : '' }}
+                                verwendet
+                            </span>
+                            <span class="mt-1 block font-normal sm:hidden">
+                                @if ($code->is_active && $code->isValid())
+                                    <x-ui.status tone="success">Aktiv</x-ui.status>
+                                @elseif ($code->is_active && !$code->isValid())
+                                    <x-ui.status tone="warning">Abgelaufen</x-ui.status>
+                                @else
+                                    <x-ui.status tone="neutral">Inaktiv</x-ui.status>
+                                @endif
+                            </span>
+                        </th>
+                        <td class="max-sm:hidden">{{ $code->type === 'percentage' ? 'Prozent' : 'Festbetrag' }}</td>
+                        <td class="num max-sm:hidden">{{ $valueText }}</td>
+                        <td class="num max-sm:hidden">
                             {{ $code->usage_count }}@if ($code->usage_limit)
                                 / {{ $code->usage_limit }}
                             @endif
                         </td>
-                        <td class="tabular-nums whitespace-nowrap">
+                        <td class="tabular-nums whitespace-nowrap max-sm:hidden">
                             @if ($code->valid_from || $code->valid_until)
                                 @if ($code->valid_from)
                                     <span class="block">Ab: {{ $code->valid_from->format('d.m.Y') }}</span>
@@ -50,7 +66,7 @@
                                 <span class="text-muted">Unbegrenzt</span>
                             @endif
                         </td>
-                        <td>
+                        <td class="max-sm:hidden">
                             @if ($code->is_active && $code->isValid())
                                 <x-ui.status tone="success">Aktiv</x-ui.status>
                             @elseif ($code->is_active && !$code->isValid())

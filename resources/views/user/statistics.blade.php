@@ -6,7 +6,7 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$stats['total_bookings']" />
         <x-ui.stat label="Teilgenommen" :value="$stats['total_events_attended']" />
         <x-ui.stat label="Stunden gesamt" :value="\App\Support\Ui::number($stats['total_hours'], 1)" />
@@ -57,29 +57,33 @@
 
     <x-ui.section title="Buchungen pro Monat ({{ now()->year }})">
         @php $maxBookings = $stats['bookings_by_month']->max() ?: 1; @endphp
-        <ol class="m-0 grid h-64 list-none grid-cols-12 gap-1 p-0 sm:gap-2">
-            @foreach (range(1, 12) as $month)
-                @php
-                    $monthKey = str_pad($month, 2, '0', STR_PAD_LEFT);
-                    $bookingCount = $stats['bookings_by_month']->get($monthKey, 0);
-                    $heightPercent = ($bookingCount / $maxBookings) * 100;
-                @endphp
-                <li class="flex min-w-0 flex-col gap-1">
-                    <div class="relative flex-1">
-                        <div class="absolute inset-x-0 bottom-0 flex flex-col"
-                            style="height: {{ max($heightPercent, $bookingCount > 0 ? 2 : 0) }}%">
-                            <span
-                                class="absolute bottom-full w-full pb-1 text-center text-caption text-muted tabular-nums">
-                                {{ $bookingCount }}<span class="sr-only">
-                                    Buchung{{ $bookingCount != 1 ? 'en' : '' }}</span>
-                            </span>
-                            <div class="w-full flex-1 rounded-t-control bg-primary"></div>
+        @if ((int) $stats['bookings_by_month']->sum() === 0)
+            <x-ui.empty>In diesem Jahr gibt es noch keine Buchungen.</x-ui.empty>
+        @else
+            <ol class="m-0 grid h-64 list-none grid-cols-12 gap-1 p-0 sm:gap-2">
+                @foreach (range(1, 12) as $month)
+                    @php
+                        $monthKey = str_pad($month, 2, '0', STR_PAD_LEFT);
+                        $bookingCount = $stats['bookings_by_month']->get($monthKey, 0);
+                        $heightPercent = ($bookingCount / $maxBookings) * 100;
+                    @endphp
+                    <li class="flex min-w-0 flex-col gap-1">
+                        <div class="relative flex-1">
+                            <div class="absolute inset-x-0 bottom-0 flex flex-col"
+                                style="height: {{ max($heightPercent, $bookingCount > 0 ? 2 : 0) }}%">
+                                <span
+                                    class="absolute bottom-full w-full pb-1 text-center text-caption text-muted tabular-nums">
+                                    {{ $bookingCount }}<span class="sr-only">
+                                        Buchung{{ $bookingCount != 1 ? 'en' : '' }}</span>
+                                </span>
+                                <div class="w-full flex-1 rounded-t-control bg-primary"></div>
+                            </div>
                         </div>
-                    </div>
-                    <span
-                        class="border-t border-line pt-1 text-center text-caption text-muted">{{ \Carbon\Carbon::create()->month($month)->translatedFormat('M') }}</span>
-                </li>
-            @endforeach
-        </ol>
+                        <span
+                            class="border-t border-line pt-1 text-center text-caption text-muted">{{ \Carbon\Carbon::create()->month($month)->translatedFormat('M') }}</span>
+                    </li>
+                @endforeach
+            </ol>
+        @endif
     </x-ui.section>
 </x-layouts.app>

@@ -36,14 +36,14 @@ class ImpersonateController extends Controller
             $user,
             null,
             null,
-            "Admin " . auth()->user()->name . " hat Benutzer {$user->name} verkörpert"
+            "Admin " . auth()->user()->fullName() . " hat Benutzer {$user->fullName()} verkörpert"
         );
 
         // Login as the target user
         Auth::login($user);
 
         return redirect()->route('dashboard')
-            ->with('success', "Sie verkörpern jetzt {$user->name}. Klicken Sie auf 'Verkörperung beenden' um zurückzukehren.");
+            ->with('success', "Sie verkörpern jetzt {$user->fullName()}. Klicken Sie auf 'Verkörperung beenden' um zurückzukehren.");
     }
 
     public function leave()
@@ -55,7 +55,7 @@ class ImpersonateController extends Controller
 
         $impersonatedUser = auth()->user();
         $originalUserId = session('impersonator');
-        $originalUser = User::find($originalUserId);
+        $originalUser = User::find((int) $originalUserId);
 
         if (!$originalUser) {
             session()->forget('impersonator');
@@ -70,7 +70,7 @@ class ImpersonateController extends Controller
             $impersonatedUser,
             null,
             null,
-            "Admin {$originalUser->name} hat die Verkörperung von {$impersonatedUser->name} beendet"
+            "Admin {$originalUser->fullName()} hat die Verkörperung von {$impersonatedUser->fullName()} beendet"
         );
 
         // Clear impersonation session

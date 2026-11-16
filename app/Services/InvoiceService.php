@@ -2,40 +2,42 @@
 
 namespace App\Services;
 
-use App\Models\Event;
 use App\Models\Booking;
+use App\Models\Event;
 use App\Models\Invoice;
 use App\Models\PlatformFee;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class InvoiceService
 {
     protected InvoiceNumberService $invoiceNumberService;
+
     protected ZugferdInvoiceService $zugferdInvoiceService;
 
     public function __construct(
         InvoiceNumberService $invoiceNumberService,
         ZugferdInvoiceService $zugferdInvoiceService
     ) {
-        $this->invoiceNumberService  = $invoiceNumberService;
+        $this->invoiceNumberService = $invoiceNumberService;
         $this->zugferdInvoiceService = $zugferdInvoiceService;
     }
+
     /**
      * Generate platform fee invoice after event ends
      */
     public function generatePlatformFeeInvoice(Event $event)
     {
         // Check if event has ended
-        if (!$event->end_date || !$event->end_date->isPast()) {
+        if (! $event->end_date || ! $event->end_date->isPast()) {
             return null;
         }
 
         // Check if event has a user/organization
-        if (!$event->user) {
+        if (! $event->user) {
             Log::warning("Cannot generate platform fee invoice for event {$event->id}: No user/organization found");
+
             return null;
         }
 
@@ -74,7 +76,7 @@ class InvoiceService
             'event_id' => $event->id,
             'user_id' => $event->user?->id,
             'type' => 'platform_fee',
-            'recipient_name' => $event->user->organization_name ?? $event->user->name,
+            'recipient_name' => $event->user->organization_name ?? $event->user->fullName(),
             'recipient_email' => $event->user->email,
             'recipient_address' => $this->formatOrganizerAddress($event->user, $event),
             'amount' => $totalFees,
@@ -201,10 +203,10 @@ class InvoiceService
 
         // Extract counter length
         if (preg_match('/{COUNTER:(\d+)}/', $format, $matches)) {
-            $counterLength = (int)$matches[1];
+            $counterLength = (int) $matches[1];
 
             // Build search pattern replacing counter with wildcard
-            $searchPattern = str_replace('{COUNTER:' . $counterLength . '}', '%', $basePattern);
+            $searchPattern = str_replace('{COUNTER:'.$counterLength.'}', '%', $basePattern);
 
             // Fetch latest matching invoice and derive highest counter
             $lastInvoice = \App\Models\Invoice::where('invoice_number', 'like', $searchPattern)
@@ -214,7 +216,7 @@ class InvoiceService
             $newCounter = 1;
             if ($lastInvoice) {
                 // Build regex to capture trailing counter digits of given length
-                $counterRegex = '/(\d{' . $counterLength . '})$/';
+                $counterRegex = '/(\d{'.$counterLength.'})$/';
                 if (preg_match($counterRegex, $lastInvoice->invoice_number, $m)) {
                     $newCounter = ((int) $m[1]) + 1;
                 }
@@ -224,14 +226,14 @@ class InvoiceService
 
             // Final replacement including counter
             return str_replace(
-                ['{YEAR}', '{MONTH}', '{COUNTER:' . $counterLength . '}', '{ORG}'],
+                ['{YEAR}', '{MONTH}', '{COUNTER:'.$counterLength.'}', '{ORG}'],
                 [$year, $month, $counterStr, $orgId],
                 $format
             );
         }
 
         // Fallback if no counter placeholder
-        return $basePattern . '-' . date('YmdHis');
+        return $basePattern.'-'.date('YmdHis');
     }
 
     /**
@@ -261,7 +263,7 @@ class InvoiceService
     private function getOrganizerBillingData($user, $event = null)
     {
         // If no user provided, try to get data from event
-        if (!$user) {
+        if (! $user) {
             if ($event) {
                 return [
                     'company_name' => $event->getOrganizerName(),
@@ -304,7 +306,7 @@ class InvoiceService
             // Resolve absolute logo path for DomPDF
             $logoPath = null;
             if ($organization->logo) {
-                $abs = public_path('storage/' . $organization->logo);
+                $abs = public_path('storage/'.$organization->logo);
                 if (file_exists($abs)) {
                     $logoPath = $abs;
                 }
@@ -329,7 +331,7 @@ class InvoiceService
         $billingData = $user->organizer_billing_data ?? [];
 
         return [
-            'company_name' => $billingData['company_name'] ?? $user->organization_name ?? $user->name,
+            'company_name' => $billingData['company_name'] ?? $user->organization_name ?? $user->fullName(),
             'address' => $billingData['company_address'] ?? '',
             'postal_code' => $billingData['company_postal_code'] ?? '',
             'city' => $billingData['company_city'] ?? '',
@@ -349,7 +351,7 @@ class InvoiceService
     private function formatOrganizerAddress($user, $event = null)
     {
         // If no user provided, return empty address
-        if (!$user) {
+        if (! $user) {
             return '';
         }
 
@@ -403,8 +405,8 @@ class InvoiceService
                 'quantity' => $fees->count(),
                 'unit_price' => $fees->avg('fee_amount'),
                 'total' => $fees->sum('fee_amount'),
-                'details' => "Gebühr: " . number_format($actualFeePercentage, 2) . "% pro Buchung",
-            ]
+                'details' => 'Gebühr: '.number_format($actualFeePercentage, 2).'% pro Buchung',
+            ],
         ];
     }
 
@@ -424,21 +426,21 @@ class InvoiceService
         $items = [];
 
         foreach ($featuredFees as $fee) {
-            $durationLabel = match($fee->duration_type) {
+            $durationLabel = match ($fee->duration_type) {
                 'daily' => '1 Tag',
                 'weekly' => '7 Tage (1 Woche)',
                 'monthly' => '30 Tage (1 Monat)',
-                'custom' => $fee->duration_days . ' Tage',
+                'custom' => $fee->duration_days.' Tage',
                 default => 'Custom',
             };
 
             $items[] = [
-                'description' => "Featured Event Gebühr",
+                'description' => 'Featured Event Gebühr',
                 'quantity' => 1,
                 'unit_price' => $fee->fee_amount,
                 'total' => $fee->fee_amount,
                 'details' => sprintf(
-                    "Zeitraum: %s - %s (%s)",
+                    'Zeitraum: %s - %s (%s)',
                     $fee->featured_start_date->format('d.m.Y'),
                     $fee->featured_end_date->format('d.m.Y'),
                     $durationLabel
@@ -474,18 +476,18 @@ class InvoiceService
         $filename = "invoice-{$invoice->invoice_number}.pdf";
         $path = storage_path("app/invoices/{$filename}");
 
-        if (!file_exists(storage_path('app/invoices'))) {
+        if (! file_exists(storage_path('app/invoices'))) {
             mkdir(storage_path('app/invoices'), 0755, true);
         }
 
         // ZUGFeRD-XML (EN 16931) in das PDF einbetten
-        $rawPdfContent    = $pdf->output();
+        $rawPdfContent = $pdf->output();
         $zugferdPdfContent = $this->zugferdInvoiceService->embedZugferdInPdfFromInvoice($rawPdfContent, $invoice);
 
         file_put_contents($path, $zugferdPdfContent);
 
         $invoice->update([
-            'pdf_path' => "invoices/{$filename}"
+            'pdf_path' => "invoices/{$filename}",
         ]);
 
         return $path;
@@ -500,7 +502,7 @@ class InvoiceService
 
         Mail::send('emails.invoice', compact('invoice'), function ($message) use ($invoice, $ccEmail) {
             $message->to($invoice->recipient_email)
-                    ->subject("Rechnung {$invoice->invoice_number}");
+                ->subject("Rechnung {$invoice->invoice_number}");
 
             if ($ccEmail) {
                 $message->cc($ccEmail);
@@ -518,7 +520,7 @@ class InvoiceService
     private function getOrganizationFeePercentage($organization)
     {
         // Check if organization has custom fee settings
-        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+        if ($organization && ! empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
             $customFee = $organization->custom_platform_fee;
 
             if ($customFee['fee_type'] === 'percentage') {
@@ -536,13 +538,14 @@ class InvoiceService
     private function getOrganizationFeeAmount($organization, $bookingTotal)
     {
         // Check if organization has custom fee settings
-        if ($organization && !empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
+        if ($organization && ! empty($organization->custom_platform_fee) && ($organization->custom_platform_fee['enabled'] ?? false)) {
             $customFee = $organization->custom_platform_fee;
 
             if ($customFee['fee_type'] === 'fixed') {
                 return $customFee['fee_fixed_amount'] ?? 0;
             } elseif ($customFee['fee_type'] === 'percentage') {
                 $percentage = $customFee['fee_percentage'] ?? 0;
+
                 return $bookingTotal * ($percentage / 100);
             }
         }
@@ -554,6 +557,7 @@ class InvoiceService
             return config('monetization.platform_fee_fixed_amount', 0);
         } else {
             $percentage = config('monetization.platform_fee_percentage', 5.0);
+
             return $bookingTotal * ($percentage / 100);
         }
     }
@@ -567,57 +571,56 @@ class InvoiceService
         $booking->load(['event.organizer', 'items.ticketType']);
 
         $invoiceData = [
-            'booking'  => $booking,
-            'event'    => $booking->event,
-            'items'    => $this->getBookingItems($booking),
+            'booking' => $booking,
+            'event' => $booking->event,
+            'items' => $this->getBookingItems($booking),
             'organizer' => $this->getOrganizerBillingData($booking->event->user, $booking->event),
             'customer' => [
-                'name'    => $booking->customer_name,
-                'email'   => $booking->customer_email,
+                'name' => $booking->customer_name,
+                'email' => $booking->customer_email,
                 'address' => $this->formatBookingAddress($booking),
                 'company' => $booking->billing_company,
-                'vat_id'  => $booking->billing_vat_id,
+                'vat_id' => $booking->billing_vat_id,
             ],
         ];
 
         $rawPdf = PDF::loadView('invoices.booking-pdf', $invoiceData)->output();
 
         // ZUGFeRD-Daten aufbereiten für den Service
-        $taxRate    = 19.0;
+        $taxRate = 19.0;
         $grossTotal = 0.0;
         $zugferdItems = [];
 
         foreach ($booking->items as $item) {
-            $itemTotal   = $item->price * $item->quantity;
+            $itemTotal = $item->price * $item->quantity;
             $grossTotal += $itemTotal;
             $zugferdItems[] = [
                 'description' => $item->ticketType->name ?? 'Ticket',
                 'ticket_type' => $booking->event->title ?? '',
-                'quantity'    => $item->quantity,
-                'unit_price'  => $item->price,
-                'tax_rate'    => $taxRate,
-                'total'       => $itemTotal,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->price,
+                'tax_rate' => $taxRate,
+                'total' => $itemTotal,
             ];
         }
 
-        $discountAmount   = $booking->discount ?? 0;
-        $totalAmount      = $grossTotal - $discountAmount;
+        $discountAmount = $booking->discount ?? 0;
+        $totalAmount = $grossTotal - $discountAmount;
         $netAfterDiscount = $totalAmount / (1 + ($taxRate / 100));
-        $taxAmount        = $totalAmount - $netAfterDiscount;
+        $taxAmount = $totalAmount - $netAfterDiscount;
 
         $zugferdData = [
-            'items'          => $zugferdItems,
-            'grossTotal'     => $grossTotal,
-            'netTotal'       => $netAfterDiscount,
+            'items' => $zugferdItems,
+            'grossTotal' => $grossTotal,
+            'netTotal' => $netAfterDiscount,
             'discountAmount' => $discountAmount,
-            'taxRate'        => $taxRate,
-            'taxAmount'      => $taxAmount,
-            'totalAmount'    => $totalAmount,
-            'invoiceNumber'  => $booking->invoice_number ?? ('INV-' . $booking->id),
-            'invoiceDate'    => $booking->invoice_date ? $booking->invoice_date->format('d.m.Y') : now()->format('d.m.Y'),
+            'taxRate' => $taxRate,
+            'taxAmount' => $taxAmount,
+            'totalAmount' => $totalAmount,
+            'invoiceNumber' => $booking->invoice_number ?? ('INV-'.$booking->id),
+            'invoiceDate' => $booking->invoice_date ? $booking->invoice_date->format('d.m.Y') : now()->format('d.m.Y'),
         ];
 
         return $this->zugferdInvoiceService->embedZugferdInPdf($rawPdf, $booking, $zugferdData);
     }
 }
-

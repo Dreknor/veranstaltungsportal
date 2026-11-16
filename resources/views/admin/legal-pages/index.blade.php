@@ -21,10 +21,11 @@
 
                 <x-slot:meta>
                     @if ($page && $page->last_updated_at)
-                        <span class="text-ui font-medium tabular-nums">Zuletzt bearbeitet: {{ $page->last_updated_at->format('d.m.Y H:i') }} Uhr</span>
+                        <span class="text-ui font-medium tabular-nums">Zuletzt bearbeitet:
+                            {{ $page->last_updated_at->format('d.m.Y H:i') }} Uhr</span>
                     @endif
                     @if ($page && $page->editor)
-                        <span class="text-small text-muted">Von {{ $page->editor->name }}</span>
+                        <span class="text-small text-muted">Von {{ $page->editor->fullName() }}</span>
                     @endif
                 </x-slot:meta>
 

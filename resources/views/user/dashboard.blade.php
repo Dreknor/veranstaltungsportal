@@ -2,7 +2,7 @@
     <x-ui.page-header title="Willkommen zurück, {{ $user->fullName() }}"
         subtitle="Verwalten Sie Ihre Buchungen und Fortbildungen." />
 
-    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$stats['total_bookings']" :href="route('user.bookings')" />
         <x-ui.stat label="Anstehende Veranstaltungen" :value="$stats['upcoming_events']" :href="route('user.events.upcoming')" />
         <x-ui.stat label="Vergangene Veranstaltungen" :value="$stats['past_events']" :href="route('user.events.past')" />
@@ -80,7 +80,7 @@
                                 {{ $booking->created_at->format('d.m.Y') }} · {{ $booking->booking_number }}</span>
                             <x-slot:aside>
                                 <span
-                                    class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
+                                    class="text-base font-semibold whitespace-nowrap">{{ $booking->total > 0 ? \App\Support\Ui::money($booking->total) : 'kostenfrei' }}</span>
                                 <x-ui.status :tone="\App\Support\Ui::bookingTone($booking->status)">{{ $booking->statusLabel() }}</x-ui.status>
                             </x-slot:aside>
                             <x-slot:action>

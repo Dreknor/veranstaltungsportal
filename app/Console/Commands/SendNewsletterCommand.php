@@ -34,7 +34,7 @@ class SendNewsletterCommand extends Command
         $type = $this->option('type');
         $isTest = $this->option('test');
 
-        $this->info("📧 Preparing {$type} newsletter...");
+        $this->info("Newsletter ({$type}) wird vorbereitet ...");
 
         // Get upcoming events
         $upcomingEvents = Event::published()
@@ -45,7 +45,7 @@ class SendNewsletterCommand extends Command
             ->get();
 
         if ($upcomingEvents->isEmpty()) {
-            $this->warn('No upcoming events found. Newsletter not sent.');
+            $this->warn('Keine kommenden Veranstaltungen gefunden. Der Newsletter wurde nicht versendet.');
             return 0;
         }
 
@@ -60,10 +60,10 @@ class SendNewsletterCommand extends Command
         // Get subscribers
         if ($isTest) {
             $subscribers = User::role('admin')->get();
-            $this->info('Sending test newsletter to admins...');
+            $this->info('Test-Newsletter geht an die Administratoren ...');
         } else {
             $subscribers = User::where('newsletter_subscribed', true)->get();
-            $this->info("Found {$subscribers->count()} subscribers");
+            $this->info("{$subscribers->count()} registrierte Abonnenten gefunden");
         }
 
         $sent = 0;
@@ -83,21 +83,21 @@ class SendNewsletterCommand extends Command
                 ));
 
                 $sent++;
-                $this->line("✓ Sent to: {$subscriber->email}");
+                $this->line("Gesendet an: {$subscriber->email}");
             } catch (\Exception $e) {
                 $failed++;
-                $this->error("✗ Failed to send to {$subscriber->email}: {$e->getMessage()}");
+                $this->error("Versand an {$subscriber->email} fehlgeschlagen: {$e->getMessage()}");
             }
         }
 
         $this->newLine();
-        $this->info("📊 Newsletter sent successfully!");
+        $this->info("Newsletter-Versand abgeschlossen.");
         $this->table(
-            ['Status', 'Count'],
+            ['Status', 'Anzahl'],
             [
-                ['Sent', $sent],
-                ['Failed', $failed],
-                ['Total', $sent + $failed],
+                ['Gesendet', $sent],
+                ['Fehlgeschlagen', $failed],
+                ['Gesamt', $sent + $failed],
             ]
         );
 

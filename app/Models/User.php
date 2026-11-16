@@ -2,26 +2,18 @@
 
 namespace App\Models;
 
+use App\Notifications\CustomVerifyEmail;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Spatie\Permission\Traits\HasRoles;
-use App\Models\Event;
-use App\Models\Booking;
-use App\Models\EventCategory;
-use App\Models\Badge;
-use App\Models\UserBadge;
-use App\Models\EventReview;
-use App\Models\Organization;
-use App\Models\UserConnection;
-use App\Notifications\CustomVerifyEmail;
-use App\Notifications\ResetPasswordNotification;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property \Illuminate\Support\Carbon|null $email_verified_at
@@ -45,7 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasPushSubscriptions, Notifiable, HasRoles;
+    use HasFactory, HasPushSubscriptions, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -161,7 +153,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function initials(): string
     {
         if ($this->first_name && $this->last_name) {
-            return strtoupper(substr($this->first_name, 0, 1) . substr($this->last_name, 0, 1));
+            return strtoupper(substr($this->first_name, 0, 1).substr($this->last_name, 0, 1));
         }
 
         return Str::of($this->name)
@@ -175,11 +167,9 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function fullName(): string
     {
-        if ($this->first_name && $this->last_name) {
-            return trim($this->first_name . ' ' . $this->last_name);
-        }
+        $full = trim(trim((string) $this->first_name).' '.trim((string) $this->last_name));
 
-        return $this->name;
+        return $full !== '' ? $full : (string) $this->name;
     }
 
     /**
@@ -213,20 +203,22 @@ class User extends Authenticatable implements MustVerifyEmail
     public function anonymizedName(): string
     {
         if ($this->first_name) {
-            $lastInitial = $this->last_name ? mb_substr($this->last_name, 0, 1) . '.' : '';
-            return trim($this->first_name . ' ' . $lastInitial);
+            $lastInitial = $this->last_name ? mb_substr($this->last_name, 0, 1).'.' : '';
+
+            return trim($this->first_name.' '.$lastInitial);
         }
 
         // Fallback: Use first part of name or User ID
         if ($this->name) {
             $parts = explode(' ', $this->name);
             if (count($parts) > 1) {
-                return $parts[0] . ' ' . mb_substr($parts[1], 0, 1) . '.';
+                return $parts[0].' '.mb_substr($parts[1], 0, 1).'.';
             }
+
             return $this->name;
         }
 
-        return 'Benutzer #' . $this->id;
+        return 'Benutzer #'.$this->id;
     }
 
     /**
@@ -240,6 +232,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Generate a gravatar URL as fallback
         $hash = md5(strtolower(trim($this->email)));
+
         return "https://www.gravatar.com/avatar/{$hash}?d=mp&s=200";
     }
 
@@ -254,7 +247,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return Event::query()
             ->whereHas('organization.users', function ($query) {
                 $query->where('users.id', $this->id)
-                      ->where('organization_user.is_active', true);
+                    ->where('organization_user.is_active', true);
             });
     }
 
@@ -322,13 +315,15 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $organizationId = session('current_organization_id');
 
-        if (!$organizationId) {
+        if (! $organizationId) {
             // Auto-select first active organization
             $organization = $this->activeOrganizations()->first();
             if ($organization) {
                 session(['current_organization_id' => $organization->id]);
+
                 return $organization;
             }
+
             return null;
         }
 
@@ -340,7 +335,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function setCurrentOrganization(Organization $organization): void
     {
-        if (!$this->isMemberOf($organization)) {
+        if (! $this->isMemberOf($organization)) {
             throw new \Exception('User is not a member of this organization');
         }
 
@@ -414,7 +409,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isParticipant(): bool
     {
-        return $this->hasRole('user') && !$this->hasRole(['organizer', 'admin']);
+        return $this->hasRole('user') && ! $this->hasRole(['organizer', 'admin']);
     }
 
     /**
@@ -447,7 +442,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasCompleteBillingData(): bool
     {
-        if (!$this->isOrganizer()) {
+        if (! $this->isOrganizer()) {
             return true; // Non-organizers don't need billing data
         }
 
@@ -469,7 +464,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'company_country',
             'company_email',
             'company_phone',
-            'tax_id'
+            'tax_id',
         ];
 
         foreach ($requiredFields as $field) {
@@ -487,7 +482,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasCompleteBankAccount(): bool
     {
-        if (!$this->isOrganizer()) {
+        if (! $this->isOrganizer()) {
             return true; // Non-organizers don't need bank account
         }
 
@@ -501,7 +496,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $bankAccount = $this->bank_account ?? [];
 
         // Check required fields: account_holder, iban
-        return !empty($bankAccount['account_holder']) && !empty($bankAccount['iban']);
+        return ! empty($bankAccount['account_holder']) && ! empty($bankAccount['iban']);
     }
 
     /**
@@ -510,7 +505,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canPublishEvents(): bool
     {
-        if (!$this->isOrganizer()) {
+        if (! $this->isOrganizer()) {
             return false;
         }
 
@@ -530,17 +525,17 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getMissingOrganizerData(): array
     {
-        if (!$this->isOrganizer()) {
+        if (! $this->isOrganizer()) {
             return [];
         }
 
         $missing = [];
 
-        if (!$this->hasCompleteBillingData()) {
+        if (! $this->hasCompleteBillingData()) {
             $missing[] = 'billing_data';
         }
 
-        if (!$this->hasCompleteBankAccount()) {
+        if (! $this->hasCompleteBankAccount()) {
             $missing[] = 'bank_account';
         }
 
@@ -560,7 +555,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function isSsoUser(): bool
     {
-        return !empty($this->sso_provider);
+        return ! empty($this->sso_provider);
     }
 
     /**
@@ -569,7 +564,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canChangePassword(): bool
     {
-        return !$this->isSsoUser();
+        return ! $this->isSsoUser();
     }
 
     /**
@@ -580,13 +575,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->sso_provider ? ucfirst($this->sso_provider) : null;
     }
 
-
     /**
      * Get user's interested categories
      */
     public function interestedCategories()
     {
         $categoryIds = $this->interested_category_ids ?? [];
+
         return EventCategory::whereIn('id', $categoryIds)->get();
     }
 
@@ -596,6 +591,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isInterestedInCategory(int $categoryId): bool
     {
         $categoryIds = $this->interested_category_ids ?? [];
+
         return in_array($categoryId, $categoryIds);
     }
 
@@ -605,7 +601,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function addInterest(int $categoryId): void
     {
         $categoryIds = $this->interested_category_ids ?? [];
-        if (!in_array($categoryId, $categoryIds)) {
+        if (! in_array($categoryId, $categoryIds)) {
             $categoryIds[] = $categoryId;
             $this->interested_category_ids = $categoryIds;
             $this->save();
@@ -618,7 +614,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function removeInterest(int $categoryId): void
     {
         $categoryIds = $this->interested_category_ids ?? [];
-        $categoryIds = array_filter($categoryIds, fn($id) => $id != $categoryId);
+        $categoryIds = array_filter($categoryIds, fn ($id) => $id != $categoryId);
         $this->interested_category_ids = array_values($categoryIds);
         $this->save();
     }
@@ -705,7 +701,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function awardBadge(Badge $badge): void
     {
-        if (!$this->hasBadge($badge->id)) {
+        if (! $this->hasBadge($badge->id)) {
             $this->badges()->attach($badge->id, [
                 'earned_at' => now(),
             ]);
@@ -737,7 +733,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         if ($badge) {
             $this->badges()->updateExistingPivot($badgeId, [
-                'is_highlighted' => !$badge->pivot->is_highlighted,
+                'is_highlighted' => ! $badge->pivot->is_highlighted,
             ]);
         }
     }
@@ -750,7 +746,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $allBadges = Badge::active()->get();
 
         foreach ($allBadges as $badge) {
-            if (!$this->hasBadge($badge->id) && $this->meetsRequirements($badge)) {
+            if (! $this->hasBadge($badge->id) && $this->meetsRequirements($badge)) {
                 $this->awardBadge($badge);
             }
         }
@@ -1000,6 +996,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         if ($connection) {
             $connection->accept();
+
             return true;
         }
 
@@ -1136,6 +1133,7 @@ class User extends Authenticatable implements MustVerifyEmail
             if (empty($userCategories)) {
                 return false;
             }
+
             return count(array_intersect($categoryIds, $userCategories)) > 0;
         })->take($limit);
 
@@ -1170,7 +1168,7 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         // Legacy Fallback wenn Feld nicht gesetzt (behandle als öffentlich)
-        if (!isset($this->show_profile_public)) {
+        if (! isset($this->show_profile_public)) {
             return true;
         }
 

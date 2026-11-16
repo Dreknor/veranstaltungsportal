@@ -33,7 +33,7 @@
                     @endif
                     <x-slot:aside>
                         @unless ($booking->isFree())
-                            <span class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
+                            <span class="text-base font-semibold whitespace-nowrap">{{ $booking->total > 0 ? \App\Support\Ui::money($booking->total) : 'kostenfrei' }}</span>
                         @endunless
                         <x-ui.status :tone="$badge[1]">{{ $badge[0] }}</x-ui.status>
                     </x-slot:aside>

@@ -13,7 +13,7 @@
                 <div class="mb-4 flex items-center gap-4">
                     <img src="{{ $person->profilePhotoUrl() }}" alt="" class="h-16 w-16 flex-none rounded-full">
                     <div class="min-w-0">
-                        <span class="block text-h3">{{ $person->name }}</span>
+                        <span class="block text-h3">{{ $person->fullName() }}</span>
                         <span class="block text-small text-muted">{{ $person->email }}</span>
                     </div>
                 </div>

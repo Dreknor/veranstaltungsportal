@@ -1,7 +1,6 @@
 <x-help.article title="Benachrichtigungen" subtitle="Benachrichtigungen verwalten und einstellen">
     <p>
-        Bleiben Sie auf dem Laufenden mit personalisierten Benachrichtigungen zu Veranstaltungen, Buchungen und
-        Netzwerk-Aktivitäten.
+        Bleiben Sie auf dem Laufenden mit Benachrichtigungen zu Veranstaltungen, Buchungen und Verbindungen.
     </p>
 
     <nav aria-label="Inhalt">
@@ -16,83 +15,65 @@
     <section id="types">
         <h2>1. Benachrichtigungstypen</h2>
 
-        <h3>Veranstaltungs-Benachrichtigungen</h3>
+        <h3>Veranstaltungen</h3>
         <ul>
             <li>Neue Veranstaltungen in Ihren Interessengebieten</li>
             <li>Erinnerungen vor Veranstaltungsbeginn</li>
             <li>Änderungen an gebuchten Veranstaltungen</li>
-            <li>Absagen von Veranstaltungen</li>
+            <li>Absagen von Veranstaltungen oder einzelnen Terminen</li>
         </ul>
 
-        <h3>Buchungs-Benachrichtigungen</h3>
+        <h3>Buchungen</h3>
         <ul>
             <li>Buchungsbestätigungen</li>
-            <li>Zahlungsbestätigungen</li>
-            <li>Ticket-Verfügbarkeit</li>
+            <li>Änderungen des Zahlungs- oder Buchungsstatus</li>
             <li>Stornierungsbestätigungen</li>
         </ul>
 
-        <h3>Netzwerk-Benachrichtigungen</h3>
+        <h3>Netzwerk und Abzeichen</h3>
         <ul>
             <li>Neue Verbindungsanfragen</li>
-            <li>Akzeptierte Anfragen</li>
-            <li>Neue Follower</li>
-            <li>Aktivitäten von Verbindungen</li>
-        </ul>
-
-        <h3>System-Benachrichtigungen</h3>
-        <ul>
-            <li>Neue Abzeichen erhalten</li>
-            <li>Zertifikate verfügbar</li>
-            <li>Wichtige Systemupdates</li>
-            <li>Sicherheitshinweise</li>
+            <li>Angenommene und abgelehnte Anfragen</li>
+            <li>Neue Abzeichen</li>
         </ul>
     </section>
 
     <section id="settings">
         <h2>2. Einstellungen anpassen</h2>
         <ol>
-            <li>Klicken Sie oben rechts auf Ihren Namen</li>
+            <li>Öffnen Sie oben rechts das Menü mit Ihrem Namen</li>
             <li>Wählen Sie <strong>„Einstellungen“</strong></li>
-            <li>Navigieren Sie zu <strong>„Benachrichtigungen“</strong></li>
-            <li>Aktivieren/Deaktivieren Sie die gewünschten Benachrichtigungen</li>
-            <li>Klicken Sie auf <strong>„Speichern“</strong></li>
+            <li>Wechseln Sie zu <strong>„Benachrichtigungen“</strong></li>
+            <li>Schalten Sie die gewünschten E-Mail-Benachrichtigungen ein oder aus</li>
+            <li>Klicken Sie auf <strong>„Einstellungen speichern“</strong></li>
         </ol>
-
-        <x-ui.alert tone="info" title="Tipp">Sie können für jeden Benachrichtigungstyp getrennt einstellen, ob Sie
-            E-Mails oder nur In-App-Benachrichtigungen erhalten möchten.</x-ui.alert>
     </section>
 
     <section id="channels">
         <h2>3. Benachrichtigungskanäle</h2>
 
-        <h3>E-Mail-Benachrichtigungen</h3>
-        <p>Erhalten Sie wichtige Updates direkt in Ihr E-Mail-Postfach.</p>
-        <ul>
-            <li>Sofortige Zustellung</li>
-            <li>Detaillierte Informationen</li>
-            <li>Archivierbar für spätere Referenz</li>
-        </ul>
+        <h3>E-Mail</h3>
+        <p>Erhalten Sie wichtige Updates direkt in Ihr E-Mail-Postfach. Welche E-Mails Sie bekommen, legen Sie in den
+            Einstellungen fest.</p>
 
-        <h3>In-App-Benachrichtigungen</h3>
-        <p>Sehen Sie Benachrichtigungen direkt im Portal.</p>
-        <ul>
-            <li>Echtzeit-Updates</li>
-            <li>Zähler mit der Anzahl ungelesener Benachrichtigungen</li>
-            <li>Zentrale Übersicht aller Benachrichtigungen</li>
-        </ul>
+        <h3>Im Portal</h3>
+        <p>Alle Benachrichtigungen erscheinen außerdem unter <strong>Benachrichtigungen</strong> im Portal. Neben dem
+            Menüpunkt zeigt ein Zähler die Anzahl ungelesener Benachrichtigungen.</p>
+
+        <h3>Push im Browser</h3>
+        <p>Unter <strong>Einstellungen</strong> › <strong>Benachrichtigungen</strong> können Sie Push-Mitteilungen für
+            den jeweiligen Browser einschalten. Sie erhalten dann alle Benachrichtigungen auch dann, wenn das Portal
+            gerade nicht geöffnet ist.</p>
     </section>
 
     <section id="manage">
         <h2>4. Benachrichtigungen verwalten</h2>
-
-        <h3>Benachrichtigungszentrale</h3>
-        <p>Klicken Sie auf das Glockensymbol oben rechts, um alle Ihre Benachrichtigungen zu sehen.</p>
+        <p>Öffnen Sie <strong>Benachrichtigungen</strong> in der Navigation.</p>
         <ul>
-            <li><strong>Als gelesen markieren:</strong> Einzeln oder alle auf einmal als gelesen markieren</li>
-            <li><strong>Löschen:</strong> Einzelne Benachrichtigungen entfernen</li>
-            <li><strong>Filtern:</strong> Nach Typ oder Datum filtern</li>
-            <li><strong>Direkt reagieren:</strong> Auf Anfragen direkt aus der Benachrichtigung reagieren</li>
+            <li><strong>Details:</strong> Öffnet die zugehörige Seite und markiert die Benachrichtigung als gelesen
+            </li>
+            <li><strong>Als gelesen markieren:</strong> Einzeln oder mit „Alle als gelesen markieren“</li>
+            <li><strong>Löschen:</strong> Einzelne Benachrichtigungen oder mit „Gelesene löschen“ alle gelesenen</li>
         </ul>
     </section>
 </x-help.article>

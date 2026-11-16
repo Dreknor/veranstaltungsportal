@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -29,12 +31,7 @@ class SystemLogController extends Controller
         }
 
         // Filter by date range
-        if ($request->filled('from')) {
-            $query->whereDate('datetime', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $query->whereDate('datetime', '<=', $request->to);
-        }
+        $this->applyDateRange($query, $request->from, $request->to);
 
         // Search in message
         if ($request->filled('search')) {
@@ -126,12 +123,7 @@ class SystemLogController extends Controller
         if ($request->filled('channel')) {
             $query->where('channel', $request->channel);
         }
-        if ($request->filled('from')) {
-            $query->whereDate('datetime', '>=', $request->from);
-        }
-        if ($request->filled('to')) {
-            $query->whereDate('datetime', '<=', $request->to);
-        }
+        $this->applyDateRange($query, $request->from, $request->to);
         if ($request->filled('search')) {
             $query->where('message', 'like', '%' . $request->search . '%');
         }
@@ -171,8 +163,7 @@ class SystemLogController extends Controller
     {
         $stats = [
             'total' => DB::table(config('logtodb.collection', 'log'))->count(),
-            'today' => DB::table(config('logtodb.collection', 'log'))
-                ->whereDate('datetime', today())
+            'today' => $this->applyDateRange(DB::table(config('logtodb.collection', 'log')), today()->toDateString(), today()->toDateString())
                 ->count(),
             'week' => DB::table(config('logtodb.collection', 'log'))
                 ->where('datetime', '>=', now()->subDays(7))
@@ -198,5 +189,30 @@ class SystemLogController extends Controller
 
         return view('admin.system-logs.statistics', compact('stats'));
     }
-}
 
+    /**
+     * Das Paket speichert den Zeitpunkt als Text "2026-11-16 17:45:09:1109" (Millisekunden mit
+     * Doppelpunkt). SQLite kann daraus mit whereDate() kein Datum lesen und liefert 0 Treffer;
+     * deshalb wird als Textbereich auf Tagesgrenzen verglichen (Zeitzone: Anwendung, wie beim Schreiben).
+     */
+    private function applyDateRange(Builder $query, ?string $from, ?string $to): Builder
+    {
+        if (filled($from)) {
+            $query->where('datetime', '>=', $this->day($from)->startOfDay()->format('Y-m-d H:i:s'));
+        }
+        if (filled($to)) {
+            $query->where('datetime', '<', $this->day($to)->addDay()->startOfDay()->format('Y-m-d H:i:s'));
+        }
+
+        return $query;
+    }
+
+    private function day(string $value): Carbon
+    {
+        try {
+            return Carbon::parse($value);
+        } catch (\Throwable) {
+            return today();
+        }
+    }
+}

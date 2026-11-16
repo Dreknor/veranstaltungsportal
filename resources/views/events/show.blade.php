@@ -412,7 +412,8 @@
                                         @endif
                                     @endfor
                                 </span>
-                                <span class="text-small text-muted">{{ $approvedReviews->count() }} Bewertungen</span>
+                                <span
+                                    class="text-small text-muted">{{ trans_choice(':count Bewertung|:count Bewertungen', $approvedReviews->count()) }}</span>
                             </div>
                         </div>
 
@@ -451,10 +452,7 @@
                                 ->reviews()
                                 ->where('user_id', auth()->id())
                                 ->first();
-                            $hasAttended = \App\Models\Booking::where('user_id', auth()->id())
-                                ->where('event_id', $event->id)
-                                ->where('status', 'confirmed')
-                                ->exists();
+                            $hasAttended = $event->canBeReviewedBy(auth()->user());
                         @endphp
 
                         @if ($hasAttended && !$userReview)
@@ -503,7 +501,7 @@
                                     Ihre Bewertung wird gerade geprüft und in Kürze veröffentlicht.
                                 @endif
                             </x-ui.alert>
-                        @elseif(!$hasAttended && $event->start_date->isPast())
+                        @elseif(!$hasAttended && $event->hasEnded())
                             <p class="m-0 mt-6 text-small text-muted">Nur Teilnehmende können eine Bewertung abgeben.</p>
                         @endif
                     @else

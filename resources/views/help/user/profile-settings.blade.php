@@ -37,25 +37,15 @@
             <li>
                 <strong>Zusatzinformationen:</strong>
                 <ul>
-                    <li>Bio/Über mich (max. 500 Zeichen)</li>
-                    <li>Schule/Institution</li>
-                    <li>Fachbereiche</li>
+                    <li>Bio/Über mich</li>
                 </ul>
             </li>
             <li>
                 <strong>Interessen:</strong>
                 <ul>
-                    <li>Themenbereiche auswählen</li>
+                    <li>Themenbereiche auswählen (unter Einstellungen › Interessen &amp; Newsletter)</li>
                     <li>Für personalisierte Empfehlungen</li>
                     <li>Mehrfachauswahl möglich</li>
-                </ul>
-            </li>
-            <li>
-                <strong>Social Media:</strong>
-                <ul>
-                    <li>Website/Blog</li>
-                    <li>Twitter/LinkedIn</li>
-                    <li>Xing/GitHub</li>
                 </ul>
             </li>
         </ul>
@@ -136,24 +126,9 @@
         <h2>5. Privatsphäre & Sichtbarkeit</h2>
         <p>
             Unter <strong>Einstellungen</strong> › <strong>Datenschutz</strong> können Sie steuern, wer was von
-            Ihrem Profil sehen kann.
+            Ihrem Profil sehen kann: Vernetzung erlauben, öffentliches Profil sowie E-Mail-Adresse und Telefonnummer
+            für Verbindungen zeigen.
         </p>
-
-        <h3>Sichtbarkeitseinstellungen</h3>
-        <ul>
-            <li>
-                <strong>Öffentliches Profil:</strong> Ihr Profil ist für alle Nutzer sichtbar. Empfohlen für
-                Networking.
-                <ul>
-                    <li>Profilbild und Name sichtbar</li>
-                    <li>Bio und Interessen sichtbar</li>
-                    <li>Besuchte Veranstaltungen sichtbar</li>
-                </ul>
-            </li>
-            <li><strong>Nur für Verbindungen:</strong> Nur Nutzer, denen Sie folgen, können Ihr vollständiges Profil
-                sehen.</li>
-            <li><strong>Privat:</strong> Minimale Sichtbarkeit. Nur Name und Profilbild sind sichtbar.</li>
-        </ul>
     </section>
 
     <section id="data">
@@ -162,15 +137,16 @@
 
         <h3>Daten exportieren</h3>
         <ol>
-            <li>Gehen Sie zu <strong>Einstellungen</strong> › <strong>Datenschutz</strong></li>
-            <li>Klicken Sie auf <strong>„Meine Daten exportieren“</strong></li>
+            <li>Gehen Sie zu <strong>Einstellungen</strong> › <strong>Datenschutz</strong> und öffnen Sie <strong>„Meine
+                    Daten“</strong></li>
+            <li>Klicken Sie auf <strong>„Daten als JSON exportieren“</strong></li>
             <li>Sie erhalten eine JSON-Datei mit allen Ihren Daten zum Download</li>
         </ol>
 
         <h3>Konto löschen</h3>
         <ol>
-            <li>Gehen Sie zu <strong>Einstellungen</strong> › <strong>Datenschutz</strong></li>
-            <li>Scrollen Sie nach unten zum Bereich <strong>„Konto löschen“</strong></li>
+            <li>Gehen Sie zu <strong>Einstellungen</strong> › <strong>Datenschutz</strong> und öffnen Sie <strong>„Meine
+                    Daten“</strong></li>
             <li>Klicken Sie auf <strong>„Konto löschen beantragen“</strong></li>
             <li>Bestätigen Sie die Löschung durch Eingabe Ihres Passworts</li>
         </ol>

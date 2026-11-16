@@ -29,13 +29,13 @@ class NewWaitlistEntryNotification extends Notification
         $event = $this->waitlistEntry->event;
 
         return (new MailMessage)
-            ->subject('Neue Wartelisten-Anmeldung: ' . $event->title)
-            ->greeting('Hallo ' . $notifiable->first_name . ',')
+            ->subject('Neue Wartelisten-Anmeldung: '.$event->title)
+            ->greeting('Hallo '.$notifiable->fullName().',')
             ->line('Eine neue Person hat sich für die Warteliste Ihrer Veranstaltung angemeldet.')
-            ->line('**Veranstaltung:** ' . $event->title)
-            ->line('**Name:** ' . $this->waitlistEntry->name)
-            ->line('**E-Mail:** ' . $this->waitlistEntry->email)
-            ->line('**Gewünschte Tickets:** ' . $this->waitlistEntry->quantity)
+            ->line('**Veranstaltung:** '.$event->title)
+            ->line('**Name:** '.$this->waitlistEntry->name)
+            ->line('**E-Mail:** '.$this->waitlistEntry->email)
+            ->line('**Gewünschte Tickets:** '.$this->waitlistEntry->quantity)
             ->action('Warteliste verwalten', route('organizer.events.waitlist.index', $event))
             ->line('Sie können die Warteliste in Ihrem Organizer-Dashboard verwalten.');
     }
@@ -44,7 +44,7 @@ class NewWaitlistEntryNotification extends Notification
     {
         return [
             'title' => 'Neue Wartelisten-Anmeldung',
-            'message' => $this->waitlistEntry->name . ' hat sich für die Warteliste von "' . $this->waitlistEntry->event->title . '" angemeldet (' . $this->waitlistEntry->quantity . ' Ticket(s))',
+            'message' => $this->waitlistEntry->name.' hat sich für die Warteliste von "'.$this->waitlistEntry->event->title.'" angemeldet ('.$this->waitlistEntry->quantity.' Ticket(s))',
             'event_id' => $this->waitlistEntry->event_id,
             'event_title' => $this->waitlistEntry->event->title,
             'waitlist_id' => $this->waitlistEntry->id,
@@ -55,4 +55,3 @@ class NewWaitlistEntryNotification extends Notification
         ];
     }
 }
-

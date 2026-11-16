@@ -1,5 +1,5 @@
-<x-layouts.app title="Umsatz-Report" :header="false">
-    <x-ui.page-header title="Umsatz-Report" subtitle="Finanzielle Übersicht und Umsatzanalyse" :back-href="route('admin.reporting.index', ['period' => $period])"
+<x-layouts.app title="Umsatzbericht" :header="false">
+    <x-ui.page-header title="Umsatzbericht" subtitle="Finanzielle Übersicht und Umsatzanalyse" :back-href="route('admin.reporting.index', ['period' => $period])"
         back-label="Zurück zur Übersicht" />
 
     <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">

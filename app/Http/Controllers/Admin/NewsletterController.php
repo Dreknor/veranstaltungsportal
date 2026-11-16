@@ -139,7 +139,7 @@ class NewsletterController extends Controller
                     '--test' => true,
                 ]);
 
-                $message = 'Test-Newsletter wurde an alle Admins versendet!';
+                $message = 'Test-Newsletter wurde an alle Administratoren versendet.';
             } else {
                 // Send to all subscribers
                 $exitCode = Artisan::call('newsletter:send', [
@@ -147,7 +147,7 @@ class NewsletterController extends Controller
                 ]);
 
                 $subscriberCount = User::where('newsletter_subscribed', true)->count();
-                $message = "Newsletter wurde an {$subscriberCount} Abonnenten versendet!";
+                $message = "Newsletter wurde an {$subscriberCount} registrierte Abonnenten versendet.";
             }
 
             // Get command output

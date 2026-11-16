@@ -40,11 +40,11 @@ class LogNotificationSettingsController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail((int) $request->user_id);
         $user->givePermissionTo('receive-critical-log-notifications');
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        return back()->with('success', "Benutzer {$user->name} erhält jetzt Benachrichtigungen bei kritischen Fehlern.");
+        return back()->with('success', "Benutzer {$user->fullName()} erhält jetzt Benachrichtigungen bei kritischen Fehlern.");
     }
 
     public function revokePermission(Request $request)
@@ -53,7 +53,7 @@ class LogNotificationSettingsController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $user = User::findOrFail($request->user_id);
+        $user = User::findOrFail((int) $request->user_id);
 
         // Direkte Permission entziehen
         if ($user->hasDirectPermission('receive-critical-log-notifications')) {
@@ -85,7 +85,7 @@ class LogNotificationSettingsController extends Controller
         // Cache auch nach direktem Entzug leeren
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        return back()->with('success', "Benachrichtigungen für {$user->name} wurden deaktiviert.");
+        return back()->with('success', "Benachrichtigungen für {$user->fullName()} wurden deaktiviert.");
     }
 
     public function testNotification(Request $request)

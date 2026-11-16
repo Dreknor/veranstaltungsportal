@@ -204,7 +204,7 @@
                 @elseif($booking->payment_status === 'pending' && $booking->ticketsReleasedBeforePayment())
                     Rechnung folgt separat
                 @elseif($booking->payment_status === 'pending')
-                    Ausstehend
+                    Offen
                 @else
                     {{ ucfirst($booking->payment_status) }}
                 @endif

@@ -19,22 +19,15 @@
         <h3>Suchfunktion nutzen</h3>
         <ol>
             <li>Gehen Sie zu <strong>Netzwerk</strong> › <strong>Suchen</strong></li>
-            <li>Geben Sie einen Namen oder Suchbegriff ein</li>
-            <li>Filtern Sie nach Interessen, Schule oder Fachbereich</li>
-            <li>Durchsuchen Sie die Ergebnisse</li>
+            <li>Geben Sie einen Namen oder eine E-Mail-Adresse ein</li>
+            <li>Durchsuchen Sie die Ergebnisse (Suche nach Name oder E-Mail-Adresse)</li>
         </ol>
 
         <h3>Vorschläge erhalten</h3>
         <p>
             Unter <strong>Netzwerk</strong> › <strong>Vorschläge</strong> finden Sie personalisierte Empfehlungen
-            basierend auf:
+            basierend auf gemeinsamen Interessen. Personen, die keine Vernetzung wünschen, erscheinen dort nicht.
         </p>
-        <ul>
-            <li>Gemeinsamen besuchten Veranstaltungen</li>
-            <li>Ähnlichen Interessen</li>
-            <li>Gleichen Fachbereichen</li>
-            <li>Gemeinsamen Verbindungen</li>
-        </ul>
     </section>
 
     <section id="connect">
@@ -43,13 +36,11 @@
         <h3>Jemandem folgen</h3>
         <ol>
             <li>Besuchen Sie das Profil eines Nutzers</li>
-            <li>Klicken Sie auf <strong>„Folgen“</strong></li>
-            <li>Der Nutzer wird benachrichtigt</li>
-            <li>Sie sehen Updates über dessen Aktivitäten</li>
+            <li>Klicken Sie auf <strong>„Verbinden“</strong></li>
+            <li>Die Person erhält Ihre Anfrage und kann sie annehmen oder ablehnen</li>
+            <li>Sobald sie angenommen hat, sehen Sie auf dem Profil auch die Kontaktdaten, die die Person freigegeben
+                hat</li>
         </ol>
-
-        <x-ui.alert tone="info" title="Tipp">Gegenseitiges Folgen ermöglicht direkten Nachrichtenaustausch!
-        </x-ui.alert>
     </section>
 
     <section id="manage">
@@ -57,8 +48,8 @@
         <ul>
             <li><strong>Folge ich:</strong> Übersicht aller Nutzer, denen Sie folgen</li>
             <li><strong>Folgen mir:</strong> Übersicht aller Ihrer Follower</li>
-            <li><strong>Anfragen:</strong> Offene Verbindungsanfragen annehmen oder ablehnen</li>
-            <li><strong>Blockiert:</strong> Liste blockierter Nutzer</li>
+            <li><strong>Anfragen:</strong> Offene Verbindungsanfragen annehmen oder ablehnen; eigene Anfragen
+                zurückziehen</li>
         </ul>
     </section>
 
@@ -67,10 +58,9 @@
         <p>Klicken Sie auf einen Nutzer, um dessen öffentliches Profil zu sehen:</p>
         <ul>
             <li>Profilbild und Bio</li>
-            <li>Besuchte Veranstaltungen</li>
-            <li>Abzeichen und Erfolge</li>
-            <li>Gemeinsame Interessen</li>
-            <li>Gemeinsame Verbindungen</li>
+            <li>Besuchte Veranstaltungen und Aktivität</li>
+            <li>Abzeichen</li>
+            <li>Kontaktdaten, wenn die Person sie freigegeben hat</li>
         </ul>
     </section>
 </x-help.article>

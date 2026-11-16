@@ -47,7 +47,7 @@ class SendNewsletterCommandTest extends TestCase
         ]);
 
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
-            ->expectsOutputToContain('📧 Preparing')
+            ->expectsOutputToContain('wird vorbereitet')
             ->assertSuccessful();
 
         Mail::assertQueued(\App\Mail\NewsletterMail::class, 3);
@@ -246,7 +246,7 @@ class SendNewsletterCommandTest extends TestCase
         ]);
 
         $this->artisan('newsletter:send', ['--type' => 'weekly'])
-            ->expectsOutput('📊 Newsletter sent successfully!')
+            ->expectsOutput('Newsletter-Versand abgeschlossen.')
             ->assertSuccessful();
     }
 

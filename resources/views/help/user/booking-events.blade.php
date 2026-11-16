@@ -5,12 +5,12 @@
         <h3>1. Veranstaltung auswählen</h3>
         <p>Klicken Sie auf einer Veranstaltungsseite auf den Button <strong>„Buchen“</strong></p>
         <x-ui.alert tone="info" title="Veranstaltungen mit mehreren Terminen">Einige Veranstaltungen bestehen aus
-            mehreren Terminen (z.B. ein 8-Wochen-Kurs). Bei diesen Veranstaltungen sehen Sie alle Termine aufgelistet.
+            mehreren Terminen (z. B. ein 8-Wochen-Kurs). Bei diesen Veranstaltungen sehen Sie alle Termine aufgelistet.
             Die Buchung gilt automatisch für <strong>alle Termine</strong> - es ist nicht möglich, nur einzelne
             Termine zu buchen.</x-ui.alert>
 
         <h3>2. Ticketart wählen</h3>
-        <p>Wählen Sie die passende Ticketart (z.B. Standard, Ermäßigt, VIP) und die gewünschte Anzahl</p>
+        <p>Wählen Sie die passende Ticketart (z. B. Standard, Ermäßigt, VIP) und die gewünschte Anzahl</p>
         <ul>
             <li>Prüfen Sie die Verfügbarkeit</li>
             <li>Beachten Sie eventuelle Limits pro Person</li>

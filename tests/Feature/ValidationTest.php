@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
-use App\Models\Event;
 use App\Models\Booking;
+use App\Models\Event;
+use App\Models\User;
 
 test('event creation requires title', function () {
     $result = test()->createOrganizerWithOrganization();
@@ -171,7 +171,10 @@ test('phone number format is validated', function () {
 
 test('review rating must be between 1 and 5', function () {
     $user = User::factory()->create();
-    $event = Event::factory()->create();
+    $event = Event::factory()->create([
+        'start_date' => now()->subWeek(),
+        'end_date' => now()->subWeek()->addHours(3),
+    ]);
 
     Booking::factory()->create([
         'user_id' => $user->id,

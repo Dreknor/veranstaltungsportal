@@ -78,14 +78,14 @@
                         <td class="max-sm:hidden">
                             <input type="checkbox" name="connection_ids[]" value="{{ $connection->id }}"
                                 class="connection-checkbox ui-checkbox"
-                                aria-label="Verbindung von {{ $connection->follower->name }} zu {{ $connection->following->name }} auswählen">
+                                aria-label="Verbindung von {{ $connection->follower->fullName() }} zu {{ $connection->following->fullName() }} auswählen">
                         </td>
                         <td class="max-sm:w-20 max-sm:hyphens-auto">
                             <div class="flex items-center gap-3">
                                 <img src="{{ $connection->follower->profilePhotoUrl() }}" alt=""
                                     class="h-10 w-10 flex-none rounded-full max-sm:hidden">
                                 <div class="min-w-0">
-                                    {{ $connection->follower->name }}
+                                    {{ $connection->follower->fullName() }}
                                     <span
                                         class="block text-small break-all text-muted">{{ $connection->follower->email }}</span>
                                 </div>
@@ -96,7 +96,7 @@
                                 <img src="{{ $connection->following->profilePhotoUrl() }}" alt=""
                                     class="h-10 w-10 flex-none rounded-full max-sm:hidden">
                                 <div class="min-w-0">
-                                    {{ $connection->following->name }}
+                                    {{ $connection->following->fullName() }}
                                     <span
                                         class="block text-small text-muted">{{ $connection->following->email }}</span>
                                 </div>

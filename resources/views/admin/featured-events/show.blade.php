@@ -3,7 +3,7 @@
         $payTone = ['paid' => 'success', 'pending' => 'warning', 'failed' => 'danger'];
         $payLabel = [
             'paid' => 'Bezahlt',
-            'pending' => 'Ausstehend',
+            'pending' => 'Offen',
             'failed' => 'Fehlgeschlagen',
             'refunded' => 'Erstattet',
         ];
@@ -116,7 +116,7 @@
                     @csrf
                     <x-ui.select label="Status ändern" name="payment_status" id="payment_status" :old="false"
                         :selected="$fee->payment_status" :options="[
-                            'pending' => 'Ausstehend',
+                            'pending' => 'Offen',
                             'paid' => 'Bezahlt',
                             'failed' => 'Fehlgeschlagen',
                             'refunded' => 'Erstattet',

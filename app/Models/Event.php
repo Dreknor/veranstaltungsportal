@@ -32,7 +32,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  */
 class Event extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, SoftDeletes;
 
     /**
      * Get the route key for the model.
@@ -133,6 +133,7 @@ class Event extends Model implements HasMedia
         if ($this->organization) {
             return $this->organization->users()->wherePivot('role', 'owner')->first();
         }
+
         return null;
     }
 
@@ -153,6 +154,31 @@ class Event extends Model implements HasMedia
     }
 
     /**
+     * Die Veranstaltung ist vorbei (Ende, sonst Beginn liegt in der Vergangenheit).
+     */
+    public function hasEnded(): bool
+    {
+        $end = $this->end_date ?? $this->start_date;
+
+        return $end !== null && $end->isPast();
+    }
+
+    /**
+     * Darf diese Person bewerten? Nur nach Ende der Veranstaltung und mit bestätigter Buchung.
+     */
+    public function canBeReviewedBy(?User $user): bool
+    {
+        if (! $user || ! $this->hasEnded()) {
+            return false;
+        }
+
+        return $this->bookings()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['confirmed', 'completed'])
+            ->exists();
+    }
+
+    /**
      * Get organizer name (prefer organization)
      */
     public function getOrganizerName(): string
@@ -160,6 +186,7 @@ class Event extends Model implements HasMedia
         if ($this->organization) {
             return $this->organization->name;
         }
+
         return 'Unbekannt';
     }
 
@@ -278,7 +305,7 @@ class Event extends Model implements HasMedia
 
         // For single events, return main start/end date as collection
         return collect([
-            (object)[
+            (object) [
                 'start_date' => $this->start_date,
                 'end_date' => $this->end_date,
                 'venue_name' => $this->venue_name,
@@ -287,7 +314,7 @@ class Event extends Model implements HasMedia
                 'venue_postal_code' => $this->venue_postal_code,
                 'venue_country' => $this->venue_country,
                 'is_cancelled' => $this->is_cancelled,
-            ]
+            ],
         ]);
     }
 
@@ -309,7 +336,7 @@ class Event extends Model implements HasMedia
 
     public function availableTickets(): int
     {
-        if (!$this->max_attendees) {
+        if (! $this->max_attendees) {
             return PHP_INT_MAX;
         }
 
@@ -372,7 +399,7 @@ class Event extends Model implements HasMedia
      */
     public function requiresManualApprovalForFreeTickets(): bool
     {
-        return !$this->free_ticket_auto_confirm;
+        return ! $this->free_ticket_auto_confirm;
     }
 
     /**
@@ -398,7 +425,7 @@ class Event extends Model implements HasMedia
                 ->get()
                 ->contains(function ($ticketType) {
                     // Check if ticket is on sale (considering sale_start and sale_end)
-                    if (!$ticketType->isOnSale()) {
+                    if (! $ticketType->isOnSale()) {
                         return false;
                     }
 
@@ -417,6 +444,7 @@ class Event extends Model implements HasMedia
             if ($hasAvailableTicketType) {
                 return true;
             }
+
             // Ticket-Typen existieren, aber keiner ist gerade buchbar –
             // price_from gilt nur als Fallback wenn gar keine Ticket-Typen angelegt sind
             return false;
@@ -441,7 +469,7 @@ class Event extends Model implements HasMedia
             return false;
         }
 
-        return !$this->hasAvailableTickets();
+        return ! $this->hasAvailableTickets();
     }
 
     /**
@@ -474,7 +502,7 @@ class Event extends Model implements HasMedia
         $minTicketPrice = $this->ticketTypes()
             ->where('is_available', true)
             ->get()
-            ->filter(fn($t) => $t->isOnSale() && $t->availableQuantity() > 0)
+            ->filter(fn ($t) => $t->isOnSale() && $t->availableQuantity() > 0)
             ->min('price');
 
         if ($minTicketPrice !== null) {
@@ -482,7 +510,7 @@ class Event extends Model implements HasMedia
         }
 
         // Return the minimum of all prices, or null if no prices exist
-        return !empty($prices) ? min($prices) : null;
+        return ! empty($prices) ? min($prices) : null;
     }
 
     public function getLocationAttribute(): string
@@ -492,6 +520,7 @@ class Event extends Model implements HasMedia
             $this->venue_address,
             $this->venue_city,
         ]);
+
         return implode(', ', $parts);
     }
 
@@ -529,9 +558,8 @@ class Event extends Model implements HasMedia
      */
     public function canBeBookedIndividually(): bool
     {
-        return !$this->isPartOfSeries();
+        return ! $this->isPartOfSeries();
     }
-
 
     /**
      * Check if event is an online event
@@ -633,7 +661,7 @@ class Event extends Model implements HasMedia
      */
     public function getFormattedDuration(): string
     {
-        if (!$this->duration) {
+        if (! $this->duration) {
             return '0 Minuten';
         }
 
@@ -643,9 +671,9 @@ class Event extends Model implements HasMedia
         if ($hours > 0 && $minutes > 0) {
             return "{$hours} Stunden {$minutes} Minuten";
         } elseif ($hours > 0) {
-            return "{$hours} " . ($hours === 1 ? 'Stunde' : 'Stunden');
+            return "{$hours} ".($hours === 1 ? 'Stunde' : 'Stunden');
         } else {
-            return "{$minutes} " . ($minutes === 1 ? 'Minute' : 'Minuten');
+            return "{$minutes} ".($minutes === 1 ? 'Minute' : 'Minuten');
         }
     }
 
@@ -654,7 +682,7 @@ class Event extends Model implements HasMedia
      */
     public function canCancelBooking(): bool
     {
-        if (!$this->cancellation_allowed) {
+        if (! $this->cancellation_allowed) {
             return false;
         }
 
@@ -664,6 +692,7 @@ class Event extends Model implements HasMedia
         }
 
         $deadline = $this->start_date->copy()->subDays($this->cancellation_days_before);
+
         return now()->lt($deadline);
     }
 
@@ -677,7 +706,7 @@ class Event extends Model implements HasMedia
             return false;
         }
 
-        return !$this->is_cancelled
+        return ! $this->is_cancelled
             && $this->is_published
             && $this->start_date->isFuture()
             && $this->hasAvailableTickets();
@@ -730,7 +759,7 @@ class Event extends Model implements HasMedia
         $user = \App\Models\User::find($value);
         if ($user) {
             $org = $user->activeOrganizations()->first();
-            if (!$org) {
+            if (! $org) {
                 $org = \App\Models\Organization::factory()->create();
                 $org->users()->attach($user->id, [
                     'role' => 'owner',

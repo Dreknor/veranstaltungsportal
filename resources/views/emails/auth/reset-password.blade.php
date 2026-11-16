@@ -8,7 +8,7 @@
 
 @section('content')
     <p style="margin: 0 0 16px 0;">
-        Hallo{{ isset($user) && $user->first_name ? ' ' . $user->first_name : '' }},
+        Hallo{{ isset($user) && $user->fullName() !== '' ? ' ' . $user->fullName() : '' }},
     </p>
 
     <p style="margin: 0 0 16px 0;">

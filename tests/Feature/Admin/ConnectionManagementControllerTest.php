@@ -62,7 +62,7 @@ class ConnectionManagementControllerTest extends TestCase
     #[\PHPUnit\Framework\Attributes\Test]
     public function admin_can_search_connections(): void
     {
-        $user1 = User::factory()->create(['name' => 'Johannes Zwiebelmann']);
+        $user1 = User::factory()->create(['name' => 'Johannes Zwiebelmann', 'first_name' => 'Johannes', 'last_name' => 'Zwiebelmann']);
         $user2 = User::factory()->create(['name' => 'Jane Smith']);
 
         $connection1 = UserConnection::factory()->create([
@@ -93,8 +93,8 @@ class ConnectionManagementControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertViewIs('admin.connections.show');
-        $response->assertSee($connection->follower->name);
-        $response->assertSee($connection->following->name);
+        $response->assertSee($connection->follower->fullName());
+        $response->assertSee($connection->following->fullName());
     }
 
     #[\PHPUnit\Framework\Attributes\Test]

@@ -6,7 +6,6 @@ use App\Models\Event;
 use App\Models\EventReview;
 use App\Notifications\NewReviewNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class EventReviewController extends Controller
 {
@@ -14,17 +13,12 @@ class EventReviewController extends Controller
     {
         // Prüfe ob User schon eine Review geschrieben hat
         if ($event->reviews()->where('user_id', auth()->id())->exists()) {
-            return back()->with('error', 'Du hast bereits eine Bewertung für dieses Event abgegeben.');
+            return back()->with('error', 'Sie haben bereits eine Bewertung für diese Veranstaltung abgegeben.');
         }
 
-        // Optional: Prüfe ob User an dem Event teilgenommen hat
-        $hasAttended = $event->bookings()
-            ->where('user_id', auth()->id())
-            ->whereIn('status', ['confirmed', 'completed'])
-            ->exists();
-
-        if (!$hasAttended) {
-            return back()->with('error', 'Du kannst nur Events bewerten, an denen du teilgenommen hast.');
+        // Bewertung erst nach Ende der Veranstaltung und mit bestätigter Buchung
+        if (! $event->canBeReviewedBy(auth()->user())) {
+            return back()->with('error', 'Sie können Veranstaltungen erst bewerten, wenn sie stattgefunden haben und Ihre Buchung bestätigt ist.');
         }
 
         $validated = $request->validate([
@@ -41,7 +35,7 @@ class EventReviewController extends Controller
         // Benachrichtige den Veranstalter über neue Review
         $event->user->notify(new NewReviewNotification($review));
 
-        return back()->with('success', 'Vielen Dank für deine Bewertung! Sie wird nach Prüfung freigegeben.');
+        return back()->with('success', 'Vielen Dank für Ihre Bewertung! Sie wird nach Prüfung freigegeben.');
     }
 
     public function update(Request $request, EventReview $review)
@@ -84,4 +78,3 @@ class EventReviewController extends Controller
         $event->update(['average_rating' => $averageRating]);
     }
 }
-

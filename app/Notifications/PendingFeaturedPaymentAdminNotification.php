@@ -36,7 +36,7 @@ class PendingFeaturedPaymentAdminNotification extends Notification implements Sh
 
         $mail = (new MailMessage)
             ->subject("{$count} ausstehende Zahlungen für Hervorhebungen (> 7 Tage)")
-            ->greeting('Hallo ' . ($notifiable->first_name ?? 'Admin') . ',')
+            ->greeting('Hallo ' . ($notifiable->fullName() ?: 'Admin') . ',')
             ->line("Es gibt **{$count} ausstehende Zahlungen für Hervorhebungen**, die seit mehr als 7 Tagen offen sind.")
             ->line('**Gesamtbetrag ausstehend:** ' . number_format($totalAmount, 2, ',', '.') . ' €');
 

@@ -1,12 +1,7 @@
 <x-layouts.app title="Warteliste">
-    <x-ui.page-header
-        title="Warteliste"
-        :subtitle="$event->title"
-        :back-href="route('organizer.events.edit', $event)"
-        back-label="Zurück zur Veranstaltung"
-    />
+    <x-ui.page-header title="Warteliste" :subtitle="$event->title" :back-href="route('organizer.events.edit', $event)" back-label="Zurück zur Veranstaltung" />
 
-    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-ui.stat label="Gesamt" :value="$statistics['total']" />
         <x-ui.stat label="Wartend" :value="$statistics['waiting']" />
         <x-ui.stat label="Benachrichtigt" :value="$statistics['notified']" />
@@ -20,9 +15,11 @@
             <p class="m-0 mb-4 max-w-prose text-base text-ink-soft">
                 Benachrichtigen Sie die nächsten Personen auf der Warteliste, dass Tickets verfügbar sind.
             </p>
-            <form method="POST" action="{{ route('organizer.events.waitlist.notify', $event) }}" class="flex flex-col gap-4 sm:flex-row sm:items-end">
+            <form method="POST" action="{{ route('organizer.events.waitlist.notify', $event) }}"
+                class="flex flex-col gap-4 sm:flex-row sm:items-end">
                 @csrf
-                <x-ui.field label="Anzahl verfügbarer Tickets" name="quantity" type="number" min="1" value="1" required class="sm:w-72" />
+                <x-ui.field label="Anzahl verfügbarer Tickets" name="quantity" type="number" min="1"
+                    value="1" required class="sm:w-72" />
                 <x-ui.button type="submit">Nächste benachrichtigen</x-ui.button>
             </form>
         </x-ui.box>
@@ -59,7 +56,8 @@
                             @elseif ($entry->status === 'notified')
                                 <x-ui.status tone="info">Benachrichtigt</x-ui.status>
                                 @if ($entry->expires_at)
-                                    <span class="block text-small text-muted tabular-nums">Läuft ab: {{ $entry->expires_at->format('d.m.Y H:i') }}</span>
+                                    <span class="block text-small text-muted tabular-nums">Läuft ab:
+                                        {{ $entry->expires_at->format('d.m.Y H:i') }}</span>
                                 @endif
                             @elseif ($entry->status === 'converted')
                                 <x-ui.status tone="success">Konvertiert</x-ui.status>
@@ -68,8 +66,10 @@
                             @endif
                         </td>
                         <td class="actions">
-                            <form method="POST" action="{{ route('organizer.events.waitlist.remove', [$event, $entry]) }}" class="inline-block"
-                                  onsubmit="return confirm('Möchten Sie diesen Eintrag wirklich entfernen?');">
+                            <form method="POST"
+                                action="{{ route('organizer.events.waitlist.remove', [$event, $entry]) }}"
+                                class="inline-block"
+                                onsubmit="return confirm('Möchten Sie diesen Eintrag wirklich entfernen?');">
                                 @csrf
                                 @method('DELETE')
                                 <x-ui.button type="submit" size="sm" variant="secondary">Entfernen</x-ui.button>

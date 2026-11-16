@@ -121,7 +121,7 @@ class AuditLogController extends Controller
                     fputcsv($file, [
                         $log->id,
                         $log->created_at->format('d.m.Y H:i:s'),
-                        $log->user?->name ?? 'System',
+                        $log->user?->fullName() ?? 'System',
                         $log->action,
                         $log->auditable_type ? class_basename($log->auditable_type) : '',
                         $log->ip_address,

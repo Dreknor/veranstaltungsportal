@@ -299,7 +299,7 @@
                                         class="block text-small font-normal text-muted tabular-nums sm:hidden">{{ Ui::money($item->price) }}</span>
                                 @endunless
                             </th>
-                            <td>
+                            <td class="min-w-44">
                                 @if ($item->attendee_name)
                                     {{ $item->attendee_name }}
                                     @if ($item->attendee_email)

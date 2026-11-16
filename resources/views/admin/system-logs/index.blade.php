@@ -11,11 +11,13 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    <form method="GET" class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
+    <form method="GET"
+        class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_9.5rem_9.5rem_minmax(0,1.2fr)_auto]">
         <x-ui.select label="Schweregrad" name="level" :old="false">
             <option value="">Alle Schweregrade</option>
             @foreach ($levels as $level)
-                <option value="{{ $level }}" @selected(request('level') === $level)>{{ $level }}</option>
+                <option value="{{ $level }}" @selected(request('level') === $level)>
+                    {{ \App\Support\Ui::logLevelLabel($level) }}</option>
             @endforeach
         </x-ui.select>
         <x-ui.select label="Kanal" name="channel" :old="false">
@@ -29,7 +31,9 @@
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Nachricht" />
         <div class="flex flex-wrap items-center gap-3">
             <x-ui.button type="submit" variant="secondary" size="lg">Filtern</x-ui.button>
-            <x-ui.button variant="link" :href="route('admin.system-logs.index')">Zurücksetzen</x-ui.button>
+            @if (request()->anyFilled(['level', 'channel', 'from', 'to', 'search']))
+                <x-ui.button variant="link" :href="route('admin.system-logs.index')">Zurücksetzen</x-ui.button>
+            @endif
         </div>
     </form>
 
@@ -70,10 +74,14 @@
                         @else
                             -
                         @endif
+                        <span
+                            class="mt-1 line-clamp-2 block whitespace-normal text-small text-muted sm:hidden">{{ $log->message }}</span>
                     </td>
-                    <td><x-ui.status :tone="$levelTone">{{ $log->level_name }}</x-ui.status></td>
+                    <td><x-ui.status
+                            :tone="$levelTone">{{ \App\Support\Ui::logLevelLabel($log->level_name) }}</x-ui.status></td>
                     <td class="max-sm:hidden whitespace-nowrap">{{ $log->channel ?? '-' }}</td>
-                    <td class="max-sm:hidden max-w-[320px] truncate" title="{{ $log->message }}">{{ $log->message }}</td>
+                    <td class="max-sm:hidden max-w-[320px] truncate" title="{{ $log->message }}">{{ $log->message }}
+                    </td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.system-logs.show', $log->id)">Details</x-ui.button>
                         <x-ui.button variant="secondary" size="sm" type="submit" class="max-sm:hidden"

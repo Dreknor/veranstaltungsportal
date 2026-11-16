@@ -72,6 +72,10 @@
         </x-ui.section>
     </div>
 
+    @php
+        $teamMembers = $organization->members->where('id', '!=', $organization->owner_id);
+    @endphp
+
     <x-ui.section title="Eigentümer und Team" class="mb-12">
         <x-ui.table label="Eigentümer und Team">
             <thead>
@@ -82,23 +86,25 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">{{ $organization->owner->name }}</th>
-                    <td>{{ $organization->owner->email }}</td>
-                    <td>Eigentümer</td>
-                </tr>
-                @foreach ($organization->members->where('id', '!=', $organization->owner_id) as $member)
-<tr>
-                        <th scope="row">{{ $member->name }}</th>
+                @if ($organization->owner)
+                    <tr>
+                        <th scope="row">{{ $organization->owner->fullName() }}</th>
+                        <td>{{ $organization->owner->email }}</td>
+                        <td>Eigentümer</td>
+                    </tr>
+                @endif
+                @foreach ($teamMembers as $member)
+                    <tr>
+                        <th scope="row">{{ $member->fullName() }}</th>
                         <td>{{ $member->email }}</td>
                         <td>Mitglied</td>
                     </tr>
-@endforeach
+                @endforeach
             </tbody>
         </x-ui.table>
-        @if ($organization->members->where('id', '!=', $organization->owner_id)->isEmpty())
-<p class="mb-0 mt-3 text-small text-muted">Keine weiteren Team-Mitglieder.</p>
-@endif
+        @if ($teamMembers->isEmpty())
+            <p class="mb-0 mt-3 text-small text-muted">Keine weiteren Team-Mitglieder.</p>
+        @endif
     </x-ui.section>
 
     <x-ui.section title="Aktionen">
@@ -107,17 +113,18 @@
 
             <form method="POST" action="{{ route('admin.organizations.toggle-active', $organization) }}">
                 @csrf
-                <x-ui.button type="submit" variant="secondary">{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.button>
+                <x-ui.button type="submit"
+                    variant="secondary">{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.button>
             </form>
 
             @if ($stats['total_events'] === 0)
-<form method="POST" action="{{ route('admin.organizations.destroy', $organization) }}"
+                <form method="POST" action="{{ route('admin.organizations.destroy', $organization) }}"
                     onsubmit="return confirm('Organisation wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')">
                     @csrf
                     @method('DELETE')
                     <x-ui.button type="submit" variant="danger">Löschen</x-ui.button>
                 </form>
- @endif
-                    </div>
-                    </x-ui.section>
-                    </x-layouts.app>)
+            @endif
+        </div>
+    </x-ui.section>
+</x-layouts.app>

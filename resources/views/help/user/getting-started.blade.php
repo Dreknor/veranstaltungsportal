@@ -67,7 +67,7 @@
         <p>Ergänzen Sie Ihr Profil mit weiteren Informationen:</p>
         <ul>
             <li><strong>Telefonnummer:</strong> Für wichtige Benachrichtigungen (optional)</li>
-            <li><strong>Bio:</strong> Stellen Sie sich kurz vor (z.B. Ihre Fächer, Schule, Interessen)</li>
+            <li><strong>Bio:</strong> Stellen Sie sich kurz vor (z. B. Ihre Fächer, Schule, Interessen)</li>
             <li><strong>Interessen:</strong> Wählen Sie Kategorien aus, um personalisierte Empfehlungen zu erhalten
             </li>
         </ul>
@@ -104,10 +104,9 @@
             <li>
                 Nutzen Sie die Filter:
                 <ul>
-                    <li>Kategorien (z.B. Pädagogik, Digitalisierung, Schulentwicklung)</li>
-                    <li>Datum und Zeitraum</li>
-                    <li>Ort (vor Ort oder online)</li>
-                    <li>Preis</li>
+                    <li>Kategorien (z. B. Pädagogik, Digitalisierung, Schulentwicklung)</li>
+                    <li>Zeitraum oder Datum</li>
+                    <li>Format (Präsenz, Online, Hybrid) und Ort</li>
                 </ul>
             </li>
             <li>Klicken Sie auf eine Veranstaltung, um Details zu sehen</li>
@@ -141,7 +140,6 @@
                     <li>Buchungsbestätigungen und Zahlungsinformationen</li>
                     <li>Änderungen an gebuchten Veranstaltungen</li>
                     <li>Neue Verbindungsanfragen</li>
-                    <li>Benachrichtigungen über neue Abzeichen</li>
                 </ul>
             </li>
             <li>Speichern Sie Ihre Einstellungen</li>
@@ -161,7 +159,8 @@
             <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'social-features']) }}">Vernetzen
                     Sie sich</a>
                 – Knüpfen Sie Kontakte mit anderen Pädagogen.</li>
-            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'badges']) }}">Badges sammeln</a>
+            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'badges']) }}">Abzeichen
+                    sammeln</a>
                 – Verfolgen Sie Ihren Lernfortschritt mit Abzeichen.</li>
             <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'favorites']) }}">Favoriten
                     nutzen</a>

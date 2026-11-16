@@ -141,7 +141,7 @@
             </fieldset>
 
             <x-ui.textarea label="Hinweise zu diesem Termin" name="notes" id="add_notes" rows="3" optional
-                :old="false" :error="false" placeholder="z.B. 'Dieser Termin findet online statt'" />
+                :old="false" :error="false" placeholder="z. B. 'Dieser Termin findet online statt'" />
         </form>
 
         <x-slot:footer>
@@ -156,7 +156,7 @@
             @csrf
 
             <x-ui.textarea label="Grund für die Absage" name="cancellation_reason" id="cancel_cancellation_reason"
-                rows="3" required :old="false" :error="false" placeholder="z.B. 'Dozent erkrankt'" />
+                rows="3" required :old="false" :error="false" placeholder="z. B. 'Dozent erkrankt'" />
 
             <x-ui.alert tone="warning">Teilnehmer werden per E-Mail über die Absage informiert.</x-ui.alert>
         </form>
@@ -197,7 +197,7 @@
             </fieldset>
 
             <x-ui.textarea label="Hinweise zu diesem Termin" name="notes" id="edit_notes" rows="3" optional
-                :old="false" :error="false" placeholder="z.B. 'Dieser Termin findet online statt'" />
+                :old="false" :error="false" placeholder="z. B. 'Dieser Termin findet online statt'" />
         </form>
 
         <x-slot:footer>

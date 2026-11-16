@@ -97,11 +97,11 @@
 @if ($isAdmin)
     <x-ui.sidebar-group label="Administration">
         <x-layouts.sidebar-link href="{{ route('admin.dashboard') }}" icon="chart" :active="request()->routeIs('admin.dashboard')">
-            Admin Dashboard
+            Admin-Dashboard
         </x-layouts.sidebar-link>
     </x-ui.sidebar-group>
 
-    <x-ui.sidebar-group label="Content-Verwaltung">
+    <x-ui.sidebar-group label="Inhalte">
         <x-layouts.sidebar-link href="{{ route('admin.users.index') }}" icon="users" :active="request()->routeIs('admin.users.*')">
             Benutzerverwaltung
         </x-layouts.sidebar-link>
@@ -132,7 +132,7 @@
         </x-layouts.sidebar-link>
     </x-ui.sidebar-group>
 
-    <x-ui.sidebar-group label="Gamification & Social">
+    <x-ui.sidebar-group label="Abzeichen & Netzwerk">
         <x-layouts.sidebar-link href="{{ route('admin.badges.index') }}" icon="medal" :active="request()->routeIs('admin.badges.*')">
             Abzeichen-Verwaltung
         </x-layouts.sidebar-link>
@@ -156,13 +156,13 @@
         </x-layouts.sidebar-link>
     </x-ui.sidebar-group>
 
-    <x-ui.sidebar-group label="Analytics & Logs">
+    <x-ui.sidebar-group label="Auswertungen & Protokolle">
         <x-layouts.sidebar-link href="{{ route('admin.reporting.index') }}" icon="chart" :active="request()->routeIs('admin.reporting.*')">
-            Analytics & Reports
+            Auswertungen
         </x-layouts.sidebar-link>
 
         <x-layouts.sidebar-link href="{{ route('admin.audit-logs.index') }}" icon="list" :active="request()->routeIs('admin.audit-logs.*')">
-            Audit Logs
+            Audit-Logs
         </x-layouts.sidebar-link>
 
         <x-layouts.sidebar-link href="{{ route('admin.updates.index') }}" icon="download" :active="request()->routeIs('admin.updates.*')">

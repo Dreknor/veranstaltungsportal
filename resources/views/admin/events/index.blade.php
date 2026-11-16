@@ -19,7 +19,7 @@
                 <th scope="col">Veranstaltung</th>
                 <th scope="col" class="max-sm:hidden">Veranstalter</th>
                 <th scope="col" class="max-sm:hidden">Kategorie</th>
-                <th scope="col">Status</th>
+                <th scope="col" class="max-sm:hidden">Status</th>
                 <th scope="col" class="max-sm:hidden">Datum</th>
                 <th scope="col" class="num max-sm:hidden">Buchungen</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
@@ -28,20 +28,28 @@
         <tbody>
             @forelse ($events as $event)
                 <tr>
-                    <th scope="row" class="min-w-48 max-sm:w-28 max-sm:min-w-0 max-sm:hyphens-auto">
+                    <th scope="row" class="min-w-48 max-sm:min-w-0">
                         <span class="block">{{ Str::limit($event->title, 40) }}</span>
-                        <span class="block text-small font-normal break-all text-muted">{{ $event->slug }}</span>
+                        <span
+                            class="block text-small font-normal break-all text-muted max-sm:hidden">{{ $event->slug }}</span>
                         <span
                             class="block text-small font-normal text-muted tabular-nums sm:hidden">{{ $event->start_date->format('d.m.Y H:i') }}
                             · {{ $event->bookings_count }}
                             {{ $event->bookings_count === 1 ? 'Buchung' : 'Buchungen' }}</span>
+                        <span class="mt-1 flex flex-col items-start gap-1 sm:hidden">
+                            <x-ui.status
+                                :tone="$event->is_published ? 'success' : 'warning'">{{ $event->is_published ? 'Veröffentlicht' : 'Entwurf' }}</x-ui.status>
+                            @if ($event->is_featured)
+                                <x-ui.status tone="info">Hervorgehoben</x-ui.status>
+                            @endif
+                        </span>
                     </th>
                     <td class="max-sm:hidden">
                         <span class="block">{{ $event->getOrganizerName() }}</span>
-                        <span class="block text-small text-muted">{{ $event->getOrganizerEmail() ?? 'N/A' }}</span>
+                        <span class="block text-small text-muted">{{ $event->getOrganizerEmail() ?? '–' }}</span>
                     </td>
                     <td class="text-muted max-sm:hidden">{{ $event->category->name }}</td>
-                    <td>
+                    <td class="max-sm:hidden">
                         <span class="flex flex-col items-start gap-1">
                             @if ($event->is_published)
                                 <x-ui.status tone="success">Veröffentlicht</x-ui.status>

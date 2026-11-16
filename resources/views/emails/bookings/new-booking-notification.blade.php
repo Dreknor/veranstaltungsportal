@@ -21,7 +21,7 @@
 
 @section('content')
     <p style="margin: 0 0 16px 0;">
-        Hallo {{ $organizer->first_name ?? $organizer->name }},
+        Hallo {{ $organizer->fullName() }},
     </p>
 
     <p style="margin: 0 0 24px 0;">

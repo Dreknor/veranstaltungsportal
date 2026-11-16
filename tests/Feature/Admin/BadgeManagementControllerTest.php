@@ -125,7 +125,7 @@ class BadgeManagementControllerTest extends TestCase
         $response->assertOk();
         $response->assertViewIs('admin.badges.show');
         $response->assertSee($badge->name);
-        $response->assertSee($user->name);
+        $response->assertSee($user->fullName());
     }
 
     #[\PHPUnit\Framework\Attributes\Test]

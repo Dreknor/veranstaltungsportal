@@ -402,7 +402,7 @@
                 <x-ui.status tone="waitlist">Warteliste</x-ui.status>
                 <x-ui.status tone="neutral">Entwurf</x-ui.status>
                 <x-ui.status tone="success">Bestätigt</x-ui.status>
-                <x-ui.status tone="warning">Zahlung ausstehend</x-ui.status>
+                <x-ui.status tone="warning">Zahlung offen</x-ui.status>
                 <x-ui.status tone="danger">Storniert</x-ui.status>
                 <x-ui.status tone="info">Neu</x-ui.status>
             </div>
@@ -633,7 +633,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ([['BK-6735A1F2', 'Maria Muster', 'confirmed', 'Bestätigt', '26.11.2026', '90,00 €'], ['BK-6735A1F3', 'Dr. Johannes Beispielmann-Langername', 'pending', 'Zahlung ausstehend', '27.11.2026', '45,00 €'], ['BK-6735A1F4', 'Erika Mustermann', 'cancelled', 'Storniert', '01.12.2026', '0,00 €']] as [$no, $person, $st, $stLabel, $date, $sum])
+                        @foreach ([['BK-6735A1F2', 'Maria Muster', 'confirmed', 'Bestätigt', '26.11.2026', '90,00 €'], ['BK-6735A1F3', 'Dr. Johannes Beispielmann-Langername', 'pending', 'Zahlung offen', '27.11.2026', '45,00 €'], ['BK-6735A1F4', 'Erika Mustermann', 'cancelled', 'Storniert', '01.12.2026', '0,00 €']] as [$no, $person, $st, $stLabel, $date, $sum])
                             <tr>
                                 <th scope="row"><a href="#tabelle"
                                         class="text-ink underline-offset-[3px] hover:underline">{{ $no }}</a>

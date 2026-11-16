@@ -203,10 +203,10 @@
                 <thead>
                     <tr>
                         <th scope="col">Teilnehmende</th>
-                        <th scope="col">Ticket</th>
+                        <th scope="col" class="max-sm:hidden">Ticket</th>
                         <th scope="col">Check-in</th>
                         @unless ($booking->isFree())
-                            <th scope="col" class="num">Preis</th>
+                            <th scope="col" class="num max-sm:hidden">Preis</th>
                         @endunless
                     </tr>
                 </thead>
@@ -221,8 +221,9 @@
                                 @endif
                                 @if ($item->attendee_email)<span class="block text-small font-normal text-muted break-all">{{ $item->attendee_email }}</span>@endif
                                 @if ($item->attendee_organization)<span class="block text-small font-normal text-ink-soft">{{ $item->attendee_organization }}</span>@endif
+                                <span class="block text-small font-normal text-muted tabular-nums sm:hidden">{{ $item->ticketType?->name ?? 'Ticket' }}@unless ($booking->isFree()) · {{ \App\Support\Ui::money($item->price) }}@endunless</span>
                             </th>
-                            <td>
+                            <td class="max-sm:hidden">
                                 {{ $item->ticketType?->name ?? 'Ticket' }}
                                 <span class="block text-small text-muted tabular-nums">{{ $item->ticket_number }}</span>
                             </td>
@@ -234,7 +235,7 @@
                                 @endif
                             </td>
                             @unless ($booking->isFree())
-                                <td class="num">{{ \App\Support\Ui::money($item->price) }}</td>
+                                <td class="num max-sm:hidden">{{ \App\Support\Ui::money($item->price) }}</td>
                             @endunless
                         </tr>
                     @endforeach
@@ -340,7 +341,7 @@
                             <form action="{{ route('organizer.bookings.update-status', $booking) }}" method="POST" class="flex items-end gap-3">
                                 @csrf @method('PUT')
                                 <x-ui.select label="Buchungsstatus" name="status" id="status-select" :old="false" class="min-w-0 flex-1">
-                                    @foreach (['pending' => 'Ausstehend', 'pending_approval' => 'Wartet auf Freigabe', 'confirmed' => 'Bestätigt', 'completed' => 'Abgeschlossen'] as $value => $label)
+                                    @foreach (['pending' => 'Zahlung offen', 'pending_approval' => 'Wartet auf Freigabe', 'confirmed' => 'Bestätigt', 'completed' => 'Abgeschlossen'] as $value => $label)
                                         <option value="{{ $value }}" @selected($booking->status === $value)>{{ $label }}</option>
                                     @endforeach
                                 </x-ui.select>
@@ -350,7 +351,7 @@
                                 <form action="{{ route('organizer.bookings.update-payment', $booking) }}" method="POST" class="flex items-end gap-3">
                                     @csrf @method('PUT')
                                     <x-ui.select label="Zahlungsstatus" name="payment_status" id="payment-select" :old="false" class="min-w-0 flex-1">
-                                        <option value="pending" @selected($booking->payment_status === 'pending')>Zahlung ausstehend</option>
+                                        <option value="pending" @selected($booking->payment_status === 'pending')>Offen</option>
                                         <option value="paid" @selected($booking->payment_status === 'paid')>Bezahlt</option>
                                         @if ($isExternalInvoicing)
                                             <option value="extern" @selected($booking->payment_status === 'extern')>Extern fakturiert</option>

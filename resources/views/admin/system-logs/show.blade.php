@@ -29,7 +29,8 @@
         </x-ui.dl-item>
         <x-ui.dl-item label="Unix-Zeitstempel" num>{{ $log->unix_time }}</x-ui.dl-item>
         <x-ui.dl-item label="Schweregrad">
-            <x-ui.status :tone="$levelTone">{{ $log->level_name }} (Stufe {{ $log->level }})</x-ui.status>
+            <x-ui.status :tone="$levelTone">{{ \App\Support\Ui::logLevelLabel($log->level_name) }} (Stufe
+                {{ $log->level }})</x-ui.status>
         </x-ui.dl-item>
         <x-ui.dl-item label="Kanal">{{ $log->channel ?? '-' }}</x-ui.dl-item>
         <x-ui.dl-item label="Nachricht">

@@ -33,6 +33,12 @@
                                 {{ \App\Support\Ui::money($ticketType->price) }} · {{ $ticketType->quantity_sold }}
                                 verkauft
                             </span>
+                            @if ($ticketType->hasActiveSales())
+                                <span class="mt-1 flex items-center gap-1 text-small font-normal text-muted sm:hidden">
+                                    <x-icon.lock class="h-4 w-4 flex-none" />
+                                    Aktive Buchungen, Löschen nicht möglich
+                                </span>
+                            @endif
                             <span class="mt-1 block font-normal sm:hidden">
                                 @if ($ticketType->is_available)
                                     <x-ui.status tone="success">Aktiv</x-ui.status>
@@ -72,10 +78,10 @@
                                     @method('DELETE')
                                 </form>
                             @else
-                                <span class="inline-flex items-center gap-1 text-small text-muted"
+                                <span class="inline-flex items-center gap-1 text-small text-muted max-sm:hidden"
                                     title="Löschen nicht möglich: Es gibt noch aktive Buchungen für diese Ticketart.">
                                     <x-icon.lock class="h-4 w-4" />
-                                    <span class="max-sm:sr-only">Aktive Buchungen</span>
+                                    <span>Aktive Buchungen</span>
                                 </span>
                             @endif
                         </td>

@@ -35,10 +35,8 @@
             <div class="mt-4 flex flex-col gap-3">
                 @foreach ($todo['almostFull'] as $event)
                     <x-ui.alert tone="warning">
-                        „{{ $event->title }}“ ist fast ausgebucht
-                        (<span
-                            class="tabular-nums">{{ $event->max_attendees - $event->availableTickets() }}/{{ $event->max_attendees }}</span>)
-                        .
+                        @php $booked = $event->max_attendees - $event->availableTickets(); @endphp
+                        „{{ $event->title }}“ ist fast ausgebucht ({{ $booked }}/{{ $event->max_attendees }}).
                         <a href="{{ route('organizer.events.edit', $event) }}">Kapazität prüfen</a>
                     </x-ui.alert>
                 @endforeach
@@ -60,7 +58,7 @@
                             <a href="{{ route('organizer.events.edit', $event) }}"
                                 class="text-base font-semibold text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
                             <span class="text-small text-muted tabular-nums">
-                                {{ $event->start_date->isToday() ? 'Heute' : ($event->start_date->isTomorrow() ? 'Morgen' : $event->start_date->translatedFormat('D, d.m.')) }},
+                                {{ $event->start_date->isToday() ? 'Heute' : ($event->start_date->isTomorrow() ? 'Morgen' : \App\Support\Ui::date($event->start_date)) }},
                                 {{ $event->start_date->format('H:i') }} Uhr ·
                                 {{ $row['booked'] }}{{ $row['capacity'] ? '/' . $row['capacity'] : '' }}
                                 {{ $row['booked'] === 1 ? 'Platz' : 'Plätze' }} bestätigt

@@ -94,7 +94,7 @@
         </details>
 
         <details>
-            <summary>Zahlung wurde abgebucht aber Buchung zeigt „Ausstehend“</summary>
+            <summary>Zahlung wurde abgebucht aber Buchung zeigt „Offen“</summary>
             <p>Das kann verschiedene Gründe haben:</p>
             <ul>
                 <li>Zahlung wird noch verarbeitet (kann bis zu 24h dauern)</li>
@@ -110,14 +110,14 @@
             <p>Gemäß DSGVO haben Sie folgende Rechte:</p>
             <p><strong>Daten exportieren:</strong></p>
             <ol>
-                <li>Einstellungen › Datenschutz</li>
-                <li>Klicken Sie auf „Meine Daten exportieren“</li>
+                <li>Einstellungen › Datenschutz › „Meine Daten“</li>
+                <li>Klicken Sie auf „Daten als JSON exportieren“</li>
                 <li>Sie erhalten eine JSON-Datei mit allen Ihren Daten</li>
             </ol>
             <p><strong>Konto löschen:</strong></p>
             <ol>
-                <li>Einstellungen › Datenschutz</li>
-                <li>Scrollen Sie nach unten zu „Konto löschen“</li>
+                <li>Einstellungen › Datenschutz › „Meine Daten“</li>
+                <li>Klicken Sie auf „Konto löschen beantragen“</li>
                 <li>Bestätigen Sie die Löschung</li>
             </ol>
             <x-ui.alert tone="warning" title="Hinweis">Bei aktiven Buchungen kann das Konto nicht sofort gelöscht

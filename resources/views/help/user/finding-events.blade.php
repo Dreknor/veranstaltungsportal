@@ -40,34 +40,30 @@
             <li>Und viele mehr...</li>
         </ul>
 
-        <h3>Nach Datum filtern</h3>
+        <h3>Nach Zeitraum filtern</h3>
         <p>
-            Wählen Sie einen Zeitraum aus, um nur Veranstaltungen in diesem Zeitfenster anzuzeigen. Sie können nach
-            einzelnen Tagen, Wochen oder Monaten filtern.
+            Wählen Sie „Heute“, „Diese Woche“, „Diesen Monat“ oder „Nächste 3 Monate“. Über die erweiterten Filter
+            können Sie außerdem ein eigenes Datum von/bis eingeben.
         </p>
 
-        <h3>Nach Ort filtern</h3>
+        <h3>Nach Format filtern</h3>
         <p>Wählen Sie zwischen:</p>
         <ul>
-            <li><strong>Präsenz-Veranstaltungen:</strong> Veranstaltungen mit physischem Veranstaltungsort</li>
-            <li><strong>Online-Veranstaltungen:</strong> Webinare und digitale Fortbildungen</li>
-            <li><strong>Hybrid-Veranstaltungen:</strong> Kombinierte Formate</li>
+            <li><strong>Präsenz:</strong> Veranstaltungen mit physischem Veranstaltungsort</li>
+            <li><strong>Online:</strong> Webinare und digitale Fortbildungen</li>
+            <li><strong>Hybrid:</strong> Kombinierte Formate</li>
         </ul>
 
-        <h3>Nach Preis filtern</h3>
-        <p>
-            Nutzen Sie den Preis-Slider, um nur Veranstaltungen in Ihrer gewünschten Preisklasse anzuzeigen. Es gibt
-            auch viele kostenfreie Angebote!
-        </p>
+        <h3>Nach Ort filtern</h3>
+        <p>Geben Sie im erweiterten Filter eine Stadt ein, um nur Veranstaltungen an diesem Ort zu sehen.</p>
     </section>
 
     <section>
         <h2>Textsuche verwenden</h2>
         <p>Nutzen Sie die Suchleiste, um gezielt nach Veranstaltungen zu suchen. Sie können suchen nach:</p>
         <ul>
-            <li><strong>Titel:</strong> z.B. „Digitale Medien im Unterricht“</li>
+            <li><strong>Titel:</strong> z. B. „Digitale Medien im Unterricht“</li>
             <li><strong>Beschreibung:</strong> Stichwörter aus der Veranstaltungsbeschreibung</li>
-            <li><strong>Veranstalter:</strong> Name der Organisation</li>
             <li><strong>Ort:</strong> Stadt oder Region</li>
         </ul>
 
@@ -88,8 +84,6 @@
             Alle gespeicherten Veranstaltungen finden Sie unter <a href="{{ route('favorites.index') }}">Favoriten</a>.
         </p>
 
-        <x-ui.alert tone="success" title="Vorteil">Sie erhalten automatisch Benachrichtigungen, wenn sich etwas an
-            Ihren Favoriten ändert!</x-ui.alert>
     </section>
 
     <section>
@@ -116,16 +110,8 @@
             <li>Verfügbare Ticketarten</li>
             <li>Preise</li>
             <li>Verfügbarkeit</li>
-            <li>Rabattmöglichkeiten</li>
         </ul>
 
-        <h3>Veranstalter</h3>
-        <ul>
-            <li>Name und Beschreibung</li>
-            <li>Kontaktinformationen</li>
-            <li>Website</li>
-            <li>Weitere Veranstaltungen</li>
-        </ul>
     </section>
 
     <x-slot:related>

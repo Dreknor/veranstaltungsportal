@@ -12,7 +12,7 @@
         <x-ui.dl-item label="Datum/Zeit" num>{{ $auditLog->created_at->format('d.m.Y H:i:s') }}</x-ui.dl-item>
         <x-ui.dl-item label="Benutzer">
             @if ($auditLog->user)
-                {{ $auditLog->user->name }} ({{ $auditLog->user->email }})
+                {{ $auditLog->user->fullName() }} ({{ $auditLog->user->email }})
             @else
                 System
             @endif
@@ -44,6 +44,14 @@
     </x-ui.dl>
 
     @if (count($changes) > 0)
+        @php
+            $formatValue = fn($value) => match (true) {
+                is_bool($value) => $value ? 'Ja' : 'Nein',
+                $value === null => '–',
+                is_array($value) => json_encode($value, JSON_UNESCAPED_UNICODE),
+                default => (string) $value,
+            };
+        @endphp
         <x-ui.section title="Änderungen" class="mt-12">
             <x-ui.table label="Änderungen" dense>
                 <thead>
@@ -58,9 +66,9 @@
                         <tr>
                             <th scope="row">{{ $field }}</th>
                             <td class="break-all text-danger">
-                                {{ is_array($change['old']) ? json_encode($change['old']) : $change['old'] }}</td>
+                                {{ $formatValue($change['old']) }}</td>
                             <td class="break-all text-success">
-                                {{ is_array($change['new']) ? json_encode($change['new']) : $change['new'] }}</td>
+                                {{ $formatValue($change['new']) }}</td>
                         </tr>
                     @endforeach
                 </tbody>

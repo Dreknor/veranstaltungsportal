@@ -146,7 +146,7 @@ class NewsletterControllerTest extends TestCase
             ]);
 
         $response->assertRedirect(route('admin.newsletter.index'));
-        $response->assertSessionHas('success', 'Test-Newsletter wurde an alle Admins versendet!');
+        $response->assertSessionHas('success', 'Test-Newsletter wurde an alle Administratoren versendet.');
     }
 
     #[Test]

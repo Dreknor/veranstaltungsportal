@@ -1,5 +1,5 @@
 <x-layouts.app title="Benutzer bearbeiten" :header="false">
-    <x-ui.page-header title="Benutzer bearbeiten" :subtitle="$user->name . ' · ' . $user->email" :back-href="route('admin.users.index')" back-label="Zur Benutzerliste" />
+    <x-ui.page-header title="Benutzer bearbeiten" :subtitle="$user->fullName() . ' · ' . $user->email" :back-href="route('admin.users.index')" back-label="Zur Benutzerliste" />
 
     <div class="grid items-start gap-x-12 gap-y-12 lg:grid-cols-[minmax(0,640px)_minmax(0,368px)] lg:justify-between">
 

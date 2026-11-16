@@ -1,6 +1,6 @@
 {{--
     Mehrzeiliges Feld für Markdown (z. B. Veranstaltungsbeschreibung): Label, Werkzeugleiste
-    (Fett, Kursiv, Überschrift, Aufzählung, Nummerierung, Link, Vorschau), <x-ui.textarea>, Hinweis, Fehler.
+    (Fett, Kursiv, Überschrift, Liste, Nummeriert, Link, Vorschau; alle 44 px hoch, in einer Zeile ab Formularbreite), <x-ui.textarea>, Hinweis, Fehler.
     Die Vorschau rendert der Server mit App\Support\Ui::markdown() – genauso wie die spätere Anzeige.
     Tastenkürzel im Feld: Strg/Cmd+B, Strg/Cmd+I, Strg/Cmd+K. Props wie <x-ui.textarea>; class landet am
     äußeren <div>, alle übrigen Attribute am <textarea>. Braucht Alpine (resources/js/markdown-editor.js).
@@ -28,8 +28,8 @@
         ['bold', 'Fett', 'Fett (Strg+B)'],
         ['italic', 'Kursiv', 'Kursiv (Strg+I)'],
         ['heading', 'Überschrift', 'Überschrift'],
-        ['bullets', 'Aufzählung', 'Aufzählung'],
-        ['numbers', 'Nummerierung', 'Nummerierte Liste'],
+        ['bullets', 'Liste', 'Aufzählung'],
+        ['numbers', 'Nummeriert', 'Nummerierte Liste'],
         ['link', 'Link', 'Link einfügen (Strg+K)'],
     ];
 @endphp
@@ -43,12 +43,12 @@
         class="mb-2 flex flex-wrap gap-2" x-on:keydown.right.prevent="moveFocus($event, 1)"
         x-on:keydown.left.prevent="moveFocus($event, -1)">
         @foreach ($tools as [$action, $text, $title])
-            <x-ui.button variant="secondary" size="sm" x-on:click="{{ $action }}()"
+            <x-ui.button variant="secondary" x-on:click="{{ $action }}()" class="px-3!"
                 title="{{ $title }}">{{ $text }}</x-ui.button>
         @endforeach
-        <x-ui.button variant="secondary" size="sm" x-on:click="togglePreview()" aria-pressed="false"
+        <x-ui.button variant="secondary" x-on:click="togglePreview()" aria-pressed="false"
             x-bind:aria-pressed="preview.toString()" aria-controls="{{ $id }}-preview"
-            class="aria-pressed:border-ink aria-pressed:bg-zone aria-pressed:font-semibold sm:ml-auto">
+            class="aria-pressed:border-ink aria-pressed:bg-zone aria-pressed:font-semibold px-3!">
             <x-slot:icon>
                 <x-icon.eye />
             </x-slot:icon>

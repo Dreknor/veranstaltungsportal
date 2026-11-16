@@ -33,9 +33,13 @@ class ConnectionManagementController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->whereHas('follower', function ($sq) use ($search) {
                     $sq->where('name', 'like', "%{$search}%")
+                      ->orWhere('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                 })->orWhereHas('following', function ($sq) use ($search) {
                     $sq->where('name', 'like', "%{$search}%")
+                      ->orWhere('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             });
@@ -99,8 +103,8 @@ class ConnectionManagementController extends Controller
      */
     public function destroy(UserConnection $connection)
     {
-        $followerName = $connection->follower->name;
-        $followingName = $connection->following->name;
+        $followerName = $connection->follower->fullName();
+        $followingName = $connection->following->fullName();
 
         $connection->delete();
 

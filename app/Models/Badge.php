@@ -42,6 +42,19 @@ class Badge extends Model
         return self::REQUIREMENT_ALIASES[$key] ?? $key;
     }
 
+    /**
+     * Anforderungen als Text für Übersichten, z. B. „25 Veranstaltungen besucht (eingecheckt)“.
+     * Mehrere Anforderungen stehen durch Komma getrennt; ohne Anforderung bleibt der Text leer.
+     */
+    public function requirementSummary(): string
+    {
+        $requirements = is_array($this->requirements) ? $this->requirements : [];
+
+        return collect($requirements)
+            ->map(fn ($value, $key) => $value.' '.(self::REQUIREMENT_TYPES[self::normalizeRequirement((string) $key)] ?? str_replace('_', ' ', (string) $key)))
+            ->implode(', ');
+    }
+
     protected $fillable = [
         'name',
         'slug',

@@ -318,7 +318,7 @@
                                                         <div class="text-muted">{{ $item['description'] }}</div>
                                                     @endif
                                                     @if (isset($item['status']) && $item['status'] === 'pending')
-                                                        <x-ui.status tone="warning">Zahlung ausstehend</x-ui.status>
+                                                        <x-ui.status tone="warning">Zahlung offen</x-ui.status>
                                                     @endif
                                                 </div>
                                                 <div class="font-medium whitespace-nowrap tabular-nums">
@@ -932,7 +932,7 @@
                     let statusBadge = '';
                     if (item.status === 'pending') {
                         statusBadge =
-                            '<span class="inline-flex items-center gap-1.5 text-small whitespace-nowrap text-warning"><span aria-hidden="true" class="h-2 w-2 flex-none rounded-full bg-warning"></span>Zahlung ausstehend</span>';
+                            '<span class="inline-flex items-center gap-1.5 text-small whitespace-nowrap text-warning"><span aria-hidden="true" class="h-2 w-2 flex-none rounded-full bg-warning"></span>Zahlung offen</span>';
                     }
 
                     breakdownHTML += `

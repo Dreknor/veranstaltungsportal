@@ -1,7 +1,7 @@
 <x-layouts.app title="Übersicht der Hervorhebungen">
     @php
         $payTone = ['paid' => 'success', 'pending' => 'warning', 'failed' => 'danger'];
-        $payLabel = ['paid' => 'Bezahlt', 'pending' => 'Ausstehend', 'failed' => 'Fehlgeschlagen'];
+        $payLabel = ['paid' => 'Bezahlt', 'pending' => 'Offen', 'failed' => 'Fehlgeschlagen'];
     @endphp
 
     <x-ui.page-header title="Übersicht der Hervorhebungen"
@@ -14,7 +14,7 @@
         <x-ui.stat label="Aktive Hervorhebungen" :value="$stats['active_featured']" />
         <x-ui.stat label="Gesamtumsatz" :value="\App\Support\Ui::money($stats['total_revenue'])" />
         <x-ui.stat label="Diesen Monat" :value="\App\Support\Ui::money($stats['this_month'])" />
-        <x-ui.stat label="Ausstehend" :value="$stats['pending_payments']" :sub="\App\Support\Ui::money($stats['pending_revenue'])" />
+        <x-ui.stat label="Offen" :value="$stats['pending_payments']" :sub="\App\Support\Ui::money($stats['pending_revenue'])" />
     </div>
 
     <x-ui.section :title="'Alle Transaktionen (' . $featuredFees->total() . ')'">
@@ -41,7 +41,7 @@
                             @endif
                         </th>
                         <td class="max-sm:hidden">
-                            {{ $fee->user->name ?? '–' }}
+                            {{ $fee->user?->fullName() ?? '–' }}
                             <span class="block text-small text-muted">{{ $fee->user->email ?? '' }}</span>
                         </td>
                         <td class="max-sm:hidden whitespace-nowrap tabular-nums">

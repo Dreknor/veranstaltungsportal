@@ -25,6 +25,8 @@ class UserManagementController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
@@ -293,7 +295,7 @@ class UserManagementController extends Controller
 
         return redirect()
             ->route('admin.users.edit', $user)
-            ->with('success', 'Passwort für ' . $user->name . ' erfolgreich zurückgesetzt.');
+            ->with('success', 'Passwort für ' . $user->fullName() . ' erfolgreich zurückgesetzt.');
     }
 
     /**
@@ -311,7 +313,7 @@ class UserManagementController extends Controller
 
         Log::info('Admin ' . auth()->user()?->email . ' hat die E-Mail von Benutzer ' . $user->email . ' manuell verifiziert.');
 
-        return back()->with('success', 'E-Mail-Adresse von ' . $user->name . ' erfolgreich verifiziert.');
+        return back()->with('success', 'E-Mail-Adresse von ' . $user->fullName() . ' erfolgreich verifiziert.');
     }
 
     /**
@@ -329,7 +331,7 @@ class UserManagementController extends Controller
 
         Log::info('Admin ' . auth()->user()?->email . ' hat die E-Mail-Verifizierung von Benutzer ' . $user->email . ' aufgehoben.');
 
-        return back()->with('success', 'E-Mail-Verifizierung für ' . $user->name . ' aufgehoben.');
+        return back()->with('success', 'E-Mail-Verifizierung für ' . $user->fullName() . ' aufgehoben.');
     }
 }
 

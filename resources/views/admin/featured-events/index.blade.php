@@ -3,7 +3,7 @@
         $payTone = ['paid' => 'success', 'pending' => 'warning', 'failed' => 'danger'];
         $payLabel = [
             'paid' => 'Bezahlt',
-            'pending' => 'Ausstehend',
+            'pending' => 'Offen',
             'failed' => 'Fehlgeschlagen',
             'refunded' => 'Erstattet',
         ];
@@ -22,7 +22,7 @@
     <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <x-ui.stat label="Gesamt" :value="$stats['total']" />
         <x-ui.stat label="Aktiv" :value="$stats['active']" />
-        <x-ui.stat label="Ausstehend" :value="$stats['pending']" />
+        <x-ui.stat label="Offen" :value="$stats['pending']" />
         <x-ui.stat label="Umsatz" :value="\App\Support\Ui::money($stats['revenue'])" />
         <x-ui.stat label="Offen" :value="\App\Support\Ui::money($stats['pending_revenue'])" />
     </div>
@@ -34,7 +34,7 @@
             placeholder="Veranstaltung suchen" />
         <x-ui.select label="Status" name="status" :old="false" :selected="request('status')" :options="[
             '' => 'Alle Status',
-            'pending' => 'Ausstehend',
+            'pending' => 'Offen',
             'paid' => 'Bezahlt',
             'failed' => 'Fehlgeschlagen',
             'refunded' => 'Erstattet',

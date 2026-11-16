@@ -376,11 +376,11 @@ class Ui
     }
 
     /** Prozentwert deutsch: "5 %", "4,5 %", "33,3 %" (höchstens $decimals Nachkommastellen, ohne überflüssige Nullen). */
-    public static function percent(float|int|string|null $value, int $decimals = 1): string
+    public static function percent(float|int|string|null $value, int $decimals = 1, bool $trimZeros = true): string
     {
         $text = number_format((float) $value, $decimals, ',', '.');
 
-        if (str_contains($text, ',')) {
+        if ($trimZeros && str_contains($text, ',')) {
             $text = rtrim(rtrim($text, '0'), ',');
         }
 
@@ -434,6 +434,22 @@ class Ui
             'pending' => 'warning',
             'failed' => 'danger',
             default => 'neutral',
+        };
+    }
+
+    /** Deutsche Bezeichnung der Stufe eines System-Logs ("ERROR" → "Fehler"); Unbekanntes bleibt als Text erhalten. */
+    public static function logLevelLabel(?string $level): string
+    {
+        return match (strtoupper((string) $level)) {
+            'EMERGENCY' => 'Notfall',
+            'ALERT' => 'Alarm',
+            'CRITICAL' => 'Kritisch',
+            'ERROR' => 'Fehler',
+            'WARNING' => 'Warnung',
+            'NOTICE' => 'Hinweis',
+            'INFO' => 'Information',
+            'DEBUG' => 'Debug',
+            default => (string) $level,
         };
     }
 

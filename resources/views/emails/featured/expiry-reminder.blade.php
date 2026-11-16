@@ -13,7 +13,7 @@
 @section('heading', 'Hervorhebungs-Status läuft bald ab')
 
 @section('content')
-    <p style="margin: 0 0 16px 0;">Hallo {{ $user->name }},</p>
+    <p style="margin: 0 0 16px 0;">Hallo {{ $user->fullName() }},</p>
 
     @component('emails.partials.notice', ['type' => 'warning', 'title' => 'Wichtiger Hinweis'])
         <p style="margin: 0;">Der Hervorhebungs-Status Ihrer Veranstaltung läuft in <strong>3 Tagen</strong> ab!</p>

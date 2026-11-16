@@ -7,16 +7,20 @@
 
     <!-- Period Filter -->
     <form method="GET" action="{{ route('admin.featured-events.statistics') }}" class="mb-10 max-w-64">
-        <x-ui.select label="Zeitraum" name="period" id="period" :old="false" :selected="$period" onchange="this.form.submit()"
-            :options="['7' => 'Letzte 7 Tage', '30' => 'Letzte 30 Tage', '90' => 'Letzte 90 Tage', '365' => 'Letztes Jahr']" />
+        <x-ui.select label="Zeitraum" name="period" id="period" :old="false" :selected="$period"
+            onchange="this.form.submit()" :options="[
+                '7' => 'Letzte 7 Tage',
+                '30' => 'Letzte 30 Tage',
+                '90' => 'Letzte 90 Tage',
+                '365' => 'Letztes Jahr',
+            ]" />
     </form>
 
     <!-- By Duration Type -->
     <x-ui.section title="Nach Zeitraum-Typ" class="mb-12">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ($byDuration as $duration)
-                <x-ui.stat :label="$durationLabel[$duration->duration_type] ?? 'Monatlich'" :value="$duration->count"
-                    :sub="\App\Support\Ui::money($duration->total)" />
+                <x-ui.stat :label="$durationLabel[$duration->duration_type] ?? 'Monatlich'" :value="$duration->count" :sub="\App\Support\Ui::money($duration->total)" />
             @endforeach
         </div>
     </x-ui.section>

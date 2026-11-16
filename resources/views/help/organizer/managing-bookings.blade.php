@@ -8,7 +8,7 @@
         <ol>
             <li><strong>Wartet auf Freigabe</strong> (nur kostenfreie Veranstaltungen mit manueller Freigabe): Anmeldung
                 bestätigen oder ablehnen.</li>
-            <li><strong>Zahlung ausstehend</strong>: Sobald das Geld eingegangen ist, klicken Sie auf „Zahlung
+            <li><strong>Zahlung offen</strong>: Sobald das Geld eingegangen ist, klicken Sie auf „Zahlung
                 eingegangen“. Bei externer Rechnungsstellung markieren Sie die Buchung als fakturiert. PayPal-Zahlungen
                 werden automatisch verbucht.</li>
             <li><strong>Bestätigt</strong>: Die Person erhält automatisch Tickets bzw. Online-Zugangsdaten. Bei mehreren

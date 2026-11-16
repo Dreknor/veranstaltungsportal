@@ -43,6 +43,7 @@ return [
         'manage ticket types' => 'Tickettypen verwalten',
         'manage user roles' => 'Benutzerrollen verwalten',
         'moderate reviews' => 'Bewertungen moderieren',
+        'publish events' => 'Veranstaltungen veröffentlichen',
         'receive-critical-log-notifications' => 'Meldungen zu kritischen Logs erhalten',
         'view audit log' => 'Audit-Log einsehen',
         'view bookings' => 'Buchungen ansehen',

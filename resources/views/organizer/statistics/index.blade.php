@@ -14,7 +14,7 @@
         <x-ui.stat label="Veranstaltungen gesamt" :value="$totalEvents"
             sub="{{ $publishedEvents }} veröffentlicht · {{ $upcomingEvents }} kommend" />
         <x-ui.stat label="Buchungen gesamt" :value="$totalBookings"
-            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} ausstehend" />
+            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} offen" />
         <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)"
             sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
         <x-ui.stat label="Verkaufte Tickets" :value="$ticketsSold"

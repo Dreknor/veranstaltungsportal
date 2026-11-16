@@ -11,7 +11,7 @@
                 <x-ui.event-row :event="$booking->event" :href="route('bookings.show', $booking->booking_number)">
                     <span class="text-small text-muted tabular-nums">{{ $quantity }} {{ $quantity === 1 ? 'Ticket' : 'Tickets' }}</span>
                     <x-slot:aside>
-                        <span class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
+                        <span class="text-base font-semibold whitespace-nowrap">{{ $booking->total > 0 ? \App\Support\Ui::money($booking->total) : 'kostenfrei' }}</span>
                         @if ($userReview)
                             <x-ui.status tone="success">Bewertet</x-ui.status>
                         @else

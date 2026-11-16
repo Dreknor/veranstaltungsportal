@@ -36,7 +36,8 @@
                     <x-ui.field label="Nachname" name="last_name" :value="$user->last_name" />
                 </div>
 
-                <x-ui.field label="Anzeigename" name="name" :value="$user->name" :hint="__('This is how other users will see you.')" />
+                <x-ui.field label="Anzeigename" name="name" :value="$user->name"
+                    hint="Wird nur angezeigt, wenn Vor- und Nachname leer sind." />
 
                 <x-ui.field label="E-Mail-Adresse" name="email" type="email" :value="$user->email" />
 

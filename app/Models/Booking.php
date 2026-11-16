@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 /**
  * @property 'pending'|'confirmed'|'cancelled'|'completed'|'pending_approval' $status
@@ -33,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 class Booking extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'booking_number',
         'invoice_number',
@@ -112,8 +113,8 @@ class Booking extends Model
         parent::boot();
 
         static::creating(function ($booking) {
-            if (!$booking->booking_number) {
-                $booking->booking_number = 'BK-' . strtoupper(uniqid());
+            if (! $booking->booking_number) {
+                $booking->booking_number = 'BK-'.strtoupper(uniqid());
             }
         });
     }
@@ -149,6 +150,7 @@ class Booking extends Model
     {
         return $this->hasMany(BookingItem::class);
     }
+
     /**
      * @return HasOne<PlatformFee, $this>
      */
@@ -198,7 +200,7 @@ class Booking extends Model
     }
 
     public const STATUS_LABELS = [
-        'pending' => 'Zahlung ausstehend',
+        'pending' => 'Zahlung offen',
         'pending_approval' => 'Wartet auf Freigabe',
         'confirmed' => 'Bestätigt',
         'completed' => 'Abgeschlossen',
@@ -206,7 +208,7 @@ class Booking extends Model
     ];
 
     public const PAYMENT_STATUS_LABELS = [
-        'pending' => 'Ausstehend',
+        'pending' => 'Offen',
         'paid' => 'Bezahlt',
         'extern' => 'Extern fakturiert',
         'refunded' => 'Erstattet',
@@ -215,7 +217,7 @@ class Booking extends Model
 
     public function statusLabel(): string
     {
-        // Kostenfreie oder bezahlte, aber noch nicht bestätigte Buchungen sind nicht "Zahlung ausstehend"
+        // Kostenfreie oder bezahlte, aber noch nicht bestätigte Buchungen sind nicht "Zahlung offen"
         if ($this->status === 'pending' && ($this->isPaymentComplete() || (float) $this->total == 0.0)) {
             return 'Ausstehend';
         }
@@ -306,7 +308,7 @@ class Booking extends Model
     {
         return $this->event
             && $this->event->requires_ticket
-            && !$this->event->isOnline();
+            && ! $this->event->isOnline();
     }
 
     /**
@@ -317,18 +319,18 @@ class Booking extends Model
         return $this->status === 'pending'
             && $this->payment_status === 'pending'
             && $this->payment_method === 'paypal'
-            && !$this->isFree()
+            && ! $this->isFree()
             && $this->event
-            && !$this->event->is_cancelled
+            && ! $this->event->is_cancelled
             && $this->event->organization?->hasPayPalConfigured()
-            && !$this->event->organization?->hasExternalInvoicing();
+            && ! $this->event->organization?->hasExternalInvoicing();
     }
 
     /**
      * Schritte des Buchungsablaufs für die Fortschrittsanzeige (Kunde & Veranstalter).
      *
      * @return array<int, array{key: string, label: string, state: string, hint: ?string}>
-     *               state: done | current | upcoming
+     *                                                                                     state: done | current | upcoming
      */
     public function progressSteps(): array
     {
@@ -337,7 +339,7 @@ class Booking extends Model
         $blocked = false; // ab dem ersten offenen Schritt sind alle folgenden "upcoming"
 
         $push = function (string $key, string $label, bool $done, ?string $hint = null, bool $blocking = true) use (&$steps, &$blocked) {
-            $state = $done && !$blocked ? 'done' : ($blocked || !$blocking ? 'upcoming' : 'current');
+            $state = $done && ! $blocked ? 'done' : ($blocked || ! $blocking ? 'upcoming' : 'current');
             if ($state === 'current') {
                 $blocked = true;
             }
@@ -347,12 +349,12 @@ class Booking extends Model
 
         $push('booked', 'Gebucht', true, $this->created_at?->format('d.m.Y'));
 
-        if ($this->status === 'pending_approval' || ($this->isFree() && $event && !$event->free_ticket_auto_confirm)) {
+        if ($this->status === 'pending_approval' || ($this->isFree() && $event && ! $event->free_ticket_auto_confirm)) {
             $push('approval', 'Freigabe', in_array($this->status, ['confirmed', 'completed']),
                 $this->status === 'pending_approval' ? 'wird vom Veranstalter geprüft' : $this->confirmed_at?->format('d.m.Y'));
         }
 
-        if (!$this->isFree() && !$invoiceLater) {
+        if (! $this->isFree() && ! $invoiceLater) {
             $push('payment', $this->payment_status === 'extern' || $event?->organization?->hasExternalInvoicing() ? 'Rechnung' : 'Zahlung',
                 $this->isPaymentComplete(),
                 $this->isPaymentComplete() ? $this->paymentStatusLabel() : ($this->payment_method === 'paypal' ? 'PayPal offen' : 'offen'));
@@ -388,7 +390,7 @@ class Booking extends Model
      */
     public function manageUrl(): string
     {
-        if (!$this->user_id && $this->email_verification_token) {
+        if (! $this->user_id && $this->email_verification_token) {
             return route('bookings.verify-email-token', [$this->booking_number, $this->email_verification_token]);
         }
 
@@ -443,7 +445,7 @@ class Booking extends Model
     public function canCheckIn(): bool
     {
         // Must be confirmed and paid (or extern = externally invoiced)
-        if ($this->status !== 'confirmed' || !$this->isReadyForParticipation()) {
+        if ($this->status !== 'confirmed' || ! $this->isReadyForParticipation()) {
             return false;
         }
 
@@ -459,14 +461,13 @@ class Booking extends Model
             $now = now();
 
             // Allow check-in if event is today or in the past, or within 24 hours
-            if ($eventStart->isFuture() && !$eventStart->isToday() && $eventStart->diffInHours($now) > 24) {
+            if ($eventStart->isFuture() && ! $eventStart->isToday() && $eventStart->diffInHours($now) > 24) {
                 return false;
             }
         }
 
         return true;
     }
-
 
     public function getTotalAmountAttribute(): float
     {
@@ -478,6 +479,7 @@ class Booking extends Model
         // Generate a verification code from booking_number
         // Ensure we have at least 8 characters, pad if necessary
         $code = str_replace(['BK-', '-'], '', $this->booking_number);
+
         return strtoupper(substr($code, -8));
     }
 
@@ -516,7 +518,7 @@ class Booking extends Model
         // 4. Not yet personalized
         return $this->isReadyForParticipation()
             && $this->itemCount() > 1
-            && !$this->tickets_personalized;
+            && ! $this->tickets_personalized;
     }
 
     /**
@@ -555,6 +557,6 @@ class Booking extends Model
     public function canSendTickets(): bool
     {
         return $this->isReadyForParticipation()
-            && (!$this->needsPersonalization() || $this->tickets_personalized);
+            && (! $this->needsPersonalization() || $this->tickets_personalized);
     }
 }

@@ -38,6 +38,8 @@ class ReviewManagementController extends Controller
                     $q->where('title', 'like', "%{$search}%");
                 })->orWhereHas('user', function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('first_name', 'like', "%{$search}%")
+                      ->orWhere('last_name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%");
                 })->orWhere('comment', 'like', "%{$search}%");
             });

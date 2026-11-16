@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Notification;
 use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
 
+// Beispielschlüssel aus RFC 8291 (gültiger P-256-Punkt, 16-Byte-Geheimnis)
+const PUSH_TEST_P256DH = 'BCVxsr7N_eNgVRqvHtD0zTZsEc6-VV-JvLexhqUzORcxaOzi6-AYWXvTBHm4bjyPjs7Vd8pZGH6SRpkNtoIAiw4';
+const PUSH_TEST_AUTH = 'BTBZMqHH6r4Tts7J_aSIgg';
+
 function pushConfigure(): void
 {
     config([
@@ -29,7 +33,7 @@ function pushSubscriptionPayload(string $suffix = 'a'): array
 {
     return [
         'endpoint' => 'https://push.example.test/send/'.$suffix,
-        'keys' => ['p256dh' => 'BPublicKey'.$suffix, 'auth' => 'authToken'.$suffix],
+        'keys' => ['p256dh' => PUSH_TEST_P256DH, 'auth' => PUSH_TEST_AUTH],
         'contentEncoding' => 'aes128gcm',
     ];
 }
@@ -83,7 +87,7 @@ test('Anmelden speichert das Abo und schaltet Push ein', function () {
     $user->refresh();
     expect($user->pushSubscriptions)->toHaveCount(1)
         ->and($user->pushSubscriptions->first()->endpoint)->toBe('https://push.example.test/send/a')
-        ->and($user->pushSubscriptions->first()->public_key)->toBe('BPublicKeya')
+        ->and($user->pushSubscriptions->first()->public_key)->toBe(PUSH_TEST_P256DH)
         ->and($user->notification_preferences[PushNotifications::PREFERENCE])->toBeTrue();
 });
 
@@ -101,6 +105,37 @@ test('Anmelden prüft die Angaben des Browsers', function (array $payload, strin
     'ohne auth' => [['endpoint' => 'https://push.example.test/x', 'keys' => ['p256dh' => 'a']], 'keys.auth'],
     'unbekannte Kodierung' => [['endpoint' => 'https://push.example.test/x', 'keys' => ['p256dh' => 'a', 'auth' => 'b'], 'contentEncoding' => 'gzip'], 'contentEncoding'],
 ]);
+
+test('Anmelden weist unbrauchbare Schlüssel zurück, die beim Versand "Base64Url::encode()" auslösen würden', function (string $p256dh, string $auth, string $field) {
+    pushConfigure();
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('settings.notifications.push.store'), [
+            'endpoint' => 'https://push.example.test/send/x',
+            'keys' => ['p256dh' => $p256dh, 'auth' => $auth],
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($field);
+
+    expect($user->pushSubscriptions()->count())->toBe(0);
+})->with([
+    'Schlüssel kein Base64' => ['BPublicKeya', PUSH_TEST_AUTH, 'keys.p256dh'],
+    'Schlüssel zu kurz' => ['AAAA', PUSH_TEST_AUTH, 'keys.p256dh'],
+    'Auth kein Base64' => [PUSH_TEST_P256DH, 'authToken$a', 'keys.auth'],
+    'Auth falsche Länge' => [PUSH_TEST_P256DH, 'AAAA', 'keys.auth'],
+]);
+
+test('Der Kanal fängt einen Fehler der Push-Bibliothek ab und liefert keine Berichte', function () {
+    pushConfigure();
+    $user = pushUser();
+    \Illuminate\Support\Facades\Log::spy();
+    $this->mock(WebPushChannel::class, fn ($mock) => $mock->shouldReceive('send')->once()->andThrow(new \TypeError('Base64Url::encode(): Argument #1 ($data) must be of type string, false given')));
+
+    $result = app(SafeWebPushChannel::class)->send($user, new \App\Notifications\PushTestNotification);
+
+    expect($result)->toBe([]);
+});
 
 test('Anmelden ist ohne VAPID-Schlüssel nicht möglich', function () {
     $user = User::factory()->create();

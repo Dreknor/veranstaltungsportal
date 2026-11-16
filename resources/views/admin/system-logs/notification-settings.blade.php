@@ -6,8 +6,8 @@
     <x-ui.alert tone="info" title="Über Log-Benachrichtigungen" class="mb-12">
         <p class="m-0 mb-2">Benutzer mit der Berechtigung „Meldungen zu kritischen Logs erhalten“ bekommen automatisch
             E-Mails bei kritischen Systemfehlern.</p>
-        <p class="m-0 mb-2"><strong class="font-semibold">Kritische Schweregrade:</strong> ERROR, CRITICAL, ALERT,
-            EMERGENCY</p>
+        <p class="m-0 mb-2"><strong class="font-semibold">Kritische Schweregrade:</strong> Fehler, Kritisch, Alarm,
+            Notfall</p>
         <p class="m-0"><strong class="font-semibold">Funktionen:</strong></p>
         <ul class="m-0 mt-1 list-disc pl-5">
             <li>Doppelte Meldungen werden 5 Minuten lang unterdrückt</li>
@@ -19,7 +19,7 @@
 
     <div class="mb-12 grid gap-4 sm:grid-cols-3">
         <x-ui.stat label="Aktive Empfänger" :value="$usersWithPermission->count()" />
-        <x-ui.stat label="Kritische Schweregrade" value="4" sub="ERROR, CRITICAL, ALERT, EMERGENCY" />
+        <x-ui.stat label="Kritische Schweregrade" value="4" sub="Fehler, Kritisch, Alarm, Notfall" />
         <x-ui.stat label="Zeitfenster für Doppelte" value="5 Min" sub="Verhindert wiederholte Meldungen" />
     </div>
 
@@ -51,18 +51,18 @@
                 <tbody>
                     @foreach ($usersWithPermission as $user)
                         <tr>
-                            <th scope="row">{{ $user->name }}</th>
+                            <th scope="row">{{ $user->fullName() }}</th>
                             <td class="max-sm:hidden">{{ $user->email }}</td>
                             <td class="max-sm:hidden">
                                 <x-ui.status
-                                    tone="neutral">{{ $user->hasRole('admin') ? 'Admin' : 'Benutzer' }}</x-ui.status>
+                                    tone="neutral">{{ \App\Support\AccessLabels::role($user->hasRole('admin') ? 'admin' : 'user') }}</x-ui.status>
                             </td>
                             <td class="actions">
                                 <x-ui.button variant="secondary" size="sm" type="submit"
                                     form="revoke-{{ $user->id }}">Deaktivieren</x-ui.button>
                                 <form id="revoke-{{ $user->id }}"
                                     action="{{ route('admin.log-notifications.revoke') }}" method="POST" class="hidden"
-                                    onsubmit="return confirm('Benachrichtigungen für {{ $user->name }} deaktivieren?')">
+                                    onsubmit="return confirm('Benachrichtigungen für {{ $user->fullName() }} deaktivieren?')">
                                     @csrf
                                     <input type="hidden" name="user_id" value="{{ $user->id }}">
                                 </form>
@@ -82,7 +82,7 @@
                 <option value="">Benutzer auswählen</option>
                 @foreach ($allAdmins as $admin)
                     @if (!$admin->hasPermissionTo('receive-critical-log-notifications'))
-                        <option value="{{ $admin->id }}">{{ $admin->name }} ({{ $admin->email }})</option>
+                        <option value="{{ $admin->id }}">{{ $admin->fullName() }} ({{ $admin->email }})</option>
                     @endif
                 @endforeach
             </x-ui.select>

@@ -10,7 +10,7 @@
 
 @section('content')
     <p style="margin: 0 0 16px 0;">
-        Hallo{{ $user->first_name ? ' ' . $user->first_name : '' }},
+        Hallo{{ $user->fullName() !== '' ? ' ' . $user->fullName() : '' }},
     </p>
 
     <p style="margin: 0 0 16px 0;">

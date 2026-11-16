@@ -37,7 +37,7 @@ class NewReviewNotification extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Neue Bewertung wartet auf Freigabe')
-            ->greeting("Hallo {$notifiable->name}!")
+            ->greeting("Hallo {$notifiable->fullName()}!")
             ->line("Eine neue Bewertung für Ihre Veranstaltung **{$event->title}** wartet auf Freigabe.")
             ->line("**Bewertung:** {$this->review->rating} von 5 Sternen")
             ->line("**Von:** {$this->review->reviewerName()}")
@@ -55,7 +55,7 @@ class NewReviewNotification extends Notification implements ShouldQueue
     {
         return [
             'title' => 'Neue Bewertung',
-            'message' => $this->review->reviewerName() . ' hat "' . $this->review->event->title . '" mit ' . $this->review->rating . ' Sternen bewertet',
+            'message' => $this->review->reviewerName().' hat "'.$this->review->event->title.'" mit '.$this->review->rating.' Sternen bewertet',
             'review_id' => $this->review->id,
             'event_id' => $this->review->event_id,
             'event_title' => $this->review->event->title,
@@ -66,4 +66,3 @@ class NewReviewNotification extends Notification implements ShouldQueue
         ];
     }
 }
-

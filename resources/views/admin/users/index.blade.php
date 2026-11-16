@@ -35,7 +35,7 @@
                 <tr>
                     <th scope="row" class="max-sm:max-w-44">
                         <span class="block">
-                            {{ $user->name }}
+                            {{ $user->fullName() }}
                             @if ($user->isSsoUser())
                                 <span class="ml-1 text-small font-normal text-muted"
                                     title="SSO-Benutzer via {{ $user->ssoProviderName() }}">({{ $user->ssoProviderName() }})</span>
@@ -72,7 +72,7 @@
                     <td class="tabular-nums whitespace-nowrap max-sm:hidden">{{ $user->created_at->format('d.m.Y') }}
                     </td>
                     <td class="actions">
-                        <x-ui.dropdown :label="'Aktionen für ' . $user->name" icon-only width="w-64">
+                        <x-ui.dropdown :label="'Aktionen für ' . $user->fullName()" icon-only width="w-64">
                             <x-ui.dropdown-item :href="route('admin.users.edit', $user)">Bearbeiten</x-ui.dropdown-item>
                             @if (auth()->id() !== $user->id)
                                 @if (!$user->hasRole('admin'))

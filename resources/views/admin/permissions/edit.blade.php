@@ -1,4 +1,4 @@
-<x-layouts.app :title="'Berechtigung bearbeiten: ' . $permission->name">
+<x-layouts.app :title="'Berechtigung bearbeiten: ' . \App\Support\AccessLabels::permission($permission->name)">
     <x-ui.page-header title="Berechtigung bearbeiten" :back-href="route('admin.permissions.index')" back-label="Zurück zu Berechtigungen">
         @if ($permission->is_system)
             <x-slot:meta>

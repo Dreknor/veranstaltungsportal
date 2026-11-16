@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\EventWaitlist;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class WaitlistController extends Controller
 {
@@ -16,7 +16,7 @@ class WaitlistController extends Controller
     public function join(Request $request, Event $event)
     {
         // Check if event is sold out
-        if (!$event->isSoldOut()) {
+        if (! $event->isSoldOut()) {
             return back()->withErrors(['event' => 'Für diese Veranstaltung sind noch Tickets verfügbar.'])->withInput();
         }
 
@@ -29,8 +29,8 @@ class WaitlistController extends Controller
         ]);
 
         // Use user's name if logged in and name not provided
-        if (!isset($validated['name']) && auth()->check()) {
-            $validated['name'] = auth()->user()->name;
+        if (! isset($validated['name']) && auth()->check()) {
+            $validated['name'] = auth()->user()->fullName();
         }
 
         // Ensure name is set
@@ -121,7 +121,7 @@ class WaitlistController extends Controller
         Log::info('Manual waitlist notification started', [
             'event_id' => $event->id,
             'event_title' => $event->title,
-            'requested_quantity' => $quantity
+            'requested_quantity' => $quantity,
         ]);
 
         // Gleiche Logik wie beim automatischen Nachrücken: Reservierung + persönlicher Buchungslink
@@ -146,4 +146,3 @@ class WaitlistController extends Controller
         return back()->with('success', 'Eintrag von der Warteliste entfernt.');
     }
 }
-

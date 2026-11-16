@@ -10,8 +10,9 @@
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat label="Registrierte Abonnenten" :value="number_format($stats['total_subscribers'])" />
         <x-ui.stat label="Gast-Abonnenten" :value="number_format($stats['guest_subscribers'])" />
-        <x-ui.stat label="Gesamt Abonnenten" :value="number_format($stats['total_subscribers'] + $stats['guest_subscribers'])" />
-        <x-ui.stat label="Abonnement-Rate" :value="\App\Support\Ui::percent($stats['subscription_rate'])" />
+        <x-ui.stat label="Abonnenten insgesamt" :value="number_format($stats['total_subscribers'] + $stats['guest_subscribers'])"
+            sub="Registrierte und Gäste; der Newsletter geht nur an registrierte" />
+        <x-ui.stat label="Anteil der Benutzer mit Abonnement" :value="\App\Support\Ui::percent($stats['subscription_rate'])" />
     </div>
 
     <x-ui.section title="Aktionen" class="mb-12">

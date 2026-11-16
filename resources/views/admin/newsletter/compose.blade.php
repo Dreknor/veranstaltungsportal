@@ -94,25 +94,29 @@
                 <input type="hidden" name="type" value="{{ $type }}">
                 <input type="hidden" name="send_to" value="all">
                 <x-ui.button type="submit" full
-                    onclick="return confirm('Newsletter wirklich an ALLE Abonnenten senden? Diese Aktion kann nicht rückgängig gemacht werden!')">An
-                    alle Abonnenten senden</x-ui.button>
+                    onclick="return confirm('Newsletter wirklich an alle registrierten Abonnenten senden? Diese Aktion kann nicht rückgängig gemacht werden.')">An
+                    alle registrierten Abonnenten senden</x-ui.button>
             </form>
 
-            <x-ui.alert tone="info" title="Hinweis" size="small">
-                <ul class="m-0 list-disc pl-5">
-                    <li>Der Newsletter wird asynchron versendet.</li>
-                    <li>Der Versand kann einige Minuten dauern.</li>
-                    <li>Testen Sie vor dem Live-Versand.</li>
-                </ul>
-            </x-ui.alert>
+            <ul class="m-0 list-disc pl-5 text-small text-muted">
+                <li>Der Newsletter wird im Hintergrund versendet und kann einige Minuten dauern.</li>
+                <li>Er geht nur an registrierte Abonnenten, nicht an Gast-Abonnenten.</li>
+                <li>Testen Sie vor dem Versand an alle.</li>
+            </ul>
 
             <div class="border-t border-line pt-5">
                 <h3 class="m-0 mb-3 text-ui font-semibold">Versand-Statistik</h3>
                 <dl class="m-0 flex flex-col gap-2 text-small">
                     <div class="flex justify-between gap-4">
-                        <dt class="text-muted">Empfänger</dt>
+                        <dt class="text-muted">Registrierte Abonnenten (Empfänger)</dt>
                         <dd class="m-0 font-semibold tabular-nums">
                             {{ number_format(\App\Models\User::where('newsletter_subscribed', true)->count()) }}</dd>
+                    </div>
+                    <div class="flex justify-between gap-4">
+                        <dt class="text-muted">Gast-Abonnenten (kein Versand)</dt>
+                        <dd class="m-0 font-semibold tabular-nums">
+                            {{ number_format(\Illuminate\Support\Facades\DB::table('newsletter_subscribers')->count()) }}
+                        </dd>
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-muted">Veranstaltungen</dt>

@@ -28,32 +28,33 @@ class EventCancelledNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Veranstaltung abgesagt: ' . $this->event->title)
-            ->greeting('Hallo ' . $notifiable->name . ',')
+            ->subject('Veranstaltung abgesagt: '.$this->event->title)
+            ->greeting('Hallo '.$notifiable->fullName().',')
             ->line('Leider müssen wir Ihnen mitteilen, dass die folgende Veranstaltung abgesagt wurde:')
-            ->line('**' . $this->event->title . '**')
-            ->line('Datum: ' . $this->event->start_date->format('d.m.Y H:i') . ' Uhr')
+            ->line('**'.$this->event->title.'**')
+            ->line('Datum: '.$this->event->start_date->format('d.m.Y H:i').' Uhr')
             ->when($this->event->cancellation_reason, function ($mail) {
                 return $mail->line('**Grund der Absage:**')
                     ->line($this->event->cancellation_reason);
             })
             ->when($this->booking, function ($mail) {
-                $mail->line('Ihre Buchungsnummer: ' . $this->booking->booking_number);
+                $mail->line('Ihre Buchungsnummer: '.$this->booking->booking_number);
                 if ($this->booking->payment_status === 'paid' && (float) $this->booking->total > 0) {
                     $mail->line('Bereits gezahlte Beträge werden vom Veranstalter erstattet.');
                 }
+
                 return $mail;
             })
             ->line('Wir entschuldigen uns für die Unannehmlichkeiten.')
             ->action('Weitere Veranstaltungen ansehen', route('events.index'))
-            ->salutation('Mit freundlichen Grüßen, ' . config('app.name'));
+            ->salutation('Mit freundlichen Grüßen, '.config('app.name'));
     }
 
     public function toDatabase(object $notifiable): array
     {
         return [
             'title' => 'Veranstaltung abgesagt',
-            'message' => 'Die Veranstaltung "' . $this->event->title . '" wurde abgesagt.' . ($this->event->cancellation_reason ? ' Grund: ' . $this->event->cancellation_reason : ''),
+            'message' => 'Die Veranstaltung "'.$this->event->title.'" wurde abgesagt.'.($this->event->cancellation_reason ? ' Grund: '.$this->event->cancellation_reason : ''),
             'type' => 'event_cancelled',
             'event_id' => $this->event->id,
             'event_title' => $this->event->title,
@@ -70,4 +71,3 @@ class EventCancelledNotification extends Notification implements ShouldQueue
         return $this->toDatabase($notifiable);
     }
 }
-

@@ -28,8 +28,8 @@
             @foreach ($users as $user)
                 <x-ui.person-row :user="$user">
                     <x-slot:meta>
-                        <span class="text-ui font-medium tabular-nums">{{ $user->events_count ?? 0 }} Veranstaltungen</span>
-                        <span class="text-small text-muted tabular-nums">{{ $user->bookings_count ?? 0 }} Buchungen · {{ $user->followers_count ?? 0 }} Follower</span>
+                        <span class="text-ui font-medium tabular-nums">{{ trans_choice('{0} Keine besuchten Veranstaltungen|{1} 1 besuchte Veranstaltung|[2,*] :count besuchte Veranstaltungen', $user->events_attended_count) }}</span>
+                        <span class="text-small text-muted tabular-nums">{{ $user->followers_count }} Follower</span>
                     </x-slot:meta>
                     <x-slot:action>
                         @if (auth()->user()->isFollowing($user))

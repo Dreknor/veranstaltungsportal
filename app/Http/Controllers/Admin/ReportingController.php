@@ -77,11 +77,16 @@ class ReportingController extends Controller
 
         $data = [
             'user_growth' => $this->getUserGrowthData($startDate, now()),
-            'user_roles' => User::select('is_organizer', DB::raw('count(*) as count'))
-                ->groupBy('is_organizer')
-                ->get(),
+            'user_roles' => \App\Models\Role::query()
+                ->withCount('users')
+                ->orderByDesc('users_count')
+                ->get()
+                ->map(fn ($role) => (object) [
+                    'label' => \App\Support\AccessLabels::role($role->name),
+                    'count' => $role->users_count,
+                ]),
             'user_activity' => $this->getUserActivityData($startDate),
-            'top_users' => User::withCount(['bookings'])
+            'top_users' => User::with('roles')->withCount(['bookings'])
                 ->orderBy('bookings_count', 'desc')
                 ->limit(10)
                 ->get(),
@@ -124,22 +129,9 @@ class ReportingController extends Controller
 
         $data = [
             'revenue_chart' => $this->getRevenueData($startDate, now()),
-            'revenue_by_category' => EventCategory::with(['events' => function ($query) use ($startDate) {
-                $query->where('created_at', '>=', $startDate)
-                    ->with(['bookings' => function ($q) use ($startDate) {
-                        $q->where('payment_status', 'paid')
-                            ->where('created_at', '>=', $startDate);
-                    }]);
-            }])
-                ->get()
-                ->map(function ($category) {
-                    $category->bookings_sum_total = $category->events->sum(function ($event) {
-                        return $event->bookings->sum('total');
-                    });
-                    return $category;
-                })
-                ->sortByDesc('bookings_sum_total')
-                ->values(),
+            // Bezahlte Buchungen des Zeitraums je Kategorie der Veranstaltung (unabhängig davon, wann die
+            // Veranstaltung angelegt wurde); dieselbe Summe wie "Umsatz (gesamt)" der Übersicht.
+            'revenue_by_category' => $this->getRevenueByCategory($startDate),
             'payment_methods' => Booking::select('payment_method', DB::raw('count(*) as count'), DB::raw('sum(total) as total'))
                 ->where('created_at', '>=', $startDate)
                 ->where('payment_status', 'paid')
@@ -210,6 +202,26 @@ class ReportingController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, EventCategory>
+     */
+    private function getRevenueByCategory(\Carbon\Carbon $startDate)
+    {
+        $sums = Booking::query()
+            ->join('events', 'events.id', '=', 'bookings.event_id')
+            ->where('bookings.payment_status', 'paid')
+            ->where('bookings.created_at', '>=', $startDate)
+            ->groupBy('events.event_category_id')
+            ->selectRaw('events.event_category_id as category_id, sum(bookings.total) as total')
+            ->pluck('total', 'category_id');
+
+        return EventCategory::query()
+            ->get()
+            ->each(fn ($category) => $category->bookings_sum_total = (float) ($sums[$category->id] ?? 0))
+            ->sortByDesc('bookings_sum_total')
+            ->values();
     }
 
     private function getCategoryPerformance($startDate, $endDate)
@@ -329,15 +341,15 @@ class ReportingController extends Controller
             if ($type === 'users') {
                 fputcsv($file, ['ID', 'Name', 'Email', 'Rolle', 'Registriert am', 'Buchungen', 'Umsatz']);
 
-                User::with(['bookings' => function ($query) use ($startDate, $endDate) {
+                User::with(['roles', 'bookings' => function ($query) use ($startDate, $endDate) {
                     $query->whereBetween('created_at', [$startDate, $endDate]);
                 }])->chunk(100, function ($users) use ($file) {
                     foreach ($users as $user) {
                         fputcsv($file, [
                             $user->id,
-                            $user->name,
+                            $user->fullName(),
                             $user->email,
-                            $user->is_organizer ? 'Veranstalter' : 'Teilnehmer',
+                            $user->roles->pluck('name')->map(fn ($name) => \App\Support\AccessLabels::role($name))->implode(', '),
                             $user->created_at->format('d.m.Y H:i'),
                             $user->bookings->count(),
                             $user->bookings->where('payment_status', 'paid')->sum('total'),

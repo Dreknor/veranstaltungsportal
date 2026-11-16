@@ -105,7 +105,7 @@
                     <x-ui.step-heading number="2" id="schritt-2" aside="* Pflichtfeld" class="mb-6">Ihre
                         Daten</x-ui.step-heading>
                     <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                        <x-ui.field label="Name" name="customer_name" :value="auth()->user()->name ?? ''" required
+                        <x-ui.field label="Name" name="customer_name" :value="auth()->user()?->fullName()" required
                             autocomplete="name" />
                         <x-ui.field label="E-Mail" name="customer_email" type="email" :value="auth()->user()->email ?? ''" required
                             autocomplete="email" inputmode="email"
@@ -115,7 +115,7 @@
                         @if ($event->showsOrganizationField())
                             <x-ui.field label="Organisation / Einrichtung" name="customer_organization"
                                 :required="$event->requiresOrganizationField()" :optional="!$event->requiresOrganizationField()" autocomplete="organization"
-                                placeholder="z.B. Evangelische Grundschule Dresden" />
+                                placeholder="z. B. Evangelische Grundschule Dresden" />
                         @endif
                     </div>
                 </section>

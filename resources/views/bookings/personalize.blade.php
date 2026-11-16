@@ -39,7 +39,7 @@
                                     :value="$item->attendee_organization ?? ($index === 0 ? $booking->customer_organization : '')"
                                     :required="$booking->event->requiresOrganizationField()"
                                     :optional="!$booking->event->requiresOrganizationField()"
-                                    placeholder="z.B. Evangelische Grundschule Dresden" />
+                                    placeholder="z. B. Evangelische Grundschule Dresden" />
                             @endif
                         </div>
                     </fieldset>

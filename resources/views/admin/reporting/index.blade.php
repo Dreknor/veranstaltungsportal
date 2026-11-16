@@ -1,5 +1,5 @@
 <x-layouts.app title="Auswertungen" :header="false">
-    <x-ui.page-header title="Reporting und Auswertungen" subtitle="Übersicht über System-Statistiken und Reports" />
+    <x-ui.page-header title="Auswertungen" subtitle="Übersicht über Kennzahlen und Berichte des Portals" />
 
     <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
         <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()"
@@ -53,9 +53,9 @@
     </x-ui.section>
 
     <div class="mb-12 grid gap-4 md:grid-cols-3">
-        <x-ui.stat label="Report" value="Benutzer" sub="Detaillierte Benutzerstatistiken" :href="route('admin.reporting.users') . '?period=' . $period" />
-        <x-ui.stat label="Report" value="Veranstaltungen" sub="Performance und Trends" :href="route('admin.reporting.events') . '?period=' . $period" />
-        <x-ui.stat label="Report" value="Umsatz" sub="Finanzielle Übersicht" :href="route('admin.reporting.revenue') . '?period=' . $period" />
+        <x-ui.stat label="Bericht" value="Benutzer" sub="Detaillierte Benutzerstatistiken" :href="route('admin.reporting.users') . '?period=' . $period" />
+        <x-ui.stat label="Bericht" value="Veranstaltungen" sub="Entwicklung und Auslastung" :href="route('admin.reporting.events') . '?period=' . $period" />
+        <x-ui.stat label="Bericht" value="Umsatz" sub="Finanzielle Übersicht" :href="route('admin.reporting.revenue') . '?period=' . $period" />
     </div>
 
     <x-ui.section title="Top 10 Veranstaltungen (nach Umsatz)" class="mb-12">
@@ -100,7 +100,7 @@
             <tbody>
                 @forelse ($topOrganizers as $organizer)
                     <tr>
-                        <th scope="row">{{ $organizer->name }}</th>
+                        <th scope="row">{{ $organizer->fullName() }}</th>
                         <td class="num">{{ $organizer->events_count }}</td>
                         <td class="num">{{ \App\Support\Ui::money($organizer->events_bookings_sum_total ?? 0) }}
                         </td>

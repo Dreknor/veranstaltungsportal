@@ -31,7 +31,7 @@ test('Veranstaltung anlegen zeigt das Markdown-Eingabefeld für die Beschreibung
         ->assertSee('x-data="markdownEditor(', false)
         ->assertSee('role="toolbar"', false)
         ->assertSee('name="description"', false)
-        ->assertSeeInOrder(['Fett', 'Kursiv', 'Überschrift', 'Aufzählung', 'Nummerierung', 'Link', 'Vorschau'])
+        ->assertSeeInOrder(['Fett', 'Kursiv', 'Überschrift', 'Liste', 'Nummeriert', 'Link', 'Vorschau'])
         ->assertSee('markdown\\/preview', false)
         ->assertSee('value="Deutschland"', false);
 });

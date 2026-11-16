@@ -8,8 +8,7 @@
         <ul>
             <li><a href="#write">1. Bewertung schreiben</a></li>
             <li><a href="#guidelines">2. Bewertungs-Richtlinien</a></li>
-            <li><a href="#manage">3. Bewertungen verwalten</a></li>
-            <li><a href="#helpful">4. Hilfreiche Bewertungen</a></li>
+            <li><a href="#after">3. Nach dem Absenden</a></li>
         </ul>
     </nav>
 
@@ -18,27 +17,19 @@
 
         <h3>Wann kann ich bewerten?</h3>
         <p>
-            Sie können eine Veranstaltung bewerten, nachdem Sie daran teilgenommen haben. Nach Abschluss der
-            Veranstaltung erhalten Sie automatisch eine Einladung zur Bewertung.
+            Sie können eine Veranstaltung bewerten, sobald sie stattgefunden hat und Ihre Buchung bestätigt ist. Vorher
+            erscheint kein Bewertungsformular. Nach der Veranstaltung erhalten Sie außerdem eine E-Mail mit einem Link
+            zum Feedback.
         </p>
 
         <h3>Schritt-für-Schritt Anleitung</h3>
         <ol>
-            <li>Gehen Sie zu <strong>Meine Buchungen</strong></li>
-            <li>Wählen Sie eine abgeschlossene Veranstaltung</li>
-            <li>Klicken Sie auf <strong>„Jetzt bewerten“</strong></li>
-            <li>
-                Vergeben Sie Sterne in verschiedenen Kategorien:
-                <ul>
-                    <li>Inhalt & Qualität (1-5 Sterne)</li>
-                    <li>Referent/Dozent (1-5 Sterne)</li>
-                    <li>Organisation (1-5 Sterne)</li>
-                    <li>Preis-Leistungs-Verhältnis (1-5 Sterne)</li>
-                </ul>
-            </li>
+            <li>Öffnen Sie die Seite der Veranstaltung oder Ihre Buchung unter <strong>Meine Buchungen</strong></li>
+            <li>Gehen Sie zum Abschnitt <strong>„Ihre Bewertung“</strong> bzw. <strong>„Wie hat Ihnen die
+                    Veranstaltung gefallen?“</strong></li>
+            <li>Vergeben Sie 1 bis 5 Sterne</li>
             <li>Schreiben Sie einen Kommentar (optional, aber empfohlen)</li>
-            <li>Geben Sie an, ob Sie die Veranstaltung weiterempfehlen würden</li>
-            <li>Klicken Sie auf <strong>„Bewertung abschicken“</strong></li>
+            <li>Klicken Sie auf <strong>„Bewertung abgeben“</strong> bzw. <strong>„Feedback senden“</strong></li>
         </ol>
 
         <x-ui.alert tone="success" title="Abzeichen">Geschriebene Bewertungen zählen für Abzeichen, zum Beispiel
@@ -69,52 +60,12 @@
             und können gelöscht werden.</x-ui.alert>
     </section>
 
-    <section id="manage">
-        <h2>3. Bewertungen verwalten</h2>
-
-        <h3>Ihre Bewertungen ansehen</h3>
-        <ol>
-            <li>Gehen Sie zu Ihrem Profil</li>
-            <li>Klicken Sie auf <strong>„Meine Bewertungen“</strong></li>
-            <li>Sie sehen alle Ihre abgegebenen Bewertungen</li>
-        </ol>
-
-        <h3>Bewertung bearbeiten</h3>
-        <p>Sie können Ihre Bewertungen innerhalb von 30 Tagen nach Abgabe bearbeiten:</p>
-        <ol>
-            <li>Öffnen Sie die Bewertung</li>
-            <li>Klicken Sie auf <strong>„Bearbeiten“</strong></li>
-            <li>Ändern Sie Sterne oder Text</li>
-            <li>Speichern Sie die Änderungen</li>
-        </ol>
-
-        <h3>Bewertung löschen</h3>
-        <ol>
-            <li>Öffnen Sie die Bewertung</li>
-            <li>Klicken Sie auf <strong>„Löschen“</strong></li>
-            <li>Bestätigen Sie die Löschung</li>
-        </ol>
-
-        <x-ui.alert tone="info" title="Tipp">Nach 30 Tagen werden Bewertungen endgültig und können nicht mehr
-            bearbeitet werden.</x-ui.alert>
-    </section>
-
-    <section id="helpful">
-        <h2>4. Hilfreiche Bewertungen</h2>
-
-        <h3>Bewertungen als hilfreich markieren</h3>
+    <section id="after">
+        <h2>3. Nach dem Absenden</h2>
         <p>
-            Sie können Bewertungen anderer Nutzer als hilfreich markieren, um besonders nützliche Reviews
-            hervorzuheben.
+            Jede Veranstaltung können Sie einmal bewerten. Ihre Bewertung wird vom Veranstalter geprüft und dann auf
+            der Veranstaltungsseite veröffentlicht. Bis dahin sehen Sie dort den Hinweis, dass Ihre Bewertung geprüft
+            wird.
         </p>
-        <ol>
-            <li>Lesen Sie eine Bewertung auf einer Veranstaltungsseite</li>
-            <li>Klicken Sie auf den Daumen-hoch-Button</li>
-            <li>Die Bewertung erhält einen Hilfreich-Punkt</li>
-        </ol>
-
-        <ul>
-            <li><strong>Bewertungs-Rang:</strong> Hilfreiche Bewertungen werden weiter oben angezeigt</li>
-        </ul>
     </section>
 </x-help.article>

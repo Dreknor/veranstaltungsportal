@@ -1,14 +1,11 @@
 <x-layouts.app title="Statistik: {{ $event->title }}">
     <x-ui.page-header :title="'Statistik: ' . $event->title" subtitle="Detaillierte Auswertung für diese Veranstaltung" :back-href="route('organizer.statistics.index')"
         back-label="Zur Übersicht">
-        <x-slot:actions>
-            <x-ui.button variant="secondary" :href="route('organizer.events.edit', $event)">Veranstaltung bearbeiten</x-ui.button>
-        </x-slot:actions>
     </x-ui.page-header>
 
     <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$totalBookings"
-            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} ausstehend" />
+            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} offen" />
         <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)"
             sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
         <x-ui.stat label="Verkaufte Tickets">
@@ -116,6 +113,7 @@
                 Teilnehmerliste exportieren (CSV)
             </x-ui.button>
             <x-ui.button variant="secondary" :href="route('organizer.bookings.index', ['event_id' => $event->id])">Alle Buchungen anzeigen</x-ui.button>
+            <x-ui.button variant="secondary" :href="route('organizer.events.edit', $event)">Veranstaltung bearbeiten</x-ui.button>
         </div>
     </x-ui.section>
 </x-layouts.app>

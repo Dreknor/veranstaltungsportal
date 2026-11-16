@@ -26,8 +26,7 @@
                 <x-ui.dl layout="stack" class="!grid-cols-1">
                     <x-ui.dl-item label="Beschreibung">{{ $badge->description }}</x-ui.dl-item>
                     <x-ui.dl-item label="Punkte" num>{{ $badge->points }}</x-ui.dl-item>
-                    <x-ui.dl-item label="Anforderung">{{ $badge->requirement_value }}
-                        {{ \App\Models\Badge::REQUIREMENT_TYPES[\App\Models\Badge::normalizeRequirement((string) $badge->requirement_type)] ?? str_replace('_', ' ', $badge->requirement_type) }}</x-ui.dl-item>
+                    <x-ui.dl-item label="Anforderung">{{ $badge->requirementSummary() ?: '–' }}</x-ui.dl-item>
                     <x-ui.dl-item label="Vergeben" num>{{ $badge->users->count() }} mal</x-ui.dl-item>
                 </x-ui.dl>
             </section>
@@ -40,7 +39,7 @@
                     <x-ui.select label="Benutzer auswählen" name="user_id" placeholder="Benutzer auswählen..." required
                         :old="false">
                         @foreach (\App\Models\User::orderBy('name')->get() as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            <option value="{{ $user->id }}">{{ $user->fullName() }} ({{ $user->email }})</option>
                         @endforeach
                     </x-ui.select>
                     <div>
@@ -72,7 +71,7 @@
                                     <img src="{{ $user->profilePhotoUrl() }}" alt=""
                                         class="h-10 w-10 flex-none rounded-full">
                                     <div>
-                                        {{ $user->name }}
+                                        {{ $user->fullName() }}
                                         @if ($user->is_organizer)
                                             <span class="block text-small font-normal text-muted">Veranstalter</span>
                                         @endif

@@ -67,7 +67,7 @@
             </x-ui.select>
             <x-ui.select label="Zahlungsstatus" name="payment_status" :old="false">
                 <option value="">Alle</option>
-                <option value="pending" @selected(request('payment_status') === 'pending')>Ausstehend</option>
+                <option value="pending" @selected(request('payment_status') === 'pending')>Offen</option>
                 <option value="paid" @selected(request('payment_status') === 'paid')>Bezahlt</option>
                 @if ($organization->hasExternalInvoicing())
                     <option value="extern" @selected(request('payment_status') === 'extern')>Extern fakturiert</option>
@@ -77,7 +77,7 @@
             </x-ui.select>
             <x-ui.select label="Buchungsstatus" name="status" :old="false">
                 <option value="">Alle</option>
-                <option value="pending" @selected(request('status') === 'pending')>Zahlung ausstehend</option>
+                <option value="pending" @selected(request('status') === 'pending')>Zahlung offen</option>
                 <option value="pending_approval" @selected(request('status') === 'pending_approval')>Wartet auf Freigabe</option>
                 <option value="confirmed" @selected(request('status') === 'confirmed')>Bestätigt</option>
                 <option value="completed" @selected(request('status') === 'completed')>Abgeschlossen</option>

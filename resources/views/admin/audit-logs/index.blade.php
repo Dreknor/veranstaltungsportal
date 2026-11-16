@@ -12,7 +12,8 @@
         </x-slot:actions>
     </x-ui.page-header>
 
-    <form method="GET" class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
+    <form method="GET"
+        class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_9.5rem_9.5rem_minmax(0,1.2fr)_auto]">
         <x-ui.select label="Aktion" name="action" :old="false">
             <option value="">Alle Aktionen</option>
             @foreach ($actions as $action)
@@ -32,7 +33,9 @@
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')" placeholder="Beschreibung" />
         <div class="flex flex-wrap items-center gap-3">
             <x-ui.button type="submit" variant="secondary" size="lg">Filtern</x-ui.button>
-            <x-ui.button variant="link" :href="route('admin.audit-logs.index')">Zurücksetzen</x-ui.button>
+            @if (request()->anyFilled(['action', 'auditable_type', 'from', 'to', 'search']))
+                <x-ui.button variant="link" :href="route('admin.audit-logs.index')">Zurücksetzen</x-ui.button>
+            @endif
         </div>
     </form>
 
@@ -55,7 +58,7 @@
                 @endphp
                 <tr>
                     <td class="tabular-nums whitespace-nowrap">{{ $log->created_at->format('d.m.Y H:i') }}</td>
-                    <td class="max-sm:hidden whitespace-nowrap">{{ $log->user?->name ?? 'System' }}</td>
+                    <td class="max-sm:hidden whitespace-nowrap">{{ $log->user?->fullName() ?? 'System' }}</td>
                     <td><x-ui.status
                             :tone="$actionTone">{{ \App\Support\AdminLabels::auditAction($log->action) }}</x-ui.status>
                     </td>
@@ -63,7 +66,8 @@
                         {{ $log->auditable_type ? \App\Support\AdminLabels::auditModel($log->auditable_type) : '-' }}
                     </td>
                     <td class="max-sm:hidden tabular-nums whitespace-nowrap text-muted">{{ $log->ip_address }}</td>
-                    <td class="max-sm:hidden max-w-[220px] truncate" title="{{ $log->description }}">{{ $log->description ?? '-' }}
+                    <td class="max-sm:hidden max-w-[220px] truncate" title="{{ $log->description }}">
+                        {{ $log->description ?? '-' }}
                     </td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.audit-logs.show', $log)">Details</x-ui.button>

@@ -41,7 +41,7 @@
                         class="mx-auto flex max-w-page flex-wrap items-center justify-between gap-x-6 gap-y-2 px-page py-2">
                         <p class="m-0 flex items-center gap-2 text-small font-medium">
                             <x-icon.warning class="h-5 w-5 flex-none" />
-                            Sie verkörpern gerade: {{ auth()->user()->name }}
+                            Sie verkörpern gerade: {{ auth()->user()->fullName() }}
                         </p>
                         <form action="{{ route('impersonate.leave') }}" method="POST" class="m-0">
                             @csrf

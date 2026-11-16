@@ -289,12 +289,6 @@ parameters:
 			path: app/Http/Controllers/Admin/AuditLogController.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/Admin/AuditLogController.php
-
-		-
 			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 2
@@ -565,12 +559,6 @@ parameters:
 			path: app/Http/Controllers/Admin/FeaturedEventManagementController.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/ImpersonateController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Admin\\ImpersonateController\:\:impersonate\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -579,12 +567,6 @@ parameters:
 		-
 			message: '#^Method App\\Http\\Controllers\\Admin\\ImpersonateController\:\:leave\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Http/Controllers/Admin/ImpersonateController.php
-
-		-
-			message: '#^Parameter \#1 \$user of static method Illuminate\\Support\\Facades\\Auth\:\:login\(\) expects Illuminate\\Contracts\\Auth\\Authenticatable, App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Admin/ImpersonateController.php
 
@@ -695,36 +677,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Http/Controllers/Admin/LegalPageController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/LogNotificationSettingsController.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Http/Controllers/Admin/LogNotificationSettingsController.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:givePermissionTo\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/LogNotificationSettingsController.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:hasDirectPermission\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/LogNotificationSettingsController.php
-
-		-
-			message: '#^Call to an undefined method App\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\User\>\:\:revokePermissionTo\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Http/Controllers/Admin/LogNotificationSettingsController.php
 
 		-
 			message: '#^Method App\\Http\\Controllers\\Admin\\LogNotificationSettingsController\:\:givePermission\(\) has no return type specified\.$#'
@@ -3865,12 +3817,6 @@ parameters:
 			path: app/Models/EventReview.php
 
 		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Models/EventReview.php
-
-		-
 			message: '#^Class App\\Models\\EventWaitlist uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
@@ -4549,12 +4495,6 @@ parameters:
 			path: app/Notifications/CriticalLogNotification.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/EventCancelledNotification.php
-
-		-
 			message: '#^Method App\\Notifications\\EventCancelledNotification\:\:__construct\(\) has parameter \$channels with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -4757,12 +4697,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: app/Notifications/NewOrganizerRegisteredNotification.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/NewReviewNotification.php
 
 		-
 			message: '#^Method App\\Notifications\\NewReviewNotification\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'

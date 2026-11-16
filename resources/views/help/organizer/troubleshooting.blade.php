@@ -30,10 +30,12 @@
         <p>Bei manuellen Zahlungen (Überweisung, Barzahlung):</p>
         <ul>
             <li>Automatische Aktualisierung nur bei Online-Zahlung (PayPal)</li>
-            <li>Bei Überweisung: Manuell auf „Paid“ setzen nach Zahlungseingang</li>
+            <li>Bei Überweisung: Zahlungseingang selbst verbuchen</li>
         </ul>
-        <p><strong>Lösung:</strong> Gehen Sie zu „Buchungen“ › Buchung öffnen › „Zahlungsstatus“ › „Paid“ auswählen.
-            System versendet dann automatisch Tickets.</p>
+        <p><strong>Lösung:</strong> Öffnen Sie unter „Buchungen“ die Buchung und klicken Sie auf „Zahlung eingegangen –
+            Tickets senden“.
+            Alternativ setzen Sie unter „Status manuell setzen“ den Zahlungsstatus auf „Bezahlt“. Die Person erhält dann
+            automatisch ihre Tickets.</p>
     </section>
 
     <section>

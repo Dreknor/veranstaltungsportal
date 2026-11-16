@@ -1,7 +1,7 @@
 @component('mail::message')
 # Willkommen – Ihr Konto wurde erstellt
 
-Hallo {{ $user->first_name ?? $user->name }},
+Hallo {{ $user->fullName() }},
 
 **{{ $invitedBy->fullName() }}** hat Sie zur Organisation **{{ $organization->name }}** eingeladen und ein Konto für Sie erstellt.
 

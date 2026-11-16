@@ -14,7 +14,7 @@
                     <div class="flex min-w-0 flex-col gap-1">
                         <span class="text-ui font-medium">{{ $item['label'] }}</span>
                         @if (isset($item['status']) && $item['status'] === 'pending')
-                            <x-ui.status tone="warning">Zahlung ausstehend</x-ui.status>
+                            <x-ui.status tone="warning">Zahlung offen</x-ui.status>
                         @elseif(isset($item['status']) && $item['status'] === 'paid')
                             <x-ui.status tone="success">Bezahlt</x-ui.status>
                         @elseif(isset($item['status']) && $item['status'] === 'estimated')

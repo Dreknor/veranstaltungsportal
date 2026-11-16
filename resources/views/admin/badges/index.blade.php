@@ -68,11 +68,10 @@
                             tone="neutral">{{ $typeLabels[$badge->type] ?? ucfirst($badge->type) }}</x-ui.status></td>
                     <td class="max-sm:hidden num">{{ $badge->points }}</td>
                     <td class="max-sm:hidden num">{{ $badge->users_count }}</td>
-                    <td class="max-sm:hidden">{{ $badge->requirement_value }}
-                        {{ \App\Models\Badge::REQUIREMENT_TYPES[\App\Models\Badge::normalizeRequirement((string) $badge->requirement_type)] ?? str_replace('_', ' ', $badge->requirement_type) }}
-                    </td>
+                    <td class="max-sm:hidden">{{ $badge->requirementSummary() ?: '–' }}</td>
                     <td class="actions">
-                        <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.show', $badge)" class="max-sm:hidden">Details</x-ui.button>
+                        <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.show', $badge)"
+                            class="max-sm:hidden">Details</x-ui.button>
                         <x-ui.button size="sm" variant="secondary" :href="route('admin.badges.edit', $badge)">Bearbeiten</x-ui.button>
                     </td>
                 </tr>

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EventReview extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'event_id',
         'user_id',
@@ -57,7 +58,7 @@ class EventReview extends Model
      */
     public function reviewerName(): string
     {
-        return $this->user?->name ?? $this->booking?->customer_name ?? 'Teilnehmer:in';
+        return $this->user?->fullName() ?? $this->booking?->customer_name ?? 'Teilnehmer:in';
     }
 
     public function reviewerEmail(): ?string
