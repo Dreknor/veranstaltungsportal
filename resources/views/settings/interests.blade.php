@@ -44,8 +44,7 @@
 
                 <div class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-1">
                     @foreach ($categories as $category)
-                        <x-ui.checkbox name="category_ids[]" :value="$category->id" :label="$category->name"
-                            :hint="$category->description ? Str::limit($category->description, 50) : null"
+                        <x-ui.checkbox name="category_ids[]" :value="$category->id" :label="$category->name" :hint="$category->description ? Str::limit($category->description, 50) : null"
                             :checked="auth()->user()->isInterestedInCategory($category->id)" />
                     @endforeach
                 </div>

@@ -1,6 +1,5 @@
 @use('App\Support\Ui')
-<x-layouts.public :title="$event->title"
-    :description="\App\Support\Ui::plainText($event->description, 160) ?: null">
+<x-layouts.public :title="$event->title" :description="\App\Support\Ui::plainText($event->description, 160) ?: null">
     <!-- SEO & Social Media Meta Tags -->
     @push('meta')
         @php

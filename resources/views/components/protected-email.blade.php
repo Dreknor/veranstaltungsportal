@@ -13,7 +13,8 @@
 
         // Zeige nur erste 2 und letzte 2 Zeichen des lokalen Teils
         if (strlen($localPart) > 4) {
-            $display = substr($localPart, 0, 2) . str_repeat('●', min(6, strlen($localPart) - 4)) . substr($localPart, -2);
+            $display =
+                substr($localPart, 0, 2) . str_repeat('●', min(6, strlen($localPart) - 4)) . substr($localPart, -2);
         } else {
             $display = str_repeat('●', strlen($localPart));
         }
@@ -22,7 +23,8 @@
 
         // Zeige nur erste und letzte 3 Zeichen der Domain
         if (strlen($domainPart) > 6) {
-            $display .= substr($domainPart, 0, 3) . str_repeat('●', min(8, strlen($domainPart) - 6)) . substr($domainPart, -3);
+            $display .=
+                substr($domainPart, 0, 3) . str_repeat('●', min(8, strlen($domainPart) - 6)) . substr($domainPart, -3);
         } else {
             $display .= str_repeat('●', strlen($domainPart));
         }
@@ -34,13 +36,10 @@
     $reversed = strrev($encoded);
 @endphp
 
-<span class="protected-contact"
-      data-contact="{{ $reversed }}"
-      data-type="email"
-      {{ $attributes->merge(['class' => $class]) }}>
+<span class="protected-contact" data-contact="{{ $reversed }}" data-type="email"
+    {{ $attributes->merge(['class' => $class]) }}>
     <button type="button" class="inline-flex min-h-11 cursor-pointer flex-wrap items-center gap-x-2 text-left"
-            onclick="revealContact(this)"
-            aria-label="E-Mail-Adresse anzeigen">
+        onclick="revealContact(this)" aria-label="E-Mail-Adresse anzeigen">
         <x-icon.mail class="h-4 w-4 flex-shrink-0" />
         <span class="contact-display whitespace-nowrap">{{ $display }}</span>
         <span class="text-small whitespace-nowrap text-muted">(zum Anzeigen klicken)</span>
@@ -49,42 +48,41 @@
 
 @once
     @push('scripts')
-    <script>
-        window.revealContact = function(element) {
-            const parent = element.closest('.protected-contact');
-            if (!parent) return;
+        <script>
+            window.revealContact = function(element) {
+                const parent = element.closest('.protected-contact');
+                if (!parent) return;
 
-            const reversed = parent.dataset.contact;
-            const type = parent.dataset.type;
+                const reversed = parent.dataset.contact;
+                const type = parent.dataset.type;
 
-            // Dekodiere die umgekehrte Base64-Zeichenfolge
-            const encoded = reversed.split('').reverse().join('');
-            let contact;
+                // Dekodiere die umgekehrte Base64-Zeichenfolge
+                const encoded = reversed.split('').reverse().join('');
+                let contact;
 
-            try {
-                contact = atob(encoded);
-            } catch (e) {
-                console.error('Fehler beim Dekodieren der Kontaktdaten');
-                return;
+                try {
+                    contact = atob(encoded);
+                } catch (e) {
+                    console.error('Fehler beim Dekodieren der Kontaktdaten');
+                    return;
+                }
+
+                // Erstelle den Link basierend auf dem Typ
+                let link = '';
+                const classes = parent.className.replace('protected-contact', '').trim();
+
+                if (type === 'email') {
+                    link = `<a href="mailto:${contact}" class="${classes}">${contact}</a>`;
+                } else if (type === 'phone') {
+                    link = `<a href="tel:${contact}" class="${classes}">${contact}</a>`;
+                } else if (type === 'url') {
+                    // Stelle sicher, dass die URL mit http:// oder https:// beginnt
+                    const url = contact.match(/^https?:\/\//) ? contact : 'https://' + contact;
+                    link = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="${classes}">${contact}</a>`;
+                }
+
+                parent.innerHTML = link;
             }
-
-            // Erstelle den Link basierend auf dem Typ
-            let link = '';
-            const classes = parent.className.replace('protected-contact', '').trim();
-
-            if (type === 'email') {
-                link = `<a href="mailto:${contact}" class="${classes}">${contact}</a>`;
-            } else if (type === 'phone') {
-                link = `<a href="tel:${contact}" class="${classes}">${contact}</a>`;
-            } else if (type === 'url') {
-                // Stelle sicher, dass die URL mit http:// oder https:// beginnt
-                const url = contact.match(/^https?:\/\//) ? contact : 'https://' + contact;
-                link = `<a href="${url}" target="_blank" rel="noopener noreferrer" class="${classes}">${contact}</a>`;
-            }
-
-            parent.innerHTML = link;
-        }
-    </script>
+        </script>
     @endpush
 @endonce
-

@@ -4,8 +4,7 @@
     @include('settings.partials.navigation')
 
     <div class="max-w-form">
-        <x-ui.section :title="__('Update password')"
-            :description="__('Ensure your account is using a long, random password to stay secure')">
+        <x-ui.section :title="__('Update password')" :description="__('Ensure your account is using a long, random password to stay secure')">
             @if ($user->isSsoUser())
                 <x-ui.alert tone="info" :title="__('SSO-Konto')">
                     {{ __('Sie sind über') }} <strong>{{ $user->ssoProviderName() }}</strong>

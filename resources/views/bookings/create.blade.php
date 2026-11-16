@@ -1,22 +1,21 @@
 @php
     use App\Support\Ui;
 
-    $onlyFreeTickets = $ticketTypes->isNotEmpty() && $ticketTypes->every(fn ($t) => $t->price == 0);
+    $onlyFreeTickets = $ticketTypes->isNotEmpty() && $ticketTypes->every(fn($t) => $t->price == 0);
     $isExternalInvoicing = $event->organization?->hasExternalInvoicing() ?? false;
     $singleTicketType = $ticketTypes->count() === 1;
 
     // Freie Plätze für die Metazeile (wie in der Listenzeile): Veranstaltungskontingent oder Summe der Ticketkontingente
     $freePlaces = $event->max_attendees
         ? $event->availableTickets()
-        : ($ticketTypes->isNotEmpty() && $ticketTypes->every(fn ($t) => $t->quantity !== null)
-            ? $ticketTypes->sum(fn ($t) => $t->availableQuantity())
+        : ($ticketTypes->isNotEmpty() && $ticketTypes->every(fn($t) => $t->quantity !== null)
+            ? $ticketTypes->sum(fn($t) => $t->availableQuantity())
             : null);
 @endphp
 
 <x-layouts.public :title="($onlyFreeTickets ? 'Anmelden - ' : 'Tickets buchen - ') . $event->title">
     <div class="mx-auto max-w-page px-page pt-4 pb-[clamp(56px,7vw,96px)]">
-        <x-ui.page-header :title="$onlyFreeTickets ? 'Anmelden' : 'Tickets buchen'"
-            :back-href="route('events.show', $event->slug)" back-label="Zur Veranstaltung" />
+        <x-ui.page-header :title="$onlyFreeTickets ? 'Anmelden' : 'Tickets buchen'" :back-href="route('events.show', $event->slug)" back-label="Zur Veranstaltung" />
 
         @if ($waitlistClaim ?? null)
             <x-ui.alert tone="success" title="Für Sie reserviert" class="mb-6">
@@ -45,11 +44,13 @@
                             <span class="text-small text-muted">{{ $event->category->name }}</span>
                         @endif
                         <span class="text-h3">{{ $event->title }}</span>
-                        <span class="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-small text-ink-soft tabular-nums">
+                        <span
+                            class="flex flex-wrap items-center gap-x-4 gap-y-0.5 text-small text-ink-soft tabular-nums">
                             <span>{{ Ui::dateTime($event->start_date, $event->end_date) }}</span>
                             <span>{{ Ui::formatAndPlace($event) }}</span>
                             @if ($ticketTypes->isNotEmpty())
-                                <x-ui.status tone="free">{{ $freePlaces !== null ? 'noch ' . $freePlaces . ' frei' : 'Plätze frei' }}</x-ui.status>
+                                <x-ui.status
+                                    tone="free">{{ $freePlaces !== null ? 'noch ' . $freePlaces . ' frei' : 'Plätze frei' }}</x-ui.status>
                             @endif
                         </span>
                     </div>
@@ -84,9 +85,10 @@
                                                 {{ $ticketType->availableQuantity() }} verfügbar</span>
                                         @endif
                                     </div>
-                                    <x-ui.stepper name="tickets[{{ $index }}][quantity]" id="ticket_{{ $ticketType->id }}"
-                                        :label="$ticketType->name" :value="$singleTicketType ? max(1, $ticketType->min_per_order) : 0"
-                                        :max="$max" input-class="quantity-input" data-ticket="{{ $ticketType->id }}" />
+                                    <x-ui.stepper name="tickets[{{ $index }}][quantity]"
+                                        id="ticket_{{ $ticketType->id }}" :label="$ticketType->name" :value="$singleTicketType ? max(1, $ticketType->min_per_order) : 0"
+                                        :max="$max" input-class="quantity-input"
+                                        data-ticket="{{ $ticketType->id }}" />
                                     <input type="hidden" name="tickets[{{ $index }}][ticket_type_id]"
                                         value="{{ $ticketType->id }}">
                                 </div>
@@ -105,15 +107,15 @@
                     <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
                         <x-ui.field label="Name" name="customer_name" :value="auth()->user()->name ?? ''" required
                             autocomplete="name" />
-                        <x-ui.field label="E-Mail" name="customer_email" type="email" :value="auth()->user()->email ?? ''"
-                            required autocomplete="email" inputmode="email"
+                        <x-ui.field label="E-Mail" name="customer_email" type="email" :value="auth()->user()->email ?? ''" required
+                            autocomplete="email" inputmode="email"
                             hint="Hierhin senden wir Bestätigung{{ $onlyFreeTickets ? '' : ', Rechnung' }} und Tickets bzw. Zugangsdaten." />
                         <x-ui.field label="Telefon" name="customer_phone" type="tel" optional autocomplete="tel"
                             inputmode="tel" />
                         @if ($event->showsOrganizationField())
                             <x-ui.field label="Organisation / Einrichtung" name="customer_organization"
-                                :required="$event->requiresOrganizationField()" :optional="!$event->requiresOrganizationField()"
-                                autocomplete="organization" placeholder="z.B. Evangelische Grundschule Dresden" />
+                                :required="$event->requiresOrganizationField()" :optional="!$event->requiresOrganizationField()" autocomplete="organization"
+                                placeholder="z.B. Evangelische Grundschule Dresden" />
                         @endif
                     </div>
                 </section>
@@ -136,7 +138,12 @@
                                     class="min-w-0 flex-[3_1_200px]" />
                             </div>
                             <x-ui.select label="Land" name="billing_country" required autocomplete="country-name"
-                                :options="['Germany' => 'Deutschland', 'Austria' => 'Österreich', 'Switzerland' => 'Schweiz', 'Other' => 'Anderes']" selected="Germany" />
+                                :options="[
+                                    'Germany' => 'Deutschland',
+                                    'Austria' => 'Österreich',
+                                    'Switzerland' => 'Schweiz',
+                                    'Other' => 'Anderes',
+                                ]" selected="Germany" />
 
                             @if ($isExternalInvoicing)
                                 <div class="mt-3">
@@ -175,7 +182,8 @@
                                 <div class="flex max-w-[400px] flex-wrap gap-2">
                                     <x-ui.input name="discount_code" autocomplete="off" class="min-w-0 flex-[1_1_180px]"
                                         aria-describedby="discount-message" />
-                                    <x-ui.button variant="secondary" size="lg" id="apply-discount">Einlösen</x-ui.button>
+                                    <x-ui.button variant="secondary" size="lg"
+                                        id="apply-discount">Einlösen</x-ui.button>
                                 </div>
                                 <x-ui.field-error name="discount_code" />
                                 <div id="discount-message" class="mt-2 text-small" aria-live="polite"></div>
@@ -197,7 +205,8 @@
 
                 <x-ui.summary-lines>
                     <div id="order-summary" class="flex flex-col gap-2">
-                        <p class="m-0 text-small text-muted">Bitte wählen Sie {{ $onlyFreeTickets ? 'Plätze' : 'Tickets' }}
+                        <p class="m-0 text-small text-muted">Bitte wählen Sie
+                            {{ $onlyFreeTickets ? 'Plätze' : 'Tickets' }}
                             aus.</p>
                     </div>
                     <x-ui.summary-line id="subtotal-row" label="Zwischensumme" muted style="display: none;">
@@ -224,10 +233,13 @@
 
                 <div class="flex flex-col gap-3">
                     <x-ui.button type="submit" id="submit-button" size="xl" full :disabled="true">
-                        <span id="submit-button-text">{{ $ticketTypes->isEmpty() ? 'Keine Tickets verfügbar' : ($onlyFreeTickets ? 'Verbindlich anmelden' : 'Kostenpflichtig buchen') }}</span>
-                        <svg id="submit-spinner" class="hidden h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg"
-                            fill="none" viewBox="0 0 24 24" aria-hidden="true">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                        <span
+                            id="submit-button-text">{{ $ticketTypes->isEmpty() ? 'Keine Tickets verfügbar' : ($onlyFreeTickets ? 'Verbindlich anmelden' : 'Kostenpflichtig buchen') }}</span>
+                        <svg id="submit-spinner" class="hidden h-5 w-5 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                stroke-width="4">
                             </circle>
                             <path class="opacity-75" fill="currentColor"
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -303,7 +315,8 @@
                     const total = Math.max(0, subtotal - discountAmount);
                     document.getElementById('subtotal').textContent = euro(subtotal);
                     // Ohne Auswahl: "–" statt "kostenfrei", damit eine kostenpflichtige Veranstaltung nicht kostenlos wirkt.
-                    document.getElementById('total').textContent = count === 0 && !onlyFree ? '–' : (total > 0 ? euro(total) :
+                    document.getElementById('total').textContent = count === 0 && !onlyFree ? '–' : (total > 0 ? euro(
+                        total) :
                         'kostenfrei');
                     document.getElementById('submit-button').disabled = count === 0;
                     updateSubmitButton();
@@ -381,7 +394,8 @@
                         }
                         updateSummary();
                     } catch (error) {
-                        show('Der Rabattcode konnte nicht geprüft werden. Bitte versuchen Sie es erneut.', false);
+                        show('Der Rabattcode konnte nicht geprüft werden. Bitte versuchen Sie es erneut.',
+                            false);
                     }
                 });
 

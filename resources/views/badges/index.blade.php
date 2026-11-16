@@ -15,8 +15,7 @@
         <x-ui.stat label="Abzeichen" :value="$stats['earned_badges'] . ' von ' . $stats['total_badges']" />
         <x-ui.stat label="Fortschritt" :value="Ui::percent($stats['completion_percentage'])" />
         <x-ui.stat label="Punkte" :value="Ui::number($stats['total_points'])" />
-        <x-ui.stat label="Zuletzt"
-            :value="$stats['recent_badges']->isNotEmpty() ? $stats['recent_badges']->first()->name : 'Noch keine'"
+        <x-ui.stat label="Zuletzt" :value="$stats['recent_badges']->isNotEmpty() ? $stats['recent_badges']->first()->name : 'Noch keine'"
             class="[&>span:nth-child(2)]:truncate [&>span:nth-child(2)]:text-h3" />
     </div>
 

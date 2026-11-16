@@ -35,12 +35,15 @@
                             <td class="num">{{ $rank }}</td>
                             <th scope="row">
                                 <span class="flex items-center gap-3">
-                                    @if ($entry['user']->show_profile_public || ($entry['user']->allow_networking && auth()->check() && auth()->user()->isFollowing($entry['user'])))
+                                    @if (
+                                        $entry['user']->show_profile_public ||
+                                            ($entry['user']->allow_networking && auth()->check() && auth()->user()->isFollowing($entry['user'])))
                                         <img class="h-10 w-10 flex-none rounded-full border border-line object-cover"
                                             src="{{ $entry['user']->profilePhotoUrl() }}"
                                             alt="{{ $entry['user']->displayName(auth()->user()) }}">
                                     @else
-                                        <span class="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-zone text-muted">
+                                        <span
+                                            class="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-zone text-muted">
                                             <x-icon.user class="h-5 w-5" />
                                         </span>
                                     @endif
@@ -50,7 +53,8 @@
                                             <span class="font-normal text-muted">(Sie)</span>
                                         @endif
                                         @if (!$entry['user']->show_profile_public)
-                                            <span class="block text-caption font-normal text-muted">Privates Profil</span>
+                                            <span class="block text-caption font-normal text-muted">Privates
+                                                Profil</span>
                                         @endif
                                     </span>
                                 </span>

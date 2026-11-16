@@ -10,7 +10,8 @@
                         <form action="{{ route('connections.remove', $user) }}" method="POST" class="m-0">
                             @csrf
                             @method('DELETE')
-                            <x-ui.button type="submit" variant="secondary" onclick="return confirm('Verbindung wirklich entfernen?')">Entfernen</x-ui.button>
+                            <x-ui.button type="submit" variant="secondary"
+                                onclick="return confirm('Verbindung wirklich entfernen?')">Entfernen</x-ui.button>
                         </form>
                     @elseif ($connectionStatus === 'pending')
                         @if ($isPendingRequest)
@@ -74,15 +75,25 @@
             <x-ui.section title="Aktivität">
                 <ul class="m-0 flex list-none flex-col p-0 text-base text-ink">
                     @if ($stats['events_attended'] > 0)
-                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_attended'] }}</span> {{ $stats['events_attended'] === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} besucht</li>
+                        <li class="border-t border-line py-3">Hat <span
+                                class="font-semibold tabular-nums">{{ $stats['events_attended'] }}</span>
+                            {{ $stats['events_attended'] === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} besucht</li>
                     @endif
                     @if ($user->isOrganizer() && $stats['events_organized'] > 0)
-                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $stats['events_organized'] }}</span> {{ $stats['events_organized'] === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} organisiert</li>
+                        <li class="border-t border-line py-3">Hat <span
+                                class="font-semibold tabular-nums">{{ $stats['events_organized'] }}</span>
+                            {{ $stats['events_organized'] === 1 ? 'Veranstaltung' : 'Veranstaltungen' }} organisiert
+                        </li>
                     @endif
                     @if ($user->badges->isNotEmpty())
-                        <li class="border-t border-line py-3">Hat <span class="font-semibold tabular-nums">{{ $user->badges->count() }}</span> Abzeichen verdient</li>
+                        <li class="border-t border-line py-3">Hat <span
+                                class="font-semibold tabular-nums">{{ $user->badges->count() }}</span> Abzeichen
+                            verdient</li>
                     @endif
-                    @if ($stats['events_attended'] === 0 && $user->badges->isEmpty() && !($user->isOrganizer() && $stats['events_organized'] > 0))
+                    @if (
+                        $stats['events_attended'] === 0 &&
+                            $user->badges->isEmpty() &&
+                            !($user->isOrganizer() && $stats['events_organized'] > 0))
                         <li class="border-t border-line py-3 text-muted">Noch keine Aktivität.</li>
                     @endif
                 </ul>
@@ -96,13 +107,15 @@
                         @if ($showEmail && $user->email)
                             <li class="flex items-center gap-2">
                                 <x-icon.mail class="h-5 w-5 flex-none text-muted" />
-                                <a href="mailto:{{ $user->email }}" class="min-w-0 break-words font-medium text-ink underline underline-offset-[3px]">{{ $user->email }}</a>
+                                <a href="mailto:{{ $user->email }}"
+                                    class="min-w-0 break-words font-medium text-ink underline underline-offset-[3px]">{{ $user->email }}</a>
                             </li>
                         @endif
                         @if ($showPhone && $user->phone)
                             <li class="flex items-center gap-2">
                                 <x-icon.phone class="h-5 w-5 flex-none text-muted" />
-                                <a href="tel:{{ $user->phone }}" class="font-medium text-ink underline underline-offset-[3px]">{{ $user->phone }}</a>
+                                <a href="tel:{{ $user->phone }}"
+                                    class="font-medium text-ink underline underline-offset-[3px]">{{ $user->phone }}</a>
                             </li>
                         @endif
                         @if (!$showEmail && !$showPhone)
@@ -117,7 +130,8 @@
                     <ul class="m-0 flex list-none flex-col p-0">
                         @foreach ($user->badges as $badge)
                             <li class="border-t border-line">
-                                <a href="{{ route('badges.show', $badge) }}" class="flex min-h-14 items-center gap-4 py-3 text-ui font-medium text-ink no-underline underline-offset-[3px] hover:underline">
+                                <a href="{{ route('badges.show', $badge) }}"
+                                    class="flex min-h-14 items-center gap-4 py-3 text-ui font-medium text-ink no-underline underline-offset-[3px] hover:underline">
                                     <x-badge-icon :badge="$badge" size="sm" />
                                     <span class="min-w-0">{{ $badge->name }}</span>
                                 </a>

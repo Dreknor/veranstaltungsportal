@@ -11,12 +11,12 @@
     $isReady = $booking->isReadyForParticipation();
     $eventPast = $event->end_date?->isPast() ?? false;
     // Veranstalter-Team und Administration sehen die Kundenansicht nur lesend.
-    $readOnly = auth()->check()
-        && auth()->id() !== $booking->user_id
-        && !session()->has('booking_access_' . $booking->id);
+    $readOnly =
+        auth()->check() && auth()->id() !== $booking->user_id && !session()->has('booking_access_' . $booking->id);
     $needsAttendees = !$readOnly && $booking->canBePersonalized() && !$booking->tickets_personalized;
     $isFree = $booking->isFree();
-    $canCancelOnline = !$readOnly && $booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture();
+    $canCancelOnline =
+        !$readOnly && $booking->isActive() && $booking->status !== 'completed' && $event->start_date->isFuture();
 
     // [Text, Ton für <x-ui.status>]
     $statusBadge = match (true) {
@@ -73,22 +73,22 @@
                     Nicht abgeschlossene Zahlungen werden nach 48 Stunden automatisch storniert.
                 </p>
                 @unless ($readOnly)
-                <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-                    <form method="POST" action="{{ route('bookings.pay', $booking->booking_number) }}" class="m-0">
-                        @csrf
-                        <x-ui.button type="submit" class="w-full sm:w-auto">
-                            Mit PayPal bezahlen ({{ Ui::money($booking->total) }})
-                        </x-ui.button>
-                    </form>
-                    <form method="POST" action="{{ route('bookings.switch-to-invoice', $booking->booking_number) }}"
-                        class="m-0"
-                        onsubmit="return confirm('Möchten Sie stattdessen per Rechnung (Überweisung) bezahlen?')">
-                        @csrf
-                        <x-ui.button type="submit" variant="secondary" class="w-full sm:w-auto">
-                            Stattdessen per Rechnung zahlen
-                        </x-ui.button>
-                    </form>
-                </div>
+                    <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+                        <form method="POST" action="{{ route('bookings.pay', $booking->booking_number) }}" class="m-0">
+                            @csrf
+                            <x-ui.button type="submit" class="w-full sm:w-auto">
+                                Mit PayPal bezahlen ({{ Ui::money($booking->total) }})
+                            </x-ui.button>
+                        </form>
+                        <form method="POST" action="{{ route('bookings.switch-to-invoice', $booking->booking_number) }}"
+                            class="m-0"
+                            onsubmit="return confirm('Möchten Sie stattdessen per Rechnung (Überweisung) bezahlen?')">
+                            @csrf
+                            <x-ui.button type="submit" variant="secondary" class="w-full sm:w-auto">
+                                Stattdessen per Rechnung zahlen
+                            </x-ui.button>
+                        </form>
+                    </div>
                 @endunless
             @elseif($isExternalInvoicing)
                 <p class="m-0 text-h3">Sie erhalten eine Rechnung vom Veranstalter.</p>
@@ -100,7 +100,8 @@
             @else
                 <p class="m-0 text-h3 tabular-nums">Bitte überweisen Sie {{ Ui::money($booking->total) }}.</p>
                 <x-ui.dl layout="stack" class="mt-4">
-                    <x-ui.dl-item label="Empfänger">{{ $bankAccount['account_holder'] ?? $organization?->name }}</x-ui.dl-item>
+                    <x-ui.dl-item
+                        label="Empfänger">{{ $bankAccount['account_holder'] ?? $organization?->name }}</x-ui.dl-item>
                     @if (!empty($bankAccount['iban']))
                         <x-ui.dl-item label="IBAN" num><span
                                 class="break-all select-all">{{ $bankAccount['iban'] }}</span></x-ui.dl-item>
@@ -162,8 +163,7 @@
                     </x-ui.button>
                 @endif
                 @if ($booking->hasTicketDocument() && $booking->canSendTickets())
-                    <x-ui.button :href="route('bookings.ticket', $booking->booking_number)"
-                        :variant="$booking->canAccessOnlineContent() && $event->online_url ? 'secondary' : 'primary'">
+                    <x-ui.button :href="route('bookings.ticket', $booking->booking_number)" :variant="$booking->canAccessOnlineContent() && $event->online_url ? 'secondary' : 'primary'">
                         <x-slot:icon><x-icon.download /></x-slot:icon>
                         Ticket herunterladen (PDF)
                     </x-ui.button>
@@ -266,12 +266,10 @@
         </x-ui.section>
 
         {{-- Tickets / Teilnehmende --}}
-        <x-ui.section :title="$booking->items->count() > 1 ? 'Plätze & Teilnehmende' : 'Ihr Platz'" id="abschnitt-plaetze"
-            class="[&>div:first-child]:mb-4">
+        <x-ui.section :title="$booking->items->count() > 1 ? 'Plätze & Teilnehmende' : 'Ihr Platz'" id="abschnitt-plaetze" class="[&>div:first-child]:mb-4">
             @if ($booking->canBePersonalized() && !$readOnly)
                 <x-slot:actions>
-                    <x-ui.button variant="secondary" size="sm"
-                        :href="route('bookings.personalize', $booking->booking_number)">
+                    <x-ui.button variant="secondary" size="sm" :href="route('bookings.personalize', $booking->booking_number)">
                         {{ $booking->tickets_personalized ? 'Teilnehmende ändern' : 'Teilnehmende eintragen' }}
                     </x-ui.button>
                 </x-slot:actions>
@@ -305,7 +303,8 @@
                                 @if ($item->attendee_name)
                                     {{ $item->attendee_name }}
                                     @if ($item->attendee_email)
-                                        <span class="block text-small [overflow-wrap:anywhere] text-muted">{{ $item->attendee_email }}</span>
+                                        <span
+                                            class="block text-small [overflow-wrap:anywhere] text-muted">{{ $item->attendee_email }}</span>
                                     @endif
                                 @else
                                     <x-ui.status tone="warning">Teilnehmer:in noch nicht eingetragen</x-ui.status>
@@ -321,8 +320,10 @@
                             @if ($eventPast)
                                 <td class="actions">
                                     @if ($item->checked_in)
-                                        <x-ui.button variant="link" size="sm"
-                                            :href="route('bookings.certificate.individual', ['bookingNumber' => $booking->booking_number, 'itemId' => $item->id])">
+                                        <x-ui.button variant="link" size="sm" :href="route('bookings.certificate.individual', [
+                                            'bookingNumber' => $booking->booking_number,
+                                            'itemId' => $item->id,
+                                        ])">
                                             Zertifikat
                                         </x-ui.button>
                                     @endif
@@ -338,7 +339,8 @@
         <x-ui.section title="Ihre Angaben" id="abschnitt-angaben" class="[&>div:first-child]:mb-4">
             <x-ui.dl>
                 <x-ui.dl-item label="Name">{{ $booking->customer_name }}</x-ui.dl-item>
-                <x-ui.dl-item label="E-Mail"><span class="break-all">{{ $booking->customer_email }}</span></x-ui.dl-item>
+                <x-ui.dl-item label="E-Mail"><span
+                        class="break-all">{{ $booking->customer_email }}</span></x-ui.dl-item>
                 @if ($booking->customer_phone)
                     <x-ui.dl-item label="Telefon" num>{{ $booking->customer_phone }}</x-ui.dl-item>
                 @endif
@@ -374,7 +376,8 @@
                     </p>
                 @else
                     <h2 id="feedback-titel" class="m-0 text-h2">Wie hat Ihnen die Veranstaltung gefallen?</h2>
-                    <p class="mt-1 mb-0 text-base text-muted">Ihr Feedback hilft dem Veranstalter, zukünftige Angebote zu
+                    <p class="mt-1 mb-0 text-base text-muted">Ihr Feedback hilft dem Veranstalter, zukünftige Angebote
+                        zu
                         verbessern.</p>
                     <form method="POST" action="{{ route('bookings.feedback', $booking->booking_number) }}"
                         class="mt-6 flex max-w-form flex-col gap-5" x-data="{ rating: {{ (int) old('rating', 0) }} }">
@@ -385,9 +388,10 @@
                                 @for ($i = 1; $i <= 5; $i++)
                                     <label
                                         class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink">
-                                        <input type="radio" name="rating" value="{{ $i }}" class="sr-only"
-                                            x-model.number="rating" @checked(old('rating') == $i)>
-                                        <span aria-hidden="true" :class="rating >= {{ $i }} ? 'text-ink' : 'text-line-strong'"
+                                        <input type="radio" name="rating" value="{{ $i }}"
+                                            class="sr-only" x-model.number="rating" @checked(old('rating') == $i)>
+                                        <span aria-hidden="true"
+                                            :class="rating >= {{ $i }} ? 'text-ink' : 'text-line-strong'"
                                             class="text-line-strong transition-colors duration-150">
                                             <x-icon.star-filled class="h-7 w-7" />
                                         </span>
@@ -397,8 +401,9 @@
                             </div>
                             <x-ui.field-error name="rating" />
                         </fieldset>
-                        <x-ui.textarea label="Kommentar" name="comment" id="feedback-comment" optional rows="3"
-                            maxlength="1000" placeholder="Was war besonders hilfreich? Was können wir verbessern?" />
+                        <x-ui.textarea label="Kommentar" name="comment" id="feedback-comment" optional
+                            rows="3" maxlength="1000"
+                            placeholder="Was war besonders hilfreich? Was können wir verbessern?" />
                         <div>
                             <x-ui.button type="submit">Feedback senden</x-ui.button>
                         </div>
@@ -425,23 +430,27 @@
             @unless ($isFree)
                 <x-ui.summary-total :amount="Ui::money($booking->total)" />
                 <div class="flex flex-col gap-2">
-                    <x-ui.summary-line label="Zahlart"
-                        :amount="$booking->payment_method === 'paypal' ? 'PayPal' : 'Rechnung'" />
+                    <x-ui.summary-line label="Zahlart" :amount="$booking->payment_method === 'paypal' ? 'PayPal' : 'Rechnung'" />
                     @if ($booking->ticketsReleasedBeforePayment())
                         <x-ui.summary-line label="Rechnung" amount="folgt separat" />
                     @elseif($booking->payment_status !== 'extern')
                         <x-ui.summary-line label="Zahlung">
-                            <x-ui.status :tone="Ui::paymentTone($booking->payment_status)">{{ $booking->payment_status === 'pending' ? 'Offen' : $booking->paymentStatusLabel() }}</x-ui.status>
+                            <x-ui.status
+                                :tone="Ui::paymentTone($booking->payment_status)">{{ $booking->payment_status === 'pending' ? 'Offen' : $booking->paymentStatusLabel() }}</x-ui.status>
                         </x-ui.summary-line>
                     @endif
                 </div>
             @endunless
-            <p class="m-0 text-small text-muted tabular-nums">Gebucht am {{ $booking->created_at->format('d.m.Y H:i') }}
+            <p class="m-0 text-small text-muted tabular-nums">Gebucht am
+                {{ $booking->created_at->format('d.m.Y H:i') }}
                 Uhr</p>
         </x-ui.summary>
 
         <section aria-labelledby="dokumente-titel" class="flex flex-col gap-3">
-            <h2 id="dokumente-titel" @class(['m-0 mb-1 text-h3', 'max-sm:hidden' => $isCancelled && !$canCancelOnline])>Dokumente &amp; Aktionen</h2>
+            <h2 id="dokumente-titel" @class([
+                'm-0 mb-1 text-h3',
+                'max-sm:hidden' => $isCancelled && !$canCancelOnline,
+            ])>Dokumente &amp; Aktionen</h2>
             @if ($booking->hasTicketDocument() && $isReady && $booking->canSendTickets())
                 <x-ui.button :href="route('bookings.ticket', $booking->booking_number)" full>
                     <x-slot:icon><x-icon.ticket /></x-slot:icon>

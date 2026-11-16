@@ -858,7 +858,8 @@
                 <div x-data="{ sgTab: 'participants' }" class="flex flex-col gap-4">
                     <x-ui.tabs label="Bereiche (Umschalter)" variant="toggle">
                         <x-ui.tab x-on:click="sgTab = 'participants'"
-                            x-bind:aria-pressed="(sgTab === 'participants').toString()" active>Für Teilnehmer</x-ui.tab>
+                            x-bind:aria-pressed="(sgTab === 'participants').toString()" active>Für
+                            Teilnehmer</x-ui.tab>
                         <x-ui.tab x-on:click="sgTab = 'organizers'"
                             x-bind:aria-pressed="(sgTab === 'organizers').toString()" :count="12">Für
                             Veranstalter</x-ui.tab>
@@ -891,8 +892,8 @@
                             <span class="font-medium text-ink">Abzeichen „Stammgast“</span>
                             <span class="text-muted tabular-nums">3 / 5</span>
                         </div>
-                        <x-ui.progress :value="3" :max="5" size="lg" label="Fortschritt Abzeichen"
-                            value-text="3 von 5 Veranstaltungen" />
+                        <x-ui.progress :value="3" :max="5" size="lg"
+                            label="Fortschritt Abzeichen" value-text="3 von 5 Veranstaltungen" />
                     </div>
                     <div class="flex flex-col gap-2">
                         <x-ui.progress :value="0" decorative />

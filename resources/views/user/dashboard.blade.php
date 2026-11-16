@@ -1,5 +1,6 @@
 <x-layouts.app title="Mein Dashboard">
-    <x-ui.page-header title="Willkommen zurück, {{ $user->fullName() }}" subtitle="Verwalten Sie Ihre Buchungen und Fortbildungen." />
+    <x-ui.page-header title="Willkommen zurück, {{ $user->fullName() }}"
+        subtitle="Verwalten Sie Ihre Buchungen und Fortbildungen." />
 
     <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$stats['total_bookings']" :href="route('user.bookings')" />
@@ -15,7 +16,11 @@
                 $quickLinks = [
                     ['Fortbildungen finden', route('events.index'), null],
                     ['Meine Buchungen', route('user.bookings'), null],
-                    ['Netzwerk', route('connections.index'), $pendingRequests > 0 ? $pendingRequests . ' offene Anfragen' : null],
+                    [
+                        'Netzwerk',
+                        route('connections.index'),
+                        $pendingRequests > 0 ? $pendingRequests . ' offene Anfragen' : null,
+                    ],
                     ['Favoriten', route('favorites.index'), null],
                     ['Statistiken', route('user.statistics'), null],
                 ];
@@ -43,20 +48,23 @@
                 @foreach ($upcomingBookings as $booking)
                     @if ($booking->event)
                         <x-ui.event-row :event="$booking->event" :href="route('bookings.show', $booking->booking_number)">
-                            <span class="text-small text-muted tabular-nums">Buchung {{ $booking->booking_number }}</span>
+                            <span class="text-small text-muted tabular-nums">Buchung
+                                {{ $booking->booking_number }}</span>
                             <x-slot:aside>
                                 <x-ui.status :tone="\App\Support\Ui::bookingTone($booking->status)">{{ $booking->statusLabel() }}</x-ui.status>
                             </x-slot:aside>
                             <x-slot:action>
                                 <x-ui.button variant="secondary" :href="route('bookings.show', $booking->booking_number)" full>Buchung ansehen</x-ui.button>
-                                <x-ui.button variant="link" size="sm" :href="route('bookings.ticket', $booking->booking_number)">Ticket herunterladen</x-ui.button>
+                                <x-ui.button variant="link" size="sm" :href="route('bookings.ticket', $booking->booking_number)">Ticket
+                                    herunterladen</x-ui.button>
                             </x-slot:action>
                         </x-ui.event-row>
                     @endif
                 @endforeach
             </x-ui.row-list>
         @else
-            <x-ui.empty title="Keine anstehenden Veranstaltungen" :action-href="route('events.index')" action-label="Fortbildungen entdecken">
+            <x-ui.empty title="Keine anstehenden Veranstaltungen" :action-href="route('events.index')"
+                action-label="Fortbildungen entdecken">
                 Sobald Sie eine Veranstaltung buchen, erscheint sie hier.
             </x-ui.empty>
         @endif
@@ -68,9 +76,11 @@
                 @foreach ($bookings->take(5) as $booking)
                     @if ($booking->event)
                         <x-ui.event-row :event="$booking->event" :href="route('bookings.show', $booking->booking_number)">
-                            <span class="text-small text-muted tabular-nums">Gebucht am {{ $booking->created_at->format('d.m.Y') }} · {{ $booking->booking_number }}</span>
+                            <span class="text-small text-muted tabular-nums">Gebucht am
+                                {{ $booking->created_at->format('d.m.Y') }} · {{ $booking->booking_number }}</span>
                             <x-slot:aside>
-                                <span class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
+                                <span
+                                    class="text-base font-semibold whitespace-nowrap">{{ \App\Support\Ui::money($booking->total) }}</span>
                                 <x-ui.status :tone="\App\Support\Ui::bookingTone($booking->status)">{{ $booking->statusLabel() }}</x-ui.status>
                             </x-slot:aside>
                             <x-slot:action>
@@ -81,7 +91,8 @@
                 @endforeach
             </x-ui.row-list>
         @else
-            <x-ui.empty title="Noch keine Buchungen" :action-href="route('events.index')" action-label="Veranstaltungen entdecken" action-variant="primary">
+            <x-ui.empty title="Noch keine Buchungen" :action-href="route('events.index')" action-label="Veranstaltungen entdecken"
+                action-variant="primary">
                 Entdecken Sie Fortbildungen und sichern Sie sich Ihren Platz.
             </x-ui.empty>
         @endif
@@ -92,7 +103,11 @@
             <x-ui.row-list>
                 @foreach ($notifications as $notification)
                     <x-ui.row>
-                        <p @class(['m-0 flex items-center gap-2 text-base', 'font-semibold' => !$notification->read_at, 'font-normal' => $notification->read_at])>
+                        <p @class([
+                            'm-0 flex items-center gap-2 text-base',
+                            'font-semibold' => !$notification->read_at,
+                            'font-normal' => $notification->read_at,
+                        ])>
                             @unless ($notification->read_at)
                                 <span aria-hidden="true" class="h-2 w-2 flex-none rounded-full bg-leaf"></span>
                                 <span class="sr-only">Ungelesen:</span>
@@ -100,17 +115,20 @@
                             {{ \App\Support\Ui::notificationTitle($notification->type, $notification->data) }}
                         </p>
                         @if (!empty($notification->data['message']))
-                            <p class="m-0 text-small text-muted">{{ \App\Support\Ui::notificationMessage($notification->data) }}</p>
+                            <p class="m-0 text-small text-muted">
+                                {{ \App\Support\Ui::notificationMessage($notification->data) }}</p>
                         @endif
                         <x-slot:aside>
                             <span class="text-small text-muted">{{ $notification->created_at->diffForHumans() }}</span>
                         </x-slot:aside>
                         @unless ($notification->read_at)
                             <x-slot:action>
-                                <form action="{{ route('notifications.mark-read', $notification->id) }}" method="POST" class="m-0">
+                                <form action="{{ route('notifications.mark-read', $notification->id) }}" method="POST"
+                                    class="m-0">
                                     @csrf
                                     @method('PATCH')
-                                    <x-ui.button type="submit" variant="link" size="sm">Als gelesen markieren</x-ui.button>
+                                    <x-ui.button type="submit" variant="link" size="sm">Als gelesen
+                                        markieren</x-ui.button>
                                 </form>
                             </x-slot:action>
                         @endunless

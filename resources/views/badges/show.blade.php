@@ -28,9 +28,10 @@
                 @if ($hasEarned)
                     @php
                         $userBadge = auth()->user()->badges()->where('badge_id', $badge->id)->first();
-                        $earnedAt = $userBadge->pivot->earned_at instanceof \Carbon\Carbon
-                            ? $userBadge->pivot->earned_at
-                            : \Carbon\Carbon::parse($userBadge->pivot->earned_at);
+                        $earnedAt =
+                            $userBadge->pivot->earned_at instanceof \Carbon\Carbon
+                                ? $userBadge->pivot->earned_at
+                                : \Carbon\Carbon::parse($userBadge->pivot->earned_at);
                     @endphp
                     <p class="m-0 mt-4 text-small text-muted tabular-nums">
                         Verdient am {{ $earnedAt->format('d.m.Y') }}
@@ -51,7 +52,8 @@
                                 <span class="text-muted">
                                     {{ Ui::number(min($data['current'], $data['required'])) }} von
                                     {{ Ui::number($data['required']) }}
-                                    <span class="ml-2 font-medium text-ink">{{ Ui::percent($data['percentage']) }}</span>
+                                    <span
+                                        class="ml-2 font-medium text-ink">{{ Ui::percent($data['percentage']) }}</span>
                                 </span>
                             </div>
                             <x-ui.progress :value="$data['percentage']" size="lg" decorative />

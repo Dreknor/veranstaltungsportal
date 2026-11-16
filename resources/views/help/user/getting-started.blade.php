@@ -155,13 +155,16 @@
         <h2>6. Nächste Schritte</h2>
         <p>Jetzt sind Sie bereit, das Bildungsportal voll zu nutzen! Hier sind einige Vorschläge:</p>
         <ul>
-            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'booking-events']) }}">Veranstaltungen buchen</a>
+            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'booking-events']) }}">Veranstaltungen
+                    buchen</a>
                 – Lernen Sie, wie Sie Tickets buchen und bezahlen.</li>
-            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'social-features']) }}">Vernetzen Sie sich</a>
+            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'social-features']) }}">Vernetzen
+                    Sie sich</a>
                 – Knüpfen Sie Kontakte mit anderen Pädagogen.</li>
             <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'badges']) }}">Badges sammeln</a>
                 – Verfolgen Sie Ihren Lernfortschritt mit Abzeichen.</li>
-            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'favorites']) }}">Favoriten nutzen</a>
+            <li><a href="{{ route('help.article', ['category' => 'user', 'article' => 'favorites']) }}">Favoriten
+                    nutzen</a>
                 – Speichern Sie interessante Veranstaltungen.</li>
         </ul>
     </section>

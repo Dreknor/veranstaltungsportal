@@ -19,7 +19,8 @@
     $invalid ??= \App\Support\Ui::error($errors ?? null, $name, $bag) !== null;
 @endphp
 
-<div x-data="{ files: '' }" {{ $attributes->only('class')->class('flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2') }}>
+<div x-data="{ files: '' }"
+    {{ $attributes->only('class')->class('flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2') }}>
     <input type="file" @if ($name) name="{{ $name }}" @endif id="{{ $id }}"
         @if ($invalid) aria-invalid="true" @endif
         x-on:change="files = Array.from($event.target.files).map(f => f.name).join(', ')"

@@ -13,7 +13,8 @@
     'rows' => 8,
     'required' => false,
     'optional' => false,
-    'hint' => 'Formatieren Sie mit der Werkzeugleiste oder mit Markdown, z. B. **fett** oder „- “ am Zeilenanfang für eine Aufzählung.',
+    'hint' =>
+        'Formatieren Sie mit der Werkzeugleiste oder mit Markdown, z. B. **fett** oder „- “ am Zeilenanfang für eine Aufzählung.',
     'error' => null,
     'old' => true,
     'bag' => 'default',
@@ -39,10 +40,11 @@
     @endif
 
     <div role="toolbar" aria-label="Formatierung{{ $label ? ': ' . $label : '' }}" aria-controls="{{ $id }}"
-        class="mb-2 flex flex-wrap gap-2"
-        x-on:keydown.right.prevent="moveFocus($event, 1)" x-on:keydown.left.prevent="moveFocus($event, -1)">
+        class="mb-2 flex flex-wrap gap-2" x-on:keydown.right.prevent="moveFocus($event, 1)"
+        x-on:keydown.left.prevent="moveFocus($event, -1)">
         @foreach ($tools as [$action, $text, $title])
-            <x-ui.button variant="secondary" size="sm" x-on:click="{{ $action }}()" title="{{ $title }}">{{ $text }}</x-ui.button>
+            <x-ui.button variant="secondary" size="sm" x-on:click="{{ $action }}()"
+                title="{{ $title }}">{{ $text }}</x-ui.button>
         @endforeach
         <x-ui.button variant="secondary" size="sm" x-on:click="togglePreview()" aria-pressed="false"
             x-bind:aria-pressed="preview.toString()" aria-controls="{{ $id }}-preview"
@@ -54,9 +56,9 @@
         </x-ui.button>
     </div>
 
-    <x-ui.textarea :name="$name" :id="$id" :value="$value" :rows="$rows" :required="$required" :hint="$hint"
-        :error="$error" :old="$old" :bag="$bag" x-ref="input" x-on:keydown="shortcut($event)" x-on:input="changed()"
-        {{ $attributes->except('class') }} />
+    <x-ui.textarea :name="$name" :id="$id" :value="$value" :rows="$rows" :required="$required"
+        :hint="$hint" :error="$error" :old="$old" :bag="$bag" x-ref="input"
+        x-on:keydown="shortcut($event)" x-on:input="changed()" {{ $attributes->except('class') }} />
 
     <section id="{{ $id }}-preview" x-show="preview" x-cloak aria-label="Vorschau"
         class="mt-3 rounded-box border border-line p-4">

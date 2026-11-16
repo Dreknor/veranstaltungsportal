@@ -1,7 +1,8 @@
 <x-layouts.app title="Benachrichtigungen">
     <x-ui.page-header title="Benachrichtigungen" subtitle="Alle Ihre Benachrichtigungen.">
         <x-slot:actions>
-            <form action="{{ route('notifications.delete-read') }}" method="POST" class="m-0" onsubmit="return confirm('Alle gelesenen Benachrichtigungen löschen?')">
+            <form action="{{ route('notifications.delete-read') }}" method="POST" class="m-0"
+                onsubmit="return confirm('Alle gelesenen Benachrichtigungen löschen?')">
                 @csrf
                 @method('DELETE')
                 <x-ui.button type="submit" variant="secondary">
@@ -35,7 +36,11 @@
                     $unread = !$notification->read_at;
                 @endphp
                 <x-ui.row>
-                    <p @class(['m-0 flex items-center gap-2 text-base', 'font-semibold' => $unread, 'font-normal' => !$unread])>
+                    <p @class([
+                        'm-0 flex items-center gap-2 text-base',
+                        'font-semibold' => $unread,
+                        'font-normal' => !$unread,
+                    ])>
                         @if ($unread)
                             <span aria-hidden="true" class="h-2 w-2 flex-none rounded-full bg-leaf"></span>
                             <span class="sr-only">Ungelesen:</span>
@@ -47,7 +52,8 @@
                         <p class="m-0 text-small text-muted">Channel: {{ $data['channel'] }}</p>
                     @endif
                     @if (isset($data['booking_number']))
-                        <p class="m-0 text-small text-muted tabular-nums">Buchungsnummer: {{ $data['booking_number'] }}</p>
+                        <p class="m-0 text-small text-muted tabular-nums">Buchungsnummer: {{ $data['booking_number'] }}
+                        </p>
                     @endif
 
                     <x-slot:aside>
@@ -63,12 +69,15 @@
                                 <x-ui.button variant="link" size="sm" :href="route('notifications.mark-read', $notification->id)">Details</x-ui.button>
                             @endif
                             @if ($unread)
-                                <form action="{{ route('notifications.mark-read', $notification->id) }}" method="POST" class="m-0">
+                                <form action="{{ route('notifications.mark-read', $notification->id) }}" method="POST"
+                                    class="m-0">
                                     @csrf
-                                    <x-ui.button type="submit" variant="link" size="sm">Als gelesen markieren</x-ui.button>
+                                    <x-ui.button type="submit" variant="link" size="sm">Als gelesen
+                                        markieren</x-ui.button>
                                 </form>
                             @endif
-                            <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" class="m-0" onsubmit="return confirm('Benachrichtigung löschen?')">
+                            <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST"
+                                class="m-0" onsubmit="return confirm('Benachrichtigung löschen?')">
                                 @csrf
                                 @method('DELETE')
                                 <x-ui.button type="submit" variant="link" size="sm">Löschen</x-ui.button>

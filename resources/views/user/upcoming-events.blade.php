@@ -7,10 +7,13 @@
                 @php
                     $quantity = $booking->items->sum('quantity');
                     // Ganze Kalendertage bis zum Beginn (Carbon 3 liefert sonst Bruchteile)
-                    $daysUntil = (int) now()->startOfDay()->diffInDays($booking->event->start_date->copy()->startOfDay(), false);
+                    $daysUntil = (int) now()
+                        ->startOfDay()
+                        ->diffInDays($booking->event->start_date->copy()->startOfDay(), false);
                 @endphp
                 <x-ui.event-row :event="$booking->event" :href="route('bookings.show', $booking->booking_number)">
-                    <span class="text-small text-muted tabular-nums">{{ $quantity }} {{ $quantity === 1 ? 'Ticket' : 'Tickets' }}</span>
+                    <span class="text-small text-muted tabular-nums">{{ $quantity }}
+                        {{ $quantity === 1 ? 'Ticket' : 'Tickets' }}</span>
                     @if ($daysUntil >= 0)
                         <span class="text-small font-medium text-ink-soft">
                             @if ($daysUntil === 0)
@@ -37,7 +40,8 @@
             {{ $bookings->links() }}
         </div>
     @else
-        <x-ui.empty title="Keine anstehenden Veranstaltungen" :action-href="route('events.index')" action-label="Fortbildungen entdecken" action-variant="primary">
+        <x-ui.empty title="Keine anstehenden Veranstaltungen" :action-href="route('events.index')" action-label="Fortbildungen entdecken"
+            action-variant="primary">
             Buchen Sie jetzt Ihre nächste Fortbildung.
         </x-ui.empty>
     @endif

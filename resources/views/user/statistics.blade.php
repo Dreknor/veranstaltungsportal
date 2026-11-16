@@ -25,8 +25,10 @@
 
         <x-ui.section title="Finanzübersicht">
             <x-ui.dl>
-                <x-ui.dl-item label="Gesamt investiert" num>{{ \App\Support\Ui::money($stats['total_spent']) }}</x-ui.dl-item>
-                <x-ui.dl-item label="Durchschnitt pro Buchung" num>{{ \App\Support\Ui::money($stats['average_booking_value'] ?? 0) }}</x-ui.dl-item>
+                <x-ui.dl-item label="Gesamt investiert"
+                    num>{{ \App\Support\Ui::money($stats['total_spent']) }}</x-ui.dl-item>
+                <x-ui.dl-item label="Durchschnitt pro Buchung"
+                    num>{{ \App\Support\Ui::money($stats['average_booking_value'] ?? 0) }}</x-ui.dl-item>
                 <x-ui.dl-item label="Bestätigte Buchungen" num>{{ $stats['confirmed_bookings'] }}</x-ui.dl-item>
                 <x-ui.dl-item label="Stornierte Buchungen" num>{{ $stats['cancelled_bookings'] }}</x-ui.dl-item>
             </x-ui.dl>
@@ -41,7 +43,8 @@
                     <li>
                         <div class="mb-1 flex items-baseline justify-between gap-4">
                             <span class="text-small font-medium text-ink">{{ $category ?: 'Ohne Kategorie' }}</span>
-                            <span class="text-small text-muted tabular-nums">{{ $count }} {{ $count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}</span>
+                            <span class="text-small text-muted tabular-nums">{{ $count }}
+                                {{ $count === 1 ? 'Veranstaltung' : 'Veranstaltungen' }}</span>
                         </div>
                         <x-ui.progress :value="$count" :max="$categoryTotal" decorative />
                     </li>
@@ -63,14 +66,18 @@
                 @endphp
                 <li class="flex min-w-0 flex-col gap-1">
                     <div class="relative flex-1">
-                        <div class="absolute inset-x-0 bottom-0 flex flex-col" style="height: {{ max($heightPercent, $bookingCount > 0 ? 2 : 0) }}%">
-                            <span class="absolute bottom-full w-full pb-1 text-center text-caption text-muted tabular-nums">
-                                {{ $bookingCount }}<span class="sr-only"> Buchung{{ $bookingCount != 1 ? 'en' : '' }}</span>
+                        <div class="absolute inset-x-0 bottom-0 flex flex-col"
+                            style="height: {{ max($heightPercent, $bookingCount > 0 ? 2 : 0) }}%">
+                            <span
+                                class="absolute bottom-full w-full pb-1 text-center text-caption text-muted tabular-nums">
+                                {{ $bookingCount }}<span class="sr-only">
+                                    Buchung{{ $bookingCount != 1 ? 'en' : '' }}</span>
                             </span>
                             <div class="w-full flex-1 rounded-t-control bg-primary"></div>
                         </div>
                     </div>
-                    <span class="border-t border-line pt-1 text-center text-caption text-muted">{{ \Carbon\Carbon::create()->month($month)->translatedFormat('M') }}</span>
+                    <span
+                        class="border-t border-line pt-1 text-center text-caption text-muted">{{ \Carbon\Carbon::create()->month($month)->translatedFormat('M') }}</span>
                 </li>
             @endforeach
         </ol>
