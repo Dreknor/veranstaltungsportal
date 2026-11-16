@@ -3,9 +3,11 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-8">
                 <div class="flex items-center mb-2">
-                    <a href="{{ route('help.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+                    <a href="{{ route('help.index') }}"
+                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </a>
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 ml-4">Bewertungen schreiben</h1>
@@ -16,27 +18,33 @@
                 <div class="p-8 text-gray-900 dark:text-gray-100">
                     <div class="mb-8">
                         <p class="text-lg text-gray-700 dark:text-gray-300">
-                            Ihre Bewertungen helfen anderen Pädagogen bei der Auswahl passender Fortbildungen und geben Veranstaltern wertvolles Feedback.
+                            Ihre Bewertungen helfen anderen Pädagogen bei der Auswahl passender Fortbildungen und geben
+                            Veranstaltern wertvolles Feedback.
                         </p>
                     </div>
                     <div class="mb-8 bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg">
                         <h2 class="text-xl font-semibold mb-4">Inhalt</h2>
                         <ul class="space-y-2">
-                            <li><a href="#write" class="text-blue-600 dark:text-blue-400 hover:underline">1. Bewertung schreiben</a></li>
-                            <li><a href="#guidelines" class="text-blue-600 dark:text-blue-400 hover:underline">2. Bewertungs-Richtlinien</a></li>
-                            <li><a href="#manage" class="text-blue-600 dark:text-blue-400 hover:underline">3. Bewertungen verwalten</a></li>
-                            <li><a href="#helpful" class="text-blue-600 dark:text-blue-400 hover:underline">4. Hilfreiche Bewertungen</a></li>
+                            <li><a href="#write" class="text-blue-600 dark:text-blue-400 hover:underline">1. Bewertung
+                                    schreiben</a></li>
+                            <li><a href="#guidelines" class="text-blue-600 dark:text-blue-400 hover:underline">2.
+                                    Bewertungs-Richtlinien</a></li>
+                            <li><a href="#manage" class="text-blue-600 dark:text-blue-400 hover:underline">3.
+                                    Bewertungen verwalten</a></li>
+                            <li><a href="#helpful" class="text-blue-600 dark:text-blue-400 hover:underline">4.
+                                    Hilfreiche Bewertungen</a></li>
                         </ul>
                     </div>
                     <section id="write" class="mb-12">
                         <h2 class="text-2xl font-bold mb-4 flex items-center">
-                            <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
+                            <span
+                                class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
                             Bewertung schreiben
                         </h2>
                         <div class="ml-11 space-y-4">
                             <h3 class="text-xl font-semibold">Wann kann ich bewerten?</h3>
                             <p class="text-gray-700 dark:text-gray-300">
-                                Sie können eine Veranstaltung bewerten, nachdem Sie daran teilgenommen haben. 
+                                Sie können eine Veranstaltung bewerten, nachdem Sie daran teilgenommen haben.
                                 Nach Abschluss des Events erhalten Sie automatisch eine Einladung zur Bewertung.
                             </p>
                             <h3 class="text-xl font-semibold mt-6">Schritt-für-Schritt Anleitung</h3>
@@ -59,16 +67,20 @@
                             <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-400 p-4 mt-4">
                                 <div class="flex">
                                     <svg class="h-5 w-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
                                     </svg>
-                                    <p><strong>Belohnung:</strong> Für jede abgegebene Bewertung erhalten Sie Badge-Punkte!</p>
+                                    <p><strong>Belohnung:</strong> Für jede abgegebene Bewertung erhalten Sie
+                                        Badge-Punkte!</p>
                                 </div>
                             </div>
                         </div>
                     </section>
                     <section id="guidelines" class="mb-12">
                         <h2 class="text-2xl font-bold mb-4 flex items-center">
-                            <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
+                            <span
+                                class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
                             Bewertungs-Richtlinien
                         </h2>
                         <div class="ml-11 space-y-4">
@@ -101,7 +113,8 @@
                             </div>
                             <h3 class="text-xl font-semibold mt-6">Was ist nicht erlaubt?</h3>
                             <div class="space-y-3">
-                                <div class="border border-red-300 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+                                <div
+                                    class="border border-red-300 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
                                     <h4 class="font-semibold mb-2 flex items-center text-red-700 dark:text-red-400">
                                         <span class="text-2xl mr-2">✗</span> Beleidigende Sprache
                                     </h4>
@@ -109,7 +122,8 @@
                                         Keine Beleidigungen, Drohungen oder Diskriminierung
                                     </p>
                                 </div>
-                                <div class="border border-red-300 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+                                <div
+                                    class="border border-red-300 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
                                     <h4 class="font-semibold mb-2 flex items-center text-red-700 dark:text-red-400">
                                         <span class="text-2xl mr-2">✗</span> Persönliche Angriffe
                                     </h4>
@@ -117,7 +131,8 @@
                                         Kritisieren Sie Inhalte, nicht Personen
                                     </p>
                                 </div>
-                                <div class="border border-red-300 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+                                <div
+                                    class="border border-red-300 dark:border-red-700 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
                                     <h4 class="font-semibold mb-2 flex items-center text-red-700 dark:text-red-400">
                                         <span class="text-2xl mr-2">✗</span> Spam oder Werbung
                                     </h4>
@@ -129,16 +144,20 @@
                             <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4 mt-4">
                                 <div class="flex">
                                     <svg class="h-5 w-5 text-yellow-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                        <path fill-rule="evenodd"
+                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
                                     </svg>
-                                    <p><strong>Hinweis:</strong> Bewertungen, die gegen die Richtlinien verstoßen, werden moderiert und können gelöscht werden.</p>
+                                    <p><strong>Hinweis:</strong> Bewertungen, die gegen die Richtlinien verstoßen,
+                                        werden moderiert und können gelöscht werden.</p>
                                 </div>
                             </div>
                         </div>
                     </section>
                     <section id="manage" class="mb-12">
                         <h2 class="text-2xl font-bold mb-4 flex items-center">
-                            <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
+                            <span
+                                class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
                             Bewertungen verwalten
                         </h2>
                         <div class="ml-11 space-y-4">
@@ -167,22 +186,27 @@
                             <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-400 p-4 mt-4">
                                 <div class="flex">
                                     <svg class="h-5 w-5 text-blue-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                            clip-rule="evenodd" />
                                     </svg>
-                                    <p><strong>Tipp:</strong> Nach 30 Tagen werden Bewertungen endgültig und können nicht mehr bearbeitet werden.</p>
+                                    <p><strong>Tipp:</strong> Nach 30 Tagen werden Bewertungen endgültig und können
+                                        nicht mehr bearbeitet werden.</p>
                                 </div>
                             </div>
                         </div>
                     </section>
                     <section id="helpful" class="mb-12">
                         <h2 class="text-2xl font-bold mb-4 flex items-center">
-                            <span class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">4</span>
+                            <span
+                                class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">4</span>
                             Hilfreiche Bewertungen
                         </h2>
                         <div class="ml-11 space-y-4">
                             <h3 class="text-xl font-semibold">Bewertungen als hilfreich markieren</h3>
                             <p class="text-gray-700 dark:text-gray-300">
-                                Sie können Bewertungen anderer Nutzer als hilfreich markieren, um besonders nützliche Reviews hervorzuheben.
+                                Sie können Bewertungen anderer Nutzer als hilfreich markieren, um besonders nützliche
+                                Reviews hervorzuheben.
                             </p>
                             <ol class="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300">
                                 <li>Lesen Sie eine Bewertung auf einer Event-Seite</li>
@@ -193,7 +217,8 @@
                                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                                     <h4 class="font-semibold mb-2">🏆 Top-Reviewer Badge</h4>
                                     <p class="text-sm text-gray-600 dark:text-gray-400">
-                                        Erhalten Sie das "Top-Reviewer" Badge wenn 50 Ihrer Bewertungen als hilfreich markiert wurden
+                                        Erhalten Sie das "Top-Reviewer" Badge wenn 50 Ihrer Bewertungen als hilfreich
+                                        markiert wurden
                                     </p>
                                 </div>
                                 <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">

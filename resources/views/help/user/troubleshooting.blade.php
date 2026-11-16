@@ -4,9 +4,11 @@
             <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center mb-2">
-                    <a href="{{ route('help.index') }}" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
+                    <a href="{{ route('help.index') }}"
+                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </a>
                     <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 ml-4">Häufige Probleme</h1>
@@ -15,7 +17,6 @@
             </div>
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-8 text-gray-900 dark:text-gray-100">
-
 
                     <!-- FAQ Accordion -->
                     <div class="space-y-4">
@@ -32,7 +33,8 @@
                                     <li>Klicken Sie auf den Link und wählen Sie ein neues Passwort</li>
                                 </ol>
                                 <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
-                                    <strong>Hinweis:</strong> Der Link ist 60 Minuten gültig. Prüfen Sie auch Ihren Spam-Ordner.
+                                    <strong>Hinweis:</strong> Der Link ist 60 Minuten gültig. Prüfen Sie auch Ihren
+                                    Spam-Ordner.
                                 </div>
                             </div>
                         </details>
@@ -66,7 +68,8 @@
                                     <li>Prüfen Sie Ihren Spam-Ordner für die E-Mail</li>
                                 </ol>
                                 <div class="mt-3 bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                                    <strong>Hinweis:</strong> Bei Online-Events erhalten Sie nach Bezahlung die Zugangsdaten statt eines PDF-Tickets.
+                                    <strong>Hinweis:</strong> Bei Online-Events erhalten Sie nach Bezahlung die
+                                    Zugangsdaten statt eines PDF-Tickets.
                                 </div>
                             </div>
                         </details>
@@ -83,7 +86,8 @@
                                     <li>Bestätigen Sie die Stornierung</li>
                                 </ol>
                                 <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
-                                    <strong>Wichtig:</strong> Beachten Sie die Stornierungsbedingungen des Veranstalters.
+                                    <strong>Wichtig:</strong> Beachten Sie die Stornierungsbedingungen des
+                                    Veranstalters.
                                     Diese finden Sie in den Event-Details.
                                 </div>
                             </div>
@@ -165,7 +169,8 @@
                                     <li>Prüfen Sie Ihr E-Mail-Postfach auf Zahlungsbestätigung</li>
                                 </ul>
                                 <div class="mt-3 bg-red-50 dark:bg-red-900/20 p-3 rounded">
-                                    <strong>Wenn das Problem länger als 24h besteht:</strong> Kontaktieren Sie bitte unseren Support
+                                    <strong>Wenn das Problem länger als 24h besteht:</strong> Kontaktieren Sie bitte
+                                    unseren Support
                                     mit Ihrer Buchungsnummer und einem Screenshot Ihrer Banküberweisung.
                                 </div>
                             </div>
@@ -191,7 +196,8 @@
                                     <li>Bestätigen Sie die Löschung</li>
                                 </ol>
                                 <div class="mt-3 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
-                                    <strong>Hinweis:</strong> Bei aktiven Buchungen kann das Konto nicht sofort gelöscht werden.
+                                    <strong>Hinweis:</strong> Bei aktiven Buchungen kann das Konto nicht sofort gelöscht
+                                    werden.
                                 </div>
                             </div>
                         </details>
@@ -202,7 +208,8 @@
                                 ❓ Wie kontaktiere ich einen Veranstalter?
                             </summary>
                             <div class="mt-4 text-gray-700 dark:text-gray-300">
-                                <p class="mb-3">Auf jeder Veranstaltungsseite finden Sie die Kontaktinformationen des Veranstalters:</p>
+                                <p class="mb-3">Auf jeder Veranstaltungsseite finden Sie die Kontaktinformationen des
+                                    Veranstalters:</p>
                                 <ul class="list-disc list-inside space-y-1 ml-4">
                                     <li>E-Mail-Adresse</li>
                                     <li>Telefonnummer (falls angegeben)</li>
@@ -221,16 +228,18 @@
                         </p>
                         <div class="flex flex-col sm:flex-row gap-4 justify-center">
                             <a href="mailto:support@bildungsportal.de"
-                               class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+                                class="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 E-Mail an Support
                             </a>
                             <a href="{{ route('help.index') }}"
-                               class="inline-flex items-center justify-center px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors">
+                                class="inline-flex items-center justify-center px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-medium rounded-lg transition-colors">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Weitere Hilfe-Artikel
                             </a>
@@ -241,17 +250,19 @@
                     <div class="mt-12 pt-8 border-t dark:border-gray-700">
                         <div class="flex justify-between items-center">
                             <a href="{{ route('help.article', ['category' => 'user', 'article' => 'privacy']) }}"
-                               class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                                class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>
                                 Vorheriger Artikel: Datenschutz
                             </a>
                             <a href="{{ route('help.index') }}"
-                               class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
+                                class="text-blue-600 dark:text-blue-400 hover:underline flex items-center">
                                 Zurück zur Übersicht
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                 </svg>
                             </a>
                         </div>
@@ -261,4 +272,3 @@
         </div>
     </div>
 </x-layouts.app>
-

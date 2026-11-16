@@ -42,7 +42,8 @@
         <ul>
             <li><strong>Max. Teilnehmerzahl:</strong> Gesamtkapazität der Veranstaltung</li>
             <li><strong>Kontingent pro Ticketart:</strong> z.B. max. 20 Frühbucher-Tickets</li>
-            <li><strong>Warteliste:</strong> Aktivieren Sie die Warteliste, damit Interessenten bei Ausverkauf benachrichtigt werden</li>
+            <li><strong>Warteliste:</strong> Aktivieren Sie die Warteliste, damit Interessenten bei Ausverkauf
+                benachrichtigt werden</li>
         </ul>
     </section>
 
@@ -56,7 +57,9 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Frühbucherrabatte erhöhen die Planungssicherheit. Setzen Sie attraktive Anreize für frühe Buchungen.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Frühbucherrabatte erhöhen die Planungssicherheit. Setzen Sie
+        attraktive Anreize für frühe Buchungen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Begrenzen Sie Frühbucher-Kontingente künstlich (z.B. nur 30% der Plätze), um Dringlichkeit zu erzeugen.</x-ui.alert>
+    <x-ui.alert tone="info" title="Best Practice">Begrenzen Sie Frühbucher-Kontingente künstlich (z.B. nur 30% der
+        Plätze), um Dringlichkeit zu erzeugen.</x-ui.alert>
 </x-help.article>

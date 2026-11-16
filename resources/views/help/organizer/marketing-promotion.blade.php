@@ -9,7 +9,8 @@
             <li>Höheres Ranking in Suchergebnissen</li>
             <li>Gebühr: täglich, wöchentlich oder monatlich buchbar</li>
         </ul>
-        <p>Gehen Sie zu „Featured Events" → „Antrag stellen" und wählen Sie die Dauer. Nach Zahlung ist Ihre Veranstaltung sofort featured.</p>
+        <p>Gehen Sie zu „Featured Events" › „Antrag stellen" und wählen Sie die Dauer. Nach Zahlung ist Ihre
+            Veranstaltung sofort featured.</p>
     </section>
 
     <section>
@@ -71,7 +72,9 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Kombinieren Sie Frühbucher-Rabatt mit Social-Media-Kampagne für maximale Reichweite in kurzer Zeit.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Kombinieren Sie Frühbucher-Rabatt mit Social-Media-Kampagne
+        für maximale Reichweite in kurzer Zeit.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Investieren Sie in 1-2 Featured-Wochen kurz vor Veranstaltungsbeginn für letzten Buchungsschub.</x-ui.alert>
+    <x-ui.alert tone="info" title="Best Practice">Investieren Sie in 1-2 Featured-Wochen kurz vor Veranstaltungsbeginn
+        für letzten Buchungsschub.</x-ui.alert>
 </x-help.article>

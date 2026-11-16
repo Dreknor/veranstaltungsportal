@@ -48,8 +48,8 @@ class NewEventInCategoryNotification extends Notification implements ShouldQueue
             ->line('Es gibt eine neue Veranstaltung in einer Ihrer Lieblingskategorien!')
             ->line('**' . $this->event->title . '**')
             ->line($this->event->category?->name)
-            ->line('📅 ' . $this->event->start_date->format('d.m.Y H:i') . ' Uhr')
-            ->line('📍 ' . ($this->event->isOnline() ? 'Online-Veranstaltung' : $this->event->venue_name))
+            ->line('Termin: ' . $this->event->start_date->format('d.m.Y H:i') . ' Uhr')
+            ->line('Ort: ' . ($this->event->isOnline() ? 'Online-Veranstaltung' : $this->event->venue_name))
             ->action('Veranstaltung ansehen', route('events.show', $this->event))
             ->line('Verpassen Sie nicht diese spannende Gelegenheit!')
             ->salutation('Viele Grüße, Ihr Bildungsportal-Team');

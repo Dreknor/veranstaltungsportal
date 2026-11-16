@@ -51,7 +51,7 @@
                 <p class="m-0">Das Update wird abgebrochen, solange diese Dateien verändert sind:</p>
                 <ul class="m-0 mt-2 list-disc pl-5 font-mono">
                     @foreach ($status['dirty'] as $file)
-                        <li>{{ $file }}</li>
+                        <li class="break-all">{{ $file }}</li>
                     @endforeach
                 </ul>
             </x-ui.alert>

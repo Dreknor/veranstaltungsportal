@@ -44,7 +44,7 @@ class BadgeEarnedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('🏆 Neues Abzeichen erhalten!')
+            ->subject('Neues Abzeichen erhalten')
             ->greeting('Glückwunsch, ' . $notifiable->fullName() . '!')
             ->line('Sie haben ein neues Abzeichen verdient: **' . $this->badge->name . '**')
             ->line($this->badge->description)

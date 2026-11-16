@@ -74,7 +74,7 @@
                             <a href="{{ route('events.show', $event->slug) }}" class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
                         </th>
                         <td class="num">{{ $event->bookings_count }}</td>
-                        <td class="num">{{ \App\Support\Ui::money($event->bookings_sum_total_amount ?? 0) }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($event->bookings_sum_total ?? 0) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">
@@ -100,8 +100,8 @@
                 @forelse ($topOrganizers as $organizer)
                     <tr>
                         <th scope="row">{{ $organizer->name }}</th>
-                        <td class="num">{{ $organizer->organized_events_count }}</td>
-                        <td class="num">{{ \App\Support\Ui::money($organizer->organized_events_bookings_sum_total_amount ?? 0) }}</td>
+                        <td class="num">{{ $organizer->events_count }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($organizer->events_bookings_sum_total ?? 0) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">

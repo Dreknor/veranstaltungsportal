@@ -5,176 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ticket - {{ $event->title }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 12px;
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #2563eb;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
-        }
-
-        .ticket-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #1f2937;
-        }
-
-        .ticket-subtitle {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .ticket-body {
-            margin-bottom: 30px;
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .info-grid {
-            display: table;
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-        .info-row {
-            display: table-row;
-        }
-
-        .info-label {
-            display: table-cell;
-            font-weight: bold;
-            color: #4b5563;
-            padding: 8px 15px 8px 0;
-            width: 35%;
-        }
-
-        .info-value {
-            display: table-cell;
-            padding: 8px 0;
-            color: #1f2937;
-        }
-
-        .qr-section {
-            text-align: center;
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f9fafb;
-            border-radius: 8px;
-        }
-
-        .qr-code {
-            margin: 15px auto;
-        }
-
-        .qr-code img {
-            width: 200px;
-            height: 200px;
-        }
-
-        .booking-reference {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2563eb;
-            margin: 15px 0;
-            letter-spacing: 2px;
-        }
-
-        .tickets-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .tickets-table th {
-            background-color: #f3f4f6;
-            padding: 10px;
-            text-align: left;
-            font-weight: bold;
-            color: #374151;
-            border-bottom: 2px solid #d1d5db;
-        }
-
-        .tickets-table td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .total-row {
-            font-weight: bold;
-            background-color: #f9fafb;
-        }
-
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-            text-align: center;
-            font-size: 10px;
-            color: #6b7280;
-        }
-
-        .important-info {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .important-info p {
-            margin: 5px 0;
-            font-size: 11px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            background-color: #10b981;
-            color: white;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        .status-cancelled {
-            background-color: #ef4444;
-        }
+        @include('pdf.partials.styles')
     </style>
 </head>
 <body>
@@ -188,7 +19,7 @@
                          style="max-height: 50px; max-width: 200px; object-fit: contain;">
                 </div>
             @else
-                <div class="logo">Bildungsportal</div>
+                @include('pdf.partials.wordmark')
             @endif
             <div class="ticket-title">Veranstaltungs-Ticket</div>
             <div class="ticket-subtitle">{{ $event->title }}</div>
@@ -204,7 +35,7 @@
                 @elseif($booking->status === 'cancelled')
                     <span class="status-badge status-cancelled">Storniert</span>
                 @else
-                    <span class="status-badge" style="background-color: #f59e0b;">{{ ucfirst($booking->status) }}</span>
+                    <span class="status-badge status-warning">{{ ucfirst($booking->status) }}</span>
                 @endif
             </div>
         </div>
@@ -233,13 +64,13 @@
                 @if($event->online_url)
                 <div class="info-row">
                     <div class="info-label">Online-Zugang:</div>
-                    <div class="info-value" style="word-break: break-all; color: #2563eb;">{{ $event->online_url }}</div>
+                    <div class="info-value" style="word-break: break-all;">{{ $event->online_url }}</div>
                 </div>
                 @endif
                 @if($event->online_access_code)
                 <div class="info-row">
                     <div class="info-label">Zugangscode:</div>
-                    <div class="info-value" style="font-family: monospace; background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">{{ $event->online_access_code }}</div>
+                    <div class="info-value code">{{ $event->online_access_code }}</div>
                 </div>
                 @endif
                 @elseif($event->isHybrid())
@@ -257,13 +88,13 @@
                 @if($event->online_url)
                 <div class="info-row">
                     <div class="info-label">Online-Zugang:</div>
-                    <div class="info-value" style="word-break: break-all; color: #2563eb;">{{ $event->online_url }}</div>
+                    <div class="info-value" style="word-break: break-all;">{{ $event->online_url }}</div>
                 </div>
                 @endif
                 @if($event->online_access_code)
                 <div class="info-row">
                     <div class="info-label">Zugangscode:</div>
-                    <div class="info-value" style="font-family: monospace; background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">{{ $event->online_access_code }}</div>
+                    <div class="info-value code">{{ $event->online_access_code }}</div>
                 </div>
                 @endif
                 @else
@@ -323,7 +154,7 @@
                     <tr>
                         <td>{{ $item->ticket_number }}</td>
                         <td>{{ $item->attendee_name ?? $booking->customer_name }}</td>
-                        <td style="font-size: 10px;">{{ $item->attendee_email ?? $booking->customer_email }}</td>
+                        <td style="font-size: 8pt;">{{ $item->attendee_email ?? $booking->customer_email }}</td>
                         <td>{{ $item->ticketType->name }}</td>
                     </tr>
                     @endforeach
@@ -340,8 +171,8 @@
                     <tr>
                         <th>Ticket-Typ</th>
                         <th>Anzahl</th>
-                        <th style="text-align: right;">Einzelpreis</th>
-                        <th style="text-align: right;">Gesamt</th>
+                        <th class="num">Einzelpreis</th>
+                        <th class="num">Gesamt</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -356,7 +187,7 @@
                     @if($booking->discount_amount > 0)
                     <tr>
                         <td colspan="3" style="text-align: right;">Rabatt ({{ $booking->discount_code }}):</td>
-                        <td style="text-align: right; color: #10b981;">-{{ number_format($booking->discount_amount, 2, ',', '.') }} €</td>
+                        <td style="text-align: right;">-{{ number_format($booking->discount_amount, 2, ',', '.') }} €</td>
                     </tr>
                     @endif
                     <tr class="total-row">
@@ -371,7 +202,7 @@
         @if($event->show_qr_code_on_ticket)
         <div class="qr-section">
             <div class="section-title">Check-In QR-Code</div>
-            <p style="font-size: 11px; color: #6b7280; margin-bottom: 10px;">
+            <p class="qr-hint">
                 Bitte zeigen Sie diesen QR-Code beim Check-In vor
             </p>
             <div class="qr-code">
@@ -382,7 +213,7 @@
 
         <!-- Important Information -->
         <div class="important-info">
-            <p><strong>Wichtige Hinweise:</strong></p>
+            <p class="note-title"><strong>Wichtige Hinweise:</strong></p>
             @if($event->ticket_notes)
                 {!! nl2br(e($event->ticket_notes)) !!}
             @else
@@ -399,7 +230,7 @@
 
         <!-- Footer -->
         <div class="footer">
-            <p>Bildungsportal für Fort- und Weiterbildungen</p>
+            <p>{{ config('app.name') }} · Hauptfach Mensch</p>
             <p>Ticket generiert am {{ now()->format('d.m.Y H:i') }} Uhr</p>
             <p>Buchungs-ID: {{ $booking->id }} | Referenz: {{ $booking->booking_number }}</p>
         </div>

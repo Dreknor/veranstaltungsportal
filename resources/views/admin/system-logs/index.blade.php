@@ -12,7 +12,7 @@
                 <x-slot:icon><x-icon.download /></x-slot:icon>
                 Export CSV
             </x-ui.button>
-            <x-ui.button variant="secondary" x-on:click="$dispatch('open-modal', 'clear-logs')">
+            <x-ui.button variant="secondary" x-data x-on:click="$dispatch('open-modal', 'clear-logs')">
                 <x-slot:icon><x-icon.trash /></x-slot:icon>
                 Alte Logs löschen
             </x-ui.button>
@@ -86,7 +86,7 @@
                     </td>
                     <td><x-ui.status :tone="$levelTone">{{ $log->level_name }}</x-ui.status></td>
                     <td class="whitespace-nowrap">{{ $log->channel ?? '-' }}</td>
-                    <td class="max-w-2xl truncate">{{ $log->message }}</td>
+                    <td class="max-w-[320px] truncate" title="{{ $log->message }}">{{ $log->message }}</td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.system-logs.show', $log->id)">Details</x-ui.button>
                         <x-ui.button variant="secondary" size="sm" type="submit" form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>

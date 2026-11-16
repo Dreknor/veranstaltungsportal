@@ -92,7 +92,7 @@
                 @forelse ($data['revenue_by_category'] as $category)
                     <tr>
                         <th scope="row">{{ $category->name }}</th>
-                        <td class="num">{{ \App\Support\Ui::money($category->bookings_sum_total_amount ?? 0) }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($category->bookings_sum_total ?? 0) }}</td>
                     </tr>
                 @empty
                     <tr class="hover:bg-transparent">

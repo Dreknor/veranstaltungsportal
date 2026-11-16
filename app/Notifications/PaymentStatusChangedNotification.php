@@ -68,7 +68,7 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
 
         // Zusätzliche Informationen basierend auf dem neuen Zahlungsstatus
         if ($this->newPaymentStatus === 'paid') {
-            $mail->line('✓ Ihre Zahlung wurde erfolgreich verarbeitet.')
+            $mail->line('Ihre Zahlung wurde erfolgreich verarbeitet.')
                 ->line('Betrag: ' . number_format($this->booking->total, 2, ',', '.') . ' €');
 
             if ($this->booking->payment_method) {
@@ -81,7 +81,7 @@ class PaymentStatusChangedNotification extends Notification implements ShouldQue
 
             $mail->line('Vielen Dank für Ihre Zahlung!');
         } elseif ($this->newPaymentStatus === 'failed') {
-            $mail->line('⚠ Ihre Zahlung konnte leider nicht verarbeitet werden.')
+            $mail->line('Ihre Zahlung konnte leider nicht verarbeitet werden.')
                 ->line('Bitte überprüfen Sie Ihre Zahlungsinformationen oder versuchen Sie eine andere Zahlungsmethode.')
                 ->line('Bei weiteren Fragen kontaktieren Sie uns bitte.');
         } elseif ($this->newPaymentStatus === 'refunded') {

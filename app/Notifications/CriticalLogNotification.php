@@ -43,7 +43,7 @@ class CriticalLogNotification extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject($subject)
             ->error()
-            ->greeting('⚠️ Kritischer Systemfehler')
+            ->greeting('Kritischer Systemfehler')
             ->line("Ein kritischer Fehler wurde im System erkannt und erfordert möglicherweise Ihre Aufmerksamkeit.");
 
         if ($this->logCount > 1) {

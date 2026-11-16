@@ -34,7 +34,7 @@ class PendingFeaturedPaymentAdminNotification extends Notification implements Sh
         $totalAmount = $this->pendingFees->sum('fee_amount');
 
         $mail = (new MailMessage)
-            ->subject("⚠️ {$count} ausstehende Featured-Zahlungen (> 7 Tage)")
+            ->subject("{$count} ausstehende Featured-Zahlungen (> 7 Tage)")
             ->greeting('Hallo ' . ($notifiable->first_name ?? 'Admin') . ',')
             ->line("Es gibt **{$count} ausstehende Featured-Event-Zahlungen**, die seit mehr als 7 Tagen offen sind.")
             ->line('**Gesamtbetrag ausstehend:** ' . number_format($totalAmount, 2, ',', '.') . ' €');
@@ -59,7 +59,7 @@ class PendingFeaturedPaymentAdminNotification extends Notification implements Sh
         $totalAmount = $this->pendingFees->sum('fee_amount');
 
         return [
-            'title' => "⚠️ {$count} ausstehende Featured-Zahlungen",
+            'title' => "{$count} ausstehende Featured-Zahlungen",
             'message' => "{$count} Featured-Event-Zahlungen über insgesamt " . number_format($totalAmount, 2, ',', '.') . ' € sind seit mehr als 7 Tagen offen.',
             'action_url' => url('/admin/featured-events'),
             'type' => 'pending_featured_payment_admin',

@@ -1,5 +1,6 @@
-<x-help.article title="Statistiken & Berichte" subtitle="Verstehen Sie Ihre Kennzahlen und optimieren Sie Ihre Veranstaltungen."
-    :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
+<x-help.article title="Statistiken & Berichte"
+    subtitle="Verstehen Sie Ihre Kennzahlen und optimieren Sie Ihre Veranstaltungen." :back-href="route('help.category', 'organizer')"
+    back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>1. Dashboard Statistiken</h2>
         <p>Ihr Organizer-Dashboard zeigt auf einen Blick:</p>
@@ -23,7 +24,7 @@
             <li><strong>Rabattcode-Nutzung:</strong> Welche Codes wurden eingelöst?</li>
             <li><strong>Check-In-Rate:</strong> Wie viele Teilnehmer sind tatsächlich erschienen?</li>
         </ul>
-        <p>Gehen Sie zu „Statistiken" → Veranstaltung auswählen, um Details zu sehen.</p>
+        <p>Gehen Sie zu „Statistiken" › Veranstaltung auswählen, um Details zu sehen.</p>
     </section>
 
     <section>
@@ -60,7 +61,9 @@
         <p>Rechnungen werden automatisch nach Veranstaltungsende erstellt und per E-Mail versandt.</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Nutzen Sie die Check-In-Rate, um die Qualität Ihrer Veranstaltungen zu verbessern. Eine niedrige Rate kann auf Probleme hinweisen.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Nutzen Sie die Check-In-Rate, um die Qualität Ihrer
+        Veranstaltungen zu verbessern. Eine niedrige Rate kann auf Probleme hinweisen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Exportieren Sie regelmäßig Umsatzberichte für Ihre Buchhaltung und Planung.</x-ui.alert>
+    <x-ui.alert tone="info" title="Best Practice">Exportieren Sie regelmäßig Umsatzberichte für Ihre Buchhaltung und
+        Planung.</x-ui.alert>
 </x-help.article>

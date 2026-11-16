@@ -5,7 +5,7 @@
                 <x-slot:icon><x-icon.download /></x-slot:icon>
                 Export CSV
             </x-ui.button>
-            <x-ui.button variant="secondary" x-on:click="$dispatch('open-modal', 'clear-logs')">
+            <x-ui.button variant="secondary" x-data x-on:click="$dispatch('open-modal', 'clear-logs')">
                 <x-slot:icon><x-icon.trash /></x-slot:icon>
                 Alte Logs löschen
             </x-ui.button>
@@ -62,7 +62,7 @@
                     <td><x-ui.status :tone="$actionTone">{{ $log->action }}</x-ui.status></td>
                     <td class="whitespace-nowrap">{{ $log->auditable_type ? class_basename($log->auditable_type) : '-' }}</td>
                     <td class="tabular-nums whitespace-nowrap text-muted">{{ $log->ip_address }}</td>
-                    <td class="max-w-md truncate">{{ $log->description ?? '-' }}</td>
+                    <td class="max-w-[220px] truncate" title="{{ $log->description }}">{{ $log->description ?? '-' }}</td>
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.audit-logs.show', $log)">Details</x-ui.button>
                         <x-ui.button variant="secondary" size="sm" type="submit" form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>

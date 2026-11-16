@@ -1,5 +1,5 @@
-<x-help.article title="Häufige Probleme & FAQ" subtitle="Lösungen für typische Fragen und Fehler."
-    :back-href="route('help.category', 'organizer')" back-label="Zur Veranstalter-Hilfe">
+<x-help.article title="Häufige Probleme & FAQ" subtitle="Lösungen für typische Fragen und Fehler." :back-href="route('help.category', 'organizer')"
+    back-label="Zur Veranstalter-Hilfe">
     <section>
         <h2>Warum kann ich meine Veranstaltung nicht veröffentlichen?</h2>
         <p>Die Veranstaltung kann nur veröffentlicht werden, wenn:</p>
@@ -9,7 +9,8 @@
             <li>Mindestens ein Ticket-Typ erstellt wurde</li>
             <li>Alle Pflichtfelder ausgefüllt sind (Titel, Datum, Ort bzw. Online-Link)</li>
         </ul>
-        <p><strong>Lösung:</strong> Prüfen Sie „Organisation" → „Rechnungsdaten" und „Bankverbindung". Ergänzen Sie fehlende Angaben.</p>
+        <p><strong>Lösung:</strong> Prüfen Sie „Organisation" › „Rechnungsdaten" und „Bankverbindung". Ergänzen Sie
+            fehlende Angaben.</p>
     </section>
 
     <section>
@@ -20,7 +21,8 @@
             <li>Falsche E-Mail-Adresse bei Buchung angegeben</li>
             <li>E-Mail-Server temporär nicht erreichbar</li>
         </ul>
-        <p><strong>Lösung:</strong> Prüfen Sie in der Buchungsdetails die E-Mail-Adresse. Nutzen Sie „Erneut versenden" bei der Buchung, um die Bestätigung nochmals zu schicken.</p>
+        <p><strong>Lösung:</strong> Prüfen Sie in der Buchungsdetails die E-Mail-Adresse. Nutzen Sie „Erneut versenden"
+            bei der Buchung, um die Bestätigung nochmals zu schicken.</p>
     </section>
 
     <section>
@@ -30,7 +32,8 @@
             <li>Automatische Aktualisierung nur bei Online-Zahlung (Stripe, PayPal)</li>
             <li>Bei Überweisung: Manuell auf „Paid" setzen nach Zahlungseingang</li>
         </ul>
-        <p><strong>Lösung:</strong> Gehen Sie zu „Buchungen" → Buchung öffnen → „Zahlungsstatus" → „Paid" auswählen. System versendet dann automatisch Tickets.</p>
+        <p><strong>Lösung:</strong> Gehen Sie zu „Buchungen" › Buchung öffnen › „Zahlungsstatus" › „Paid" auswählen.
+            System versendet dann automatisch Tickets.</p>
     </section>
 
     <section>
@@ -49,7 +52,7 @@
         <h2>Ich sehe keine Teammitglieder</h2>
         <p>Teammitglieder müssen die Einladung annehmen:</p>
         <ul>
-            <li>Einladungs-E-Mail wurde versendet → Postfach prüfen</li>
+            <li>Einladungs-E-Mail wurde versendet › Postfach prüfen</li>
             <li>Link in E-Mail anklicken und Einladung bestätigen</li>
             <li>Danach erscheinen sie unter „Team"</li>
         </ul>
@@ -88,7 +91,9 @@
         <p><strong>Lösung:</strong> Wählen Sie „Gesamtzeitraum" im Filter. Cache löschen (Strg+F5).</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="warning" title="Wichtig">Bei technischen Problemen, die Sie nicht lösen können, kontaktieren Sie den Support mit Screenshots und Fehlermeldung.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="warning" title="Wichtig">Bei technischen Problemen, die Sie nicht lösen können,
+        kontaktieren Sie den Support mit Screenshots und Fehlermeldung.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Weitere Hilfe benötigt?">Durchsuchen Sie unsere <a href="{{ route('help.index') }}">Hilfe-Artikel</a> oder kontaktieren Sie den Support.</x-ui.alert>
+    <x-ui.alert tone="info" title="Weitere Hilfe benötigt?">Durchsuchen Sie unsere <a
+            href="{{ route('help.index') }}">Hilfe-Artikel</a> oder kontaktieren Sie den Support.</x-ui.alert>
 </x-help.article>

@@ -33,13 +33,12 @@ class NewReviewNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $event = $this->review->event;
-        $rating = str_repeat('⭐', $this->review->rating);
 
         return (new MailMessage)
             ->subject('Neue Bewertung wartet auf Freigabe')
             ->greeting("Hallo {$notifiable->name}!")
             ->line("Eine neue Bewertung für Ihre Veranstaltung **{$event->title}** wartet auf Freigabe.")
-            ->line("**Bewertung:** {$rating} ({$this->review->rating}/5)")
+            ->line("**Bewertung:** {$this->review->rating} von 5 Sternen")
             ->line("**Von:** {$this->review->reviewerName()}")
             ->when($this->review->comment, function ($mail) {
                 return $mail->line("**Kommentar:** \"{$this->review->comment}\"");

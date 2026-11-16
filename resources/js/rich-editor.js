@@ -46,7 +46,7 @@ export function richEditor({ name, value = "" }) {
                         link: {
                             openOnClick: false,
                             HTMLAttributes: {
-                                class: "text-blue-600 underline hover:text-blue-800",
+                                class: "text-ink underline",
                                 rel: "noopener noreferrer",
                             },
                         },

@@ -10,7 +10,7 @@
         <h2>2. Manuelle Teilnehmer-Kontaktierung</h2>
         <p>So erreichen Sie Ihre Teilnehmer direkt:</p>
         <ul>
-            <li>Gehen Sie zu „Meine Veranstaltungen" → Veranstaltung auswählen → „Teilnehmer kontaktieren"</li>
+            <li>Gehen Sie zu „Meine Veranstaltungen" › Veranstaltung auswählen › „Teilnehmer kontaktieren"</li>
             <li>Schreiben Sie eine Nachricht an alle oder gefilterte Teilnehmer</li>
             <li>Filter: Alle, nur Bezahlte, nur Eingecheckte, nur Ausstehende</li>
             <li>Betreff und Nachricht individuell formulieren</li>
@@ -20,7 +20,8 @@
 
     <section>
         <h2>3. Änderungen an der Veranstaltung</h2>
-        <p>Beim Speichern einer veröffentlichten Veranstaltung werden alle bestätigten Buchungen automatisch informiert, wenn sich</p>
+        <p>Beim Speichern einer veröffentlichten Veranstaltung werden alle bestätigten Buchungen automatisch informiert,
+            wenn sich</p>
         <ul>
             <li>Titel, Beginn oder Ende,</li>
             <li>Veranstaltungsort oder Adresse ändern,</li>
@@ -51,7 +52,9 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Versenden Sie 1-2 Tage vor der Veranstaltung eine persönliche Nachricht mit Wegbeschreibung und Ablauf – das reduziert Rückfragen.</x-ui.alert>
+    <x-ui.alert class="mt-12" tone="info" title="Tipp">Versenden Sie 1-2 Tage vor der Veranstaltung eine persönliche
+        Nachricht mit Wegbeschreibung und Ablauf – das reduziert Rückfragen.</x-ui.alert>
 
-    <x-ui.alert tone="info" title="Best Practice">Danken Sie nach der Veranstaltung mit einer Follow-up-E-Mail und bitten Sie um Feedback/Bewertung.</x-ui.alert>
+    <x-ui.alert tone="info" title="Best Practice">Danken Sie nach der Veranstaltung mit einer Follow-up-E-Mail und
+        bitten Sie um Feedback/Bewertung.</x-ui.alert>
 </x-help.article>

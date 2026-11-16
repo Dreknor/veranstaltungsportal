@@ -5,156 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tickets - {{ $event->title }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DejaVu Sans', sans-serif;
-            font-size: 12px;
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .page-break {
-            page-break-after: always;
-        }
-
-        .container {
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 3px solid #2563eb;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
-        }
-
-        .ticket-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #1f2937;
-        }
-
-        .ticket-subtitle {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .ticket-body {
-            margin-bottom: 30px;
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: #2563eb;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .info-grid {
-            display: table;
-            width: 100%;
-            margin-bottom: 15px;
-        }
-
-        .info-row {
-            display: table-row;
-        }
-
-        .info-label {
-            display: table-cell;
-            font-weight: bold;
-            color: #4b5563;
-            padding: 8px 15px 8px 0;
-            width: 35%;
-        }
-
-        .info-value {
-            display: table-cell;
-            padding: 8px 0;
-            color: #1f2937;
-        }
-
-        .qr-section {
-            text-align: center;
-            margin: 30px 0;
-            padding: 20px;
-            background-color: #f9fafb;
-            border-radius: 8px;
-        }
-
-        .qr-code {
-            margin: 15px auto;
-        }
-
-        .qr-code img {
-            width: 200px;
-            height: 200px;
-        }
-
-        .ticket-reference {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2563eb;
-            margin: 15px 0;
-            letter-spacing: 2px;
-        }
-
-        .attendee-highlight {
-            background-color: #dbeafe;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #2563eb;
-            margin: 20px 0;
-        }
-
-        .attendee-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1e40af;
-            margin-bottom: 5px;
-        }
-
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e5e7eb;
-            text-align: center;
-            font-size: 10px;
-            color: #6b7280;
-        }
-
-        .important-info {
-            background-color: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 15px;
-            margin: 20px 0;
-        }
-
-        .important-info p {
-            margin: 5px 0;
-            font-size: 11px;
-        }
+        @include('pdf.partials.styles')
     </style>
 </head>
 <body>
@@ -169,7 +20,7 @@
                              style="max-height: 50px; max-width: 200px; object-fit: contain;">
                     </div>
                 @else
-                    <div class="logo">Bildungsportal</div>
+                    @include('pdf.partials.wordmark')
                 @endif
                 <div class="ticket-title">Persönliches Ticket</div>
                 <div class="ticket-subtitle">{{ $event->title }}</div>
@@ -184,7 +35,7 @@
                     <div class="qr-code">
                         <img src="{{ $ticketData['qrCode'] }}" alt="QR Code">
                     </div>
-                    <p style="font-size: 10px; color: #6b7280; margin-top: 10px;">
+                    <p class="qr-hint">
                         Bitte zeigen Sie diesen QR-Code beim Check-In vor
                     </p>
                 @endif
@@ -192,10 +43,10 @@
 
             <!-- Attendee Information (Highlighted) -->
             <div class="attendee-highlight">
-                <div class="section-title" style="border-bottom: none; margin-bottom: 5px;">Ausgestellt für</div>
+                <div class="section-title" style="border-bottom: none; margin-bottom: 2px;">Ausgestellt für</div>
                 <div class="attendee-name">{{ $ticketData['item']->attendee_name ?? $booking->customer_name }}</div>
                 @if($ticketData['item']->attendee_email)
-                    <div style="color: #4b5563; font-size: 12px;">{{ $ticketData['item']->attendee_email }}</div>
+                    <div class="muted">{{ $ticketData['item']->attendee_email }}</div>
                 @endif
             </div>
 
@@ -215,7 +66,7 @@
                         <div class="info-label">Uhrzeit:</div>
                         <div class="info-value">{{ $event->start_date->format('H:i') }} Uhr</div>
                     </div>
-hy                    @if($event->isOnline())
+                    @if($event->isOnline())
                     <div class="info-row">
                         <div class="info-label">Format:</div>
                         <div class="info-value">Online-Veranstaltung</div>
@@ -223,13 +74,13 @@ hy                    @if($event->isOnline())
                     @if($event->online_url)
                     <div class="info-row">
                         <div class="info-label">Online-Zugang:</div>
-                        <div class="info-value" style="word-break: break-all; color: #2563eb;">{{ $event->online_url }}</div>
+                        <div class="info-value" style="word-break: break-all;">{{ $event->online_url }}</div>
                     </div>
                     @endif
                     @if($event->online_access_code)
                     <div class="info-row">
                         <div class="info-label">Zugangscode:</div>
-                        <div class="info-value" style="font-family: monospace; background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">{{ $event->online_access_code }}</div>
+                        <div class="info-value code">{{ $event->online_access_code }}</div>
                     </div>
                     @endif
                     @elseif($event->isHybrid())
@@ -247,13 +98,13 @@ hy                    @if($event->isOnline())
                     @if($event->online_url)
                     <div class="info-row">
                         <div class="info-label">Online-Zugang:</div>
-                        <div class="info-value" style="word-break: break-all; color: #2563eb;">{{ $event->online_url }}</div>
+                        <div class="info-value" style="word-break: break-all;">{{ $event->online_url }}</div>
                     </div>
                     @endif
                     @if($event->online_access_code)
                     <div class="info-row">
                         <div class="info-label">Zugangscode:</div>
-                        <div class="info-value" style="font-family: monospace; background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">{{ $event->online_access_code }}</div>
+                        <div class="info-value code">{{ $event->online_access_code }}</div>
                     </div>
                     @endif
                     @else
@@ -288,7 +139,7 @@ hy                    @if($event->isOnline())
 
             <!-- Important Info -->
             <div class="important-info">
-                <p><strong>Wichtige Hinweise:</strong></p>
+                <p class="note-title"><strong>Wichtige Hinweise:</strong></p>
                 @if($event->ticket_notes)
                     {!! nl2br(e($event->ticket_notes)) !!}
                 @else

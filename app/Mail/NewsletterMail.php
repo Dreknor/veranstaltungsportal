@@ -31,8 +31,8 @@ class NewsletterMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $subject = $this->type === 'weekly'
-            ? '📚 Ihre wöchentlichen Bildungs-Highlights'
-            : '📚 Ihr monatlicher Bildungs-Newsletter';
+            ? 'Ihre wöchentlichen Bildungs-Highlights'
+            : 'Ihr monatlicher Bildungs-Newsletter';
 
         return new Envelope(
             subject: $subject,
