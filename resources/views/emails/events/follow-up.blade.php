@@ -21,9 +21,7 @@
             <p style="margin: 0;">
                 Im Anhang finden Sie die
                 Bescheinigung{{ $certificateItems->count() > 1 ? 'en für ' . $certificateItems->map->participantName()->implode(', ') : '' }}
-                @if ($event->duration)
-                    über {{ $event->getFormattedDuration() }} Fortbildungszeit
-                @endif.
+                {{ $event->duration ? 'über ' . $event->getFormattedDuration() . ' Fortbildungszeit' : '' }}.
             </p>
         @endcomponent
     @elseif(!$isAttendee)

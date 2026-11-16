@@ -59,8 +59,9 @@
                 @php $allDates = $event->dates->where('is_cancelled', false)->values(); @endphp
                 <tr>
                     <td style="{{ $label }}">Termin</td>
-                    <td style="{{ $value }}">Termin {{ $allDates->search(fn($d) => $d->id === $session->id) + 1 }} von
-                        {{ $allDates->count() }}</td>
+                    <td style="{{ $value }}">
+                        {{ 'Termin ' . ($allDates->search(fn($d) => $d->id === $session->id) + 1) . ' von ' . $allDates->count() }}
+                    </td>
                 </tr>
             @endif
             @if ($event->requiresVenue() && $venueSource->venue_name)
@@ -128,7 +129,8 @@
                 </p>
             @else
                 <p style="margin: 0;">Für den Einlass genügt Ihre Buchungsnummer
-                    <strong>{{ $booking->booking_number }}</strong>.</p>
+                    <strong>{{ $booking->booking_number }}</strong>.
+                </p>
             @endif
             @if ($event->directions)
                 <p style="margin: 8px 0 0 0; font-size: 14px;"><strong>Anfahrt:</strong>

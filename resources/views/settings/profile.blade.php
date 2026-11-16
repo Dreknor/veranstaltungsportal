@@ -32,14 +32,14 @@
                 </div>
 
                 <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                    <x-ui.field label="First Name" name="first_name" :value="$user->first_name" />
-                    <x-ui.field label="Last Name" name="last_name" :value="$user->last_name" />
+                    <x-ui.field label="Vorname" name="first_name" :value="$user->first_name" />
+                    <x-ui.field label="Nachname" name="last_name" :value="$user->last_name" />
                 </div>
 
-                <x-ui.field label="Display Name (Username)" name="name" :value="$user->name"
+                <x-ui.field label="Anzeigename" name="name" :value="$user->name"
                     :hint="__('This is how other users will see you.')" />
 
-                <x-ui.field label="Email" name="email" type="email" :value="$user->email" />
+                <x-ui.field label="E-Mail-Adresse" name="email" type="email" :value="$user->email" />
 
                 <!-- Account Type Display (read-only) -->
                 <div>
@@ -50,7 +50,7 @@
                     <x-ui.hint>{{ __('Contact support to change your account type') }}</x-ui.hint>
                 </div>
 
-                <x-ui.field label="Phone" name="phone" type="tel" :value="$user->phone" />
+                <x-ui.field label="Telefon" optional name="phone" type="tel" :value="$user->phone" />
 
                 <x-ui.textarea label="{{ __('Bio') }}" name="bio" :value="$user->bio" rows="4" maxlength="1000"
                     :hint="__('Brief description for your profile. Maximum 1000 characters.')" />

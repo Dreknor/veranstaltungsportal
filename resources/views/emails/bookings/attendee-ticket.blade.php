@@ -35,9 +35,10 @@
             </p>
         @endif
         @if ($event->requiresVenue() && $event->venue_name)
-            <p style="margin: 0 0 4px 0;">{{ $event->venue_name }}@if ($event->venue_address)
-                    , {{ $event->venue_address }}
-                @endif, {{ trim($event->venue_postal_code . ' ' . $event->venue_city) }}</p>
+            <p style="margin: 0 0 4px 0;">
+                {{ $event->venue_name }}{{ $event->venue_address ? ', ' . $event->venue_address : '' }},
+                {{ trim($event->venue_postal_code . ' ' . $event->venue_city) }}
+            </p>
         @endif
         <p style="margin: 0; font-size: 13px; color: #55676A;">Ticket-Nr. {{ $item->ticket_number }} · Buchung
             {{ $booking->booking_number }}</p>
@@ -71,12 +72,15 @@
     <p style="margin: 0; font-size: 14px; color: #55676A;">
         Kurz vor Beginn erhalten Sie eine Erinnerung{{ $event->requiresOnlineInfo() ? ' mit den Zugangsdaten' : '' }}.
         Fragen zur Anmeldung richten Sie bitte an {{ $booking->customer_name }} oder an den Veranstalter
-        {{ $event->getOrganizerName() }}@if ($event->getOrganizerEmail())
-            (<a href="mailto:{{ $event->getOrganizerEmail() }}"
-                style="color: #1E3135; text-decoration: underline;">{{ $event->getOrganizerEmail() }}</a>)
-        @endif.
+        @if ($event->getOrganizerEmail())
+            {{ $event->getOrganizerName() }} (<a href="mailto:{{ $event->getOrganizerEmail() }}"
+                style="color: #1E3135; text-decoration: underline;">{{ $event->getOrganizerEmail() }}</a>).
+        @else
+            {{ $event->getOrganizerName() }}.
+        @endif
     </p>
 @endsection
 
-@section('footer_note', 'Sie erhalten diese E-Mail, weil Sie als Teilnehmer:in für diese Veranstaltung angemeldet
-    wurden.')
+@section('footer_note')
+    Sie erhalten diese E-Mail, weil Sie als Teilnehmer:in für diese Veranstaltung angemeldet wurden.
+@endsection

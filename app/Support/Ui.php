@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Event;
 use Carbon\CarbonInterface as Carbon;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
 
@@ -95,6 +96,190 @@ class Ui
         }
 
         return $old !== null && (string) $old === (string) $value;
+    }
+
+    /**
+     * Alte Font-Awesome-Namen (Datenbank: Kategorien, Abzeichen; Konfiguration der Seitenleiste)
+     * auf eigene Linien-Icons unter components/icon/ abbilden. Schlüssel ohne Präfix.
+     *
+     * @var array<string, string>
+     */
+    private const FA_ICONS = [
+        // Navigation, Übersicht
+        'house' => 'home',
+        'home' => 'home',
+        'gauge' => 'chart',
+        'gauge-high' => 'chart',
+        'tachometer-alt' => 'chart',
+        'chart-line' => 'chart',
+        'chart-bar' => 'chart',
+        'chart-pie' => 'chart',
+        'chart-simple' => 'chart',
+        'list' => 'list',
+        'list-ul' => 'list',
+        'clipboard-list' => 'list',
+        'bars' => 'menu',
+        'gear' => 'settings',
+        'gears' => 'settings',
+        'cog' => 'settings',
+        'cogs' => 'settings',
+        'sliders' => 'settings',
+        'circle-question' => 'help',
+        'question-circle' => 'help',
+        'question' => 'help',
+        'circle-info' => 'info',
+        'info-circle' => 'info',
+        'info' => 'info',
+        'bell' => 'bell',
+        'envelope' => 'mail',
+        'envelope-open' => 'mail',
+        'inbox' => 'mail',
+        'magnifying-glass' => 'search',
+        'search' => 'search',
+        'filter' => 'filter',
+        'ellipsis' => 'ellipsis-horizontal',
+        'ellipsis-h' => 'ellipsis-horizontal',
+        'ellipsis-vertical' => 'more',
+        'link' => 'link',
+        'globe' => 'globe',
+        'lock' => 'lock',
+        'eye' => 'eye',
+        'clock' => 'clock',
+        'location-dot' => 'location',
+        'map-marker-alt' => 'location',
+        'map-marker' => 'location',
+        'phone' => 'phone',
+        'video' => 'video',
+        'tv' => 'monitor',
+        'desktop' => 'computer-desktop',
+        'laptop' => 'computer-desktop',
+        'laptop-code' => 'computer-desktop',
+        // Veranstaltungen, Buchungen
+        'calendar' => 'calendar',
+        'calendar-days' => 'calendar',
+        'calendar-alt' => 'calendar',
+        'calendar-day' => 'calendar',
+        'calendar-week' => 'calendar',
+        'calendar-check' => 'calendar-check',
+        'ticket' => 'ticket',
+        'ticket-alt' => 'ticket',
+        'ticket-simple' => 'ticket',
+        'tag' => 'tag',
+        'tags' => 'tag',
+        'percent' => 'tag',
+        'receipt' => 'receipt',
+        'file-invoice' => 'document',
+        'file-invoice-dollar' => 'document',
+        'file-lines' => 'document',
+        'file-alt' => 'document',
+        'file' => 'document',
+        'file-contract' => 'scale',
+        'file-export' => 'download',
+        'cloud-arrow-down' => 'download',
+        'download' => 'download',
+        'upload' => 'upload',
+        'qrcode' => 'qr-code',
+        'qr-code' => 'qr-code',
+        'check' => 'check',
+        'circle-check' => 'check-circle',
+        'check-circle' => 'check-circle',
+        'clipboard-check' => 'check-circle',
+        // Organisation, Zahlung
+        'building' => 'building-office',
+        'school' => 'building-office',
+        'building-columns' => 'bank',
+        'university' => 'bank',
+        'landmark' => 'bank',
+        'paypal' => 'credit-card',
+        'credit-card' => 'credit-card',
+        'money-bill' => 'currency',
+        'money-bill-wave' => 'currency',
+        'coins' => 'currency',
+        'euro-sign' => 'currency',
+        'scale-balanced' => 'scale',
+        'balance-scale' => 'scale',
+        'gavel' => 'scale',
+        'shield-halved' => 'shield-check',
+        'shield-alt' => 'shield-check',
+        'shield' => 'shield-check',
+        'user-shield' => 'shield-check',
+        // Personen
+        'user' => 'user',
+        'user-circle' => 'user-circle',
+        'circle-user' => 'user-circle',
+        'user-tie' => 'user',
+        'user-graduate' => 'academic-cap',
+        'chalkboard-teacher' => 'academic-cap',
+        'chalkboard-user' => 'academic-cap',
+        'users' => 'users',
+        'users-gear' => 'users',
+        'user-friends' => 'user-group',
+        'user-group' => 'user-group',
+        'people-group' => 'user-group',
+        'handshake' => 'user-group',
+        'comments' => 'chat-bubble-left-right',
+        'comment' => 'chat-bubble-left-right',
+        'comment-dots' => 'chat-bubble-left-right',
+        // Themen (Kategorien)
+        'graduation-cap' => 'academic-cap',
+        'book' => 'book-open',
+        'book-open' => 'book-open',
+        'book-reader' => 'book-open',
+        'heart' => 'heart',
+        'heartbeat' => 'heart-pulse',
+        'heart-pulse' => 'heart-pulse',
+        'hand-holding-heart' => 'heart',
+        'lightbulb' => 'sparkles',
+        'brain' => 'sparkles',
+        'wand-magic-sparkles' => 'sparkles',
+        // Abzeichen
+        'medal' => 'medal',
+        'award' => 'medal',
+        'trophy' => 'medal',
+        'crown' => 'medal',
+        'ribbon' => 'medal',
+        'certificate' => 'sparkles',
+        'star' => 'star',
+        'star-half-stroke' => 'star',
+        'fire' => 'sparkles',
+        'bolt' => 'sparkles',
+        'rocket' => 'sparkles',
+        'gem' => 'sparkles',
+        'thumbs-up' => 'check-circle',
+    ];
+
+    /** @var array<string, bool> */
+    private static array $iconExists = [];
+
+    /**
+     * Komponentenname eines Linien-Icons ("icon.calendar") zu einem Icon-Namen aus der Datenbank oder
+     * Konfiguration. Nimmt eigene Namen ("calendar", "academic-cap") und alte Font-Awesome-Namen in jeder
+     * Schreibweise ("fas fa-trophy", "fa-solid fa-ticket", "fas-calendar-days", "fa-heart").
+     * Unbekannte oder leere Namen ergeben das Ersatz-Icon. Verwendung:
+     * <x-dynamic-component :component="Ui::icon($category->icon, 'calendar')" class="h-5 w-5" />
+     */
+    public static function icon(?string $name, string $fallback = 'list'): string
+    {
+        $key = Str::lower(trim((string) $name));
+        // Präfixe entfernen: "fa-solid fa-x", "fas fa-x", "fas-x", "fa-x", "heroicon-o-x"
+        $key = (string) preg_replace('/^(fa-(solid|regular|brands|light|duotone)|fa[srbld]?)[-\s]+/', '', $key);
+        $key = (string) preg_replace('/^(fa-|heroicon-[os]-|icon\.)/', '', $key);
+        $key = (string) preg_replace('/\s+fa-(fw|lg|xl|[0-9]x)$/', '', $key);
+
+        $candidate = self::FA_ICONS[$key] ?? $key;
+
+        foreach ([$candidate, $fallback, 'list'] as $icon) {
+            if ($icon !== '' && preg_match('/^[a-z0-9-]+$/', $icon) && self::iconExists($icon)) {
+                return 'icon.'.$icon;
+            }
+        }
+
+        return 'icon.list';
+    }
+
+    private static function iconExists(string $icon): bool
+    {
+        return self::$iconExists[$icon] ??= View::exists('components.icon.'.$icon);
     }
 
     /** Wochentag kurz: "Do". */

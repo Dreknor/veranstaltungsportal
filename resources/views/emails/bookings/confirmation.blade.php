@@ -392,7 +392,8 @@
                     <li style="margin: 0 0 8px 0;">Der QR-Code wird beim Check-In gescannt</li>
                 @else
                     <li style="margin: 0 0 8px 0;">Notieren Sie sich Ihre Buchungsnummer:
-                        <strong>{{ $booking->booking_number }}</strong></li>
+                        <strong>{{ $booking->booking_number }}</strong>
+                    </li>
                     <li style="margin: 0 0 8px 0;">Ihre Buchungsnummer dient als Zugangsnachweis zur Veranstaltung</li>
                     <li style="margin: 0 0 8px 0;">Sie können die Buchungsbestätigung ausgedruckt oder digital vorzeigen
                     </li>

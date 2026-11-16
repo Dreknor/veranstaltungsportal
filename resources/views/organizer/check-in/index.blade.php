@@ -47,7 +47,10 @@
             placeholder="Name, E-Mail, Ticket- oder Buchungsnummer" />
         <x-ui.select label="Status" id="statusFilter" class="flex-[1_1_160px]"
             :options="['' => 'Alle', 'pending' => 'Ausstehend', 'checked_in' => 'Eingecheckt']" />
-        <x-ui.button size="lg" onclick="openQrScanner()" class="flex-[1_1_200px]">QR-Code scannen</x-ui.button>
+        <x-ui.button size="lg" onclick="openQrScanner()" class="flex-[1_1_200px]">
+            <x-slot:icon><x-icon.qr-code /></x-slot:icon>
+            QR-Code scannen
+        </x-ui.button>
     </div>
 
     <section aria-labelledby="ticket-list-heading">

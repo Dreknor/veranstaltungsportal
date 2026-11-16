@@ -3,7 +3,7 @@
     Aktiv: Fläche zone, Gewicht 600, aria-current="page" – kein farbiger Balken.
 
     icon: Name eines Icons unter components/icon/ ("calendar") oder ein alter Font-Awesome-Name
-          (z. B. "fas-calendar-days"), der über die Zuordnung unten abgebildet wird.
+          (z. B. "fas-calendar-days"), der über App\Support\Ui::icon() abgebildet wird.
           Unbekannte Namen fallen auf das Listen-Icon zurück.
     count: Zahl rechts (z. B. ungelesene Benachrichtigungen); count-label ergänzt sie für Screenreader.
     href: Link; ohne href ein <button> (z. B. für Aufklapp-Einträge).
@@ -17,74 +17,11 @@
 ])
 
 @php
-    // Font-Awesome-Namen (Seitenleiste, Konfiguration, Datenbank) auf eigene Linien-Icons abbilden
-    $faMap = [
-        'house' => 'home',
-        'home' => 'home',
-        'gauge' => 'chart',
-        'gauge-high' => 'chart',
-        'chart-line' => 'chart',
-        'chart-bar' => 'chart',
-        'chart-pie' => 'chart',
-        'calendar' => 'calendar',
-        'calendar-days' => 'calendar',
-        'calendar-alt' => 'calendar',
-        'calendar-check' => 'calendar-check',
-        'ticket' => 'ticket',
-        'ticket-alt' => 'ticket',
-        'heart' => 'heart',
-        'medal' => 'medal',
-        'award' => 'medal',
-        'trophy' => 'medal',
-        'certificate' => 'sparkles',
-        'star' => 'star',
-        'receipt' => 'receipt',
-        'file-invoice' => 'document',
-        'file-invoice-dollar' => 'document',
-        'file-contract' => 'scale',
-        'file-lines' => 'document',
-        'file-alt' => 'document',
-        'file-export' => 'download',
-        'cloud-arrow-down' => 'download',
-        'download' => 'download',
-        'building' => 'building-office',
-        'building-columns' => 'bank',
-        'university' => 'bank',
-        'paypal' => 'credit-card',
-        'credit-card' => 'credit-card',
-        'coins' => 'currency',
-        'euro-sign' => 'currency',
-        'users' => 'users',
-        'users-gear' => 'users',
-        'user-group' => 'user-group',
-        'user' => 'user',
-        'shield-halved' => 'shield-check',
-        'shield-alt' => 'shield-check',
-        'tags' => 'tag',
-        'tag' => 'tag',
-        'clipboard-list' => 'list',
-        'list' => 'list',
-        'envelope' => 'mail',
-        'bell' => 'bell',
-        'circle-question' => 'help',
-        'question-circle' => 'help',
-        'gear' => 'settings',
-        'cog' => 'settings',
-    ];
-
-    $iconComponent = null;
-    if ($icon) {
-        // Präfixe entfernen: "fas-calendar-days", "fab-paypal" und Klassen-Schreibweisen ergeben "calendar-days", "paypal"
-        $key = preg_replace('/^(fa-(solid|regular|brands)|fa[srbld]?)[-\s]+/', '', trim((string) $icon));
-        $key = preg_replace('/^fa-/', '', $key);
-        $name = $faMap[$key] ?? $key;
-        $iconComponent = view()->exists('components.icon.' . $name) ? 'icon.' . $name : 'icon.list';
-    }
+    // Eigene Icon-Namen oder alte Font-Awesome-Namen → Linien-Icon (Zuordnung in App\Support\Ui::icon)
+    $iconComponent = $icon ? \App\Support\Ui::icon($icon, 'list') : null;
 
     $classes = \Illuminate\Support\Arr::toCssClasses([
         'flex min-h-11 w-full items-center gap-3 rounded-control px-3 py-2 text-left text-ui text-ink no-underline transition-colors duration-150',
-        // ältere Icons mit Strich 2 auf die Linienstärke 1,6 bringen
-        '[&_svg_*]:[stroke-width:1.6]',
         'bg-zone font-semibold' => $active,
         'font-medium hover:bg-zone-hover' => !$active,
     ]);

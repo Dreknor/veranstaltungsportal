@@ -10,7 +10,7 @@
         <span
             class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-control border border-line bg-zone"
             style="color: {{ $badge->color }};">
-            <x-icon.medal class="h-6 w-6" />
+            <x-ui.icon :name="$badge->icon" fallback="medal" class="h-6 w-6" />
         </span>
         <div class="min-w-0 flex-1">
             <div class="flex items-start justify-between gap-2">

@@ -1,4 +1,4 @@
-{{-- Abzeichen-Symbol. Die Farbe des Abzeichens ist Inhalt und bleibt (nur innerhalb des Abzeichens, A2). --}}
+{{-- Abzeichen-Symbol: eigenes Bild, sonst das Icon aus badge->icon (Ui::icon, Ersatz Medaille). Die Farbe des Abzeichens ist Inhalt und bleibt (nur innerhalb des Abzeichens, A2). --}}
 @props(['badge', 'size' => 'md', 'earned' => true])
 
 @php
@@ -33,8 +33,9 @@
             class="{{ $classes }} rounded-full object-cover {{ $borderClass }} {{ !$earned ? 'grayscale opacity-50' : '' }}"
             style="border-color: {{ $badge->color }}">
     @else
-        <x-icon.medal class="{{ $glyph }} {{ !$earned ? 'text-disabled' : '' }}"
-            :style="$earned ? 'color: ' . $badge->color : null" />
+        {{-- Eigenes Symbol des Abzeichens (Name aus der Datenbank), sonst die Medaille --}}
+        <x-dynamic-component :component="\App\Support\Ui::icon($badge->icon, 'medal')"
+            class="{{ $glyph }} {{ !$earned ? 'text-disabled' : '' }}" :style="$earned ? 'color: ' . $badge->color : null" />
     @endif
 
     @if (!$earned)

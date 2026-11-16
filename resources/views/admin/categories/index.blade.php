@@ -35,7 +35,12 @@
                 <tr>
                     <th scope="row">{{ $category->name }}</th>
                     <td class="text-muted">{{ $category->slug }}</td>
-                    <td class="text-muted">{{ $category->icon }}</td>
+                    <td class="text-muted">
+                        <span class="inline-flex items-center gap-2">
+                            <x-ui.icon :name="$category->icon" fallback="calendar" class="h-5 w-5 flex-none text-ink" />
+                            {{ $category->icon }}
+                        </span>
+                    </td>
                     <td class="num">{{ $category->events_count }}</td>
                     <td>
                         @if ($category->is_active)

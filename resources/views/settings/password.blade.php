@@ -16,10 +16,10 @@
                     @csrf
                     @method('PUT')
 
-                    <x-ui.field label="Current Password" name="current_password" type="password"
+                    <x-ui.field label="Aktuelles Passwort" name="current_password" type="password"
                         autocomplete="current-password" />
-                    <x-ui.field label="New Password" name="password" type="password" autocomplete="new-password" />
-                    <x-ui.field label="Confirm Password" name="password_confirmation" type="password"
+                    <x-ui.field label="Neues Passwort" name="password" type="password" autocomplete="new-password" />
+                    <x-ui.field label="Neues Passwort wiederholen" name="password_confirmation" type="password"
                         autocomplete="new-password" />
 
                     <div>
