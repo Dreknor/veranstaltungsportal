@@ -77,7 +77,7 @@
 
                 {{-- Editor-Bereich: kein Whitespace darin – Tiptap mountet via mount() --}}
                 <div x-ref="editorContent"
-                    class="rich-editor-content min-h-96 rounded-b-control border border-line-strong bg-surface text-base leading-[1.6] text-ink [&_.tiptap]:min-h-96 [&_.tiptap]:p-4 [&_.tiptap_h1]:mt-8 [&_.tiptap_h1]:mb-3 [&_.tiptap_h1]:text-h2 [&_.tiptap_h2]:mt-8 [&_.tiptap_h2]:mb-3 [&_.tiptap_h2]:text-h2-form [&_.tiptap_h3]:mt-6 [&_.tiptap_h3]:mb-2 [&_.tiptap_h3]:text-h3 [&_.tiptap_h4]:mt-6 [&_.tiptap_h4]:mb-2 [&_.tiptap_h4]:text-base [&_.tiptap_h4]:font-semibold [&_.tiptap_p]:mt-0 [&_.tiptap_p]:mb-4 [&_.tiptap_ul]:mt-0 [&_.tiptap_ul]:mb-4 [&_.tiptap_ul]:list-disc [&_.tiptap_ul]:pl-6 [&_.tiptap_ol]:mt-0 [&_.tiptap_ol]:mb-4 [&_.tiptap_ol]:list-decimal [&_.tiptap_ol]:pl-6 [&_.tiptap_li]:mb-1 [&_.tiptap_a]:font-medium [&_.tiptap_a]:text-ink [&_.tiptap_a]:underline [&_.tiptap_a]:underline-offset-[3px] [&_.tiptap_strong]:font-semibold [&_.tiptap_mark]:bg-warning-zone [&_.tiptap_mark]:text-ink [&_.tiptap_blockquote]:my-6 [&_.tiptap_blockquote]:border-l [&_.tiptap_blockquote]:border-line-strong [&_.tiptap_blockquote]:pl-4 [&_.tiptap_blockquote]:text-ink-soft [&_.tiptap_hr]:my-6 [&_.tiptap_hr]:border-0 [&_.tiptap_hr]:border-t [&_.tiptap_hr]:border-line"></div>
+                    class="rich-editor-content richtext min-h-96 rounded-b-control border border-line-strong bg-surface [&_.tiptap]:min-h-96 [&_.tiptap]:p-4"></div>
                 <x-ui.field-error name="content" />
             </div>
 

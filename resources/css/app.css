@@ -316,6 +316,132 @@
     }
 
     /*
+     * Lesetext aus Rich-Text/Markdown (Rechtstexte, Editor-Inhalt, Beschreibungen): Schriftregeln aus A3,
+     * Überschriften nach Typo-Skala (h1/h2 wie h2, h3 wie h3, h4 16 px/600), Listen mit Aufzählungszeichen,
+     * Links ink unterstrichen. Die Breite setzt der Aufrufer (meist max-w-prose).
+     * Im Editor: Klasse an den Inhalt von TipTap (.tiptap) bzw. dessen Container.
+     */
+    .richtext {
+        font-size: var(--text-base);
+        line-height: 1.6;
+        color: var(--color-ink);
+        overflow-wrap: break-word;
+    }
+    .richtext > :first-child,
+    .richtext .tiptap > :first-child {
+        margin-top: 0;
+    }
+    .richtext > :last-child {
+        margin-bottom: 0;
+    }
+    .richtext :is(h1, h2) {
+        margin: 48px 0 12px;
+        font-size: var(--text-h2);
+        line-height: var(--text-h2--line-height);
+        font-weight: 600;
+        letter-spacing: var(--text-h2--letter-spacing);
+    }
+    .richtext h3 {
+        margin: 32px 0 8px;
+        font-size: var(--text-h3);
+        line-height: var(--text-h3--line-height);
+        font-weight: 600;
+        letter-spacing: var(--text-h3--letter-spacing);
+    }
+    .richtext :is(h4, h5, h6) {
+        margin: 24px 0 8px;
+        font-size: var(--text-base);
+        line-height: 1.4;
+        font-weight: 600;
+    }
+    .richtext :is(p, ul, ol, dl, table, pre) {
+        margin: 0 0 16px;
+    }
+    .richtext ul {
+        list-style: disc;
+        padding-left: 24px;
+    }
+    .richtext ol {
+        list-style: decimal;
+        padding-left: 24px;
+    }
+    .richtext li {
+        margin-bottom: 4px;
+    }
+    .richtext li > :is(ul, ol) {
+        margin: 4px 0 0;
+    }
+    .richtext li > p {
+        margin: 0;
+    }
+    .richtext a {
+        font-weight: 500;
+        color: var(--color-ink);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    .richtext :is(strong, b) {
+        font-weight: 600;
+    }
+    .richtext mark {
+        background-color: var(--color-warning-zone);
+        color: var(--color-ink);
+    }
+    .richtext blockquote {
+        margin: 24px 0;
+        padding-left: 16px;
+        border-left: 1px solid var(--color-line-strong);
+        color: var(--color-ink-soft);
+    }
+    .richtext hr {
+        margin: 32px 0;
+        border: 0;
+        border-top: 1px solid var(--color-line);
+    }
+    .richtext :is(code, kbd) {
+        padding: 0 4px;
+        border-radius: 4px;
+        background-color: var(--color-zone);
+        font-size: 0.9375em;
+    }
+    .richtext pre {
+        overflow-x: auto;
+        padding: 12px 16px;
+        border: 1px solid var(--color-line);
+        border-radius: var(--radius-control);
+        background-color: var(--color-zone);
+        font-size: var(--text-small);
+    }
+    .richtext pre code {
+        padding: 0;
+        background: none;
+    }
+    /* Breite Tabellen scrollen in ihrem eigenen Kasten (A8) */
+    .richtext table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+        font-size: var(--text-ui);
+        line-height: 1.4;
+    }
+    .richtext :is(th, td) {
+        padding: 8px 12px;
+        border: 1px solid var(--color-line);
+        text-align: left;
+        vertical-align: top;
+    }
+    .richtext th {
+        background-color: var(--color-zone);
+        font-weight: 500;
+    }
+    .richtext img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-box);
+    }
+
+    /*
      * Tabelle: <x-ui.table> setzt die Klasse; th/td brauchen keine eigenen Klassen.
      * Hilfsklassen an Zellen: "num" (Zahl, rechtsbündig, tabellarisch), "actions" (rechts, kein Umbruch).
      */

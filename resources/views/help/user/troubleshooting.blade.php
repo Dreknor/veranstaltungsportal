@@ -140,11 +140,11 @@
         <h2>Immer noch Probleme?</h2>
         <p>Wenn Sie hier keine Lösung gefunden haben, kontaktieren Sie uns gerne direkt.</p>
         <div class="mt-6 flex flex-wrap gap-4">
-            <x-ui.button href="mailto:support@bildungsportal.de">
+            <x-ui.button class="!no-underline" href="mailto:support@bildungsportal.de">
                 <x-slot:icon><x-icon.mail /></x-slot:icon>
                 E-Mail an Support
             </x-ui.button>
-            <x-ui.button variant="secondary" :href="route('help.index')">Weitere Hilfe-Artikel</x-ui.button>
+            <x-ui.button class="!no-underline" variant="secondary" :href="route('help.index')">Weitere Hilfe-Artikel</x-ui.button>
         </div>
     </section>
 
