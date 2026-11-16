@@ -1,212 +1,116 @@
-<x-layouts.app>
-    <!-- Page Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Reporting & Analytics</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">Übersicht über System-Statistiken und Reports</p>
+<x-layouts.app title="Auswertungen" :header="false">
+    <x-ui.page-header title="Reporting und Auswertungen" subtitle="Übersicht über System-Statistiken und Reports" />
+
+    <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
+        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()" class="w-full max-w-64">
+            <option value="7days" @selected($period === '7days')>Letzte 7 Tage</option>
+            <option value="30days" @selected($period === '30days')>Letzte 30 Tage</option>
+            <option value="90days" @selected($period === '90days')>Letzte 90 Tage</option>
+            <option value="365days" @selected($period === '365days')>Letztes Jahr</option>
+            <option value="ytd" @selected($period === 'ytd')>Jahr bis heute</option>
+            <option value="all" @selected($period === 'all')>Gesamt</option>
+        </x-ui.select>
+        <x-ui.button type="submit" variant="secondary" size="lg">Anzeigen</x-ui.button>
+    </form>
+
+    <div class="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <x-ui.stat label="Benutzer (gesamt)" :value="number_format($metrics['total_users'])" sub="+{{ number_format($metrics['new_users']) }} neu" />
+        <x-ui.stat label="Veranstaltungen (gesamt)" :value="number_format($metrics['total_events'])" sub="+{{ number_format($metrics['new_events']) }} neu" />
+        <x-ui.stat label="Buchungen (gesamt)" :value="number_format($metrics['total_bookings'])" sub="+{{ number_format($metrics['new_bookings']) }} neu" />
+        <x-ui.stat label="Umsatz (gesamt)" :value="\App\Support\Ui::money($metrics['total_revenue'])" sub="+{{ \App\Support\Ui::money($metrics['period_revenue']) }} im Zeitraum" />
     </div>
 
-    <div class="space-y-6">
-            <!-- Period Filter -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <form method="GET" class="flex items-center space-x-4">
-                        <label class="text-sm font-medium text-gray-700">Zeitraum:</label>
-                        <select name="period" onchange="this.form.submit()" class="rounded-md border-gray-300">
-                            <option value="7days" {{ $period === '7days' ? 'selected' : '' }}>Letzte 7 Tage</option>
-                            <option value="30days" {{ $period === '30days' ? 'selected' : '' }}>Letzte 30 Tage</option>
-                            <option value="90days" {{ $period === '90days' ? 'selected' : '' }}>Letzte 90 Tage</option>
-                            <option value="365days" {{ $period === '365days' ? 'selected' : '' }}>Letztes Jahr</option>
-                            <option value="ytd" {{ $period === 'ytd' ? 'selected' : '' }}>Jahr bis heute</option>
-                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Gesamt</option>
-                        </select>
-                    </form>
+    <x-ui.section title="Conversion-Funnel" class="mb-12">
+        <ul class="m-0 flex list-none flex-col gap-5 p-0">
+            <li>
+                <div class="mb-2 flex justify-between gap-4 text-small">
+                    <span class="font-medium">Aufrufe der Veranstaltungen</span>
+                    <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['event_views']) }}</span>
                 </div>
-            </div>
-
-            <!-- Key Metrics -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-1">
-                                <p class="text-sm text-gray-500">Benutzer (Gesamt)</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ number_format($metrics['total_users']) }}</p>
-                                <p class="text-xs text-green-600 mt-1">+{{ number_format($metrics['new_users']) }} neu</p>
-                            </div>
-                            <div class="text-blue-500 text-3xl">👥</div>
-                        </div>
-                    </div>
+                <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
+                    <span class="block h-2 rounded-full bg-primary" style="width: 100%"></span>
+                </span>
+            </li>
+            <li>
+                <div class="mb-2 flex justify-between gap-4 text-small">
+                    <span class="font-medium">Buchungen gestartet</span>
+                    <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_started']) }} ({{ number_format($conversionFunnel['start_rate'], 1) }} %)</span>
                 </div>
-
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-1">
-                                <p class="text-sm text-gray-500">Events (Gesamt)</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ number_format($metrics['total_events']) }}</p>
-                                <p class="text-xs text-green-600 mt-1">+{{ number_format($metrics['new_events']) }} neu</p>
-                            </div>
-                            <div class="text-purple-500 text-3xl">📅</div>
-                        </div>
-                    </div>
+                <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
+                    <span class="block h-2 rounded-full bg-primary" style="width: {{ min((float) $conversionFunnel['start_rate'], 100) }}%"></span>
+                </span>
+            </li>
+            <li>
+                <div class="mb-2 flex justify-between gap-4 text-small">
+                    <span class="font-medium">Buchungen abgeschlossen</span>
+                    <span class="text-muted tabular-nums">{{ number_format($conversionFunnel['bookings_completed']) }} ({{ number_format($conversionFunnel['completion_rate'], 1) }} %)</span>
                 </div>
+                <span class="block h-2 w-full overflow-hidden rounded-full bg-line" aria-hidden="true">
+                    <span class="block h-2 rounded-full bg-primary" style="width: {{ min((float) $conversionFunnel['completion_rate'], 100) }}%"></span>
+                </span>
+            </li>
+        </ul>
+    </x-ui.section>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-1">
-                                <p class="text-sm text-gray-500">Buchungen (Gesamt)</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ number_format($metrics['total_bookings']) }}</p>
-                                <p class="text-xs text-green-600 mt-1">+{{ number_format($metrics['new_bookings']) }} neu</p>
-                            </div>
-                            <div class="text-green-500 text-3xl">🎫</div>
-                        </div>
-                    </div>
-                </div>
+    <div class="mb-12 grid gap-4 md:grid-cols-3">
+        <x-ui.stat label="Report" value="Benutzer" sub="Detaillierte Benutzerstatistiken" :href="route('admin.reporting.users') . '?period=' . $period" />
+        <x-ui.stat label="Report" value="Veranstaltungen" sub="Performance und Trends" :href="route('admin.reporting.events') . '?period=' . $period" />
+        <x-ui.stat label="Report" value="Umsatz" sub="Finanzielle Übersicht" :href="route('admin.reporting.revenue') . '?period=' . $period" />
+    </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-1">
-                                <p class="text-sm text-gray-500">Umsatz (Gesamt)</p>
-                                <p class="text-2xl font-bold text-gray-900">€{{ number_format($metrics['total_revenue'], 2, ',', '.') }}</p>
-                                <p class="text-xs text-green-600 mt-1">+€{{ number_format($metrics['period_revenue'], 2, ',', '.') }}</p>
-                            </div>
-                            <div class="text-yellow-500 text-3xl">💰</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Conversion Funnel -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">Conversion Funnel</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <span class="text-sm font-medium">Event Views</span>
-                                <span class="text-sm text-gray-600">{{ number_format($conversionFunnel['event_views']) }}</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: 100%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <span class="text-sm font-medium">Buchungen gestartet</span>
-                                <span class="text-sm text-gray-600">{{ number_format($conversionFunnel['bookings_started']) }} ({{ number_format($conversionFunnel['start_rate'], 1) }}%)</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ $conversionFunnel['start_rate'] }}%"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-2">
-                                <span class="text-sm font-medium">Buchungen abgeschlossen</span>
-                                <span class="text-sm text-gray-600">{{ number_format($conversionFunnel['bookings_completed']) }} ({{ number_format($conversionFunnel['completion_rate'], 1) }}%)</span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                                <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ $conversionFunnel['completion_rate'] }}%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Links -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <a href="{{ route('admin.reporting.users') }}?period={{ $period }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition">
-                    <div class="p-6 text-center">
-                        <div class="text-4xl mb-2">👥</div>
-                        <h3 class="font-semibold text-lg">Benutzer-Report</h3>
-                        <p class="text-sm text-gray-600 mt-1">Detaillierte Benutzerstatistiken</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('admin.reporting.events') }}?period={{ $period }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition">
-                    <div class="p-6 text-center">
-                        <div class="text-4xl mb-2">📅</div>
-                        <h3 class="font-semibold text-lg">Event-Report</h3>
-                        <p class="text-sm text-gray-600 mt-1">Event-Performance & Trends</p>
-                    </div>
-                </a>
-
-                <a href="{{ route('admin.reporting.revenue') }}?period={{ $period }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-md transition">
-                    <div class="p-6 text-center">
-                        <div class="text-4xl mb-2">💰</div>
-                        <h3 class="font-semibold text-lg">Umsatz-Report</h3>
-                        <p class="text-sm text-gray-600 mt-1">Finanzielle Übersicht</p>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Top Events -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">Top 10 Events (nach Umsatz)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Event</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buchungen</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Umsatz</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse($topEvents as $event)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <a href="{{ route('events.show', $event->slug) }}" class="text-blue-600 hover:underline">
-                                                {{ $event->title }}
-                                            </a>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $event->bookings_count }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">€{{ number_format($event->bookings_sum_total_amount ?? 0, 2, ',', '.') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-gray-500">Keine Daten verfügbar</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Organizers -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">Top 10 Veranstalter (nach Umsatz)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Veranstalter</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Events</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Umsatz</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse($topOrganizers as $organizer)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $organizer->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $organizer->organized_events_count }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">€{{ number_format($organizer->organized_events_bookings_sum_total_amount ?? 0, 2, ',', '.') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-gray-500">Keine Daten verfügbar</td>
-                                    </tr>
-                                @endforelse
+    <x-ui.section title="Top 10 Veranstaltungen (nach Umsatz)" class="mb-12">
+        <x-ui.table label="Top 10 Veranstaltungen nach Umsatz">
+            <thead>
+                <tr>
+                    <th scope="col">Veranstaltung</th>
+                    <th scope="col" class="num">Buchungen</th>
+                    <th scope="col" class="num">Umsatz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($topEvents as $event)
+                    <tr>
+                        <th scope="row">
+                            <a href="{{ route('events.show', $event->slug) }}" class="text-ink underline underline-offset-[3px]">{{ $event->title }}</a>
+                        </th>
+                        <td class="num">{{ $event->bookings_count }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($event->bookings_sum_total_amount ?? 0) }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="3" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten verfügbar</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</x-layouts.app>
+        </x-ui.table>
+    </x-ui.section>
 
+    <x-ui.section title="Top 10 Veranstalter (nach Umsatz)">
+        <x-ui.table label="Top 10 Veranstalter nach Umsatz">
+            <thead>
+                <tr>
+                    <th scope="col">Veranstalter</th>
+                    <th scope="col" class="num">Veranstaltungen</th>
+                    <th scope="col" class="num">Umsatz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($topOrganizers as $organizer)
+                    <tr>
+                        <th scope="row">{{ $organizer->name }}</th>
+                        <td class="num">{{ $organizer->organized_events_count }}</td>
+                        <td class="num">{{ \App\Support\Ui::money($organizer->organized_events_bookings_sum_total_amount ?? 0) }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="3" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten verfügbar</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
+</x-layouts.app>

@@ -10,11 +10,11 @@
     </x-ui.page-header>
 
     <div class="mb-8 flex flex-wrap gap-2" role="group" aria-label="Nach Gruppe filtern">
-        <x-ui.button variant="secondary" size="sm" class="group-filter-btn" aria-pressed="true" data-group="all">
+        <x-ui.button variant="secondary" size="sm" class="group-filter-btn aria-pressed:border-ink aria-pressed:bg-zone aria-pressed:font-semibold" aria-pressed="true" data-group="all">
             Alle ({{ $permissions->flatten()->count() }})
         </x-ui.button>
         @foreach ($groups as $group)
-            <x-ui.button variant="secondary" size="sm" class="group-filter-btn" aria-pressed="false"
+            <x-ui.button variant="secondary" size="sm" class="group-filter-btn aria-pressed:border-ink aria-pressed:bg-zone aria-pressed:font-semibold" aria-pressed="false"
                 data-group="{{ $group }}">
                 {{ ucfirst($group) }} ({{ $permissions->get($group)?->count() ?? 0 }})
             </x-ui.button>

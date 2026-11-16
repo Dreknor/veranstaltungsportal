@@ -57,7 +57,6 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach ($groups as $g)
                                 <x-ui.button variant="secondary" size="sm" class="group-quick-btn"
-                                    :aria-pressed="$g === $permission->group ? 'true' : 'false'"
                                     data-group="{{ $g }}">{{ $g }}</x-ui.button>
                             @endforeach
                         </div>

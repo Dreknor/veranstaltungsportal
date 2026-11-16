@@ -1,147 +1,107 @@
-<x-layouts.app>
-    <!-- Page Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Umsatz-Report</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">Finanzielle Übersicht und Umsatzanalyse</p>
+<x-layouts.app title="Umsatz-Report" :header="false">
+    <x-ui.page-header title="Umsatz-Report" subtitle="Finanzielle Übersicht und Umsatzanalyse"
+        :back-href="route('admin.reporting.index', ['period' => $period])" back-label="Zurück zur Übersicht" />
+
+    <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
+        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()" class="w-full max-w-64">
+            <option value="7days" @selected($period === '7days')>Letzte 7 Tage</option>
+            <option value="30days" @selected($period === '30days')>Letzte 30 Tage</option>
+            <option value="90days" @selected($period === '90days')>Letzte 90 Tage</option>
+            <option value="365days" @selected($period === '365days')>Letztes Jahr</option>
+            <option value="all" @selected($period === 'all')>Gesamt</option>
+        </x-ui.select>
+        <x-ui.button type="submit" variant="secondary" size="lg">Anzeigen</x-ui.button>
+    </form>
+
+    <div class="mb-12">
+        <x-ui.stat label="Gesamte Platform-Gebühren (Featured-Veranstaltungen)" :value="\App\Support\Ui::money($data['platform_fees'])" class="p-6" />
     </div>
 
-    <div class="space-y-6">
-        <!-- Period Filter -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
-            <div class="p-6">
-                <form method="GET" class="flex items-center space-x-4">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Zeitraum:</label>
-                    <select name="period" onchange="this.form.submit()" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
-                        <option value="7days" {{ $period === '7days' ? 'selected' : '' }}>Letzte 7 Tage</option>
-                        <option value="30days" {{ $period === '30days' ? 'selected' : '' }}>Letzte 30 Tage</option>
-                        <option value="90days" {{ $period === '90days' ? 'selected' : '' }}>Letzte 90 Tage</option>
-                        <option value="365days" {{ $period === '365days' ? 'selected' : '' }}>Letztes Jahr</option>
-                        <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Gesamt</option>
-                    </select>
-                    <a href="{{ route('admin.reporting.index', ['period' => $period]) }}" class="ml-auto text-blue-600 hover:text-blue-800 dark:text-blue-400">
-                        ← Zurück zur Übersicht
-                    </a>
-                </form>
-            </div>
-        </div>
+    <div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
+        <x-ui.section title="Zahlungsstatus">
+            <x-ui.table label="Zahlungsstatus">
+                <thead>
+                    <tr>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="num">Anzahl</th>
+                        <th scope="col" class="num">Summe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($data['payment_status_breakdown'] as $status)
+                        @php
+                            $paymentTone = match ($status->payment_status) {
+                                'paid' => 'success',
+                                'pending' => 'warning',
+                                default => 'danger',
+                            };
+                        @endphp
+                        <tr>
+                            <th scope="row"><x-ui.status :tone="$paymentTone">{{ ucfirst($status->payment_status) }}</x-ui.status></th>
+                            <td class="num">{{ number_format($status->count) }}</td>
+                            <td class="num">{{ \App\Support\Ui::money($status->total) }}</td>
+                        </tr>
+                    @empty
+                        <tr class="hover:bg-transparent">
+                            <td colspan="3" class="p-0">
+                                <x-ui.empty :bordered="false">Keine Daten verfügbar</x-ui.empty>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-ui.table>
+        </x-ui.section>
 
-        <!-- Payment Status -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Zahlungsstatus</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Anzahl</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Summe</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($data['payment_status_breakdown'] as $status)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full
-                                            @if($status->payment_status === 'paid') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                            @elseif($status->payment_status === 'pending') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                            @else bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                            @endif">
-                                            {{ ucfirst($status->payment_status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ number_format($status->count) }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
-                                        €{{ number_format($status->total, 2, ',', '.') }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Keine Daten verfügbar</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Methods -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Zahlungsmethoden</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Methode</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Anzahl</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Summe</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($data['payment_methods'] as $method)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ ucfirst($method->payment_method ?? 'Nicht angegeben') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ number_format($method->count) }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
-                                        €{{ number_format($method->total, 2, ',', '.') }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Keine Daten verfügbar</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Platform Fees -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Platform-Gebühren</h3>
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 dark:bg-blue-900/20 dark:border-blue-800">
-                    <div class="text-center">
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Gesamte Platform-Gebühren (Featured Events)</p>
-                        <p class="text-4xl font-bold text-blue-600 dark:text-blue-400">€{{ number_format($data['platform_fees'], 2, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Revenue by Category -->
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-800">
-            <div class="p-6">
-                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Umsatz nach Kategorie</h3>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                        <thead>
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Kategorie</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Umsatz</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($data['revenue_by_category'] as $category)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-gray-100">{{ $category->name }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap font-semibold text-gray-900 dark:text-gray-100">
-                                        €{{ number_format($category->bookings_sum_total_amount ?? 0, 2, ',', '.') }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Keine Daten verfügbar</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        <x-ui.section title="Zahlungsmethoden">
+            <x-ui.table label="Zahlungsmethoden">
+                <thead>
+                    <tr>
+                        <th scope="col">Methode</th>
+                        <th scope="col" class="num">Anzahl</th>
+                        <th scope="col" class="num">Summe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($data['payment_methods'] as $method)
+                        <tr>
+                            <th scope="row">{{ ucfirst($method->payment_method ?? 'Nicht angegeben') }}</th>
+                            <td class="num">{{ number_format($method->count) }}</td>
+                            <td class="num">{{ \App\Support\Ui::money($method->total) }}</td>
+                        </tr>
+                    @empty
+                        <tr class="hover:bg-transparent">
+                            <td colspan="3" class="p-0">
+                                <x-ui.empty :bordered="false">Keine Daten verfügbar</x-ui.empty>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </x-ui.table>
+        </x-ui.section>
     </div>
+
+    <x-ui.section title="Umsatz nach Kategorie">
+        <x-ui.table label="Umsatz nach Kategorie">
+            <thead>
+                <tr>
+                    <th scope="col">Kategorie</th>
+                    <th scope="col" class="num">Umsatz</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($data['revenue_by_category'] as $category)
+                    <tr>
+                        <th scope="row">{{ $category->name }}</th>
+                        <td class="num">{{ \App\Support\Ui::money($category->bookings_sum_total_amount ?? 0) }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="2" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten verfügbar</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
 </x-layouts.app>
-

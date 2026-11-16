@@ -1,102 +1,63 @@
-<x-layouts.app>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Benutzer-Report') }}
-        </h2>
-    </x-slot>
+<x-layouts.app title="Benutzer-Report" :header="false">
+    <x-ui.page-header title="Benutzer-Report" subtitle="Aktivität, Rollen und aktivste Benutzer"
+        :back-href="route('admin.reporting.index', ['period' => $period])" back-label="Zurück zur Übersicht" />
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Period Filter -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                <div class="p-6">
-                    <form method="GET" class="flex items-center space-x-4">
-                        <label class="text-sm font-medium text-gray-700">Zeitraum:</label>
-                        <select name="period" onchange="this.form.submit()" class="rounded-md border-gray-300">
-                            <option value="7days" {{ $period === '7days' ? 'selected' : '' }}>Letzte 7 Tage</option>
-                            <option value="30days" {{ $period === '30days' ? 'selected' : '' }}>Letzte 30 Tage</option>
-                            <option value="90days" {{ $period === '90days' ? 'selected' : '' }}>Letzte 90 Tage</option>
-                            <option value="365days" {{ $period === '365days' ? 'selected' : '' }}>Letztes Jahr</option>
-                            <option value="all" {{ $period === 'all' ? 'selected' : '' }}>Gesamt</option>
-                        </select>
-                        <a href="{{ route('admin.reporting.index', ['period' => $period]) }}" class="ml-auto text-blue-600 hover:text-blue-800">
-                            ← Zurück zur Übersicht
-                        </a>
-                    </form>
-                </div>
-            </div>
+    <form method="GET" class="mb-8 flex flex-wrap items-end gap-x-4 gap-y-3">
+        <x-ui.select label="Zeitraum" name="period" :old="false" onchange="this.form.submit()" class="w-full max-w-64">
+            <option value="7days" @selected($period === '7days')>Letzte 7 Tage</option>
+            <option value="30days" @selected($period === '30days')>Letzte 30 Tage</option>
+            <option value="90days" @selected($period === '90days')>Letzte 90 Tage</option>
+            <option value="365days" @selected($period === '365days')>Letztes Jahr</option>
+            <option value="all" @selected($period === 'all')>Gesamt</option>
+        </x-ui.select>
+        <x-ui.button type="submit" variant="secondary" size="lg">Anzeigen</x-ui.button>
+    </form>
 
-            <!-- User Activity -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">Benutzeraktivität</h3>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Aktive Benutzer</span>
-                                <span class="font-semibold">{{ number_format($data['user_activity']['active_users']) }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Inaktive Benutzer</span>
-                                <span class="font-semibold">{{ number_format($data['user_activity']['inactive_users']) }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
+        <x-ui.section title="Benutzeraktivität">
+            <x-ui.dl>
+                <x-ui.dl-item label="Aktive Benutzer" num>{{ number_format($data['user_activity']['active_users']) }}</x-ui.dl-item>
+                <x-ui.dl-item label="Inaktive Benutzer" num>{{ number_format($data['user_activity']['inactive_users']) }}</x-ui.dl-item>
+            </x-ui.dl>
+        </x-ui.section>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">Benutzerrollen</h3>
-                        <div class="space-y-3">
-                            @foreach($data['user_roles'] as $role)
-                                <div class="flex justify-between">
-                                    <span class="text-gray-600">{{ $role->is_organizer ? 'Veranstalter' : 'Teilnehmer' }}</span>
-                                    <span class="font-semibold">{{ number_format($role->count) }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Top Users -->
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">Top 10 Benutzer (nach Buchungen)</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead>
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Benutzer</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rolle</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buchungen</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registriert</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                @forelse($data['top_users'] as $user)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $user->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $user->email }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $user->is_organizer ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
-                                                {{ $user->is_organizer ? 'Veranstalter' : 'Teilnehmer' }}
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">{{ $user->bookings_count }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->created_at->format('d.m.Y') }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">Keine Daten verfügbar</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <x-ui.section title="Benutzerrollen">
+            <x-ui.dl>
+                @foreach ($data['user_roles'] as $role)
+                    <x-ui.dl-item :label="$role->is_organizer ? 'Veranstalter' : 'Teilnehmer'" num>{{ number_format($role->count) }}</x-ui.dl-item>
+                @endforeach
+            </x-ui.dl>
+        </x-ui.section>
     </div>
+
+    <x-ui.section title="Top 10 Benutzer (nach Buchungen)">
+        <x-ui.table label="Top 10 Benutzer nach Buchungen">
+            <thead>
+                <tr>
+                    <th scope="col">Benutzer</th>
+                    <th scope="col">E-Mail</th>
+                    <th scope="col">Rolle</th>
+                    <th scope="col" class="num">Buchungen</th>
+                    <th scope="col">Registriert</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($data['top_users'] as $user)
+                    <tr>
+                        <th scope="row">{{ $user->name }}</th>
+                        <td>{{ $user->email }}</td>
+                        <td><x-ui.status tone="neutral">{{ $user->is_organizer ? 'Veranstalter' : 'Teilnehmer' }}</x-ui.status></td>
+                        <td class="num">{{ $user->bookings_count }}</td>
+                        <td class="tabular-nums whitespace-nowrap">{{ $user->created_at->format('d.m.Y') }}</td>
+                    </tr>
+                @empty
+                    <tr class="hover:bg-transparent">
+                        <td colspan="5" class="p-0">
+                            <x-ui.empty :bordered="false">Keine Daten verfügbar</x-ui.empty>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
 </x-layouts.app>
