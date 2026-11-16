@@ -661,12 +661,6 @@ parameters:
 			path: app/Http/Controllers/Admin/InvoiceManagementController.php
 
 		-
-			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Admin/InvoiceManagementController.php
-
-		-
 			message: '#^Method App\\Http\\Controllers\\Admin\\InvoiceSettingsController\:\:index\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3062,12 +3056,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$num of function round expects float\|int, float\|int\|string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Organizer/ReviewController.php
-
-		-
-			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Http/Controllers/Organizer/ReviewController.php
