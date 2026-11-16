@@ -27,7 +27,7 @@
         'whitespace-nowrap' => !$isLink && !$wrap,
         // wrap: Text darf umbrechen, Höhe wächst mit; ohne volle Breite linksbündig lesbar
         'max-w-full whitespace-normal py-2' => !$isLink && $wrap,
-        'text-left' => !$isLink && $wrap && !$full,
+        'text-left' => $wrap && ($isLink || !$full),
         'text-center' => !$isLink && $wrap && $full,
         'disabled:border-line disabled:bg-zone disabled:text-disabled aria-disabled:border-line aria-disabled:bg-zone aria-disabled:text-disabled' => !$isLink,
         'px-3 text-small' => !$isLink && $size === 'sm',
@@ -48,7 +48,6 @@
             $variant === 'danger',
 
         // Textlink
-        'text-left' => $isLink && $wrap,
         'text-ink underline-offset-[3px] hover:underline disabled:text-disabled disabled:no-underline aria-disabled:text-disabled aria-disabled:no-underline' => $isLink,
         'min-h-9 text-small' => $isLink && $size === 'sm',
         'min-h-11 text-ui' => $isLink && $size === 'md',
