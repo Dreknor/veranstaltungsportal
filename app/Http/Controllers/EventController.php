@@ -60,8 +60,8 @@ class EventController extends Controller
         }
 
         // Sortierung
-        $sortBy = $request->get('sort', 'start_date');
-        $sortOrder = $request->get('order', 'asc');
+        $sortBy = in_array($request->get('sort'), ['start_date', 'title', 'created_at'], true) ? $request->get('sort') : 'start_date';
+        $sortOrder = $request->get('order') === 'desc' ? 'desc' : 'asc';
         $eventsQuery->orderBy($sortBy, $sortOrder);
 
         // Events abrufen mit Paginierung

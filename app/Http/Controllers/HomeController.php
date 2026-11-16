@@ -38,8 +38,10 @@ class HomeController extends Controller
             ->withCount(['events as listed_events_count' => fn ($q) => $q->listed()])
             ->orderByDesc('listed_events_count')
             ->orderBy('name')
-            ->limit(self::CATEGORY_LIMIT)
-            ->get();
+            ->get()
+            ->filter(fn (EventCategory $category) => (int) $category->getAttribute('listed_events_count') > 0)
+            ->take(self::CATEGORY_LIMIT)
+            ->values();
 
         // Alle aktiven Kategorien für den Filter „Kategorie" in der Suchzeile
         $allCategories = EventCategory::where('is_active', true)

@@ -114,3 +114,16 @@ test('Filter-Zähler zählt Kategorie, Ort und Datum, nicht Format und Zeitraum'
         ->assertOk()
         ->assertSeeInOrder(['Filter', '>2<', 'aktiv'], false);
 });
+
+it('limits the school year period to 31 July', function () {
+    [$start, $end] = \App\Support\EventFilters::periodRange('schuljahr', \Carbon\CarbonImmutable::parse('2026-11-16 10:00'));
+    expect($start->toDateString())->toBe('2026-11-16')
+        ->and($end->toDateString())->toBe('2027-07-31');
+
+    [, $end] = \App\Support\EventFilters::periodRange('schuljahr', \Carbon\CarbonImmutable::parse('2027-03-01'));
+    expect($end->toDateString())->toBe('2027-07-31');
+});
+
+it('ignores unknown sort columns', function () {
+    $this->get(route('events.index', ['sort' => 'id; drop table events', 'order' => 'sideways']))->assertOk();
+});

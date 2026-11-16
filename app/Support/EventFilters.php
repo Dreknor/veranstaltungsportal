@@ -33,6 +33,7 @@ class EventFilters
         'diese-woche' => 'Diese Woche',
         'dieser-monat' => 'Diesen Monat',
         'naechste-3-monate' => 'Nächste 3 Monate',
+        'schuljahr' => 'Dieses Schuljahr',
     ];
 
     /**
@@ -95,6 +96,8 @@ class EventFilters
             'diese-woche' => $now->endOfWeek(CarbonImmutable::SUNDAY),
             'dieser-monat' => $now->endOfMonth(),
             'naechste-3-monate' => $now->addMonthsNoOverflow(3)->endOfDay(),
+            // Schuljahr in Sachsen: 1. August bis 31. Juli
+            'schuljahr' => $now->setDate($now->month >= 8 ? $now->year + 1 : $now->year, 7, 31)->endOfDay(),
             default => throw new \InvalidArgumentException("Unbekannter Zeitraum: {$period}"),
         };
 
