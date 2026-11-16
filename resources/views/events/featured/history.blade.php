@@ -19,7 +19,7 @@
                         {{ $fee->event->title }}
                         <span
                             class="mt-1 block text-small font-normal text-muted tabular-nums sm:hidden">{{ optional($fee->featured_start_date)->format('d.m.Y') }}–{{ optional($fee->featured_end_date)->format('d.m.Y') }}
-                            · {{ \App\Support\Ui::money($fee->amount) }}</span>
+                            · {{ \App\Support\Ui::money($fee->fee_amount) }}</span>
                         <span class="mt-1 block font-normal sm:hidden"><x-ui.status
                                 :tone="\App\Support\Ui::paymentTone($fee->payment_status)">{{ ['paid' => 'Bezahlt', 'pending' => 'Offen', 'failed' => 'Fehlgeschlagen'][$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status></span>
                     </th>
@@ -30,7 +30,7 @@
                         <x-ui.status
                             :tone="\App\Support\Ui::paymentTone($fee->payment_status)">{{ ['paid' => 'Bezahlt', 'pending' => 'Offen', 'failed' => 'Fehlgeschlagen'][$fee->payment_status] ?? ucfirst($fee->payment_status) }}</x-ui.status>
                     </td>
-                    <td class="num max-sm:hidden">{{ \App\Support\Ui::money($fee->amount) }}</td>
+                    <td class="num max-sm:hidden">{{ \App\Support\Ui::money($fee->fee_amount) }}</td>
                     <td class="actions">
                         @if ($fee->payment_status !== 'paid')
                             <x-ui.button size="sm" variant="secondary" :href="route('organizer.featured-events.payment', $fee)">Zahlung</x-ui.button>

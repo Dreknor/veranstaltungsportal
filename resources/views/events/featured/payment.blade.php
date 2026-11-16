@@ -35,7 +35,7 @@
                     'custom' => 'Individuell',
                 ][$featuredEventFee->duration_type] ?? ucfirst($featuredEventFee->duration_type)" />
             </x-ui.summary-lines>
-            <x-ui.summary-total label="Betrag" :amount="\App\Support\Ui::money($featuredEventFee->amount)" />
+            <x-ui.summary-total label="Betrag" :amount="\App\Support\Ui::money($featuredEventFee->fee_amount)" />
         </x-ui.summary>
     </div>
 </x-layouts.app>
