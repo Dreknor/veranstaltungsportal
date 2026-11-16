@@ -24,6 +24,6 @@
             vollständig ist.</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Für bessere Sichtbarkeit können Sie Ihre Veranstaltung als
+    <x-ui.alert tone="info" title="Tipp">Für bessere Sichtbarkeit können Sie Ihre Veranstaltung als
         „Featured“ markieren und so prominent hervorheben.</x-ui.alert>
 </x-help.article>

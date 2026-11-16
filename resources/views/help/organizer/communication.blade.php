@@ -52,7 +52,7 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Versenden Sie 1-2 Tage vor der Veranstaltung eine persönliche
+    <x-ui.alert tone="info" title="Tipp">Versenden Sie 1-2 Tage vor der Veranstaltung eine persönliche
         Nachricht mit Wegbeschreibung und Ablauf – das reduziert Rückfragen.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Best Practice">Danken Sie nach der Veranstaltung mit einer Follow-up-E-Mail und

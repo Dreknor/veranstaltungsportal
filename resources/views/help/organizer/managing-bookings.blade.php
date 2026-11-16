@@ -67,7 +67,7 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Best Practice">Checken Sie Teilnehmer frühzeitig ein, um Wartezeiten
+    <x-ui.alert tone="info" title="Best Practice">Checken Sie Teilnehmer frühzeitig ein, um Wartezeiten
         zu vermeiden. Nutzen Sie Bulk-Check-In für Gruppen.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Tipp">Exportieren Sie die Check-In-Liste nach der Veranstaltung für Ihre Statistik

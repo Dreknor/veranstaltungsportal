@@ -14,7 +14,7 @@ body {
 }
 .certificate-table {
     width: 100%;
-    height: 100%;
+    height: 676px;
     border: 1px solid #DCE3E2;
     border-collapse: collapse;
     text-align: center;
@@ -85,7 +85,7 @@ body {
 .signatures td {
     width: 40%;
     text-align: center;
-    vertical-align: bottom;
+    vertical-align: top;
 }
 .signatures td.signature-gap {
     width: 20%;

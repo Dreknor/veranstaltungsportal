@@ -69,7 +69,7 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="warning" title="Wichtig">Halten Sie Ihre Rechnungs- und Bankdaten aktuell, um
+    <x-ui.alert tone="warning" title="Wichtig">Halten Sie Ihre Rechnungs- und Bankdaten aktuell, um
         Verzögerungen bei Auszahlungen zu vermeiden.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Tipp">Laden Sie mehrere Admins ein für Ausfallsicherheit – falls eine Person nicht

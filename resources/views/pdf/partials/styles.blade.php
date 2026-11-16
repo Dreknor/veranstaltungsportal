@@ -269,9 +269,14 @@ table.data th.num,
 .tickets-table th.num,
 .items-table th.num,
 table.items th.num,
+.items-table th.text-right,
+table.items th.text-right,
+.tickets-table th.text-right,
 .text-right {
     text-align: right;
+    white-space: nowrap;
 }
+.items-table th.text-center,
 .text-center {
     text-align: center;
 }

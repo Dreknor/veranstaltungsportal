@@ -28,7 +28,7 @@
         Keine eigenen Klassen an p, ul, ol, li, h2, h3.
       - Hinweise, Tipps, Warnungen: <x-ui.alert tone="info|warning|success|danger" title="Tipp">Text</x-ui.alert>.
         Tipp und Best Practice = info, Wichtig = warning. Keine farbigen Kästen, kein Rand links.
-        Hinweise am Artikelende mit class="mt-12" absetzen; mehrere Hinweise untereinander ohne Zusatzklasse.
+        Ein Hinweis direkt nach einem Abschnitt wird automatisch mit 48 px abgesetzt; Zusatzklassen sind nicht nötig.
       - Tabellen: <x-ui.table label="…"> mit <thead>/<tbody>, in <div class="my-6"> (Zellen ohne Klassen).
       - Aufklappfragen (FAQ): <details><summary>Frage</summary><p>Antwort</p></details>; mehrere untereinander
         ergeben eine liniengetrennte Liste, keine Kästen.
@@ -91,7 +91,7 @@
         </details>
     </section>
 
-    <x-ui.alert class="mt-12" tone="success" title="Empfehlung">Best Practice oder Erfolgs-Tipp.</x-ui.alert>
+    <x-ui.alert tone="success" title="Empfehlung">Best Practice oder Erfolgs-Tipp.</x-ui.alert>
 
     <x-slot:related>
         <x-ui.button variant="link" arrow :href="route('help.article', ['category' => 'CATEGORY', 'article' => 'previous-article'])">Titel des

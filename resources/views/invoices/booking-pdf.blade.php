@@ -20,7 +20,9 @@
                     <div class="issuer-name">{{ $organizer['company_name'] ?? 'Rechnung' }}</div>
                 @endif
                 <div class="issuer-info">
-                    <strong>{{ $organizer['company_name'] ?? 'Veranstalter' }}</strong><br>
+                    @if(!empty($organizer['logo_path']))
+                        <strong>{{ $organizer['company_name'] ?? 'Veranstalter' }}</strong><br>
+                    @endif
                     {{ $organizer['address'] ?? '' }}<br>
                     {{ $organizer['postal_code'] ?? '' }} {{ $organizer['city'] ?? '' }}<br>
                     @if(!empty($organizer['tax_id']))

@@ -30,7 +30,7 @@
                     @elseif ($setting->type === 'integer')
                         <x-ui.field :label="$setting->label" name="settings[{{ $setting->key }}]"
                             id="setting_{{ $setting->key }}" type="number" :value="$setting->getTypedValue()"
-                            :hint="$setting->description" class="sm:max-w-64" />
+                            :hint="$setting->description" input-class="sm:max-w-64" />
                     @elseif ($setting->key === 'primary_color')
                         <x-ui.label for="setting_{{ $setting->key }}">{{ $setting->label }}</x-ui.label>
                         <div class="flex flex-wrap items-center gap-3">

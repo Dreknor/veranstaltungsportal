@@ -91,7 +91,7 @@
         <p><strong>Lösung:</strong> Wählen Sie „Gesamtzeitraum" im Filter. Cache löschen (Strg+F5).</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="warning" title="Wichtig">Bei technischen Problemen, die Sie nicht lösen können,
+    <x-ui.alert tone="warning" title="Wichtig">Bei technischen Problemen, die Sie nicht lösen können,
         kontaktieren Sie den Support mit Screenshots und Fehlermeldung.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Weitere Hilfe benötigt?">Durchsuchen Sie unsere <a

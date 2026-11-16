@@ -61,7 +61,7 @@
         <p>Rechnungen werden automatisch nach Veranstaltungsende erstellt und per E-Mail versandt.</p>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Nutzen Sie die Check-In-Rate, um die Qualität Ihrer
+    <x-ui.alert tone="info" title="Tipp">Nutzen Sie die Check-In-Rate, um die Qualität Ihrer
         Veranstaltungen zu verbessern. Eine niedrige Rate kann auf Probleme hinweisen.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Best Practice">Exportieren Sie regelmäßig Umsatzberichte für Ihre Buchhaltung und

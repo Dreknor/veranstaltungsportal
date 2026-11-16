@@ -44,18 +44,18 @@
                         <div id="custom_percentage_field">
                             <x-ui.field label="Plattformgebühr (Prozent)" name="custom_fee_percentage" type="number"
                                 step="0.01" min="0" max="100" :value="$customFee['fee_percentage'] ?? 0"
-                                class="sm:max-w-64" hint="Beispiel: Bei 3 % und einer Buchung über 100 € werden 3 € Gebühr berechnet." />
+                                input-class="sm:max-w-64" hint="Beispiel: Bei 3 % und einer Buchung über 100 € werden 3 € Gebühr berechnet." />
                         </div>
 
                         <div id="custom_fixed_field" style="display: none;">
                             <x-ui.field label="Plattformgebühr (Festbetrag in €)" name="custom_fee_fixed_amount" type="number"
-                                step="0.01" min="0" :value="$customFee['fee_fixed_amount'] ?? 0" class="sm:max-w-64"
+                                step="0.01" min="0" :value="$customFee['fee_fixed_amount'] ?? 0" input-class="sm:max-w-64"
                                 hint="Fester Betrag pro Buchung." />
                         </div>
 
                         <x-ui.field label="Mindestgebühr pro Buchung (in €)" name="custom_minimum_fee" type="number"
                             step="0.01" min="0" :value="$customFee['minimum_fee'] ?? $globalSettings['minimum_fee']"
-                            class="sm:max-w-64"
+                            input-class="sm:max-w-64"
                             :hint="'Wichtig für kostenlose Tickets. Standard: ' . number_format($globalSettings['minimum_fee'], 2, ',', '.') . ' €'" />
 
                         <x-ui.textarea label="Notizen" name="custom_fee_notes" optional rows="3"

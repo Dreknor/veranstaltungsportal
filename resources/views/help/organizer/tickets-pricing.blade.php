@@ -57,7 +57,7 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Frühbucherrabatte erhöhen die Planungssicherheit. Setzen Sie
+    <x-ui.alert tone="info" title="Tipp">Frühbucherrabatte erhöhen die Planungssicherheit. Setzen Sie
         attraktive Anreize für frühe Buchungen.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Best Practice">Begrenzen Sie Frühbucher-Kontingente künstlich (z.B. nur 30% der

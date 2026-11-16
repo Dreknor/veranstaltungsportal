@@ -183,7 +183,7 @@
         </details>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Weitere Fragen?">
+    <x-ui.alert tone="info" title="Weitere Fragen?">
         Wenn Sie weitere Fragen haben, die hier nicht beantwortet werden, können Sie uns gerne kontaktieren:
         <a href="{{ route('help.index') }}">Hilfe-Center</a> oder
         <a href="mailto:support@veranstaltungen.local">Support kontaktieren</a>.

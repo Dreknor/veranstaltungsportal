@@ -72,7 +72,7 @@
         </ul>
     </section>
 
-    <x-ui.alert class="mt-12" tone="info" title="Tipp">Kombinieren Sie Frühbucher-Rabatt mit Social-Media-Kampagne
+    <x-ui.alert tone="info" title="Tipp">Kombinieren Sie Frühbucher-Rabatt mit Social-Media-Kampagne
         für maximale Reichweite in kurzer Zeit.</x-ui.alert>
 
     <x-ui.alert tone="info" title="Best Practice">Investieren Sie in 1-2 Featured-Wochen kurz vor Veranstaltungsbeginn
