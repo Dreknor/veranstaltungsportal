@@ -504,7 +504,7 @@
                 </x-ui.alert>
             @endif
 
-            @if (!auth()->user()->canPublishEvents())
+            {{-- Früher nur sichtbar, wenn Rechnungsdaten fehlten (falsch platziertes @if) – jetzt immer --}}
                 <section aria-labelledby="teilnehmende-titel" class="border-t border-line py-8">
                     <h2 id="teilnehmende-titel" class="m-0 mb-2 text-h2-form text-ink">Teilnehmende</h2>
                     <p class="m-0 mb-4 text-small text-muted tabular-nums">{{ $event->getAttendeesCount() }}
@@ -529,8 +529,7 @@
                             Warteliste verwalten
                             @if ($waitlistCount > 0)
                                 <span class="tabular-nums">({{ $waitlistCount }})</span>
-                            @endif
-                        </x-ui.button>
+                                        </x-ui.button>
                     </div>
                 </section>
             @endif

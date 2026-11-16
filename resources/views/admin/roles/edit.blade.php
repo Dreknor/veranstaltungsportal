@@ -1,216 +1,144 @@
-<x-layouts.app title="Rolle bearbeiten: {{ ucfirst($role->name) }}">
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <a href="{{ route('admin.roles.index') }}" class="text-blue-600 hover:text-blue-800 text-sm">
-                        ← Zurück zu Rollen
-                    </a>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-1">
-                        Rolle bearbeiten:
-                        <span style="color: {{ $role->color ?? '#6b7280' }}">{{ ucfirst($role->name) }}</span>
-                        @if($role->is_system)
-                            <span class="ml-2 text-sm bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-0.5 rounded-full font-medium align-middle">🔒 System-Rolle</span>
-                        @endif
-                    </h1>
-                </div>
-                @if(!$role->is_system)
-                    <form action="{{ route('admin.roles.destroy', $role) }}" method="POST"
-                          onsubmit="return confirm('Rolle \'{{ $role->name }}\' wirklich löschen? {{ $role->users()->count() }} Benutzer werden auf \'user\' zurückgesetzt.')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">
-                            🗑 Rolle löschen
-                        </button>
-                    </form>
+<x-layouts.app :title="'Rolle bearbeiten: ' . ucfirst($role->name)">
+    <x-ui.page-header :title="'Rolle bearbeiten: ' . ucfirst($role->name)" :back-href="route('admin.roles.index')" back-label="Zurück zu Rollen">
+        @if ($role->is_system)
+            <x-slot:meta>
+                <x-ui.status tone="neutral">System-Rolle</x-ui.status>
+            </x-slot:meta>
+        @endif
+        @if (!$role->is_system)
+            <x-slot:actions>
+                <x-ui.button variant="danger" type="submit" form="delete-role-form">
+                    <x-slot:icon><x-icon.trash /></x-slot:icon>
+                    Rolle löschen
+                </x-ui.button>
+            </x-slot:actions>
+        @endif
+    </x-ui.page-header>
+
+    @if (!$role->is_system)
+        <form id="delete-role-form" action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="hidden"
+            onsubmit="return confirm('Rolle \'{{ $role->name }}\' wirklich löschen? {{ $role->users()->count() }} Benutzer werden auf \'user\' zurückgesetzt.')">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+
+    <form method="POST" action="{{ route('admin.roles.update', $role) }}" class="max-w-form">
+        @csrf
+        @method('PUT')
+
+        <p class="m-0 mb-6 text-small text-muted">* Pflichtfeld</p>
+
+        <x-ui.section title="Grunddaten" class="border-t border-line py-8">
+            <div class="flex flex-col gap-y-5">
+                @if ($role->is_system)
+                    <div>
+                        <x-ui.label for="role-name-display" required>Rollenname</x-ui.label>
+                        <x-ui.input id="role-name-display" :value="$role->name" disabled :old="false"
+                            aria-describedby="role-name-display-hint" />
+                        <input type="hidden" name="name" value="{{ $role->name }}">
+                        <x-ui.hint id="role-name-display-hint">System-Rolle: Der Name ist nicht änderbar.</x-ui.hint>
+                    </div>
+                @else
+                    <x-ui.field label="Rollenname" name="name" :value="$role->name" required
+                        hint="Nur Kleinbuchstaben, Zahlen und Bindestriche." />
                 @endif
-            </div>
 
-            @if (session('success'))
-                <div class="mb-4 bg-green-100 dark:bg-green-900 border border-green-400 text-green-700 dark:text-green-200 px-4 py-3 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
+                <x-ui.textarea label="Beschreibung" name="description" :value="$role->description" optional rows="2" />
 
-            @if (session('error'))
-                <div class="mb-4 bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-200 px-4 py-3 rounded">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <form method="POST" action="{{ route('admin.roles.update', $role) }}">
-                    @csrf
-                    @method('PUT')
-
-                    <!-- Name -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            Rollenname <span class="text-red-500">*</span>
-                        </label>
-                        @if($role->is_system)
-                            <input type="text" value="{{ $role->name }}" disabled
-                                   class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400 shadow-sm bg-gray-100 cursor-not-allowed">
-                            <input type="hidden" name="name" value="{{ $role->name }}">
-                            <p class="mt-1 text-xs text-gray-500">🔒 System-Rolle – Name nicht änderbar</p>
-                        @else
-                            <input type="text" name="name" value="{{ old('name', $role->name) }}"
-                                   class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                   required>
-                            <p class="mt-1 text-xs text-gray-500">Nur Kleinbuchstaben, Zahlen und Bindestriche</p>
-                            @error('name')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        @endif
-                    </div>
-
-                    <!-- Beschreibung -->
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
-                        <textarea name="description" rows="2"
-                                  class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('description', $role->description) }}</textarea>
-                        @error('description')
-                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Farbe -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Badge-Farbe</label>
-                        <div class="flex gap-3 flex-wrap">
-                            @foreach(['#6b7280','#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316'] as $color)
-                                <label class="cursor-pointer">
-                                    <input type="radio" name="color" value="{{ $color }}"
-                                           {{ old('color', $role->color ?? '#6b7280') === $color ? 'checked' : '' }} class="sr-only color-radio">
-                                    <span class="block w-8 h-8 rounded-full border-4 border-transparent transition-all hover:scale-110"
-                                          style="background-color: {{ $color }};"></span>
-                                </label>
-                            @endforeach
-                        </div>
-                    </div>
-
-                    @if($role->name !== 'admin')
-                    <!-- Permissions -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Berechtigungen</h3>
-                        @foreach($permissions as $group => $groupPermissions)
-                            <div class="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h4 class="font-medium text-gray-900 dark:text-gray-100 capitalize">{{ $group }}</h4>
-                                    <button type="button"
-                                            class="text-xs text-blue-600 hover:text-blue-800 select-group-btn"
-                                            data-group="{{ $group }}">Alle wählen</button>
-                                </div>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    @foreach($groupPermissions as $permission)
-                                        <label class="flex items-start gap-2 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
-                                            <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
-                                                   {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}
-                                                   class="mt-0.5 rounded border-gray-300 text-blue-600 perm-{{ Str::slug($group) }}">
-                                            <div>
-                                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ $permission->name }}</span>
-                                                @if($permission->description)
-                                                    <p class="text-xs text-gray-500">{{ $permission->description }}</p>
-                                                @endif
-                                                @if($permission->is_system)
-                                                    <span class="text-xs text-yellow-600">🔒 System</span>
-                                                @endif
-                                            </div>
-                                        </label>
-                                    @endforeach
-                                </div>
-                            </div>
+                <fieldset class="m-0 min-w-0 border-0 p-0">
+                    <x-ui.label as="legend">Farbe der Rolle</x-ui.label>
+                    <div class="-ml-1 flex flex-wrap">
+                        @foreach (['#6b7280', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'] as $color)
+                            <label class="cursor-pointer p-1">
+                                <input type="radio" name="color" value="{{ $color }}" class="peer sr-only"
+                                    @checked(old('color', $role->color ?? '#6b7280') === $color)>
+                                <span class="sr-only">{{ $color }}</span>
+                                <span aria-hidden="true"
+                                    class="block h-9 w-9 rounded-full outline-offset-2 peer-checked:outline peer-checked:outline-2 peer-checked:outline-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-ink"
+                                    style="background-color: {{ $color }};"></span>
+                            </label>
                         @endforeach
                     </div>
-                    @else
-                        <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg">
-                            <p class="text-sm text-yellow-800 dark:text-yellow-200">
-                                🔒 Die <strong>Admin-Rolle</strong> erhält automatisch alle Berechtigungen und kann nicht eingeschränkt werden.
-                            </p>
-                        </div>
-                    @endif
-
-                    <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="text-sm text-gray-600 dark:text-gray-400">
-                            <strong>{{ count($rolePermissions) }}</strong> von <strong>{{ $permissions->flatten()->count() }}</strong> Berechtigungen ausgewählt
-                        </div>
-                        <div class="flex gap-3">
-                            <a href="{{ route('admin.roles.index') }}"
-                               class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">
-                                Abbrechen
-                            </a>
-                            <button type="submit"
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                                Speichern
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                    <x-ui.field-error name="color" />
+                </fieldset>
             </div>
+        </x-ui.section>
 
-            <!-- Statistiken -->
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Statistiken</h3>
-                    <dl class="space-y-3">
-                        <div class="flex justify-between">
-                            <dt class="text-gray-600 dark:text-gray-400">Benutzer mit dieser Rolle:</dt>
-                            <dd class="font-semibold text-gray-900 dark:text-gray-100">{{ $role->users()->count() }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-gray-600 dark:text-gray-400">Berechtigungen:</dt>
-                            <dd class="font-semibold text-gray-900 dark:text-gray-100">{{ $role->permissions->count() }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-gray-600 dark:text-gray-400">System-Rolle:</dt>
-                            <dd class="font-semibold">{{ $role->is_system ? '✅ Ja' : '❌ Nein' }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt class="text-gray-600 dark:text-gray-400">Erstellt am:</dt>
-                            <dd class="font-semibold text-gray-900 dark:text-gray-100">{{ $role->created_at->format('d.m.Y') }}</dd>
-                        </div>
-                    </dl>
+        <x-ui.section title="Berechtigungen" class="border-t border-line py-8"
+            :description="$role->name !== 'admin' ? count($rolePermissions) . ' von ' . $permissions->flatten()->count() . ' Berechtigungen ausgewählt' : null">
+            @if ($role->name !== 'admin')
+                <div class="flex flex-col gap-8">
+                    @foreach ($permissions as $group => $groupPermissions)
+                        <fieldset class="m-0 min-w-0 border-0 p-0">
+                            <div class="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                                <legend class="float-left m-0 p-0 text-h3 capitalize">{{ $group }}</legend>
+                                <x-ui.button variant="link" size="sm" class="select-group-btn"
+                                    data-group="{{ $group }}">Alle wählen</x-ui.button>
+                            </div>
+                            <div class="clear-both grid grid-cols-1 gap-x-4 md:grid-cols-2">
+                                @foreach ($groupPermissions as $permission)
+                                    <x-ui.checkbox name="permissions[]" :value="$permission->name"
+                                        :checked="in_array($permission->name, $rolePermissions)"
+                                        data-perm="{{ Str::slug($group) }}"
+                                        :hint="trim(($permission->description ?? '') . ($permission->is_system ? ' System-Berechtigung' : ''))"
+                                        :label="$permission->name" />
+                                @endforeach
+                            </div>
+                        </fieldset>
+                    @endforeach
                 </div>
+                <x-ui.field-error name="permissions" />
+            @else
+                <x-ui.alert tone="info">
+                    Die <strong>Admin-Rolle</strong> erhält automatisch alle Berechtigungen und kann nicht eingeschränkt werden.
+                </x-ui.alert>
+            @endif
+        </x-ui.section>
 
-                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Aktuelle Berechtigungen</h3>
-                    <div class="flex flex-wrap gap-2">
-                        @forelse($role->permissions as $permission)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                {{ $permission->name }}
-                            </span>
-                        @empty
-                            <p class="text-gray-500 dark:text-gray-400 text-sm">Keine Berechtigungen zugewiesen</p>
-                        @endforelse
-                    </div>
-                </div>
-            </div>
+        <div class="flex flex-wrap gap-3 border-t border-line pt-8">
+            <x-ui.button type="submit">Speichern</x-ui.button>
+            <x-ui.button variant="secondary" :href="route('admin.roles.index')">Abbrechen</x-ui.button>
         </div>
+    </form>
+
+    <div class="mt-8 max-w-form">
+        <x-ui.section title="Statistiken" class="border-t border-line py-8">
+            <x-ui.dl>
+                <x-ui.dl-item label="Benutzer mit dieser Rolle" num>{{ $role->users()->count() }}</x-ui.dl-item>
+                <x-ui.dl-item label="Berechtigungen" num>{{ $role->permissions->count() }}</x-ui.dl-item>
+                <x-ui.dl-item label="System-Rolle">{{ $role->is_system ? 'Ja' : 'Nein' }}</x-ui.dl-item>
+                <x-ui.dl-item label="Erstellt am" num>{{ $role->created_at->format('d.m.Y') }}</x-ui.dl-item>
+            </x-ui.dl>
+        </x-ui.section>
+
+        <x-ui.section title="Aktuelle Berechtigungen" class="border-t border-line py-8">
+            @forelse ($role->permissions as $permission)
+                @if ($loop->first)
+                    <ul class="m-0 flex list-none flex-wrap gap-x-4 gap-y-2 p-0 text-small text-ink">
+                @endif
+                <li class="font-mono">{{ $permission->name }}</li>
+                @if ($loop->last)
+                    </ul>
+                @endif
+            @empty
+                <p class="m-0 text-small text-muted">Keine Berechtigungen zugewiesen.</p>
+            @endforelse
+        </x-ui.section>
     </div>
 
-    <script>
-    document.querySelectorAll('.select-group-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const group = this.dataset.group;
-            const slug = group.replace(/[^a-z0-9]/gi, '-').toLowerCase();
-            const checkboxes = document.querySelectorAll('.perm-' + slug);
-            const allChecked = Array.from(checkboxes).every(c => c.checked);
-            checkboxes.forEach(c => c.checked = !allChecked);
-            this.textContent = allChecked ? 'Alle wählen' : 'Keine wählen';
-        });
-    });
-
-    // Farb-Auswahl visuell hervorheben
-    document.querySelectorAll('.color-radio').forEach(radio => {
-        const span = radio.nextElementSibling;
-        if (radio.checked) span.style.outline = '2px solid #000';
-        radio.addEventListener('change', function() {
-            document.querySelectorAll('.color-radio').forEach(r => {
-                r.nextElementSibling.style.outline = '';
+    @push('scripts')
+        <script>
+            document.querySelectorAll('.select-group-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const group = this.dataset.group;
+                    const slug = group.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+                    const checkboxes = document.querySelectorAll('[data-perm="' + slug + '"]');
+                    const allChecked = Array.from(checkboxes).every(c => c.checked);
+                    checkboxes.forEach(c => c.checked = !allChecked);
+                    this.textContent = allChecked ? 'Alle wählen' : 'Keine wählen';
+                });
             });
-            if (this.checked) this.nextElementSibling.style.outline = '2px solid #000';
-        });
-    });
-    </script>
+        </script>
+    @endpush
 </x-layouts.app>
-
