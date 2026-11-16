@@ -111,7 +111,7 @@
                                 <x-ui.status tone="success">Anforderungen erfüllt</x-ui.status>
                             @elseif ($open)
                                 <span class="text-small text-ink-soft">{{ Ui::percent($open['percentage']) }}</span>
-                                <x-ui.progress :value="$open['percentage']" decorative class="w-full max-w-46" />
+                                <x-ui.progress :value="$open['percentage']" decorative class="w-28 lg:w-full" />
                             @endif
                         </x-slot:aside>
                     </x-ui.row>
