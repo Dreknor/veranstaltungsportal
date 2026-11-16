@@ -927,7 +927,7 @@
 
             <h3 class="m-0 mt-10 mb-4 text-h3">Zuordnung von Namen aus der Datenbank (ui.icon)</h3>
             <ul class="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-4 gap-y-3 p-0">
-                @foreach (['fas fa-trophy' => 'medal', 'fa-solid fa-ticket' => 'list', 'fas-calendar-days' => 'list', 'fa-graduation-cap' => 'calendar', 'academic-cap' => 'calendar', 'fas fa-qrcode' => 'list', 'unbekannt' => 'medal'] as $sgName => $sgFallback)
+                @foreach (['fa-trophy' => 'medal', 'fas-ticket' => 'list', 'fas-calendar-days' => 'list', 'fa-graduation-cap' => 'calendar', 'academic-cap' => 'calendar', 'fa-qrcode' => 'list', 'unbekannt' => 'medal'] as $sgName => $sgFallback)
                     <li class="flex items-center gap-3 text-small">
                         <x-ui.icon :name="$sgName" :fallback="$sgFallback" class="h-5 w-5 flex-none" />
                         <span class="min-w-0">{{ $sgName }} <span class="text-muted">ergibt

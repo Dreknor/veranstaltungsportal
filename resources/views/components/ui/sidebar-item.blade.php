@@ -17,7 +17,7 @@
 ])
 
 @php
-    // Eigene Icon-Namen oder alte Font-Awesome-Namen → Linien-Icon (Zuordnung in App\Support\Ui::icon)
+    // Eigene Icon-Namen oder alte Font-Awesome-Namen auf Linien-Icons abbilden (Zuordnung in App\Support\Ui::icon)
     $iconComponent = $icon ? \App\Support\Ui::icon($icon, 'list') : null;
 
     $classes = \Illuminate\Support\Arr::toCssClasses([

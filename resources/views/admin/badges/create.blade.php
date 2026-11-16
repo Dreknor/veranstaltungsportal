@@ -21,7 +21,7 @@
         <x-ui.section title="Darstellung" class="border-t border-line py-8">
             <div class="flex flex-col gap-y-5">
                 <x-ui.field label="Icon" name="icon" :value="$defaultIcon" :placeholder="$defaultIcon" required
-                    hint="Name eines Symbols, z. B. medal, star, academic-cap oder ein Font-Awesome-Name wie fas fa-trophy. Ohne eigenes Bild zeigt das Abzeichen dieses Symbol; unbekannte Namen zeigen die Medaille." />
+                    hint="Name eines Symbols, z. B. medal, star, academic-cap oder ein Font-Awesome-Name wie fa-trophy. Ohne eigenes Bild zeigt das Abzeichen dieses Symbol; unbekannte Namen zeigen die Medaille." />
 
                 <div>
                     <x-ui.label for="image" optional>Bild des Abzeichens</x-ui.label>
