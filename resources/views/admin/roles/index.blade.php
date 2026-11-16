@@ -1,147 +1,86 @@
 <x-layouts.app title="Rollen & Berechtigungen">
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Rollen & Berechtigungen</h1>
-                <div class="flex items-center gap-3">
-                    <a href="{{ route('admin.roles.matrix') }}"
-                       class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm font-medium">
-                        📊 Matrix-Ansicht
-                    </a>
-                    <a href="{{ route('admin.permissions.index') }}"
-                       class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm font-medium">
-                        🔑 Permissions verwalten
-                    </a>
-                    <a href="{{ route('admin.roles.create') }}"
-                       class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium">
-                        + Neue Rolle
-                    </a>
-                    <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800 text-sm">
-                        ← Dashboard
-                    </a>
-                </div>
-            </div>
+    <x-ui.page-header title="Rollen & Berechtigungen" :back-href="route('admin.dashboard')" back-label="Zum Dashboard">
+        <x-slot:actions>
+            <x-ui.button variant="secondary" :href="route('admin.roles.matrix')">Matrix-Ansicht</x-ui.button>
+            <x-ui.button variant="secondary" :href="route('admin.permissions.index')">Berechtigungen verwalten</x-ui.button>
+            <x-ui.button :href="route('admin.roles.create')">
+                <x-slot:icon><x-icon.plus /></x-slot:icon>
+                Neue Rolle
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.page-header>
 
-            @if (session('success'))
-                <div class="mb-6 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded relative">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="mb-6 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded relative">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <!-- Roles Overview -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden mb-8">
-                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                        Rollen <span class="text-sm font-normal text-gray-500">({{ $roles->count() }} gesamt)</span>
-                    </h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-                    @foreach($roles as $role)
-                        <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-lg transition relative">
-
-                            @if($role->is_system)
-                                <span class="absolute top-3 right-3 text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-2 py-0.5 rounded-full font-medium">
-                                    🔒 System
-                                </span>
+    <x-ui.section title="Rollen" :description="$roles->count() . ' gesamt'" class="mb-12">
+        <x-ui.table label="Rollen">
+            <thead>
+                <tr>
+                    <th scope="col">Rolle</th>
+                    <th scope="col">Berechtigungen</th>
+                    <th scope="col" class="num">Benutzer</th>
+                    <th scope="col" class="num">Anzahl</th>
+                    <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($roles as $role)
+                    <tr>
+                        <th scope="row">
+                            <span class="block">{{ ucfirst($role->name) }}</span>
+                            @if ($role->description)
+                                <span class="block max-w-prose text-small font-normal text-muted">{{ $role->description }}</span>
                             @endif
-
-                            <div class="flex justify-between items-start mb-3 pr-16">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-3 h-3 rounded-full inline-block flex-shrink-0"
-                                          style="background-color: {{ $role->color ?? '#6b7280' }};"></span>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                        {{ ucfirst($role->name) }}
-                                    </h3>
-                                </div>
-                            </div>
-
-                            @if($role->description)
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $role->description }}</p>
+                            @if ($role->is_system)
+                                <x-ui.status tone="neutral" class="mt-1">System-Rolle</x-ui.status>
                             @endif
+                        </th>
+                        <td class="text-small">
+                            @foreach ($role->permissions->take(4) as $permission)
+                                <span class="font-mono whitespace-nowrap">{{ $permission->name }}</span>@if (!$loop->last), @endif
+                            @endforeach
+                            @if ($role->permissions->count() > 4)
+                                <span class="text-muted">+{{ $role->permissions->count() - 4 }} mehr</span>
+                            @endif
+                        </td>
+                        <td class="num">{{ $role->users_count }}</td>
+                        <td class="num">{{ $role->permissions->count() }}</td>
+                        <td class="actions">
+                            <x-ui.button size="sm" variant="secondary" :href="route('admin.roles.edit', $role)">Bearbeiten</x-ui.button>
+                            @if (!$role->is_system)
+                                <x-ui.button size="sm" variant="secondary" type="submit" form="delete-role-{{ $role->id }}">Löschen</x-ui.button>
+                                <form id="delete-role-{{ $role->id }}" action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="hidden"
+                                    onsubmit="return confirm('Rolle \'{{ $role->name }}\' wirklich löschen? {{ $role->users_count }} Benutzer werden auf \'user\' zurückgesetzt.')">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </x-ui.table>
+    </x-ui.section>
 
-                            <div class="flex gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
-                                <span>👥 {{ $role->users_count }} Benutzer</span>
-                                <span>🔑 {{ $role->permissions->count() }} Permissions</span>
-                            </div>
-
-                            <div class="mb-4">
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach($role->permissions->take(4) as $permission)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                                            {{ $permission->name }}
-                                        </span>
-                                    @endforeach
-                                    @if($role->permissions->count() > 4)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400">
-                                            +{{ $role->permissions->count() - 4 }} mehr
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-                                <a href="{{ route('admin.roles.edit', $role) }}"
-                                   class="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm transition">
-                                    Bearbeiten
-                                </a>
-                                @if(!$role->is_system)
-                                    <form action="{{ route('admin.roles.destroy', $role) }}" method="POST"
-                                          onsubmit="return confirm('Rolle \'{{ $role->name }}\' wirklich löschen? {{ $role->users_count }} Benutzer werden auf \'user\' zurückgesetzt.')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                class="px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm transition">
-                                            Löschen
-                                        </button>
-                                    </form>
+    <x-ui.section title="Berechtigungen" :description="$permissions->flatten()->count() . ' gesamt'"
+        link-label="Alle verwalten" :link-href="route('admin.permissions.index')">
+        <div class="flex flex-col gap-8">
+            @foreach ($permissions as $group => $groupPermissions)
+                <div class="border-t border-line pt-4">
+                    <h3 class="m-0 mb-3 text-h3 capitalize">
+                        {{ $group }}
+                        <span class="text-small font-normal text-muted tabular-nums">({{ $groupPermissions->count() }})</span>
+                    </h3>
+                    <ul class="m-0 grid list-none grid-cols-1 gap-x-4 gap-y-2 p-0 text-small sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach ($groupPermissions as $permission)
+                            <li class="font-mono text-ink">
+                                {{ $permission->name }}
+                                @if ($permission->is_system)
+                                    <span class="font-sans text-muted">(System)</span>
                                 @endif
-                            </div>
-                        </div>
-                    @endforeach
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
-            </div>
-
-            <!-- Quick Permissions Overview -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                            Berechtigungen
-                            <span class="text-sm font-normal text-gray-500">({{ $permissions->flatten()->count() }} gesamt)</span>
-                        </h2>
-                        <a href="{{ route('admin.permissions.index') }}" class="text-blue-600 hover:text-blue-800 text-sm">
-                            Alle verwalten →
-                        </a>
-                    </div>
-                </div>
-                <div class="p-6">
-                    @foreach($permissions as $group => $groupPermissions)
-                        <div class="mb-6 last:mb-0">
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wider">
-                                {{ $group }}
-                                <span class="ml-1 text-xs text-gray-400 font-normal normal-case">({{ $groupPermissions->count() }})</span>
-                            </h3>
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                @foreach($groupPermissions as $permission)
-                                    <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-700 rounded-md">
-                                        @if($permission->is_system)
-                                            <span class="text-yellow-500 text-xs">🔒</span>
-                                        @endif
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">{{ $permission->name }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @endforeach
         </div>
-    </div>
+    </x-ui.section>
 </x-layouts.app>
-
