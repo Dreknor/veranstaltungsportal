@@ -8,41 +8,20 @@
         <x-ui.stat label="Offene Anfragen" :value="$stats['pending_requests_count']" />
     </div>
 
-    <!-- Navigation Tabs -->
-    @php
-        $tabBase = 'focus-inset -mb-px inline-flex min-h-11 cursor-pointer items-center gap-2 border-b-2 bg-transparent px-3 text-ui whitespace-nowrap no-underline transition-colors duration-150';
-        $tabIdle = 'border-transparent font-medium text-muted hover:border-line-strong hover:text-ink';
-    @endphp
-    <nav aria-label="Verbindungen" class="relative mb-8 overflow-x-auto border-b border-line">
-        <ul class="m-0 flex list-none gap-1 p-0">
-            <li class="flex-none">
-                <button type="button" onclick="showTab('following')" id="tab-following" aria-pressed="true"
-                    class="tab-button {{ $tabBase }} border-ink font-semibold text-ink">
-                    Folge ich ({{ $stats['following_count'] }})
-                </button>
-            </li>
-            <li class="flex-none">
-                <button type="button" onclick="showTab('followers')" id="tab-followers" aria-pressed="false"
-                    class="tab-button {{ $tabBase }} {{ $tabIdle }}">
-                    Folgen mir ({{ $stats['followers_count'] }})
-                </button>
-            </li>
-            <li class="flex-none">
-                <a href="{{ route('connections.requests') }}" class="{{ $tabBase }} {{ $tabIdle }}">
-                    Anfragen
-                    @if ($stats['pending_requests_count'] > 0)
-                        <span class="text-small font-normal text-muted tabular-nums">{{ $stats['pending_requests_count'] }}</span>
-                    @endif
-                </a>
-            </li>
-            <li class="flex-none">
-                <a href="{{ route('connections.suggestions') }}" class="{{ $tabBase }} {{ $tabIdle }}">Vorschläge</a>
-            </li>
-            <li class="flex-none">
-                <a href="{{ route('connections.search') }}" class="{{ $tabBase }} {{ $tabIdle }}">Suchen</a>
-            </li>
-        </ul>
-    </nav>
+    <!-- Navigation Tabs: die ersten beiden schalten auf der Seite um, die übrigen sind Links -->
+    <x-ui.tabs label="Verbindungen" class="mb-8">
+        <x-ui.tab onclick="showTab('following')" id="tab-following" class="tab-button" active>
+            Folge ich ({{ $stats['following_count'] }})
+        </x-ui.tab>
+        <x-ui.tab onclick="showTab('followers')" id="tab-followers" class="tab-button">
+            Folgen mir ({{ $stats['followers_count'] }})
+        </x-ui.tab>
+        <x-ui.tab :href="route('connections.requests')" :count="$stats['pending_requests_count'] > 0 ? $stats['pending_requests_count'] : null">
+            Anfragen
+        </x-ui.tab>
+        <x-ui.tab :href="route('connections.suggestions')">Vorschläge</x-ui.tab>
+        <x-ui.tab :href="route('connections.search')">Suchen</x-ui.tab>
+    </x-ui.tabs>
 
     <!-- Following Tab -->
     <div id="content-following" class="tab-content">
@@ -123,10 +102,8 @@
                     content.classList.add('hidden');
                 });
 
-                // Remove active state from all tab buttons
+                // Remove active state from all tab buttons (die Optik folgt aria-pressed)
                 document.querySelectorAll('.tab-button').forEach(button => {
-                    button.classList.remove('border-ink', 'text-ink', 'font-semibold');
-                    button.classList.add('border-transparent', 'text-muted', 'font-medium');
                     button.setAttribute('aria-pressed', 'false');
                 });
 
@@ -134,10 +111,7 @@
                 document.getElementById('content-' + tabName).classList.remove('hidden');
 
                 // Add active state to selected tab button
-                const activeButton = document.getElementById('tab-' + tabName);
-                activeButton.classList.add('border-ink', 'text-ink', 'font-semibold');
-                activeButton.classList.remove('border-transparent', 'text-muted', 'font-medium');
-                activeButton.setAttribute('aria-pressed', 'true');
+                document.getElementById('tab-' + tabName).setAttribute('aria-pressed', 'true');
             }
         </script>
     @endpush

@@ -3,26 +3,14 @@
         :back-href="route('connections.index')" back-label="Zurück zu Verbindungen" />
 
     <!-- Tabs -->
-    @php
-        $tabBase = 'focus-inset -mb-px inline-flex min-h-11 cursor-pointer items-center gap-2 border-b-2 bg-transparent px-3 text-ui whitespace-nowrap no-underline transition-colors duration-150';
-        $tabIdle = 'border-transparent font-medium text-muted hover:border-line-strong hover:text-ink';
-    @endphp
-    <nav aria-label="Anfragen" class="relative mb-8 overflow-x-auto border-b border-line">
-        <ul class="m-0 flex list-none gap-1 p-0">
-            <li class="flex-none">
-                <button type="button" onclick="showTab('received')" id="tab-received" aria-pressed="true"
-                    class="tab-button {{ $tabBase }} border-ink font-semibold text-ink">
-                    Erhalten ({{ $received->total() }})
-                </button>
-            </li>
-            <li class="flex-none">
-                <button type="button" onclick="showTab('sent')" id="tab-sent" aria-pressed="false"
-                    class="tab-button {{ $tabBase }} {{ $tabIdle }}">
-                    Gesendet ({{ $sent->total() }})
-                </button>
-            </li>
-        </ul>
-    </nav>
+    <x-ui.tabs label="Anfragen" variant="toggle" class="mb-8">
+        <x-ui.tab onclick="showTab('received')" id="tab-received" class="tab-button" active>
+            Erhalten ({{ $received->total() }})
+        </x-ui.tab>
+        <x-ui.tab onclick="showTab('sent')" id="tab-sent" class="tab-button">
+            Gesendet ({{ $sent->total() }})
+        </x-ui.tab>
+    </x-ui.tabs>
 
     <!-- Received Requests Tab -->
     <div id="content-received" class="tab-content">
@@ -95,10 +83,8 @@
                     content.classList.add('hidden');
                 });
 
-                // Remove active state from all tab buttons
+                // Remove active state from all tab buttons (die Optik folgt aria-pressed)
                 document.querySelectorAll('.tab-button').forEach(button => {
-                    button.classList.remove('border-ink', 'text-ink', 'font-semibold');
-                    button.classList.add('border-transparent', 'text-muted', 'font-medium');
                     button.setAttribute('aria-pressed', 'false');
                 });
 
@@ -106,10 +92,7 @@
                 document.getElementById('content-' + tabName).classList.remove('hidden');
 
                 // Add active state to selected tab button
-                const activeButton = document.getElementById('tab-' + tabName);
-                activeButton.classList.add('border-ink', 'text-ink', 'font-semibold');
-                activeButton.classList.remove('border-transparent', 'text-muted', 'font-medium');
-                activeButton.setAttribute('aria-pressed', 'true');
+                document.getElementById('tab-' + tabName).setAttribute('aria-pressed', 'true');
             }
         </script>
     @endpush

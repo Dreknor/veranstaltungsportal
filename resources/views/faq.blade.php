@@ -9,14 +9,11 @@
 
             <!-- FAQ-Bereiche -->
             <div x-data="{ activeTab: 'participants' }">
-                <div class="mb-6 flex flex-wrap gap-2" role="group" aria-label="Bereiche">
-                <x-ui.button variant="secondary" x-on:click="activeTab = 'participants'" x-bind:aria-pressed="activeTab === 'participants'"
-                    x-bind:class="activeTab === 'participants' ? 'border-ink bg-zone' : ''">Für Teilnehmer</x-ui.button>
-                <x-ui.button variant="secondary" x-on:click="activeTab = 'organizers'" x-bind:aria-pressed="activeTab === 'organizers'"
-                    x-bind:class="activeTab === 'organizers' ? 'border-ink bg-zone' : ''">Für Veranstalter</x-ui.button>
-                <x-ui.button variant="secondary" x-on:click="activeTab = 'technical'" x-bind:aria-pressed="activeTab === 'technical'"
-                    x-bind:class="activeTab === 'technical' ? 'border-ink bg-zone' : ''">Technisches</x-ui.button>
-                </div>
+                <x-ui.tabs label="Bereiche" variant="toggle" class="mb-6">
+                    <x-ui.tab x-on:click="activeTab = 'participants'" x-bind:aria-pressed="(activeTab === 'participants').toString()" active>Für Teilnehmer</x-ui.tab>
+                    <x-ui.tab x-on:click="activeTab = 'organizers'" x-bind:aria-pressed="(activeTab === 'organizers').toString()">Für Veranstalter</x-ui.tab>
+                    <x-ui.tab x-on:click="activeTab = 'technical'" x-bind:aria-pressed="(activeTab === 'technical').toString()">Technisches</x-ui.tab>
+                </x-ui.tabs>
 
             <!-- Tab Content: Für Teilnehmer -->
             <div x-show="activeTab === 'participants'" x-cloak class="faq-section border-t border-line">
