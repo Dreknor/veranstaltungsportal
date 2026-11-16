@@ -117,7 +117,9 @@
                         </form>
                     @endif
 
-                    <x-ui.button variant="secondary" full :href="route('organizer.dashboard')">Veranstalter-Profil</x-ui.button>
+                    @if ($fee->event?->organization)
+                        <x-ui.button variant="secondary" full :href="route('admin.organizations.show', $fee->event->organization)">Veranstalter-Profil</x-ui.button>
+                    @endif
 
                     @if ($fee->payment_status !== 'paid')
                         <form method="POST" action="{{ route('admin.featured-events.cancel', $fee) }}" class="m-0">

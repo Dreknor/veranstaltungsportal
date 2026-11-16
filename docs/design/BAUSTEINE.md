@@ -705,6 +705,7 @@ automatisch.
 | `subtitle` | `null` | Zeile darunter (`muted`) |
 | `back-href` / `back-label` | `null` / `Zurück` | Zurück-Link mit Pfeil darüber |
 | `size` | `title` | `display` nur Startseite |
+| `level` | `h1` | `h2` nur für Vorschauen (Styleguide), sonst immer `h1` |
 
 Slots: `actions` (höchstens ein Primär- und ein Sekundärbutton), `meta` (Zeile unter dem Titel).
 Abstand nach unten 32 px (`mb-8`, überschreibbar mit `class="mb-0"`). Genau eine H1 pro Seite.

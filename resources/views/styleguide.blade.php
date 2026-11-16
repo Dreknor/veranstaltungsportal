@@ -678,7 +678,7 @@
         <x-ui.section title="Seitenkopf, Abschnitt, Leer" id="kopf">
             <div class="flex flex-col gap-10">
                 <div class="rounded-box border border-dashed border-line p-6">
-                    <x-ui.page-header title="Veranstaltungen verwalten"
+                    <x-ui.page-header level="h2" title="Veranstaltungen verwalten"
                         subtitle="Alle Veranstaltungen Ihrer Organisation, auch Entwürfe." back-href="#kopf"
                         back-label="Zur Übersicht" class="mb-0">
                         <x-slot:actions>

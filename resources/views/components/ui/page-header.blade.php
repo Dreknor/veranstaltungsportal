@@ -10,6 +10,7 @@
     'size' => 'title', // title (Standard) | display (nur Startseite)
     'actions' => null,
     'meta' => null,
+    'level' => 'h1', // h1 (Standard); h2 nur für Vorschauen, z. B. im Styleguide
 ])
 
 <div {{ $attributes->class('mb-8 flex flex-col') }}>
@@ -22,11 +23,11 @@
     @endif
     <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
         <div class="flex min-w-0 flex-col gap-2">
-            <h1 @class([
+            <{{ $level }} @class([
                 'm-0 text-ink',
                 'text-title' => $size !== 'display',
                 'text-display' => $size === 'display',
-            ])>{{ $title ?? $slot }}</h1>
+            ])>{{ $title ?? $slot }}</{{ $level }}>
             @if ($subtitle)
                 <p class="m-0 max-w-prose text-base text-muted">{{ $subtitle }}</p>
             @endif
