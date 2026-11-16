@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
-use App\Models\Event;
-use App\Models\Booking;
 use App\Models\Badge;
+use App\Models\Booking;
+use App\Models\Event;
+use App\Models\User;
 use App\Models\UserConnection;
 
 beforeEach(function () {
@@ -234,4 +234,3 @@ test('profile shows activity feed', function () {
         ->assertDontSee('Veranstaltung(en)')
         ->assertSee('Abzeichen verdient');
 });
-

@@ -35,11 +35,10 @@ class RegistrationTest extends TestCase
             'name' => 'Test User',
         ]);
 
-
         // User should be redirected (either to dashboard or verification notice)
         // Since the user implements MustVerifyEmail, they will be redirected to dashboard
         // but the 'verified' middleware will redirect them to verification.notice
-        //$response->assertRedirect(route('dashboard', absolute: false));
+        // $response->assertRedirect(route('dashboard', absolute: false));
     }
 
     public function test_organizer_registration_can_be_disabled(): void

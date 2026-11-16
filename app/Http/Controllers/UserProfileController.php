@@ -37,7 +37,7 @@ class UserProfileController extends Controller
             $canView = true;
         }
         // Legacy: Check old field if new field doesn't exist - default to true for backwards compatibility
-        elseif (!isset($user->show_profile_public)) {
+        elseif (! isset($user->show_profile_public)) {
             // If field doesn't exist, treat as public (legacy behavior)
             $canView = true;
         }
@@ -50,8 +50,7 @@ class UserProfileController extends Controller
             }
         }
 
-
-        if (!$canView) {
+        if (! $canView) {
             abort(403, 'Dieses Profil ist nicht öffentlich sichtbar.');
         }
 
@@ -59,7 +58,7 @@ class UserProfileController extends Controller
         $user->load([
             'badges' => function ($query) {
                 $query->orderBy('user_badges.earned_at', 'desc')->limit(6);
-            }
+            },
         ]);
 
         // Get user statistics
@@ -167,4 +166,3 @@ class UserProfileController extends Controller
         return round($totalMinutes / 60, 1);
     }
 }
-

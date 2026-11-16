@@ -90,12 +90,12 @@ test('Einstellungen haben Seitentitel, keine Darstellung und den richtigen Konto
 });
 
 test('Hilfe-Link im Fuß nur für Angemeldete', function () {
-    $this->get(route('faq'))->assertOk()->assertDontSee('href="' . route('help.index') . '"', false);
+    $this->get(route('faq'))->assertOk()->assertDontSee('href="'.route('help.index').'"', false);
 
     $this->actingAs(User::factory()->create())
         ->get(route('faq'))
         ->assertOk()
-        ->assertSee('href="' . route('help.index') . '"', false);
+        ->assertSee('href="'.route('help.index').'"', false);
 });
 
 test('Abzeichen-Seite mit deutschen Zahlen und gedeckeltem Fortschritt', function () {

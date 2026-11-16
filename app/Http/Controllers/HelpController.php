@@ -28,13 +28,13 @@ class HelpController extends Controller
         $userType = $this->getUserType();
 
         // Check if user has access to this category
-        if (!$this->canAccessCategory($category, $userType)) {
+        if (! $this->canAccessCategory($category, $userType)) {
             abort(403, 'Sie haben keine Berechtigung, diese Hilfe-Kategorie anzuzeigen.');
         }
 
         $viewPath = "help.{$category}.{$article}";
 
-        if (!view()->exists($viewPath)) {
+        if (! view()->exists($viewPath)) {
             abort(404, 'Hilfe-Artikel nicht gefunden.');
         }
 
@@ -53,13 +53,13 @@ class HelpController extends Controller
         $userType = $this->getUserType();
 
         // Check if user has access to this category
-        if (!$this->canAccessCategory($category, $userType)) {
+        if (! $this->canAccessCategory($category, $userType)) {
             abort(403, 'Sie haben keine Berechtigung, diese Hilfe-Kategorie anzuzeigen.');
         }
 
         $viewPath = "help.{$category}.index";
 
-        if (!view()->exists($viewPath)) {
+        if (! view()->exists($viewPath)) {
             abort(404, 'Hilfe-Kategorie nicht gefunden.');
         }
 
@@ -91,7 +91,7 @@ class HelpController extends Controller
      */
     private function getUserType(): string
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return 'guest';
         }
 
@@ -169,7 +169,7 @@ class HelpController extends Controller
         }
 
         // Sort by relevance
-        usort($results, fn($a, $b) => $b['score'] <=> $a['score']);
+        usort($results, fn ($a, $b) => $b['score'] <=> $a['score']);
 
         return $results;
     }
@@ -338,10 +338,9 @@ class HelpController extends Controller
         }
 
         if ($userType === 'guest') {
-            return array_filter($articles, fn($a) => $a['category'] === 'user');
+            return array_filter($articles, fn ($a) => $a['category'] === 'user');
         }
 
         return $articles;
     }
 }
-

@@ -80,13 +80,14 @@
                                 class="connection-checkbox ui-checkbox"
                                 aria-label="Verbindung von {{ $connection->follower->name }} zu {{ $connection->following->name }} auswählen">
                         </td>
-                        <td>
+                        <td class="max-sm:w-20 max-sm:hyphens-auto">
                             <div class="flex items-center gap-3">
                                 <img src="{{ $connection->follower->profilePhotoUrl() }}" alt=""
                                     class="h-10 w-10 flex-none rounded-full max-sm:hidden">
                                 <div class="min-w-0">
                                     {{ $connection->follower->name }}
-                                    <span class="block text-small break-all text-muted">{{ $connection->follower->email }}</span>
+                                    <span
+                                        class="block text-small break-all text-muted">{{ $connection->follower->email }}</span>
                                 </div>
                             </div>
                         </td>
@@ -101,13 +102,14 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td class="max-sm:px-2">
                             <x-ui.status
                                 :tone="$statusTone[$connection->status] ?? 'neutral'">{{ $statusLabel[$connection->status] ?? ucfirst($connection->status) }}</x-ui.status>
                         </td>
-                        <td class="max-sm:hidden tabular-nums whitespace-nowrap">{{ $connection->created_at->format('d.m.Y H:i') }}
+                        <td class="max-sm:hidden tabular-nums whitespace-nowrap">
+                            {{ $connection->created_at->format('d.m.Y H:i') }}
                         </td>
-                        <td class="actions">
+                        <td class="actions max-sm:px-2">
                             <x-ui.button size="sm" variant="secondary" :href="route('admin.connections.show', $connection)">Details</x-ui.button>
                             <x-ui.button size="sm" variant="secondary" type="submit" class="max-sm:hidden"
                                 :form="'delete-connection-' . $connection->id">Löschen</x-ui.button>

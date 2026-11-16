@@ -18,7 +18,7 @@ class BadgeService
         $allBadges = Badge::active()->get();
 
         foreach ($allBadges as $badge) {
-            if (!$user->hasBadge($badge->id) && $this->meetsRequirements($user, $badge)) {
+            if (! $user->hasBadge($badge->id) && $this->meetsRequirements($user, $badge)) {
                 $user->awardBadge($badge);
                 $newlyEarnedBadges[] = $badge;
 
@@ -80,10 +80,10 @@ class BadgeService
                     ->from('user_badges')
                     ->whereColumn('user_badges.user_id', 'users.id');
             }, 'badges_count')
-            ->where(function($query) {
+            ->where(function ($query) {
                 // Only include users with public profiles OR who allow networking
                 $query->where('show_profile_public', true)
-                      ->orWhere('allow_networking', true);
+                    ->orWhere('allow_networking', true);
             })
             ->whereRaw('(select COALESCE(SUM(badges.points), 0) from user_badges inner join badges on user_badges.badge_id = badges.id where user_badges.user_id = users.id) > 0') // Only users with at least one badge
             ->orderByDesc('total_points')
@@ -292,4 +292,3 @@ class BadgeService
         }
     }
 }
-
