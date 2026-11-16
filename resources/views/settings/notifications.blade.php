@@ -50,6 +50,7 @@
     'publicKey' => $push['publicKey'],
     'storeUrl' => route('settings.notifications.push.store'),
     'destroyUrl' => route('settings.notifications.push.destroy'),
+    'testUrl' => route('settings.notifications.push.test'),
     'workerUrl' => asset('sw-push.js'),
     'devices' => $push['devices'],
     'knownEndpoints' => $push['knownEndpoints'],
@@ -78,6 +79,17 @@
                                 Push ausschalten
                             </x-ui.button>
                         </div>
+                    </div>
+
+                    <div x-show="state === 'on'" x-cloak class="mt-4 flex flex-col items-start gap-2">
+                        <x-ui.button variant="secondary" size="sm" x-on:click="sendTest()"
+                            x-bind:disabled="busy">
+                            Testnachricht senden
+                        </x-ui.button>
+                        <p x-show="testMessage" x-text="testMessage" x-cloak role="status"
+                            x-bind:class="testStatus === 'success' ? 'text-success' : 'text-danger'"
+                            class="m-0 text-small">
+                        </p>
                     </div>
 
                     <p x-show="error" x-text="error" x-cloak role="alert" class="m-0 mt-3 text-small text-danger"></p>

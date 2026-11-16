@@ -12,6 +12,8 @@ export function pushNotifications(options = {}) {
         state: 'checking',
         busy: false,
         error: '',
+        testStatus: '',
+        testMessage: '',
         devices: Number(options.devices || 0),
 
         get otherDevices() {
@@ -126,6 +128,30 @@ export function pushNotifications(options = {}) {
             }
         },
 
+        async sendTest() {
+            this.busy = true;
+            this.testStatus = '';
+            this.testMessage = '';
+
+            try {
+                const response = await send(options.testUrl, 'POST', {});
+                const data = await response.json().catch(() => ({}));
+
+                this.testStatus = response.ok ? 'success' : 'error';
+                this.testMessage =
+                    data.message ||
+                    (response.status === 429
+                        ? 'Zu viele Testnachrichten. Bitte warten Sie eine Minute.'
+                        : 'Die Testnachricht konnte nicht gesendet werden.');
+            } catch (error) {
+                this.testStatus = 'error';
+                this.testMessage =
+                    'Die Testnachricht konnte nicht gesendet werden.';
+            } finally {
+                this.busy = false;
+            }
+        },
+
         async disable() {
             this.busy = true;
             this.error = '';
@@ -150,6 +176,7 @@ export function pushNotifications(options = {}) {
                 }
 
                 this.state = 'off';
+                this.testMessage = '';
             } catch (error) {
                 this.error =
                     'Push konnte nicht ausgeschaltet werden. Bitte versuchen Sie es später erneut.';
