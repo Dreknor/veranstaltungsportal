@@ -124,7 +124,7 @@ class SettingsController extends Controller
             ],
             [
                 'key' => 'support_email',
-                'value' => 'support@bildungsportal.de',
+                'value' => 'info@esdigmbh.de',
                 'type' => 'string',
                 'group' => 'general',
                 'label' => 'Support E-Mail',

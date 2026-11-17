@@ -43,20 +43,21 @@
             class="p-6" />
     </div>
 
-    <x-ui.section title="Veranstaltungen nach Kategorie">
-        <x-ui.table label="Veranstaltungen nach Kategorie">
+    <x-ui.section title="Buchungen nach Kategorie"
+        description="Buchungen im gewählten Zeitraum, unabhängig vom Anlagedatum der Veranstaltung">
+        <x-ui.table label="Buchungen nach Kategorie">
             <thead>
                 <tr>
                     <th scope="col">Kategorie</th>
-                    <th scope="col" class="num">Anzahl</th>
-                    <th scope="col" class="num">Umsatz</th>
+                    <th scope="col" class="num">Buchungen</th>
+                    <th scope="col" class="num">Umsatz (bezahlt)</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($data['events_by_category'] as $category)
                     <tr>
                         <th scope="row" class="max-sm:w-32 max-sm:hyphens-auto">{{ $category->name }}</th>
-                        <td class="num">{{ $category->events_count }}</td>
+                        <td class="num">{{ $category->period_bookings_count }}</td>
                         <td class="num">{{ \App\Support\Ui::money($category->bookings_sum_total ?? 0) }}</td>
                     </tr>
                 @empty

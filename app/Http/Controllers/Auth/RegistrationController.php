@@ -27,7 +27,8 @@ class RegistrationController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'account_type' => [
@@ -77,6 +78,10 @@ class RegistrationController extends Controller
         // Remove organization and account_type fields from user data
         unset($validated['account_type'], $validated['organization_name'], $validated['organization_description']);
 
+        $validated['first_name'] = trim($validated['first_name']);
+        $validated['last_name'] = trim($validated['last_name']);
+        // Anzeigename aus Vor- und Nachname bilden
+        $validated['name'] = $validated['first_name'].' '.$validated['last_name'];
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);

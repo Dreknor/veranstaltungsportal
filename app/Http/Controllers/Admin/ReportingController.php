@@ -224,26 +224,32 @@ class ReportingController extends Controller
             ->values();
     }
 
+    /**
+     * Buchungen und bezahlter Umsatz je Kategorie im Zeitraum – unabhängig davon, wann die
+     * Veranstaltung angelegt wurde (gleiche Zählweise wie der Umsatzbericht).
+     *
+     * @return \Illuminate\Support\Collection<int, EventCategory>
+     */
     private function getCategoryPerformance($startDate, $endDate)
     {
-        return EventCategory::withCount(['events' => function ($query) use ($startDate, $endDate) {
-            $query->whereBetween('created_at', [$startDate, $endDate]);
-        }])
-            ->with(['events' => function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('created_at', [$startDate, $endDate])
-                    ->with(['bookings' => function ($q) use ($startDate, $endDate) {
-                        $q->where('payment_status', 'paid')
-                            ->whereBetween('created_at', [$startDate, $endDate]);
-                    }]);
-            }])
-            ->orderBy('events_count', 'desc')
+        $rows = Booking::query()
+            ->join('events', 'events.id', '=', 'bookings.event_id')
+            ->whereBetween('bookings.created_at', [$startDate, $endDate])
+            ->where('bookings.status', '!=', 'cancelled')
+            ->groupBy('events.event_category_id')
+            ->selectRaw("events.event_category_id as category_id, count(*) as bookings, sum(case when bookings.payment_status = 'paid' then bookings.total else 0 end) as revenue")
             ->get()
-            ->map(function ($category) {
-                $category->bookings_sum_total = $category->events->sum(function ($event) {
-                    return $event->bookings->sum('total');
-                });
-                return $category;
-            });
+            ->keyBy('category_id');
+
+        return EventCategory::query()
+            ->get()
+            ->each(function (EventCategory $category) use ($rows) {
+                $row = $rows->get($category->id);
+                $category->setAttribute('period_bookings_count', (int) ($row->bookings ?? 0));
+                $category->setAttribute('bookings_sum_total', (float) ($row->revenue ?? 0));
+            })
+            ->sortByDesc('period_bookings_count')
+            ->values();
     }
 
     private function getTopEvents($startDate, $endDate)

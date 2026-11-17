@@ -99,7 +99,7 @@
                 <p class="m-0 text-base text-muted">Wenn Sie keine Antwort auf Ihre Frage gefunden haben, kontaktieren
                     Sie uns gerne direkt.</p>
             </div>
-            <x-ui.button variant="secondary" href="mailto:support@bildungsportal.de">
+            <x-ui.button variant="secondary" href="mailto:info@esdigmbh.de">
                 <x-slot:icon><x-icon.mail /></x-slot:icon>
                 Support kontaktieren
             </x-ui.button>

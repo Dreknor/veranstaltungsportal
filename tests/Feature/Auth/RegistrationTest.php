@@ -22,7 +22,8 @@ class RegistrationTest extends TestCase
         \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
         $response = $this->post('/register', [
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -32,7 +33,8 @@ class RegistrationTest extends TestCase
         // User should be created in database
         $this->assertDatabaseHas('users', [
             'email' => 'test@example.com',
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
         ]);
 
         // User should be redirected (either to dashboard or verification notice)
@@ -52,7 +54,8 @@ class RegistrationTest extends TestCase
 
         // Attempt to register as organizer
         $response = $this->post('/register', [
-            'name' => 'Test Organizer',
+            'first_name' => 'Test',
+            'last_name' => 'Organizer',
             'email' => 'organizer@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -80,7 +83,8 @@ class RegistrationTest extends TestCase
 
         // Register as organizer
         $response = $this->post('/register', [
-            'name' => 'Test Organizer',
+            'first_name' => 'Test',
+            'last_name' => 'Organizer',
             'email' => 'organizer@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -91,7 +95,8 @@ class RegistrationTest extends TestCase
         // User should be created
         $this->assertDatabaseHas('users', [
             'email' => 'organizer@example.com',
-            'name' => 'Test Organizer',
+            'first_name' => 'Test',
+            'last_name' => 'Organizer',
         ]);
 
         // Organization should be created
@@ -110,7 +115,8 @@ class RegistrationTest extends TestCase
 
         // Participant registration should still work
         $response = $this->post('/register', [
-            'name' => 'Test Participant',
+            'first_name' => 'Test',
+            'last_name' => 'Participant',
             'email' => 'participant@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',

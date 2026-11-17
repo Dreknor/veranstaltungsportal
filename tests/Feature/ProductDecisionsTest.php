@@ -69,3 +69,53 @@ test('Hervorhebungs-Historie zeigt den tatsächlichen Betrag', function () {
         ->assertSee('49,99 €')
         ->assertDontSee('0,00 €');
 });
+
+test('Registrierung speichert Vor- und Nachname getrennt und bildet daraus den Anzeigenamen', function () {
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
+
+    $this->get('/register')->assertOk()->assertSee('Vorname')->assertSee('Nachname')->assertDontSee('Vollständiger Name');
+
+    $this->post('/register', [
+        'first_name' => ' Erika ',
+        'last_name' => 'Mustermann',
+        'email' => 'erika@example.com',
+        'password' => 'Passwort-123!',
+        'password_confirmation' => 'Passwort-123!',
+        'account_type' => 'participant',
+    ]);
+
+    $user = User::where('email', 'erika@example.com')->firstOrFail();
+    expect($user->first_name)->toBe('Erika')
+        ->and($user->last_name)->toBe('Mustermann')
+        ->and($user->name)->toBe('Erika Mustermann')
+        ->and($user->fullName())->toBe('Erika Mustermann');
+});
+
+test('Registrierung verlangt Vor- und Nachname', function () {
+    $this->post('/register', [
+        'email' => 'ohne@example.com',
+        'password' => 'Passwort-123!',
+        'password_confirmation' => 'Passwort-123!',
+        'account_type' => 'participant',
+    ])->assertSessionHasErrors(['first_name', 'last_name']);
+});
+
+test('Kategorie-Bericht zählt Buchungen im Zeitraum auch bei älteren Veranstaltungen', function () {
+    $admin = User::factory()->create();
+    \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $admin->assignRole('admin');
+
+    $category = \App\Models\EventCategory::factory()->create(['name' => 'Alte Kategorie']);
+    $event = \App\Models\Event::factory()->create(['event_category_id' => $category->id, 'created_at' => now()->subYears(2)]);
+    \App\Models\Booking::factory()->count(2)->create(['event_id' => $event->id, 'status' => 'confirmed', 'payment_status' => 'paid', 'total' => 50]);
+
+    $response = $this->actingAs($admin)->get(route('admin.reporting.events', ['period' => '30days']))->assertOk();
+    $row = collect($response->viewData('data')['events_by_category'])->firstWhere('id', $category->id);
+
+    expect($row->period_bookings_count)->toBe(2)
+        ->and($row->bookings_sum_total)->toEqual(100.0);
+});
+
+test('Support-Adresse ist info@esdigmbh.de', function () {
+    $this->actingAs(User::factory()->create())->get(route('help.index'))->assertOk()->assertSee('info@esdigmbh.de')->assertDontSee('support@bildungsportal.de');
+});

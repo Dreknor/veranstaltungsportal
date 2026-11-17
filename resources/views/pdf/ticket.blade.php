@@ -222,7 +222,7 @@
             @if($event->show_qr_code_on_ticket)
                 <p>• Der Check-In erfolgt über den QR-Code am Eingang.</p>
             @endif
-            <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organization?->email ?? 'support@bildungsportal.de' }}</p>
+            <p>• Bei Fragen wenden Sie sich bitte an: {{ $event->organization?->email ?? 'info@esdigmbh.de' }}</p>
             @if($event->special_instructions)
                 <p>• {{ $event->special_instructions }}</p>
             @endif

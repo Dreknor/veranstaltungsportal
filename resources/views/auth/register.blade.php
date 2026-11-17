@@ -5,7 +5,10 @@
         <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-5" x-data="{ userType: @js(old('account_type', 'participant')) }"
             data-recaptcha data-recaptcha-action="register">
             @csrf
-            <x-ui.field label="Vollständiger Name" name="name" type="text" autocomplete="name" autofocus />
+            <div class="grid gap-x-4 gap-y-5 sm:grid-cols-2">
+                <x-ui.field label="Vorname" name="first_name" type="text" autocomplete="given-name" autofocus />
+                <x-ui.field label="Nachname" name="last_name" type="text" autocomplete="family-name" />
+            </div>
 
             <x-ui.field label="E-Mail" name="email" type="email" autocomplete="email" />
 

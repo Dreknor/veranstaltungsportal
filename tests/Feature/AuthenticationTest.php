@@ -76,7 +76,8 @@ class AuthenticationTest extends TestCase
     public function new_users_can_register()
     {
         $response = $this->post('/register', [
-            'name' => 'Test User',
+            'first_name' => 'Test',
+            'last_name' => 'User',
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -91,7 +92,8 @@ class AuthenticationTest extends TestCase
     public function organizers_can_register()
     {
         $response = $this->post('/register', [
-            'name' => 'Test Organizer',
+            'first_name' => 'Test',
+            'last_name' => 'Organizer',
             'email' => 'organizer@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',

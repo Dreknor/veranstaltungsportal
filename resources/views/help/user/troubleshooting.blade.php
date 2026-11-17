@@ -140,7 +140,7 @@
         <h2>Immer noch Probleme?</h2>
         <p>Wenn Sie hier keine Lösung gefunden haben, kontaktieren Sie uns gerne direkt.</p>
         <div class="mt-6 flex flex-wrap gap-4">
-            <x-ui.button href="mailto:support@bildungsportal.de">
+            <x-ui.button href="mailto:info@esdigmbh.de">
                 <x-slot:icon><x-icon.mail /></x-slot:icon>
                 E-Mail an Support
             </x-ui.button>
