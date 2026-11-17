@@ -1,7 +1,7 @@
 @php
     $page = \App\Models\LegalPage::getByType('agb');
 @endphp
-<x-layouts.public title="AGB – {{ config('app.name') }}">
+<x-layouts.public :title="'AGB – ' . (config('app.name'))">
     @push('meta')
         <meta name="robots" content="noindex, follow">
     @endpush

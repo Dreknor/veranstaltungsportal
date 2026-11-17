@@ -35,7 +35,7 @@
     @else
         {{-- Eigenes Symbol des Abzeichens (Name aus der Datenbank), sonst die Medaille --}}
         <x-dynamic-component :component="\App\Support\Ui::icon($badge->icon, 'medal')"
-            class="{{ $glyph }} {{ !$earned ? 'text-disabled' : '' }}" :style="$earned ? 'color: ' . $badge->color : null" />
+            :class="($glyph) . ' ' . (!$earned ? 'text-disabled' : '')" :style="$earned ? 'color: ' . $badge->color : null" />
     @endif
 
     @if (!$earned)

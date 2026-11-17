@@ -56,11 +56,11 @@
     </div>
 
     <div class="mt-6 max-w-form">
-        <x-ui.label for="share-link-{{ $event->id }}">Link zur Veranstaltung</x-ui.label>
+        <x-ui.label :for="'share-link-' . ($event->id)">Link zur Veranstaltung</x-ui.label>
         <div class="flex flex-wrap gap-2">
-            <x-ui.input id="share-link-{{ $event->id }}" :value="$shareableLink" readonly :old="false"
+            <x-ui.input :id="'share-link-' . ($event->id)" :value="$shareableLink" readonly :old="false"
                 class="min-w-0 flex-[1_1_240px]" />
-            <x-ui.button variant="secondary" size="lg" onclick="copyShareLink({{ $event->id }})">
+            <x-ui.button variant="secondary" size="lg" :onclick="'copyShareLink(' . ($event->id) . ')'">
                 <x-slot:icon>
                     <x-icon.copy />
                 </x-slot:icon>

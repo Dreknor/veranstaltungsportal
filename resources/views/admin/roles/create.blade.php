@@ -28,13 +28,13 @@
                             <legend class="float-left m-0 p-0 text-h3">{{ \App\Support\AccessLabels::group($group) }}
                             </legend>
                             <x-ui.button variant="link" size="sm" class="select-group-btn"
-                                data-group="{{ $group }}">Alle wählen</x-ui.button>
+                                :data-group="($group)">Alle wählen</x-ui.button>
                         </div>
                         <div class="clear-both grid grid-cols-1 gap-x-4 md:grid-cols-2">
                             @foreach ($groupPermissions as $permission)
                                 <x-ui.checkbox name="permissions[]" :value="$permission->name" :checked="is_array(old('permissions')) &&
                                     in_array($permission->name, old('permissions'))"
-                                    data-perm="{{ Str::slug($group) }}" :hint="trim(
+                                    :data-perm="(Str::slug($group))" :hint="trim(
                                         ($permission->description ?? '') .
                                             ($permission->is_system ? ' System-Berechtigung' : ''),
                                     )" :label="\App\Support\AccessLabels::permission($permission->name)" />

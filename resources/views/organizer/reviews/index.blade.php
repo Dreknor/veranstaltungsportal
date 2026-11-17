@@ -119,7 +119,7 @@
                             </form>
                         @endif
                         <x-ui.dropdown label="Weitere Aktionen für diese Bewertung" icon-only>
-                            <x-ui.dropdown-item type="submit" form="review-delete-{{ $review->id }}"
+                            <x-ui.dropdown-item type="submit" :form="'review-delete-' . ($review->id)"
                                 danger>Löschen</x-ui.dropdown-item>
                         </x-ui.dropdown>
                         <form id="review-delete-{{ $review->id }}" method="POST"

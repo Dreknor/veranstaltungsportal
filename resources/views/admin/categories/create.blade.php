@@ -13,7 +13,7 @@
 
         <x-ui.textarea label="Beschreibung" name="description"  rows="3" optional />
 
-        <x-ui.field label="Icon (Symbolname)" name="icon"  placeholder="fa-calendar" optional />
+        <x-ui.field label="Icon (Symbolname)" name="icon"  placeholder="z. B. calendar" optional />
 
         <x-ui.field label="Farbe (Hex)" name="color" type="color" value="#3B82F6" input-class="!w-24 cursor-pointer !p-1" />
 

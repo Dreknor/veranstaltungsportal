@@ -9,7 +9,7 @@
     <div class="grid grid-cols-2 gap-x-4 sm:grid-cols-3">
         @foreach ($options as $key => $label)
             <x-ui.radio name="icon" :value="$key" :checked="$selected === $key" :old="false"
-                id="badge-icon-{{ $key }}">
+                :id="'badge-icon-' . ($key)">
                 <span class="inline-flex items-center gap-2">
                     <x-dynamic-component :component="'icon.' . $key" class="h-5 w-5 flex-none" />
                     {{ $label }}

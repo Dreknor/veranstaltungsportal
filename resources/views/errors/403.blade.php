@@ -1,4 +1,4 @@
-<x-layouts.public title="403 – Zugriff verweigert – {{ config('app.name') }}">
+<x-layouts.public :title="'403 – Zugriff verweigert – ' . (config('app.name'))">
     <div class="mx-auto max-w-page px-page py-[clamp(48px,8vw,96px)]">
         <div class="max-w-prose">
             <p class="m-0 mb-3 text-caption text-muted">Fehler 403</p>

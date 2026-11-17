@@ -146,7 +146,7 @@
                             @endforeach
                         </ul>
                         <div class="hidden md:block">
-                            <x-ui.table label="Buchungen zu {{ $groupedEvent->title }}" class="rounded-none border-0">
+                            <x-ui.table :label="'Buchungen zu ' . ($groupedEvent->title)" class="rounded-none border-0">
                                 <thead>
                                     <tr>
                                         <th scope="col">Buchungsnr.</th>

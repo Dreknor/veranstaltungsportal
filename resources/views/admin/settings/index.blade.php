@@ -24,14 +24,14 @@
             @foreach ($settings as $setting)
                 <div class="border-t border-line py-6">
                     @if ($setting->type === 'boolean')
-                        <x-ui.checkbox name="settings[{{ $setting->key }}]" id="setting_{{ $setting->key }}"
+                        <x-ui.checkbox :name="'settings[' . ($setting->key) . ']'" :id="'setting_' . ($setting->key)"
                             :checked="(bool) $setting->getTypedValue()" :label="$setting->label" :hint="$setting->description" />
                     @elseif ($setting->type === 'integer')
-                        <x-ui.field :label="$setting->label" name="settings[{{ $setting->key }}]"
-                            id="setting_{{ $setting->key }}" type="number" :value="$setting->getTypedValue()" :hint="$setting->description"
+                        <x-ui.field :label="$setting->label" :name="'settings[' . ($setting->key) . ']'"
+                            :id="'setting_' . ($setting->key)" type="number" :value="$setting->getTypedValue()" :hint="$setting->description"
                             input-class="sm:max-w-64" />
                     @elseif ($setting->key === 'primary_color')
-                        <x-ui.label for="setting_{{ $setting->key }}">{{ $setting->label }}</x-ui.label>
+                        <x-ui.label :for="'setting_' . ($setting->key)">{{ $setting->label }}</x-ui.label>
                         <div class="flex flex-wrap items-center gap-3">
                             <input type="color" name="settings[{{ $setting->key }}]" id="setting_{{ $setting->key }}"
                                 value="{{ $setting->value }}"
@@ -43,8 +43,8 @@
                             <x-ui.hint>{{ $setting->description }}</x-ui.hint>
                         @endif
                     @else
-                        <x-ui.field :label="$setting->label" name="settings[{{ $setting->key }}]"
-                            id="setting_{{ $setting->key }}" :value="$setting->value" :hint="$setting->description" />
+                        <x-ui.field :label="$setting->label" :name="'settings[' . ($setting->key) . ']'"
+                            :id="'setting_' . ($setting->key)" :value="$setting->value" :hint="$setting->description" />
                     @endif
 
                     <p class="m-0 mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-small text-muted">

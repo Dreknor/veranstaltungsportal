@@ -63,7 +63,7 @@
             @if ($hasFilters)
                 <x-ui.button variant="secondary" x-on:click="filtersOpen = ! filtersOpen"
                     x-bind:aria-expanded="filtersOpen.toString()" aria-expanded="false"
-                    aria-controls="{{ $id }}-filters">
+                    :aria-controls="($id) . '-filters'">
                     <x-slot:icon><x-icon.filter /></x-slot:icon>
                     Filter
                     @if ($filterCount > 0)

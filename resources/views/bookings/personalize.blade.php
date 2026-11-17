@@ -25,17 +25,17 @@
                             Ticket {{ $index + 1 }}: {{ $item->ticketType->name }}
                         </legend>
                         <div class="clear-left grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
-                            <x-ui.field label="Name des Teilnehmers" id="attendee_name_{{ $item->id }}"
-                                name="attendees[{{ $item->id }}][attendee_name]"
+                            <x-ui.field label="Name des Teilnehmers" :id="'attendee_name_' . ($item->id)"
+                                :name="'attendees[' . ($item->id) . '][attendee_name]'"
                                 :value="$item->attendee_name ?? ($index === 0 ? $booking->customer_name : '')" required
                                 autocomplete="off" placeholder="Vor- und Nachname" />
-                            <x-ui.field label="E-Mail des Teilnehmers" type="email" id="attendee_email_{{ $item->id }}"
-                                name="attendees[{{ $item->id }}][attendee_email]"
+                            <x-ui.field label="E-Mail des Teilnehmers" type="email" :id="'attendee_email_' . ($item->id)"
+                                :name="'attendees[' . ($item->id) . '][attendee_email]'"
                                 :value="$item->attendee_email ?? ($index === 0 ? $booking->customer_email : '')" required
                                 autocomplete="off" placeholder="email@beispiel.de" />
                             @if ($booking->event->showsOrganizationField())
-                                <x-ui.field label="Organisation / Einrichtung" id="attendee_organization_{{ $item->id }}"
-                                    name="attendees[{{ $item->id }}][attendee_organization]"
+                                <x-ui.field label="Organisation / Einrichtung" :id="'attendee_organization_' . ($item->id)"
+                                    :name="'attendees[' . ($item->id) . '][attendee_organization]'"
                                     :value="$item->attendee_organization ?? ($index === 0 ? $booking->customer_organization : '')"
                                     :required="$booking->event->requiresOrganizationField()"
                                     :optional="!$booking->event->requiresOrganizationField()"

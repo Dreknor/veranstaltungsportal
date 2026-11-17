@@ -1,13 +1,13 @@
-<x-layouts.app title="Statistik: {{ $event->title }}">
+<x-layouts.app :title="'Statistik: ' . ($event->title)">
     <x-ui.page-header :title="'Statistik: ' . $event->title" subtitle="Detaillierte Auswertung für diese Veranstaltung" :back-href="route('organizer.statistics.index')"
         back-label="Zur Übersicht">
     </x-ui.page-header>
 
     <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-ui.stat label="Buchungen gesamt" :value="$totalBookings"
-            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} offen" />
+            :sub="($confirmedBookings) . ' bestätigt · ' . ($pendingBookings) . ' offen'" />
         <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)"
-            sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
+            :sub="(\App\Support\Ui::money($confirmedRevenue)) . ' bestätigt'" />
         <x-ui.stat label="Verkaufte Tickets">
             {{ $ticketsSold }}
             @if ($event->max_attendees)
@@ -19,8 +19,8 @@
                 </span>
             @endif
         </x-ui.stat>
-        <x-ui.stat label="Check-in-Quote" value="{{ number_format((float) $checkInRate, 1, ',', '.') }} %"
-            sub="{{ $checkedInCount }} von {{ $ticketsSold }} eingecheckt" />
+        <x-ui.stat label="Check-in-Quote" :value="(number_format((float) $checkInRate, 1, ',', '.')) . ' %'"
+            :sub="($checkedInCount) . ' von ' . ($ticketsSold) . ' eingecheckt'" />
     </div>
 
     <x-ui.section title="Verkäufe nach Ticketart" class="mb-12">

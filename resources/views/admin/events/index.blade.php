@@ -71,11 +71,11 @@
                                     rel="noopener">Anzeigen</x-ui.dropdown-item>
                             @endif
                             <x-ui.dropdown-item type="submit"
-                                form="publish-{{ $event->id }}">{{ $event->is_published ? 'Verstecken' : 'Veröffentlichen' }}</x-ui.dropdown-item>
+                                :form="'publish-' . ($event->id)">{{ $event->is_published ? 'Verstecken' : 'Veröffentlichen' }}</x-ui.dropdown-item>
                             <x-ui.dropdown-item type="submit"
-                                form="feature-{{ $event->id }}">{{ $event->is_featured ? 'Nicht mehr hervorheben' : 'Hervorheben' }}</x-ui.dropdown-item>
+                                :form="'feature-' . ($event->id)">{{ $event->is_featured ? 'Nicht mehr hervorheben' : 'Hervorheben' }}</x-ui.dropdown-item>
                             <x-ui.dropdown-item danger type="submit"
-                                form="destroy-{{ $event->id }}">Löschen</x-ui.dropdown-item>
+                                :form="'destroy-' . ($event->id)">Löschen</x-ui.dropdown-item>
                         </x-ui.dropdown>
                         <form id="publish-{{ $event->id }}"
                             action="{{ route('admin.events.toggle-publish', $event) }}" method="POST" class="hidden">

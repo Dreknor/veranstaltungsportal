@@ -98,13 +98,13 @@
                         <x-ui.dropdown :label="'Aktionen für Bewertung von ' . $review->reviewerName()" icon-only width="w-48">
                             @if (!$review->is_approved)
                                 <x-ui.dropdown-item type="submit"
-                                    form="approve-{{ $review->id }}">Freigeben</x-ui.dropdown-item>
+                                    :form="'approve-' . ($review->id)">Freigeben</x-ui.dropdown-item>
                             @else
                                 <x-ui.dropdown-item type="submit"
-                                    form="reject-{{ $review->id }}">Ablehnen</x-ui.dropdown-item>
+                                    :form="'reject-' . ($review->id)">Ablehnen</x-ui.dropdown-item>
                             @endif
                             <x-ui.dropdown-item danger type="submit"
-                                form="destroy-{{ $review->id }}">Löschen</x-ui.dropdown-item>
+                                :form="'destroy-' . ($review->id)">Löschen</x-ui.dropdown-item>
                         </x-ui.dropdown>
                         @if (!$review->is_approved)
                             <form id="approve-{{ $review->id }}" method="POST"

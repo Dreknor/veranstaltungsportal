@@ -1,4 +1,4 @@
-<x-layouts.app title="Rabattcode bearbeiten: {{ $discountCode->code }}">
+<x-layouts.app :title="'Rabattcode bearbeiten: ' . ($discountCode->code)">
     <x-ui.page-header title="Rabattcode bearbeiten" :subtitle="$discountCode->code" :back-href="route('organizer.events.discount-codes.index', $event)"
         back-label="Zurück zur Übersicht" />
 
@@ -26,7 +26,7 @@
         </div>
 
         <x-ui.field label="Maximale Verwendungen" name="usage_limit" type="number" min="1" :value="$discountCode->usage_limit"
-            optional hint="Leer lassen für unbegrenzt (aktuell verwendet: {{ $discountCode->usage_count }})." />
+            optional :hint="'Leer lassen für unbegrenzt (aktuell verwendet: ' . ($discountCode->usage_count) . ').'" />
 
         <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
             <x-ui.field label="Gültig ab" name="valid_from" type="datetime-local" :value="$discountCode->valid_from ? $discountCode->valid_from->format('Y-m-d\TH:i') : ''" optional />

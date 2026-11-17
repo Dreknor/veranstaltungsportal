@@ -77,19 +77,19 @@
                             @if (auth()->id() !== $user->id)
                                 @if (!$user->hasRole('admin'))
                                     <x-ui.dropdown-item type="submit"
-                                        form="impersonate-{{ $user->id }}">Verkörpern</x-ui.dropdown-item>
+                                        :form="'impersonate-' . ($user->id)">Verkörpern</x-ui.dropdown-item>
                                 @endif
                                 @if (!$user->hasRole('organizer') && !$user->hasRole('admin'))
-                                    <x-ui.dropdown-item type="submit" form="promote-{{ $user->id }}">Zum
+                                    <x-ui.dropdown-item type="submit" :form="'promote-' . ($user->id)">Zum
                                         Veranstalter machen</x-ui.dropdown-item>
                                 @elseif ($user->hasRole('organizer') && !$user->hasRole('admin'))
-                                    <x-ui.dropdown-item type="submit" form="demote-{{ $user->id }}">Zum Teilnehmer
+                                    <x-ui.dropdown-item type="submit" :form="'demote-' . ($user->id)">Zum Teilnehmer
                                         machen</x-ui.dropdown-item>
                                 @endif
                                 <x-ui.dropdown-item type="submit"
-                                    form="toggle-admin-{{ $user->id }}">{{ $user->hasRole('admin') ? 'Admin-Rolle entfernen' : 'Zum Administrator machen' }}</x-ui.dropdown-item>
+                                    :form="'toggle-admin-' . ($user->id)">{{ $user->hasRole('admin') ? 'Admin-Rolle entfernen' : 'Zum Administrator machen' }}</x-ui.dropdown-item>
                                 <x-ui.dropdown-item danger type="submit"
-                                    form="destroy-{{ $user->id }}">Löschen</x-ui.dropdown-item>
+                                    :form="'destroy-' . ($user->id)">Löschen</x-ui.dropdown-item>
                             @endif
                         </x-ui.dropdown>
                         @if (auth()->id() !== $user->id)

@@ -32,7 +32,7 @@
                     </x-ui.select>
 
                     <x-ui.field label="Client ID" name="paypal_client_id" :required="!$organization->paypal_client_id"
-                        placeholder="{{ $organization->paypal_client_id ? 'Leer lassen, um beizubehalten' : 'Ihre PayPal Client ID' }}">
+                        :placeholder="($organization->paypal_client_id ? 'Leer lassen, um beizubehalten' : 'Ihre PayPal Client ID')">
                         <x-slot:hint>
                             @if ($organization->paypal_client_id && !old('paypal_client_id'))
                                 Aktuell gespeichert: ••••••••. Lassen Sie das Feld leer, um den gespeicherten Wert zu
@@ -46,7 +46,7 @@
 
                     <x-ui.field type="password" label="Client Secret" name="paypal_client_secret" :required="!$organization->paypal_client_secret"
                         autocomplete="off"
-                        placeholder="{{ $organization->paypal_client_secret ? 'Leer lassen, um beizubehalten' : 'Ihr PayPal Client Secret' }}">
+                        :placeholder="($organization->paypal_client_secret ? 'Leer lassen, um beizubehalten' : 'Ihr PayPal Client Secret')">
                         <x-slot:hint>
                             @if ($organization->paypal_client_secret && !old('paypal_client_secret'))
                                 Aktuell gespeichert: ••••••••. Lassen Sie das Feld leer, um den gespeicherten Wert zu

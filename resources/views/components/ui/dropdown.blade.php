@@ -42,7 +42,7 @@
         {{ $trigger }}
     @else
         <x-ui.button variant="secondary" :size="$size" x-ref="button" x-on:click="toggle()"
-            x-bind:aria-expanded="open.toString()" aria-expanded="false" aria-controls="{{ $menuId }}"
+            x-bind:aria-expanded="open.toString()" aria-expanded="false" :aria-controls="($menuId)"
             :aria-label="$iconOnly ? $label : null" @class([
                 'w-11 px-0' => $iconOnly && $size !== 'sm',
                 'w-9 px-0' => $iconOnly && $size === 'sm',

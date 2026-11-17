@@ -12,19 +12,19 @@
 
     <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <x-ui.stat label="Veranstaltungen gesamt" :value="$totalEvents"
-            sub="{{ $publishedEvents }} veröffentlicht · {{ $upcomingEvents }} kommend" />
+            :sub="($publishedEvents) . ' veröffentlicht · ' . ($upcomingEvents) . ' kommend'" />
         <x-ui.stat label="Buchungen gesamt" :value="$totalBookings"
-            sub="{{ $confirmedBookings }} bestätigt · {{ $pendingBookings }} offen" />
+            :sub="($confirmedBookings) . ' bestätigt · ' . ($pendingBookings) . ' offen'" />
         <x-ui.stat label="Umsatz gesamt" :value="\App\Support\Ui::money($totalRevenue)"
-            sub="{{ \App\Support\Ui::money($confirmedRevenue) }} bestätigt" />
+            :sub="(\App\Support\Ui::money($confirmedRevenue)) . ' bestätigt'" />
         <x-ui.stat label="Verkaufte Tickets" :value="$ticketsSold"
-            sub="Ø {{ \App\Support\Ui::money($avgTicketPrice ?? 0) }} pro Ticket" />
+            :sub="'Ø ' . (\App\Support\Ui::money($avgTicketPrice ?? 0)) . ' pro Ticket'" />
     </div>
 
     <div class="mb-12 grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
         <x-ui.section title="Konversionsrate">
             <x-ui.stat label="Bestätigte Buchungen von gesamt"
-                value="{{ number_format((float) $conversionRate, 1, ',', '.') }} %" />
+                :value="(number_format((float) $conversionRate, 1, ',', '.')) . ' %'" />
             <x-ui.progress :value="$conversionRate" label="Konversionsrate" class="mt-3" />
         </x-ui.section>
 

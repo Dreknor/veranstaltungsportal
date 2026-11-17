@@ -85,7 +85,7 @@
                     <td class="actions">
                         <x-ui.button variant="secondary" size="sm" :href="route('admin.system-logs.show', $log->id)">Details</x-ui.button>
                         <x-ui.button variant="secondary" size="sm" type="submit" class="max-sm:hidden"
-                            form="destroy-log-{{ $log->id }}">Löschen</x-ui.button>
+                            :form="'destroy-log-' . ($log->id)">Löschen</x-ui.button>
                         <form id="destroy-log-{{ $log->id }}"
                             action="{{ route('admin.system-logs.destroy', $log->id) }}" method="POST" class="hidden"
                             onsubmit="return confirm('Sind Sie sicher?')">

@@ -77,7 +77,7 @@
                             <x-ui.dropdown-item :href="route('admin.organizations.show', $organization)">Details</x-ui.dropdown-item>
                             <x-ui.dropdown-item :href="route('admin.organizer-fees.edit', $organization)">Gebühren festlegen</x-ui.dropdown-item>
                             <x-ui.dropdown-item type="submit"
-                                form="toggle-active-{{ $organization->id }}">{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
+                                :form="'toggle-active-' . ($organization->id)">{{ $organization->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
                         </x-ui.dropdown>
                         <form id="toggle-active-{{ $organization->id }}" method="POST"
                             action="{{ route('admin.organizations.toggle-active', $organization) }}" class="hidden">

@@ -58,9 +58,9 @@
                             <x-ui.button size="sm" variant="secondary" :href="route('organizer.events.certificates.download', [$event, $booking])">
                                 Herunterladen
                             </x-ui.button>
-                            <x-ui.dropdown label="Weitere Aktionen für {{ $booking->customer_name }}" icon-only>
-                                <x-ui.dropdown-item type="submit" form="certificate-email-{{ $booking->id }}">Per E-Mail senden</x-ui.dropdown-item>
-                                <x-ui.dropdown-item type="submit" form="certificate-delete-{{ $booking->id }}" danger>Zertifikat löschen</x-ui.dropdown-item>
+                            <x-ui.dropdown :label="'Weitere Aktionen für ' . ($booking->customer_name)" icon-only>
+                                <x-ui.dropdown-item type="submit" :form="'certificate-email-' . ($booking->id)">Per E-Mail senden</x-ui.dropdown-item>
+                                <x-ui.dropdown-item type="submit" :form="'certificate-delete-' . ($booking->id)" danger>Zertifikat löschen</x-ui.dropdown-item>
                             </x-ui.dropdown>
                             <form id="certificate-email-{{ $booking->id }}" method="POST" action="{{ route('organizer.events.certificates.email', [$event, $booking]) }}" class="hidden">
                                 @csrf

@@ -207,12 +207,12 @@
                     @endif
 
                     @auth
-                        <x-ui.button variant="secondary" full onclick="toggleFavorite({{ $event->id }})"
-                            id="favorite-btn-{{ $event->id }}"
-                            aria-pressed="{{ auth()->user()->hasFavorited($event) ? 'true' : 'false' }}">
+                        <x-ui.button variant="secondary" full :onclick="'toggleFavorite(' . ($event->id) . ')'"
+                            :id="'favorite-btn-' . ($event->id)"
+                            :aria-pressed="(auth()->user()->hasFavorited($event) ? 'true' : 'false')">
                             <x-slot:icon>
                                 <x-icon.heart
-                                    fill="{{ auth()->user()->hasFavorited($event) ? 'currentColor' : 'none' }}" />
+                                    :fill="(auth()->user()->hasFavorited($event) ? 'currentColor' : 'none')" />
                             </x-slot:icon>
                             <span id="favorite-text-{{ $event->id }}">
                                 {{ auth()->user()->hasFavorited($event) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen' }}
@@ -242,7 +242,7 @@
 
                 @if ($dates->isNotEmpty())
                     <x-ui.section title="Termine" id="termine"
-                        description="Diese Veranstaltung besteht aus {{ $dates->count() }} Terminen. Die Buchung gilt für alle Termine."
+                        :description="'Diese Veranstaltung besteht aus ' . ($dates->count()) . ' Terminen. Die Buchung gilt für alle Termine.'"
                         class="scroll-mt-6">
                         <x-ui.row-list>
                             @foreach ($dates as $date)
@@ -346,7 +346,7 @@
 
                         @if ($event->venue_latitude && $event->venue_longitude)
                             <x-ui.button variant="secondary" class="mt-6"
-                                href="https://www.google.com/maps?q={{ $event->venue_latitude }},{{ $event->venue_longitude }}"
+                                :href="'https://www.google.com/maps?q=' . ($event->venue_latitude) . ',' . ($event->venue_longitude)"
                                 target="_blank" rel="noopener noreferrer">
                                 <x-slot:icon>
                                     <x-icon.location />

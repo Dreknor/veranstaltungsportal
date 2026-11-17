@@ -53,10 +53,10 @@
                         <x-ui.dropdown :label="'Aktionen für ' . $category->name" icon-only>
                             <x-ui.dropdown-item :href="route('admin.categories.edit', $category)">Bearbeiten</x-ui.dropdown-item>
                             <x-ui.dropdown-item type="submit"
-                                form="toggle-{{ $category->id }}">{{ $category->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
+                                :form="'toggle-' . ($category->id)">{{ $category->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
                             @if ($category->events_count === 0)
                                 <x-ui.dropdown-item danger type="submit"
-                                    form="destroy-{{ $category->id }}">Löschen</x-ui.dropdown-item>
+                                    :form="'destroy-' . ($category->id)">Löschen</x-ui.dropdown-item>
                             @endif
                         </x-ui.dropdown>
                         <form id="toggle-{{ $category->id }}" method="POST"

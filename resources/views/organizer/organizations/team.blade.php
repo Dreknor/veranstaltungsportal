@@ -71,8 +71,8 @@
                                 class="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
                                 @csrf
                                 @method('PUT')
-                                <x-ui.select name="role" id="role-{{ $member->id }}" size="sm"
-                                    :old="false" aria-label="Rolle von {{ $member->fullName() }}"
+                                <x-ui.select name="role" :id="'role-' . ($member->id)" size="sm"
+                                    :old="false" :aria-label="'Rolle von ' . ($member->fullName())"
                                     class="min-w-36 max-sm:min-w-28">
                                     <option value="owner" @selected($member->pivot->role === 'owner')>
                                         {{ \App\Models\Organization::roleLabel('owner') }}</option>

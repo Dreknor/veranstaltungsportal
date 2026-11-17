@@ -1,4 +1,4 @@
-<x-layouts.app title="Rabattcodes für {{ $event->title }}">
+<x-layouts.app :title="'Rabattcodes für ' . ($event->title)">
     <x-ui.page-header title="Rabattcodes" :subtitle="$event->title" :back-href="route('organizer.events.edit', $event)" back-label="Zurück zur Veranstaltung">
         <x-slot:actions>
             <x-ui.button :href="route('organizer.events.discount-codes.create', $event)">
@@ -77,11 +77,11 @@
                         </td>
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('organizer.events.discount-codes.edit', [$event, $code])">Bearbeiten</x-ui.button>
-                            <x-ui.dropdown label="Weitere Aktionen für {{ $code->code }}" icon-only>
+                            <x-ui.dropdown :label="'Weitere Aktionen für ' . ($code->code)" icon-only>
                                 <x-ui.dropdown-item type="submit"
-                                    form="code-toggle-{{ $code->id }}">{{ $code->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
+                                    :form="'code-toggle-' . ($code->id)">{{ $code->is_active ? 'Deaktivieren' : 'Aktivieren' }}</x-ui.dropdown-item>
                                 @if ($code->bookings_count == 0)
-                                    <x-ui.dropdown-item type="submit" form="code-delete-{{ $code->id }}"
+                                    <x-ui.dropdown-item type="submit" :form="'code-delete-' . ($code->id)"
                                         danger>Löschen</x-ui.dropdown-item>
                                 @endif
                             </x-ui.dropdown>

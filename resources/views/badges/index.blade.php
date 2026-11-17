@@ -48,8 +48,8 @@
                                 {{ $earnedAt->format('d.m.Y') }}</span>
                         </x-slot:meta>
                         <x-slot:action>
-                            <x-ui.button variant="secondary" full onclick="toggleHighlight({{ $badge->id }})"
-                                title="Als Favorit markieren" aria-pressed="{{ $highlighted ? 'true' : 'false' }}">
+                            <x-ui.button variant="secondary" full :onclick="'toggleHighlight(' . ($badge->id) . ')'"
+                                title="Als Favorit markieren" :aria-pressed="($highlighted ? 'true' : 'false')">
                                 <x-slot:icon>
                                     @if ($highlighted)
                                         <x-icon.star-filled />

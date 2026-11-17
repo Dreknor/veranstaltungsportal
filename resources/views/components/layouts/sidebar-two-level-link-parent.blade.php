@@ -3,7 +3,7 @@
 
 <li x-data="{ open: {{ $active ? 'true' : 'false' }} }">
     <x-ui.sidebar-item :icon="$icon" :active="$active" x-on:click="open = !open"
-        x-bind:aria-expanded="open.toString()" aria-expanded="{{ $active ? 'true' : 'false' }}">
+        x-bind:aria-expanded="open.toString()" :aria-expanded="($active ? 'true' : 'false')">
         <span class="flex items-center justify-between gap-2">
             {{ $title }}
             <x-icon.chevron-down class="h-4 w-4 flex-none transition-transform duration-150"

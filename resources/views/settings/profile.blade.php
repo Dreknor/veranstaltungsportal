@@ -22,7 +22,7 @@
                             <x-ui.hint id="profile_photo-hint">JPG, PNG oder GIF, höchstens 2 MB</x-ui.hint>
                             @if ($user->profile_photo)
                                 <x-ui.button variant="link"
-                                    onclick="if(confirm('{{ __('Are you sure you want to delete your profile photo?') }}')) { document.getElementById('delete-photo-form').submit(); }">
+                                    :onclick="'if(confirm(\'' . (__('Are you sure you want to delete your profile photo?')) . '\')) { document.getElementById(\'delete-photo-form\').submit(); }'">
                                     {{ __('Remove photo') }}
                                 </x-ui.button>
                             @endif
@@ -52,7 +52,7 @@
 
                 <x-ui.field label="Telefon" optional name="phone" type="tel" :value="$user->phone" />
 
-                <x-ui.textarea label="{{ __('Bio') }}" name="bio" :value="$user->bio" rows="4"
+                <x-ui.textarea :label="(__('Bio'))" name="bio" :value="$user->bio" rows="4"
                     maxlength="1000" :hint="__('Brief description for your profile. Maximum 1000 characters.')" />
 
                 <div>

@@ -14,7 +14,7 @@
 
         <x-ui.textarea label="Beschreibung" name="description" :value="$category->description" rows="3" optional />
 
-        <x-ui.field label="Icon (Symbolname)" name="icon" :value="$category->icon" placeholder="fa-calendar" optional />
+        <x-ui.field label="Icon (Symbolname)" name="icon" :value="$category->icon" placeholder="z. B. calendar" optional />
 
         <x-ui.field label="Farbe (Hex)" name="color" type="color" :value="$category->color ?? '#3B82F6'"
             input-class="!w-24 cursor-pointer !p-1" />

@@ -22,7 +22,7 @@
         @foreach ($groups as $group)
             <x-ui.button variant="secondary" size="sm"
                 class="group-filter-btn aria-pressed:border-ink aria-pressed:bg-zone aria-pressed:font-semibold"
-                aria-pressed="false" data-group="{{ $group }}">
+                aria-pressed="false" :data-group="($group)">
                 {{ \App\Support\AccessLabels::group($group) }} ({{ $permissions->get($group)?->count() ?? 0 }})
             </x-ui.button>
         @endforeach
@@ -30,7 +30,7 @@
 
     <div class="flex flex-col gap-12">
         @foreach ($permissions as $group => $groupPermissions)
-            <x-ui.section :title="\App\Support\AccessLabels::group($group)" :description="$groupPermissions->count() . ' Berechtigungen'" class="group-section" data-group="{{ $group }}">
+            <x-ui.section :title="\App\Support\AccessLabels::group($group)" :description="$groupPermissions->count() . ' Berechtigungen'" class="group-section" :data-group="($group)">
                 <x-ui.table :label="'Berechtigungen der Gruppe ' . \App\Support\AccessLabels::group($group)">
                     <thead>
                         <tr>
@@ -74,7 +74,7 @@
                                     @if (!$permission->is_system)
                                         <x-ui.button size="sm" variant="secondary" type="submit"
                                             class="max-sm:hidden"
-                                            form="delete-permission-{{ $permission->id }}">Löschen</x-ui.button>
+                                            :form="'delete-permission-' . ($permission->id)">Löschen</x-ui.button>
                                         <form id="delete-permission-{{ $permission->id }}"
                                             action="{{ route('admin.permissions.destroy', $permission) }}"
                                             method="POST" class="hidden"

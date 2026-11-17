@@ -25,7 +25,7 @@
                         description="Sie erstellen Rechnungen in Ihrer eigenen Buchhaltungssoftware. Die Plattform generiert keine Rechnungen und bietet kein PayPal an. Rechnungsdaten können als Excel exportiert werden." />
 
                     {{-- Warnhinweis --}}
-                    <x-ui.alert tone="warning" x-show="mode !== '{{ $organization->invoice_mode ?? 'automatic' }}'"
+                    <x-ui.alert tone="warning" :x-show="'mode !== \'' . ($organization->invoice_mode ?? 'automatic') . '\''"
                         x-cloak>
                         <span>
                             <strong>Achtung:</strong> Beim Wechsel des Rechnungsmodus werden bestehende Buchungen nicht

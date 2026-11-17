@@ -21,7 +21,7 @@
                     <tr>
                         <th scope="col" class="num">Platz</th>
                         <th scope="col">Teilnehmer</th>
-                        <th scope="col" class="num">Abzeichen</th>
+                        <th scope="col" class="num max-sm:hidden">Abzeichen</th>
                         <th scope="col" class="num">Punkte</th>
                     </tr>
                 </thead>
@@ -59,7 +59,7 @@
                                     </span>
                                 </span>
                             </th>
-                            <td class="num">{{ $entry['badges_count'] }}</td>
+                            <td class="num max-sm:hidden">{{ $entry['badges_count'] }}</td>
                             <td class="num">{{ \App\Support\Ui::number($entry['total_points']) }}</td>
                         </tr>
                     @endforeach

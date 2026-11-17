@@ -33,7 +33,7 @@
     ]);
 @endphp
 
-<x-ui.search-bar :action="route('events.index')" :filter-count="$filterCount" class="{{ $searchClass ?? '' }}">
+<x-ui.search-bar :action="route('events.index')" :filter-count="$filterCount" :class="($searchClass ?? '')">
     <x-ui.search-cell label="Format" name="format" :options="\App\Support\EventFilters::formatOptions()" :selected="$activeFormat ?? ''" />
     <x-ui.search-cell label="Zeitraum" name="zeitraum" wide :options="\App\Support\EventFilters::periodOptions()" :selected="$activePeriod ?? ''" />
     @if ($withFilters)

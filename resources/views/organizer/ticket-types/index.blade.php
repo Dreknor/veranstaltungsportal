@@ -66,8 +66,8 @@
                         <td class="actions">
                             <x-ui.button size="sm" variant="secondary" :href="route('organizer.events.ticket-types.edit', [$event, $ticketType])">Bearbeiten</x-ui.button>
                             @if (!$ticketType->hasActiveSales())
-                                <x-ui.dropdown label="Weitere Aktionen für {{ $ticketType->name }}" icon-only>
-                                    <x-ui.dropdown-item type="submit" form="ticket-type-delete-{{ $ticketType->id }}"
+                                <x-ui.dropdown :label="'Weitere Aktionen für ' . ($ticketType->name)" icon-only>
+                                    <x-ui.dropdown-item type="submit" :form="'ticket-type-delete-' . ($ticketType->id)"
                                         danger>Löschen</x-ui.dropdown-item>
                                 </x-ui.dropdown>
                                 <form id="ticket-type-delete-{{ $ticketType->id }}"

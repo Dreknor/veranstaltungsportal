@@ -1,5 +1,5 @@
 <x-layouts.app title="Mein Dashboard">
-    <x-ui.page-header title="Willkommen zurück, {{ $user->fullName() }}"
+    <x-ui.page-header :title="'Willkommen zurück, ' . ($user->fullName())"
         subtitle="Verwalten Sie Ihre Buchungen und Fortbildungen." />
 
     <div class="mb-12 grid grid-cols-2 gap-4 lg:grid-cols-4">

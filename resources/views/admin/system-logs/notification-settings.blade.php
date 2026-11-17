@@ -59,7 +59,7 @@
                             </td>
                             <td class="actions">
                                 <x-ui.button variant="secondary" size="sm" type="submit"
-                                    form="revoke-{{ $user->id }}">Deaktivieren</x-ui.button>
+                                    :form="'revoke-' . ($user->id)">Deaktivieren</x-ui.button>
                                 <form id="revoke-{{ $user->id }}"
                                     action="{{ route('admin.log-notifications.revoke') }}" method="POST" class="hidden"
                                     onsubmit="return confirm('Benachrichtigungen für {{ $user->fullName() }} deaktivieren?')">

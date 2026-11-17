@@ -64,12 +64,12 @@
                         <div class="flex flex-wrap items-center gap-2">
                             @if (!$date->is_cancelled)
                                 <x-ui.button variant="secondary" size="sm"
-                                    onclick="editDate({{ $date->id }})">
+                                    :onclick="'editDate(' . ($date->id) . ')'">
                                     <x-slot:icon><x-icon.edit /></x-slot:icon>
                                     Bearbeiten
                                 </x-ui.button>
                                 <x-ui.button variant="secondary" size="sm"
-                                    onclick="cancelDate({{ $date->id }})">
+                                    :onclick="'cancelDate(' . ($date->id) . ')'">
                                     <x-slot:icon><x-icon.x /></x-slot:icon>
                                     Absagen
                                 </x-ui.button>
@@ -123,19 +123,19 @@
                 <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort
                     (optional)</legend>
                 <x-ui.field label="Veranstaltungsort" name="venue_name" id="add_venue_name" :old="false"
-                    :error="false" placeholder="{{ $event->venue_name }}"
-                    hint="Standard: {{ $event->venue_name ?? 'Nicht angegeben' }}" />
+                    :error="false" :placeholder="($event->venue_name)"
+                    :hint="'Standard: ' . ($event->venue_name ?? 'Nicht angegeben')" />
                 <x-ui.field label="Adresse" name="venue_address" id="add_venue_address" :old="false"
-                    :error="false" placeholder="{{ $event->venue_address }}"
-                    hint="Standard: {{ $event->venue_address ?? 'Nicht angegeben' }}" />
+                    :error="false" :placeholder="($event->venue_address)"
+                    :hint="'Standard: ' . ($event->venue_address ?? 'Nicht angegeben')" />
                 <div class="flex flex-wrap gap-x-4 gap-y-5">
                     <x-ui.field label="Stadt" name="venue_city" id="add_venue_city" :old="false" :error="false"
-                        placeholder="{{ $event->venue_city }}"
-                        hint="Standard: {{ $event->venue_city ?? 'Nicht angegeben' }}"
+                        :placeholder="($event->venue_city)"
+                        :hint="'Standard: ' . ($event->venue_city ?? 'Nicht angegeben')"
                         class="min-w-0 flex-[3_1_200px]" />
                     <x-ui.field label="PLZ" name="venue_postal_code" id="add_venue_postal_code" :old="false"
-                        :error="false" placeholder="{{ $event->venue_postal_code }}"
-                        hint="Standard: {{ $event->venue_postal_code ?? 'Nicht angegeben' }}"
+                        :error="false" :placeholder="($event->venue_postal_code)"
+                        :hint="'Standard: ' . ($event->venue_postal_code ?? 'Nicht angegeben')"
                         class="min-w-0 flex-[1_1_140px]" />
                 </div>
             </fieldset>
@@ -184,14 +184,14 @@
                 <legend class="float-left mb-0 w-full p-0 text-small text-muted">Abweichender Veranstaltungsort
                     (optional)</legend>
                 <x-ui.field label="Veranstaltungsort" name="venue_name" id="edit_venue_name" :old="false"
-                    :error="false" placeholder="{{ $event->venue_name }}" />
+                    :error="false" :placeholder="($event->venue_name)" />
                 <x-ui.field label="Adresse" name="venue_address" id="edit_venue_address" :old="false"
-                    :error="false" placeholder="{{ $event->venue_address }}" />
+                    :error="false" :placeholder="($event->venue_address)" />
                 <div class="flex flex-wrap gap-x-4 gap-y-5">
                     <x-ui.field label="Stadt" name="venue_city" id="edit_venue_city" :old="false"
-                        :error="false" placeholder="{{ $event->venue_city }}" class="min-w-0 flex-[3_1_200px]" />
+                        :error="false" :placeholder="($event->venue_city)" class="min-w-0 flex-[3_1_200px]" />
                     <x-ui.field label="PLZ" name="venue_postal_code" id="edit_venue_postal_code"
-                        :old="false" :error="false" placeholder="{{ $event->venue_postal_code }}"
+                        :old="false" :error="false" :placeholder="($event->venue_postal_code)"
                         class="min-w-0 flex-[1_1_140px]" />
                 </div>
             </fieldset>

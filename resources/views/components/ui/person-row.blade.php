@@ -62,17 +62,17 @@
     {{ $slot }}
 
     @if ($has($meta))
-        <x-slot:meta class="{{ $slotClass($meta) }}">
+        <x-slot:meta :class="($slotClass($meta))">
             {{ $meta }}
         </x-slot:meta>
     @endif
     @if ($has($aside))
-        <x-slot:aside class="{{ $slotClass($aside) }}">
+        <x-slot:aside :class="($slotClass($aside))">
             {{ $aside }}
         </x-slot:aside>
     @endif
     @if ($has($action))
-        <x-slot:action class="{{ $slotClass($action) }}">
+        <x-slot:action :class="($slotClass($action))">
             {{ $action }}
         </x-slot:action>
     @endif

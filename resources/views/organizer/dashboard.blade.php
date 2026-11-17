@@ -1,5 +1,5 @@
 <x-layouts.app title="Veranstalter-Dashboard">
-    <x-ui.page-header title="Veranstalter-Dashboard" subtitle="Willkommen zurück, {{ auth()->user()->fullName() }}.">
+    <x-ui.page-header title="Veranstalter-Dashboard" :subtitle="'Willkommen zurück, ' . (auth()->user()->fullName()) . '.'">
         <x-slot:actions>
             <x-ui.button :href="route('organizer.events.create')">
                 <x-slot:icon><x-icon.plus /></x-slot:icon>

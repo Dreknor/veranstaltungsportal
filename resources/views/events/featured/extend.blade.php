@@ -32,7 +32,7 @@
         </fieldset>
 
         <x-ui.field label="Eigene Tage" name="custom_days" type="number" optional min="1"
-            max="{{ config('monetization.featured_event_max_duration_days') }}" hint="Nur bei der Dauer „Individuell“."
+            :max="(config('monetization.featured_event_max_duration_days'))" hint="Nur bei der Dauer „Individuell“."
             class="max-w-80" />
 
         <div>

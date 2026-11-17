@@ -150,7 +150,7 @@
                     </div>
 
                     <div>
-                        <x-ui.checkbox id="has_multiple_dates" :checked="$event->has_multiple_dates" data-event-id="{{ $event->id }}"
+                        <x-ui.checkbox id="has_multiple_dates" :checked="$event->has_multiple_dates" :data-event-id="($event->id)"
                             label="Veranstaltung hat mehrere Termine"
                             hint="Aktivieren Sie diese Option, wenn die Veranstaltung aus mehreren aufeinanderfolgenden Terminen besteht (z. B. ein 8-Wochen-Kurs). Teilnehmende buchen dann automatisch alle Termine gemeinsam." />
 
@@ -487,7 +487,7 @@
             @endphp
             @if ($pendingApprovalCount > 0)
                 <x-ui.alert tone="warning" class="mb-8"
-                    title="{{ trans_choice('{1} :count Anmeldung wartet|[0,*] :count Anmeldungen warten', $pendingApprovalCount) }} auf Bestätigung">
+                    :title="(trans_choice('{1} :count Anmeldung wartet|[0,*] :count Anmeldungen warten', $pendingApprovalCount)) . ' auf Bestätigung'">
                     <div class="mt-2 flex flex-wrap items-center gap-x-6 gap-y-2">
                         <a
                             href="{{ route('organizer.bookings.index', ['event_id' => $event->id, 'status' => 'pending_approval']) }}">Anzeigen</a>

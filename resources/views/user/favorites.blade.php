@@ -5,7 +5,7 @@
         <x-ui.row-list>
             @foreach ($favoriteEvents as $event)
                 <x-ui.event-row :event="$event">
-                    <x-ui.button variant="link" size="sm" class="self-start" onclick="toggleFavorite({{ $event->id }})">
+                    <x-ui.button variant="link" size="sm" class="self-start" :onclick="'toggleFavorite(' . ($event->id) . ')'">
                         <x-slot:icon><x-icon.heart class="h-4 w-4" /></x-slot:icon>
                         Aus Favoriten entfernen
                     </x-ui.button>

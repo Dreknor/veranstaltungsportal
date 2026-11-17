@@ -46,7 +46,7 @@
                             <x-ui.button size="sm" variant="secondary" :href="route('admin.roles.edit', $role)">Bearbeiten</x-ui.button>
                             @if (!$role->is_system)
                                 <x-ui.button size="sm" variant="secondary" type="submit"
-                                    form="delete-role-{{ $role->id }}">Löschen</x-ui.button>
+                                    :form="'delete-role-' . ($role->id)">Löschen</x-ui.button>
                                 <form id="delete-role-{{ $role->id }}"
                                     action="{{ route('admin.roles.destroy', $role) }}" method="POST" class="hidden"
                                     onsubmit="return confirm('Rolle „{{ \App\Support\AccessLabels::role($role->name) }}“ wirklich löschen? {{ $role->users_count }} Benutzer werden auf „Teilnehmer“ zurückgesetzt.')">

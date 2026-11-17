@@ -42,7 +42,7 @@
                         <div class="flex gap-2">
                             <x-ui.button variant="secondary" :href="route('organizer.events.edit', $event)"
                                 class="min-w-0 flex-1">Bearbeiten</x-ui.button>
-                            <x-ui.dropdown label="Weitere Aktionen für {{ $event->title }}" icon-only size="md"
+                            <x-ui.dropdown :label="'Weitere Aktionen für ' . ($event->title)" icon-only size="md"
                                 width="w-64">
                                 <x-ui.dropdown-item :href="route('events.show', $event->slug)" target="_blank" rel="noopener">
                                     <x-slot:icon><x-icon.external-link /></x-slot:icon>
@@ -62,12 +62,12 @@
                                 @endif
                                 @if (!$event->is_cancelled)
                                     <x-ui.dropdown-item type="submit"
-                                        form="duplicate-{{ $event->id }}">Duplizieren</x-ui.dropdown-item>
+                                        :form="'duplicate-' . ($event->id)">Duplizieren</x-ui.dropdown-item>
                                     @if ($event->hasAttendees())
                                         <x-ui.dropdown-item danger
                                             x-on:click="$dispatch('open-modal', 'cancel-event-{{ $event->id }}')">Absagen</x-ui.dropdown-item>
                                     @else
-                                        <x-ui.dropdown-item type="submit" form="delete-{{ $event->id }}"
+                                        <x-ui.dropdown-item type="submit" :form="'delete-' . ($event->id)"
                                             danger>Löschen</x-ui.dropdown-item>
                                     @endif
                                 @endif
@@ -88,7 +88,7 @@
 
                 @if ($event->hasAttendees())
                     {{-- Dialog für die Absage --}}
-                    <x-ui.modal name="cancel-event-{{ $event->id }}" title="Veranstaltung absagen">
+                    <x-ui.modal :name="'cancel-event-' . ($event->id)" title="Veranstaltung absagen">
                         <form id="cancel-form-{{ $event->id }}"
                             action="{{ route('organizer.events.cancel', $event) }}" method="POST"
                             class="flex flex-col gap-4">
@@ -98,14 +98,14 @@
                                 Alle Teilnehmenden werden per E-Mail über die Absage informiert.
                             </p>
                             <x-ui.textarea label="Grund der Absage" optional name="cancellation_reason"
-                                id="cancellation_reason{{ $event->id }}" rows="3" :old="false"
+                                :id="'cancellation_reason' . ($event->id)" rows="3" :old="false"
                                 :error="false"
                                 placeholder="Teilen Sie den Teilnehmenden mit, warum die Veranstaltung abgesagt wird …" />
                         </form>
                         <x-slot:footer>
                             <x-ui.button variant="secondary" x-on:click="close()">Abbrechen</x-ui.button>
                             <x-ui.button variant="danger" type="submit"
-                                form="cancel-form-{{ $event->id }}">Veranstaltung absagen</x-ui.button>
+                                :form="'cancel-form-' . ($event->id)">Veranstaltung absagen</x-ui.button>
                         </x-slot:footer>
                     </x-ui.modal>
                 @else

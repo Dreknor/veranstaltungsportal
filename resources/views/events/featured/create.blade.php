@@ -35,7 +35,7 @@
         <div class="grid grid-cols-[repeat(auto-fit,minmax(248px,1fr))] gap-x-4 gap-y-5">
             <x-ui.field label="Startdatum" name="start_date" type="date" :value="now()->format('Y-m-d')" required />
             <x-ui.field label="Eigene Tage" name="custom_days" type="number" optional min="1"
-                max="{{ config('monetization.featured_event_max_duration_days') }}"
+                :max="(config('monetization.featured_event_max_duration_days'))"
                 hint="Nur bei der Dauer „Individuell“." />
         </div>
 

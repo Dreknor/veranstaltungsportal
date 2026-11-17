@@ -85,10 +85,10 @@
                                                 {{ $ticketType->availableQuantity() }} verfügbar</span>
                                         @endif
                                     </div>
-                                    <x-ui.stepper name="tickets[{{ $index }}][quantity]"
-                                        id="ticket_{{ $ticketType->id }}" :label="$ticketType->name" :value="$singleTicketType ? max(1, $ticketType->min_per_order) : 0"
+                                    <x-ui.stepper :name="'tickets[' . ($index) . '][quantity]'"
+                                        :id="'ticket_' . ($ticketType->id)" :label="$ticketType->name" :value="$singleTicketType ? max(1, $ticketType->min_per_order) : 0"
                                         :max="$max" input-class="quantity-input"
-                                        data-ticket="{{ $ticketType->id }}" />
+                                        :data-ticket="($ticketType->id)" />
                                     <input type="hidden" name="tickets[{{ $index }}][ticket_type_id]"
                                         value="{{ $ticketType->id }}">
                                 </div>
@@ -109,7 +109,7 @@
                             autocomplete="name" />
                         <x-ui.field label="E-Mail" name="customer_email" type="email" :value="auth()->user()->email ?? ''" required
                             autocomplete="email" inputmode="email"
-                            hint="Hierhin senden wir Bestätigung{{ $onlyFreeTickets ? '' : ', Rechnung' }} und Tickets bzw. Zugangsdaten." />
+                            :hint="'Hierhin senden wir Bestätigung' . ($onlyFreeTickets ? '' : ', Rechnung') . ' und Tickets bzw. Zugangsdaten.'" />
                         <x-ui.field label="Telefon" name="customer_phone" type="tel" optional autocomplete="tel"
                             inputmode="tel" />
                         @if ($event->showsOrganizationField())

@@ -14,7 +14,7 @@
     </div>
 
     <div class="mb-12 grid gap-x-12 gap-y-12 lg:grid-cols-2">
-        <x-ui.section title="Dieses Jahr ({{ now()->year }})">
+        <x-ui.section :title="'Dieses Jahr (' . (now()->year) . ')'">
             <x-ui.dl>
                 <x-ui.dl-item label="Buchungen" num>{{ $stats['bookings_this_year'] }}</x-ui.dl-item>
                 <x-ui.dl-item label="Teilgenommene Veranstaltungen" num>{{ $stats['events_this_year'] }}</x-ui.dl-item>
@@ -55,7 +55,7 @@
         @endif
     </x-ui.section>
 
-    <x-ui.section title="Buchungen pro Monat ({{ now()->year }})">
+    <x-ui.section :title="'Buchungen pro Monat (' . (now()->year) . ')'">
         @php $maxBookings = $stats['bookings_by_month']->max() ?: 1; @endphp
         @if ((int) $stats['bookings_by_month']->sum() === 0)
             <x-ui.empty>In diesem Jahr gibt es noch keine Buchungen.</x-ui.empty>

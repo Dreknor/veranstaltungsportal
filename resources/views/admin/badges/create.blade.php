@@ -38,7 +38,7 @@
                     <div class="flex flex-wrap items-center gap-3">
                         <input type="color" name="color" id="color" value="{{ old('color', '#2B4347') }}"
                             class="h-12 w-20 cursor-pointer rounded-control border border-line-strong bg-surface p-1">
-                        <x-ui.input id="colorText" value="{{ old('color', '#2B4347') }}" placeholder="#2B4347"
+                        <x-ui.input id="colorText" :value="(old('color', '#2B4347'))" placeholder="#2B4347"
                             aria-label="Hex-Code der Farbe" :old="false" class="min-w-0 max-w-48 flex-1" />
                         <span id="colorPreview"
                             class="inline-flex h-12 w-12 flex-none items-center justify-center rounded-full"

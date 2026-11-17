@@ -1,6 +1,6 @@
 <x-layouts.app title="Teilnehmende kontaktieren">
     <x-ui.page-header title="Teilnehmende kontaktieren" :back-href="route('organizer.events.edit', $event)" back-label="Zur Veranstaltung"
-        subtitle="{{ $event->title }} · {{ \App\Support\Ui::date($event->start_date) }}, {{ $event->start_date->format('H:i') }} Uhr" />
+        :subtitle="($event->title) . ' · ' . (\App\Support\Ui::date($event->start_date)) . ', ' . ($event->start_date->format('H:i')) . ' Uhr'" />
 
     <form method="POST" action="{{ route('organizer.events.attendees.contact.send', $event) }}"
         class="flex max-w-form flex-col gap-8" x-data="{ segment: '{{ old('segment', 'all') }}', counts: @js($segments->map(fn($s) => $s['count'])) }">

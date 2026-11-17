@@ -1,6 +1,6 @@
 <x-layouts.app title="Check-in">
     <x-ui.page-header title="Check-in" :back-href="route('organizer.events.index')" back-label="Zu den Veranstaltungen"
-        subtitle="{{ $event->title }} · {{ \App\Support\Ui::date($event->start_date) }}, {{ $event->start_date->format('H:i') }} Uhr">
+        :subtitle="($event->title) . ' · ' . (\App\Support\Ui::date($event->start_date)) . ', ' . ($event->start_date->format('H:i')) . ' Uhr'">
         <x-slot:actions>
             <x-ui.button variant="secondary" :href="route('organizer.check-in.export', $event)">
                 <x-slot:icon><x-icon.download /></x-slot:icon>

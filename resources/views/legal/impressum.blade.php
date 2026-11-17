@@ -1,7 +1,7 @@
 @php
     $page = \App\Models\LegalPage::getByType('impressum');
 @endphp
-<x-layouts.public title="Impressum – {{ config('app.name') }}">
+<x-layouts.public :title="'Impressum – ' . (config('app.name'))">
     @push('meta')
         <meta name="robots" content="noindex, follow">
     @endpush

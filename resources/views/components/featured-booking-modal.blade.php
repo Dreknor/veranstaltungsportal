@@ -45,7 +45,7 @@
 
             <div x-show="durationType === 'custom'" x-cloak class="flex flex-wrap items-end gap-x-4 gap-y-2">
                 <x-ui.field label="Anzahl Tage" id="featured_custom_days_input" type="number" x-model="customDays"
-                    min="1" max="{{ config('monetization.featured_event_max_duration_days', 90) }}"
+                    min="1" :max="(config('monetization.featured_event_max_duration_days', 90))"
                     class="w-40" />
                 <span class="pb-3 text-ui tabular-nums text-ink-soft">= <span
                         x-text="euro(customDays * rates.daily)"></span>
@@ -53,7 +53,7 @@
             </div>
 
             <x-ui.field label="Beginn des Zeitraums" id="featured_start_date_input" type="date" x-model="startDate"
-                min="{{ now()->format('Y-m-d') }}" class="max-w-xs" />
+                :min="(now()->format('Y-m-d'))" class="max-w-xs" />
 
             <div class="flex flex-col gap-2 rounded-box border border-line bg-zone p-4">
                 <x-ui.summary-line label="Dauer"><span x-text="durationLabel()"></span></x-ui.summary-line>

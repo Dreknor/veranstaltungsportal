@@ -7,7 +7,7 @@
     <div class="flex flex-wrap gap-x-6">
         @foreach (\App\Support\AccessLabels::toneOptions() as $key => $label)
             <x-ui.radio name="color" :value="$key" :checked="$selected === $key" :old="false"
-                id="role-color-{{ $key }}">
+                :id="'role-color-' . ($key)">
                 <x-ui.status :tone="\App\Support\AccessLabels::roleTone($key)">{{ $label }}</x-ui.status>
             </x-ui.radio>
         @endforeach

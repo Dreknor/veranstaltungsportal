@@ -44,10 +44,10 @@
         x-on:keydown.left.prevent="moveFocus($event, -1)">
         @foreach ($tools as [$action, $text, $title])
             <x-ui.button variant="secondary" x-on:click="{{ $action }}()" class="px-3!"
-                title="{{ $title }}">{{ $text }}</x-ui.button>
+                :title="($title)">{{ $text }}</x-ui.button>
         @endforeach
         <x-ui.button variant="secondary" x-on:click="togglePreview()" aria-pressed="false"
-            x-bind:aria-pressed="preview.toString()" aria-controls="{{ $id }}-preview"
+            x-bind:aria-pressed="preview.toString()" :aria-controls="($id) . '-preview'"
             class="aria-pressed:border-ink aria-pressed:bg-zone aria-pressed:font-semibold px-3!">
             <x-slot:icon>
                 <x-icon.eye />

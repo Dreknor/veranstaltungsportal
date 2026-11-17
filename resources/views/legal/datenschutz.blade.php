@@ -1,7 +1,7 @@
 @php
     $page = \App\Models\LegalPage::getByType('datenschutz');
 @endphp
-<x-layouts.public title="Datenschutzerklärung – {{ config('app.name') }}">
+<x-layouts.public :title="'Datenschutzerklärung – ' . (config('app.name'))">
     @push('meta')
         <meta name="robots" content="noindex, follow">
     @endpush

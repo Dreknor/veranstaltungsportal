@@ -198,7 +198,7 @@
         </x-ui.section>
 
         {{-- Tickets / Teilnehmende --}}
-        <x-ui.section title="Teilnehmende ({{ $booking->items->count() }})">
+        <x-ui.section :title="'Teilnehmende (' . ($booking->items->count()) . ')'">
             <x-ui.table label="Teilnehmende und Tickets">
                 <thead>
                     <tr>
@@ -245,7 +245,7 @@
             @if (!$booking->isFree())
                 <x-ui.dl class="mt-6">
                     @if ($booking->discount > 0)
-                        <x-ui.dl-item label="Rabatt{{ $booking->discountCode ? ' (' . $booking->discountCode->code . ')' : '' }}" num>−{{ \App\Support\Ui::money($booking->discount) }}</x-ui.dl-item>
+                        <x-ui.dl-item :label="'Rabatt' . ($booking->discountCode ? ' (' . $booking->discountCode->code . ')' : '')" num>−{{ \App\Support\Ui::money($booking->discount) }}</x-ui.dl-item>
                     @endif
                     <x-ui.dl-item label="Gesamt" num><strong class="font-semibold">{{ \App\Support\Ui::money($booking->total) }}</strong></x-ui.dl-item>
                     <x-ui.dl-item label="Zahlart">{{ $booking->payment_method === 'paypal' ? 'PayPal' : 'Rechnung' }}@if ($booking->invoice_number) · {{ $booking->invoice_number }}@endif</x-ui.dl-item>
