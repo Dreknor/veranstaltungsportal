@@ -81,22 +81,24 @@
             <thead>
                 <tr>
                     <th scope="col">Name</th>
-                    <th scope="col">E-Mail</th>
+                    <th scope="col" class="max-sm:hidden">E-Mail</th>
                     <th scope="col">Rolle</th>
                 </tr>
             </thead>
             <tbody>
                 @if ($organization->owner)
                     <tr>
-                        <th scope="row">{{ $organization->owner->fullName() }}</th>
-                        <td>{{ $organization->owner->email }}</td>
+                        <th scope="row">{{ $organization->owner->fullName() }}<span
+                                class="block text-small font-normal break-all text-muted sm:hidden">{{ $organization->owner->email }}</span></th>
+                        <td class="max-sm:hidden">{{ $organization->owner->email }}</td>
                         <td>Eigentümer</td>
                     </tr>
                 @endif
                 @foreach ($teamMembers as $member)
                     <tr>
-                        <th scope="row">{{ $member->fullName() }}</th>
-                        <td>{{ $member->email }}</td>
+                        <th scope="row">{{ $member->fullName() }}<span
+                                class="block text-small font-normal break-all text-muted sm:hidden">{{ $member->email }}</span></th>
+                        <td class="max-sm:hidden">{{ $member->email }}</td>
                         <td>Mitglied</td>
                     </tr>
                 @endforeach
