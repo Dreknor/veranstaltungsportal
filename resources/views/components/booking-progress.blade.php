@@ -2,14 +2,19 @@
 
 {{-- Fortschrittsanzeige des Buchungsablaufs (mobil: untereinander, ab sm: nebeneinander) --}}
 @if ($booking->status === 'cancelled')
-    <x-ui.alert tone="danger" {{ $attributes }}
-        :title="'Storniert' . ($booking->cancelled_at ? ' am ' . $booking->cancelled_at->format('d.m.Y') : '') . match ($booking->cancelled_by) {
-            'customer' => ' · durch den Kunden',
-            'organizer' => ' · durch den Veranstalter',
-            'event' => ' · Veranstaltung abgesagt',
-            'system' => ' · automatisch (Zahlung nicht abgeschlossen)',
-            default => '',
-        }">
+    @php
+        $cancelledTitle =
+            'Storniert' .
+            ($booking->cancelled_at ? ' am ' . $booking->cancelled_at->format('d.m.Y') : '') .
+            match ($booking->cancelled_by) {
+                'customer' => ' · durch den Kunden',
+                'organizer' => ' · durch den Veranstalter',
+                'event' => ' · Veranstaltung abgesagt',
+                'system' => ' · automatisch (Zahlung nicht abgeschlossen)',
+                default => '',
+            };
+    @endphp
+    <x-ui.alert tone="danger" {{ $attributes }} :title="$cancelledTitle">
         @if ($booking->cancellation_reason)
             <p class="mt-1">Grund: {{ $booking->cancellation_reason }}</p>
         @endif
