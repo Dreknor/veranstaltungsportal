@@ -279,7 +279,148 @@
                         </form>
                     @endif
                 @endif
+
+                @if($canChangeTicketType && $ticketTypeOptions->count() > 1)
+                    @php
+                        $changeErrorKeys = ['items', 'items.*', 'ticket_type_id', 'reason', 'confirm_override'];
+                        $changeItems = $booking->items->map(fn ($item) => [
+                            'id' => $item->id,
+                            'ticketTypeId' => $item->ticket_type_id,
+                            'quantity' => (int) $item->quantity,
+                            'price' => (float) $item->price,
+                        ])->values();
+                        $preselected = old('items', $booking->items->count() === 1 ? [$booking->items->first()->id] : []);
+                        $field = 'w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 text-sm';
+                    @endphp
+                    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700" x-data="{ open: @js($errors->hasAny($changeErrorKeys)) }">
+                        <button type="button" @click="open = !open" :aria-expanded="open.toString()" class="{{ $btnSecondary }}">Ticketart ändern…</button>
+
+                        <form x-show="open" x-cloak method="POST" action="{{ route('organizer.bookings.change-ticket-type', $booking) }}"
+                              x-data="{
+                                  items: @js($changeItems),
+                                  types: @js($ticketTypeOptions),
+                                  selected: @js(array_map('intval', (array) $preselected)),
+                                  target: @js(old('ticket_type_id') ? (int) old('ticket_type_id') : null),
+                                  priceLocked: @js($priceLocked),
+                                  subtotal: @js((float) $booking->subtotal),
+                                  discount: @js((float) $booking->discount),
+                                  total: @js((float) $booking->total),
+                                  money(v) { return v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; },
+                                  get type() { return this.types.find(t => t.id === Number(this.target)) || null; },
+                                  get moving() { return this.items.filter(i => this.selected.includes(i.id) && i.ticketTypeId !== Number(this.target)); },
+                                  get seats() { return this.moving.reduce((s, i) => s + i.quantity, 0); },
+                                  get warnings() {
+                                      if (!this.type) return [];
+                                      const w = [];
+                                      if (this.type.blocked) w.push(this.type.blocked);
+                                      if (this.type.free !== null && this.type.free < this.seats) {
+                                          w.push(this.type.free > 0 ? 'nur noch ' + this.type.free + ' frei – Kontingent wird überbucht' : 'ausverkauft – Kontingent wird überbucht');
+                                      }
+                                      return w;
+                                  },
+                                  get newTotal() {
+                                      if (!this.type || this.priceLocked) return this.total;
+                                      const sub = this.subtotal + this.moving.reduce((s, i) => s + (this.type.price - i.price) * i.quantity, 0);
+                                      return Math.max(0, sub - Math.min(this.discount, sub));
+                                  },
+                              }"
+                              class="mt-4 space-y-4">
+                            @csrf @method('PUT')
+
+                            <fieldset>
+                                <legend class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Teilnehmende</legend>
+                                @foreach($booking->items as $item)
+                                    <label class="flex items-start gap-2 py-1 text-sm text-gray-800 dark:text-gray-200">
+                                        <input type="checkbox" name="items[]" value="{{ $item->id }}" x-model.number="selected" class="mt-0.5 rounded border-gray-300 dark:border-gray-600">
+                                        <span>
+                                            {{ $item->participantName() ?: 'Noch nicht eingetragen' }}
+                                            <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $item->ticketType?->name ?? 'Ticket' }}@unless($booking->isFree()) · {{ number_format($item->price, 2, ',', '.') }} €@endunless</span>
+                                        </span>
+                                    </label>
+                                @endforeach
+                            </fieldset>
+
+                            <div>
+                                <label for="ticket_type_id" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Neue Ticketart *</label>
+                                <select id="ticket_type_id" name="ticket_type_id" required x-model.number="target" class="{{ $field }}">
+                                    <option value="">Bitte wählen</option>
+                                    @foreach($ticketTypeOptions as $option)
+                                        <option value="{{ $option['id'] }}">
+                                            {{ $option['name'] }} · {{ number_format($option['price'], 2, ',', '.') }} €@if($option['blocked']) · {{ $option['blocked'] }}@elseif($option['free'] !== null) · {{ max(0, $option['free']) }} frei @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <template x-if="type && warnings.length">
+                                <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-200 px-4 py-3 rounded-lg text-sm" role="alert">
+                                    <p>„<span x-text="type.name"></span>“ ist <span x-text="warnings.join(', ')"></span>. Regulär könnte die Person diese Ticketart nicht buchen.</p>
+                                    <label class="mt-2 flex items-center gap-2 font-medium">
+                                        <input type="checkbox" name="confirm_override" value="1" class="rounded border-gray-300">
+                                        Trotzdem zuweisen
+                                    </label>
+                                </div>
+                            </template>
+
+                            <template x-if="type && seats > 0">
+                                <div class="text-sm space-y-2">
+                                    @if($priceLocked)
+                                        <p class="bg-blue-50 border border-blue-200 text-blue-800 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-200 px-4 py-3 rounded-lg">
+                                            Die Buchung ist bereits bezahlt. Der Preis bleibt bei {{ number_format($booking->total, 2, ',', '.') }} €, eine Differenz regeln Sie bitte außerhalb des Systems.
+                                        </p>
+                                    @else
+                                        <dl class="space-y-1">
+                                            <div class="flex justify-between text-gray-600 dark:text-gray-400"><dt>Bisher</dt><dd>{{ number_format($booking->total, 2, ',', '.') }} €</dd></div>
+                                            <div class="flex justify-between font-bold text-gray-900 dark:text-gray-100"><dt>Neu</dt><dd x-text="money(newTotal)"></dd></div>
+                                        </dl>
+                                        @if($booking->invoice_number && !$isExternalInvoicing)
+                                            <p x-show="newTotal !== total" class="text-gray-600 dark:text-gray-400">Die Rechnung {{ $booking->invoice_number }} wird mit dem neuen Betrag neu erstellt und der Person zugeschickt.</p>
+                                        @endif
+                                        @if($booking->payment_status === 'extern')
+                                            <p class="text-gray-600 dark:text-gray-400">Die Buchung ist extern abgerechnet. Korrigieren Sie die Rechnung gegebenenfalls in Ihrer Buchhaltung.</p>
+                                        @endif
+                                        <p x-show="total === 0 && newTotal > 0" class="text-gray-600 dark:text-gray-400">Die Buchung wird kostenpflichtig. Die Person erhält eine Rechnung mit Zahlungshinweisen.</p>
+                                    @endif
+                                </div>
+                            </template>
+
+                            <div>
+                                <label for="reason" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">Begründung *</label>
+                                <textarea id="reason" name="reason" rows="3" required class="{{ $field }}">{{ old('reason') }}</textarea>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Wird der Person in der E-Mail mitgeteilt und in der Buchung protokolliert.</p>
+                            </div>
+
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Ticketnummer und Check-in bleiben erhalten. Die Person erhält eine E-Mail mit den neuen Tickets.</p>
+
+                            <button type="submit" x-bind:disabled="!type || seats === 0" class="{{ $btnPrimary }} bg-blue-600 hover:bg-blue-700 disabled:opacity-50">Ticketart ändern</button>
+                        </form>
+                    </div>
+                @endif
             </section>
+
+            @if($ticketTypeChanges->isNotEmpty())
+                <section class="{{ $card }}">
+                    <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Änderungen an der Buchung</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">Vom Veranstalter vorgenommene Änderungen der Ticketart.</p>
+                    <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                        @foreach($ticketTypeChanges as $log)
+                            <li class="py-2">
+                                <p class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {{ $log->old_values['ticket_type'] ?? 'Ticket' }} → {{ $log->new_values['ticket_type'] ?? 'Ticket' }}
+                                    <span class="font-normal font-mono text-gray-500 dark:text-gray-400">· {{ $log->new_values['ticket_number'] ?? '' }}</span>
+                                </p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">
+                                    {{ $log->created_at->format('d.m.Y H:i') }} Uhr · {{ $log->user?->name ?? 'System' }}
+                                    @if(($log->old_values['price'] ?? null) !== ($log->new_values['price'] ?? null))
+                                        · {{ number_format((float) ($log->old_values['price'] ?? 0), 2, ',', '.') }} € → {{ number_format((float) ($log->new_values['price'] ?? 0), 2, ',', '.') }} €
+                                    @endif
+                                </p>
+                                @if($log->description)<p class="text-xs text-gray-700 dark:text-gray-300">Begründung: {{ $log->description }}</p>@endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
 
             {{-- E-Mail-Verlauf --}}
             <section class="{{ $card }}">

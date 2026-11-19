@@ -127,7 +127,33 @@ class BookingManagementController extends Controller
     {
         $this->authorize('view', $booking);
         $booking->load(['event.organization', 'items.ticketType', 'user', 'discountCode', 'emailLogs']);
-        return view('organizer.bookings.show', compact('booking'));
+
+        $workflow = app(BookingWorkflowService::class);
+        $canChangeTicketType = $workflow->canChangeTicketType($booking) && auth()->user()->can('update', $booking);
+        $priceLocked = $workflow->isPriceLocked($booking);
+
+        $ticketTypeOptions = $canChangeTicketType
+            ? $booking->event->ticketTypes()->with('event')->orderBy('price')->orderBy('name')->get()
+                ->map(fn ($type) => [
+                    'id' => $type->id,
+                    'name' => $type->name,
+                    'price' => (float) $type->price,
+                    'blocked' => $type->is_available ? ($type->isOnSale() ? null : 'außerhalb des Verkaufszeitraums') : 'nicht freigeschaltet',
+                    'free' => $type->quantity === null ? null
+                        : (int) $type->quantity - (int) $type->quantity_sold - $booking->event->reservedWaitlistSeats($type->id),
+                ])->values()
+            : collect();
+
+        $ticketTypeChanges = \App\Models\AuditLog::query()
+            ->where('auditable_type', Booking::class)
+            ->where('auditable_id', $booking->id)
+            ->where('action', 'booking.ticket_type_changed')
+            ->with('user')
+            ->latest()
+            ->orderByDesc('id')
+            ->get();
+
+        return view('organizer.bookings.show', compact('booking', 'canChangeTicketType', 'priceLocked', 'ticketTypeOptions', 'ticketTypeChanges'));
     }
 
     /**
@@ -263,6 +289,69 @@ class BookingManagementController extends Controller
         return back()->with('success', $notify
             ? 'Buchung storniert. Der Kunde hat eine Stornobestätigung erhalten.'
             : 'Buchung storniert (ohne E-Mail an den Kunden).');
+    }
+
+    /**
+     * Ticketart einzelner Positionen ändern (z. B. Fehlbuchung einer eingeschränkten Ticketart).
+     * Nicht buchbare oder ausverkaufte Ticketarten dürfen nur nach ausdrücklicher Bestätigung zugewiesen werden.
+     */
+    public function changeTicketType(Request $request, Booking $booking, BookingWorkflowService $workflow)
+    {
+        $this->authorize('update', $booking);
+
+        if (! $workflow->canChangeTicketType($booking)) {
+            return back()->with('error', 'Die Ticketart kann nur bei offenen oder bestätigten Buchungen geändert werden.');
+        }
+
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*' => 'integer',
+            'ticket_type_id' => 'required|integer',
+            'reason' => 'required|string|max:1000',
+            'confirm_override' => 'nullable|boolean',
+        ], [
+            'items.required' => 'Bitte wählen Sie mindestens eine teilnehmende Person aus.',
+            'ticket_type_id.required' => 'Bitte wählen Sie die neue Ticketart.',
+            'reason.required' => 'Bitte geben Sie eine Begründung an. Sie wird der Person mitgeteilt.',
+        ]);
+
+        $target = $booking->event->ticketTypes()->whereKey($validated['ticket_type_id'])->first();
+        if (! $target) {
+            return back()->withErrors(['ticket_type_id' => 'Diese Ticketart gehört nicht zu dieser Veranstaltung.'])->withInput();
+        }
+
+        $items = $booking->items()->whereIn('id', $validated['items'])->get();
+        if ($items->count() !== count(array_unique($validated['items']))) {
+            return back()->withErrors(['items' => 'Mindestens eine Position gehört nicht zu dieser Buchung.'])->withInput();
+        }
+
+        $seats = (int) $items->where('ticket_type_id', '!=', $target->id)->sum('quantity');
+        if ($seats === 0) {
+            return back()->withErrors(['ticket_type_id' => 'Die ausgewählten Personen haben bereits diese Ticketart.'])->withInput();
+        }
+
+        $warnings = $workflow->ticketTypeWarnings($target, $seats);
+        if ($warnings !== [] && ! $request->boolean('confirm_override')) {
+            return back()->withErrors([
+                'confirm_override' => "„{$target->name}“ ist ".implode(', ', $warnings).'. Bitte bestätigen Sie die Zuweisung.',
+            ])->withInput();
+        }
+
+        $result = $workflow->changeTicketType($booking, $items->pluck('id'), $target, $validated['reason']);
+
+        $message = $result['changed'] === 1
+            ? "Ticketart für 1 Person auf „{$target->name}“ geändert."
+            : "Ticketart für {$result['changed']} Personen auf „{$target->name}“ geändert.";
+
+        $newTotal = number_format((float) $result['new_total'], 2, ',', '.').' €';
+        $message .= match (true) {
+            $result['price_locked'] => ' Die Buchung ist bezahlt, der Preis bleibt unverändert.',
+            $result['payment_requested'] => " Die Buchung ist jetzt kostenpflichtig ({$newTotal}), die Person hat Rechnung und Zahlungshinweise erhalten.",
+            (float) $result['old_total'] !== (float) $result['new_total'] => " Neuer Gesamtbetrag: {$newTotal}.",
+            default => '',
+        };
+
+        return back()->with('success', $message.' Die Person wurde per E-Mail informiert.');
     }
 
     public function export(Request $request)
