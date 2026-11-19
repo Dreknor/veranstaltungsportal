@@ -51,14 +51,11 @@
                         <span class="sr-only">Alle auswählen</span>
                     </label>
                 </th>
-                <th scope="col">Buchungsnr.</th>
+                <th scope="col">Buchung</th>
                 <th scope="col" class="max-sm:hidden">Veranstaltung</th>
                 <th scope="col" class="max-sm:hidden">Kunde</th>
-                <th scope="col" class="max-sm:hidden">Firma</th>
                 <th scope="col" class="num max-sm:hidden">Betrag</th>
-                <th scope="col" class="max-sm:hidden">Datum</th>
-                <th scope="col" class="max-sm:hidden">Status</th>
-                <th scope="col" class="max-sm:hidden">Ext. Rechnungsnr.</th>
+                <th scope="col" class="max-sm:hidden">Fakturierung</th>
                 <th scope="col" class="actions"><span class="sr-only">Aktion</span></th>
             </tr>
         </thead>
@@ -74,6 +71,7 @@
                     </td>
                     <td class="tabular-nums max-sm:min-w-0 sm:whitespace-nowrap">
                         {{ $booking->booking_number }}
+                        <span class="block text-small text-muted max-sm:hidden">{{ $booking->created_at->format('d.m.Y') }}</span>
                         <span
                             class="mt-1 block text-small text-muted sm:hidden">{{ $booking->event->title ?? '–' }}</span>
                         <span class="block text-small text-muted sm:hidden">{{ $booking->customer_name }} ·
@@ -93,29 +91,25 @@
                     </td>
                     <td class="max-sm:hidden">
                         {{ $booking->customer_name }}
-                        <span class="block text-small text-muted">{{ $booking->customer_email }}</span>
-                    </td>
-                    <td class="max-sm:hidden">
-                        {{ $booking->billing_company ?: '–' }}
+                        @if ($booking->billing_company)
+                            <span class="block text-small">{{ $booking->billing_company }}</span>
+                        @endif
+                        <span class="block text-small text-muted break-all">{{ $booking->customer_email }}</span>
                         @if ($booking->billing_vat_id)
                             <span class="block text-small text-muted">USt: {{ $booking->billing_vat_id }}</span>
                         @endif
                     </td>
                     <td class="num max-sm:hidden">{{ format_currency($booking->total) }}</td>
-                    <td class="tabular-nums whitespace-nowrap max-sm:hidden">
-                        {{ $booking->created_at->format('d.m.Y') }}</td>
                     <td class="max-sm:hidden">
                         @if ($booking->externally_invoiced)
                             <x-ui.status tone="success">Fakturiert</x-ui.status>
-                            @if ($booking->externally_invoiced_at)
-                                <span
-                                    class="mt-0.5 block text-small text-muted tabular-nums">{{ $booking->externally_invoiced_at->format('d.m.Y') }}</span>
-                            @endif
+                            <span class="mt-0.5 block text-small text-muted tabular-nums">
+                                {{ collect([$booking->external_invoice_number, $booking->externally_invoiced_at?->format('d.m.Y')])->filter()->implode(' · ') }}
+                            </span>
                         @else
                             <x-ui.status tone="warning">Offen</x-ui.status>
                         @endif
                     </td>
-                    <td class="tabular-nums max-sm:hidden">{{ $booking->external_invoice_number ?: '–' }}</td>
                     <td class="actions">
                         @if (!$booking->externally_invoiced)
                             <form method="POST" action="{{ route('organizer.billing-data.mark-invoiced', $booking) }}"
@@ -140,7 +134,7 @@
                 </tr>
             @empty
                 <tr class="hover:bg-transparent">
-                    <td colspan="10" class="p-0">
+                    <td colspan="7" class="p-0">
                         <x-ui.empty :bordered="false">Keine Buchungen gefunden.</x-ui.empty>
                     </td>
                 </tr>
