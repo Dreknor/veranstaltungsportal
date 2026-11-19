@@ -117,6 +117,34 @@ class UpdateControllerTest extends TestCase
             ->assertSee('Jetzt aktualisieren');
     }
 
+    public function test_updates_follow_checked_out_branch_without_configured_branch(): void
+    {
+        config(['updater.branch' => null]);
+        $this->responses = [
+            'git rev-parse --abbrev-ref HEAD' => "feature-x\n",
+            'git rev-parse origin/feature-x' => "bbbbbbb2222222222222222222222222222222\n",
+        ] + $this->responses;
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.updates.index'))
+            ->assertOk()
+            ->assertSee('origin/feature-x')
+            ->assertSee('Jetzt aktualisieren');
+
+        $this->assertRanCommand('git fetch --quiet origin feature-x');
+        $this->assertRanCommand('git log --format=%H%x1f%h%x1f%s%x1f%an%x1f%cI HEAD..origin/feature-x');
+    }
+
+    public function test_configured_branch_takes_precedence(): void
+    {
+        config(['updater.branch' => 'master']);
+        $this->responses = ['git rev-parse --abbrev-ref HEAD' => "feature-x\n"] + $this->responses;
+
+        $this->actingAs($this->admin)->get(route('admin.updates.index'))->assertOk()->assertSee('origin/master');
+
+        $this->assertRanCommand('git fetch --quiet origin master');
+    }
+
     public function test_admin_sees_error_when_git_fails(): void
     {
         $this->failing = ['git fetch'];

@@ -20,7 +20,8 @@ return [
     'enabled' => env('UPDATER_ENABLED', true),
 
     'remote' => env('UPDATER_REMOTE', 'origin'),
-    'branch' => env('UPDATER_BRANCH', 'master'),
+    // Leer = aus dem aktuell ausgecheckten Branch aktualisieren
+    'branch' => env('UPDATER_BRANCH'),
 
     // Pfade zu den Programmen (leer = automatisch / aus PATH)
     'php_binary' => env('UPDATER_PHP_BINARY'),

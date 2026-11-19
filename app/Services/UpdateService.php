@@ -43,14 +43,14 @@ class UpdateService
     /**
      * Ermittelt installierte und verfügbare Version.
      *
-     * @return array{branch: string, current: string, current_date: string, target: string, behind: int, ahead: int, commits: list<array{hash: string, short: string, subject: string, author: string, date: string}>, dirty: list<string>}
+     * @return array{branch: string, target_ref: string, current: string, current_date: string, target: string, behind: int, ahead: int, commits: list<array{hash: string, short: string, subject: string, author: string, date: string}>, dirty: list<string>}
      */
     public function status(bool $fetch = true): array
     {
         $remoteRef = $this->remoteRef();
 
         if ($fetch) {
-            $this->git(['fetch', '--quiet', config('updater.remote'), config('updater.branch')]);
+            $this->git(['fetch', '--quiet', config('updater.remote'), $this->targetBranch()]);
         }
 
         $log = $this->git(['log', '--format=%H%x1f%h%x1f%s%x1f%an%x1f%cI', 'HEAD..'.$remoteRef]);
@@ -63,6 +63,7 @@ class UpdateService
 
         return [
             'branch' => trim($this->git(['rev-parse', '--abbrev-ref', 'HEAD'])),
+            'target_ref' => $remoteRef,
             'current' => trim($this->git(['rev-parse', 'HEAD'])),
             'current_date' => trim($this->git(['log', '-1', '--format=%cI', 'HEAD'])),
             'target' => trim($this->git(['rev-parse', $remoteRef])),
@@ -105,7 +106,7 @@ class UpdateService
                 throw new RuntimeException('Lokale Änderungen im Arbeitsverzeichnis verhindern das Update: '.implode(', ', $dirty));
             }
 
-            $this->step('Neue Version abrufen', [$this->gitBinary(), 'fetch', config('updater.remote'), config('updater.branch')]);
+            $this->step('Neue Version abrufen', [$this->gitBinary(), 'fetch', config('updater.remote'), $this->targetBranch()]);
 
             $from = trim($this->git(['rev-parse', 'HEAD']));
             $to = trim($this->git(['rev-parse', $this->remoteRef()]));
@@ -362,7 +363,23 @@ class UpdateService
 
     private function remoteRef(): string
     {
-        return config('updater.remote').'/'.config('updater.branch');
+        return config('updater.remote').'/'.$this->targetBranch();
+    }
+
+    /**
+     * Branch, aus dem aktualisiert wird: UPDATER_BRANCH, sonst der aktuell ausgecheckte Branch
+     * (bei losgelöstem HEAD "master"). So aktualisiert sich eine Installation auf einem
+     * Feature-Branch aus genau diesem Branch.
+     */
+    public function targetBranch(): string
+    {
+        if (filled(config('updater.branch'))) {
+            return (string) config('updater.branch');
+        }
+
+        $branch = trim($this->git(['rev-parse', '--abbrev-ref', 'HEAD']));
+
+        return $branch !== '' && $branch !== 'HEAD' ? $branch : 'master';
     }
 
     private function gitBinary(): string

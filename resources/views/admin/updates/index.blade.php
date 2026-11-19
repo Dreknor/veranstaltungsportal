@@ -11,11 +11,8 @@
         [$stateText, $stateTone] = $stateLabels[$state['status']] ?? $stateLabels['idle'];
     @endphp
 
-    <x-ui.page-header title="Updates" :subtitle="'Anwendung aus dem Repository aktualisieren (' .
-        config('updater.remote') .
-        '/' .
-        config('updater.branch') .
-        ')'" />
+    <x-ui.page-header title="Updates" :subtitle="'Anwendung aus dem Repository aktualisieren' .
+        ($status ? ' (' . $status['target_ref'] . ')' : '')" />
 
     @if ($error)
         <x-ui.alert tone="danger" title="Versionsstand konnte nicht ermittelt werden" class="mb-8">
