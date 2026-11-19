@@ -39,8 +39,7 @@
         <p class="m-0 text-ui text-muted tabular-nums">
             {{ trans_choice('{1} :count Buchung|[0,*] :count Buchungen', $bookings->total()) }}</p>
         <div class="flex flex-wrap items-center gap-3">
-            <x-ui.button type="submit" form="bulk-form" variant="secondary"
-                :formaction="route('organizer.billing-data.bulk-release-tickets')"
+            <x-ui.button type="submit" form="bulk-form" variant="secondary" :formaction="route('organizer.billing-data.bulk-release-tickets')"
                 onclick="return confirm('Tickets bzw. Zugangsdaten für die ausgewählten Buchungen jetzt senden, obwohl die Rechnung noch nicht gestellt ist? Bereits versendete, fakturierte und bezahlte Buchungen werden übersprungen.')">
                 Tickets vorab senden – Rechnung folgt
             </x-ui.button>
@@ -83,7 +82,8 @@
                     </td>
                     <td class="tabular-nums max-sm:min-w-0 sm:whitespace-nowrap">
                         {{ $booking->booking_number }}
-                        <span class="block text-small text-muted max-sm:hidden">{{ $booking->created_at->format('d.m.Y') }}</span>
+                        <span
+                            class="block text-small text-muted max-sm:hidden">{{ $booking->created_at->format('d.m.Y') }}</span>
                         <span
                             class="mt-1 block text-small text-muted sm:hidden">{{ $booking->event->title ?? '–' }}</span>
                         <span class="block text-small text-muted sm:hidden">{{ $booking->customer_name }} ·
