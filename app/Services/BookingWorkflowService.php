@@ -8,8 +8,11 @@ use App\Mail\BookingPendingApproval;
 use App\Mail\BookingRejected;
 use App\Mail\EventCancelledMail;
 use App\Mail\PaymentConfirmed;
+use App\Mail\TicketTypeChanged;
+use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Event;
+use App\Models\TicketType;
 use App\Models\User;
 use App\Notifications\EventCancelledNotification;
 use App\Notifications\PaymentStatusChangedNotification;
@@ -36,6 +39,8 @@ use Illuminate\Support\Facades\Notification;
  *  5. 24 h und 3 h vor Beginn                  → "Erinnerung" inkl. Zugangsdaten (Online/Hybrid)
  *  6. Änderung von Termin/Ort/Zugangsdaten     → "Veranstaltung aktualisiert"
  *  7. Storno / Ablehnung / Absage              → jeweils genau eine passende E-Mail
+ *  8. Ticketart durch Veranstalter geändert    → "Ticketart geändert" inkl. neuer Tickets
+ *     (aus kostenfrei wird kostenpflichtig      → zusätzlich "Buchungsbestätigung" mit Rechnung)
  */
 class BookingWorkflowService
 {
@@ -356,6 +361,254 @@ class BookingWorkflowService
                 return (bool) ($preferences['booking_notifications'] ?? true);
             })
             ->values();
+    }
+
+    /**
+     * Darf der Veranstalter die Ticketart von Positionen dieser Buchung ändern?
+     */
+    public function canChangeTicketType(Booking $booking): bool
+    {
+        return in_array($booking->status, ['pending', 'pending_approval', 'confirmed'], true);
+    }
+
+    /**
+     * Ist der Preis der Buchung festgeschrieben? Das ist nur der Fall, wenn bereits bezahlt wurde.
+     * Kostenfreie Buchungen ("paid" mit 0 €) und extern fakturierte Buchungen gelten nicht als bezahlt.
+     * Eine bereits vergebene Rechnungsnummer bleibt bei einer Preisänderung erhalten; die Person
+     * erhält die korrigierte Rechnung mit der Änderungs-E-Mail.
+     */
+    public function isPriceLocked(Booking $booking): bool
+    {
+        return $booking->payment_status === 'paid' && !$booking->isFree();
+    }
+
+    /**
+     * Hinweise, warum eine Ticketart regulär nicht gebucht werden könnte. Der Veranstalter darf
+     * trotzdem zuweisen, muss die Hinweise aber ausdrücklich bestätigen.
+     *
+     * @return list<string>
+     */
+    public function ticketTypeWarnings(TicketType $ticketType, int $seats = 1): array
+    {
+        $warnings = [];
+
+        if (!$ticketType->is_available) {
+            $warnings[] = 'nicht freigeschaltet';
+        } elseif (!$ticketType->isOnSale()) {
+            $warnings[] = 'außerhalb des Verkaufszeitraums';
+        }
+
+        if ($ticketType->quantity !== null) {
+            $free = (int) $ticketType->quantity - (int) $ticketType->quantity_sold
+                - (int) ($ticketType->event?->reservedWaitlistSeats($ticketType->id) ?? 0);
+            if ($free < $seats) {
+                $warnings[] = $free > 0 ? "nur noch {$free} frei – Kontingent wird überbucht" : 'ausverkauft – Kontingent wird überbucht';
+            }
+        }
+
+        return $warnings;
+    }
+
+    /**
+     * Ticketart einzelner Positionen durch den Veranstalter ändern (z. B. bei Fehlbuchung einer
+     * Ticketart, die nur für bestimmte Personen gedacht ist).
+     *
+     *  - Kontingente werden umgebucht (alte Ticketart frei, neue belegt – ggf. überbucht).
+     *  - Unbezahlte Buchungen erhalten den neuen Preis, die Summe wird neu berechnet; der Rabatt bleibt
+     *    als fester Betrag erhalten und wird höchstens auf die neue Zwischensumme gedeckelt.
+     *  - Bezahlte Buchungen (oder mit Rechnungsnummer) behalten den bisherigen Preis.
+     *  - Ticketnummer und Check-in bleiben erhalten; Tickets werden mit der Änderungs-E-Mail neu versendet.
+     *
+     * @param  iterable<int>  $itemIds
+     * @return array{changed: int, price_locked: bool, old_total: string, new_total: string, payment_requested: bool}
+     */
+    public function changeTicketType(Booking $booking, iterable $itemIds, TicketType $target, string $reason): array
+    {
+        $itemIds = collect($itemIds)->map(fn ($id) => (int) $id)->all();
+
+        $result = DB::transaction(function () use ($booking, $itemIds, $target, $reason) {
+            $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            $booking->load(['event', 'items.ticketType']);
+
+            $items = $booking->items
+                ->whereIn('id', $itemIds)
+                ->where('ticket_type_id', '!=', $target->id)
+                ->values();
+
+            $oldTotal = (string) $booking->total;
+            $priceLocked = $this->isPriceLocked($booking);
+
+            if ($items->isEmpty()) {
+                return ['booking' => $booking, 'changes' => [], 'freed' => [], 'price_locked' => $priceLocked,
+                    'old_total' => $oldTotal, 'payment_requested' => false];
+            }
+
+            $wasFree = $booking->isFree();
+            $wasReady = $booking->isReadyForParticipation();
+
+            // Kontingente sperren, damit parallele Buchungen nicht falsch zählen
+            $ticketTypes = TicketType::whereIn('id', $items->pluck('ticket_type_id')->push($target->id)->unique())
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            $changes = [];
+            $freed = [];
+            foreach ($items as $item) {
+                $oldType = $ticketTypes->get($item->ticket_type_id);
+                $oldPrice = (string) $item->price;
+
+                $item->ticket_type_id = $target->id;
+                if (!$priceLocked) {
+                    $item->price = $target->price;
+                }
+                $item->save();
+                $item->setRelation('ticketType', $target);
+
+                $quantity = (int) $item->quantity;
+                if ($oldType) {
+                    $oldType->quantity_sold = max(0, (int) $oldType->quantity_sold - $quantity);
+                    $freed[$oldType->id] = ($freed[$oldType->id] ?? 0) + $quantity;
+                }
+
+                $change = [
+                    'item_id' => $item->id,
+                    'ticket_number' => $item->ticket_number,
+                    'attendee' => $item->participantName(),
+                    'old_ticket_type_id' => $oldType?->id,
+                    'old_ticket_type' => $oldType?->name ?? 'Ticket',
+                    'new_ticket_type_id' => $target->id,
+                    'new_ticket_type' => $target->name,
+                    'old_price' => $oldPrice,
+                    'new_price' => (string) $item->price,
+                ];
+                $changes[] = $change;
+
+                AuditLog::log(
+                    'booking.ticket_type_changed',
+                    $booking,
+                    ['item_id' => $item->id, 'ticket_number' => $item->ticket_number, 'ticket_type_id' => $change['old_ticket_type_id'], 'ticket_type' => $change['old_ticket_type'], 'price' => $oldPrice],
+                    ['item_id' => $item->id, 'ticket_number' => $item->ticket_number, 'ticket_type_id' => $target->id, 'ticket_type' => $target->name, 'price' => $change['new_price']],
+                    $reason,
+                );
+            }
+
+            $target = $ticketTypes->get($target->id);
+            $target->quantity_sold = (int) $target->quantity_sold + (int) $items->sum('quantity');
+            $ticketTypes->each->save();
+
+            $paymentRequested = false;
+            if (!$priceLocked) {
+                $subtotal = round($booking->items->sum(fn ($item) => (float) $item->price * (int) $item->quantity), 2);
+                $discount = min((float) $booking->discount, $subtotal);
+                $updates = [
+                    'subtotal' => $subtotal,
+                    'discount' => $discount,
+                    'total' => round($subtotal - $discount, 2),
+                ];
+
+                if ($wasFree && $updates['total'] > 0) {
+                    // Aus der kostenfreien Buchung wird eine kostenpflichtige: Zahlung per Rechnung anfordern.
+                    // Bereits ausgegebene Tickets bleiben gültig (Rechnung folgt).
+                    $updates['payment_status'] = 'pending';
+                    $updates['payment_method'] = 'invoice';
+                    $updates['release_tickets_before_payment'] = $wasReady ? true : null;
+                    $paymentRequested = true;
+                } elseif (!$wasFree && $updates['total'] == 0 && $booking->payment_status === 'pending') {
+                    // Keine Zahlung mehr nötig: wie eine kostenfreie Buchung behandeln (ohne Rechnung)
+                    $updates['payment_status'] = 'paid';
+                    $updates['invoice_number'] = null;
+                    $updates['invoice_date'] = null;
+                    if ($booking->status === 'pending') {
+                        $updates['status'] = 'confirmed';
+                        $updates['confirmed_at'] = $booking->confirmed_at ?? now();
+                    }
+                }
+
+                $booking->update($updates);
+            }
+
+            return ['booking' => $booking, 'changes' => $changes, 'freed' => $freed, 'price_locked' => $priceLocked,
+                'old_total' => $oldTotal, 'payment_requested' => $paymentRequested];
+        });
+
+        $booking = $result['booking'];
+
+        if ($result['changes'] !== []) {
+            $this->offerFreedSeatsToWaitlist($booking->event, $result['freed']);
+            $this->sendTicketTypeChangeMails($booking, $result['changes'], $reason, $result['price_locked'], $result['old_total'], $result['payment_requested']);
+        }
+
+        return [
+            'changed' => count($result['changes']),
+            'price_locked' => $result['price_locked'],
+            'old_total' => $result['old_total'],
+            'new_total' => (string) $booking->total,
+            'payment_requested' => $result['payment_requested'],
+        ];
+    }
+
+    /**
+     * Frei gewordene Plätze einer Ticketart der Warteliste anbieten (wie bei einer Stornierung),
+     * sofern die Ticketart und die Veranstaltung tatsächlich wieder Platz haben.
+     *
+     * @param  array<int, int>  $freed  Ticketart-ID => Anzahl frei gewordener Plätze
+     */
+    protected function offerFreedSeatsToWaitlist(?Event $event, array $freed): void
+    {
+        if (!$event || $event->is_cancelled || $event->start_date?->isPast()) {
+            return;
+        }
+
+        foreach ($freed as $ticketTypeId => $seats) {
+            $ticketType = TicketType::with('event')->find($ticketTypeId);
+            if (!$ticketType) {
+                continue;
+            }
+
+            $seats = min($seats, $ticketType->availableQuantity());
+            if ($seats > 0) {
+                app(WaitlistService::class)->offerSeats($event, $seats);
+            }
+        }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $changes
+     */
+    protected function sendTicketTypeChangeMails(Booking $booking, array $changes, string $reason, bool $priceLocked, string $oldTotal, bool $paymentRequested): void
+    {
+        $booking->refresh()->load(['event.organization', 'items.ticketType']);
+
+        $this->send($booking, new TicketTypeChanged($booking, $changes, $reason, $priceLocked, $oldTotal));
+
+        // Aus kostenfrei wurde kostenpflichtig: Rechnung und Zahlungshinweise wie bei einer neuen Buchung
+        if ($paymentRequested) {
+            $this->send($booking, new BookingConfirmation($booking));
+        }
+
+        if (!$booking->canSendTickets()) {
+            return;
+        }
+
+        $changedIds = array_column($changes, 'item_id');
+        foreach ($booking->items->whereIn('id', $changedIds) as $item) {
+            $email = $item->separateAttendeeEmail();
+            if (!$email) {
+                continue;
+            }
+
+            try {
+                Mail::to($email)->send(new \App\Mail\AttendeeTicketMail($booking, $item));
+                $item->forceFill(['ticket_sent_to' => $email, 'ticket_sent_at' => now()])->saveQuietly();
+            } catch (\Throwable $e) {
+                Log::error('Teilnehmer-Ticket konnte nicht versendet werden', [
+                    'booking_number' => $booking->booking_number,
+                    'item_id' => $item->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
     }
 
     /**

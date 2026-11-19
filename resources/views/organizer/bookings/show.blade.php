@@ -268,7 +268,152 @@
                     </form>
                 @endif
             @endif
+
+            @if ($canChangeTicketType && $ticketTypeOptions->count() > 1)
+                @php
+                    $changeErrorKeys = ['items', 'items.*', 'ticket_type_id', 'reason', 'confirm_override'];
+                    $changeItems = $booking->items->map(fn ($item) => [
+                        'id' => $item->id,
+                        'ticketTypeId' => $item->ticket_type_id,
+                        'quantity' => (int) $item->quantity,
+                        'price' => (float) $item->price,
+                    ])->values();
+                    $preselected = old('items', $booking->items->count() === 1 ? [$booking->items->first()->id] : []);
+                @endphp
+                <div class="mt-6">
+                    <x-ui.button variant="secondary" x-data x-on:click="$dispatch('open-modal', 'change-ticket-type')">
+                        Ticketart ändern
+                    </x-ui.button>
+                </div>
+
+                <x-ui.modal name="change-ticket-type" title="Ticketart ändern" :show="$errors->hasAny($changeErrorKeys)" max-width="640px">
+                    <form method="POST" action="{{ route('organizer.bookings.change-ticket-type', $booking) }}"
+                          x-data="{
+                              items: @js($changeItems),
+                              types: @js($ticketTypeOptions),
+                              selected: @js(array_map('intval', (array) $preselected)),
+                              target: @js(old('ticket_type_id') ? (int) old('ticket_type_id') : null),
+                              priceLocked: @js($priceLocked),
+                              subtotal: @js((float) $booking->subtotal),
+                              discount: @js((float) $booking->discount),
+                              total: @js((float) $booking->total),
+                              money(v) { return v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'; },
+                              get type() { return this.types.find(t => t.id === Number(this.target)) || null; },
+                              get moving() { return this.items.filter(i => this.selected.includes(i.id) && i.ticketTypeId !== Number(this.target)); },
+                              get seats() { return this.moving.reduce((s, i) => s + i.quantity, 0); },
+                              get warnings() {
+                                  if (!this.type) return [];
+                                  const w = [];
+                                  if (this.type.blocked) w.push(this.type.blocked);
+                                  if (this.type.free !== null && this.type.free < this.seats) {
+                                      w.push(this.type.free > 0 ? 'nur noch ' + this.type.free + ' frei – Kontingent wird überbucht' : 'ausverkauft – Kontingent wird überbucht');
+                                  }
+                                  return w;
+                              },
+                              get newTotal() {
+                                  if (!this.type || this.priceLocked) return this.total;
+                                  const sub = this.subtotal + this.moving.reduce((s, i) => s + (this.type.price - i.price) * i.quantity, 0);
+                                  return Math.max(0, sub - Math.min(this.discount, sub));
+                              },
+                          }"
+                          class="flex flex-col gap-6">
+                        @csrf @method('PUT')
+
+                        <fieldset class="m-0 border-0 p-0">
+                            <legend class="mb-1 text-ui font-medium">Teilnehmende</legend>
+                            @foreach ($booking->items as $item)
+                                <x-ui.checkbox name="items[]" :value="$item->id" :old="false" x-model.number="selected">
+                                    {{ $item->participantName() ?: 'Noch nicht eingetragen' }}
+                                    <span class="block text-small text-muted">{{ $item->ticketType?->name ?? 'Ticket' }}@unless ($booking->isFree()) · {{ \App\Support\Ui::money($item->price) }}@endunless</span>
+                                </x-ui.checkbox>
+                            @endforeach
+                            <x-ui.field-error name="items" />
+                        </fieldset>
+
+                        <x-ui.select label="Neue Ticketart" name="ticket_type_id" required placeholder="Bitte wählen" x-model.number="target">
+                            @foreach ($ticketTypeOptions as $option)
+                                <option value="{{ $option['id'] }}" @selected((int) old('ticket_type_id') === $option['id'])>
+                                    {{ $option['name'] }} · {{ \App\Support\Ui::money($option['price']) }}@if ($option['blocked']) · {{ $option['blocked'] }}@elseif ($option['free'] !== null) · {{ max(0, $option['free']) }} frei @endif
+                                </option>
+                            @endforeach
+                        </x-ui.select>
+
+                        <template x-if="type && warnings.length">
+                            <div class="flex flex-col gap-1">
+                                <x-ui.alert tone="warning">
+                                    <p>„<span x-text="type.name"></span>“ ist <span x-text="warnings.join(', ')"></span>. Regulär könnte die Person diese Ticketart nicht buchen.</p>
+                                </x-ui.alert>
+                                <x-ui.checkbox name="confirm_override" value="1" :old="false" label="Trotzdem zuweisen" />
+                            </div>
+                        </template>
+                        <x-ui.field-error name="confirm_override" />
+
+                        <template x-if="type && seats > 0">
+                            <div>
+                                @if ($priceLocked)
+                                    <x-ui.alert tone="info">
+                                        <p>Die Buchung ist bereits bezahlt. Der Preis bleibt bei {{ \App\Support\Ui::money($booking->total) }}, eine Differenz regeln Sie bitte außerhalb des Systems.</p>
+                                    </x-ui.alert>
+                                @else
+                                    <x-ui.dl>
+                                        <x-ui.dl-item label="Bisher" num>{{ \App\Support\Ui::money($booking->total) }}</x-ui.dl-item>
+                                        <x-ui.dl-item label="Neu" num><strong class="font-semibold" x-text="money(newTotal)"></strong></x-ui.dl-item>
+                                    </x-ui.dl>
+                                    @if ($booking->invoice_number && !$isExternalInvoicing)
+                                        <template x-if="newTotal !== total">
+                                            <x-ui.alert tone="info" class="mt-3">
+                                                <p>Die Rechnung {{ $booking->invoice_number }} wird mit dem neuen Betrag neu erstellt und der Person zugeschickt.</p>
+                                            </x-ui.alert>
+                                        </template>
+                                    @endif
+                                    @if ($booking->payment_status === 'extern')
+                                        <x-ui.alert tone="info" class="mt-3">
+                                            <p>Die Buchung ist extern abgerechnet. Korrigieren Sie die Rechnung gegebenenfalls in Ihrer Buchhaltung.</p>
+                                        </x-ui.alert>
+                                    @endif
+                                    <template x-if="total === 0 && newTotal > 0">
+                                        <x-ui.alert tone="info" class="mt-3">
+                                            <p>Die Buchung wird kostenpflichtig. Die Person erhält eine Rechnung mit Zahlungshinweisen.</p>
+                                        </x-ui.alert>
+                                    </template>
+                                @endif
+                            </div>
+                        </template>
+
+                        <x-ui.textarea label="Begründung" name="reason" required rows="3" hint="Wird der Person in der E-Mail mitgeteilt und in der Buchung protokolliert." />
+
+                        <p class="m-0 text-small text-muted">Ticketnummer und Check-in bleiben erhalten. Die Person erhält eine E-Mail mit den neuen Tickets.</p>
+
+                        <div class="flex flex-wrap justify-end gap-3">
+                            <x-ui.button variant="secondary" x-on:click="$dispatch('close-modal', 'change-ticket-type')">Abbrechen</x-ui.button>
+                            <x-ui.button type="submit" x-bind:disabled="!type || seats === 0">Ticketart ändern</x-ui.button>
+                        </div>
+                    </form>
+                </x-ui.modal>
+            @endif
         </x-ui.section>
+
+        @if ($ticketTypeChanges->isNotEmpty())
+            <x-ui.section title="Änderungen an der Buchung" description="Vom Veranstalter vorgenommene Änderungen der Ticketart.">
+                <ol class="m-0 list-none divide-y divide-line border-y border-line p-0">
+                    @foreach ($ticketTypeChanges as $log)
+                        <li class="flex flex-col gap-0.5 py-3">
+                            <span class="text-base font-medium">
+                                {{ $log->old_values['ticket_type'] ?? 'Ticket' }} → {{ $log->new_values['ticket_type'] ?? 'Ticket' }}
+                                <span class="font-normal text-muted tabular-nums">· {{ $log->new_values['ticket_number'] ?? '' }}</span>
+                            </span>
+                            <span class="text-small text-muted tabular-nums">
+                                {{ $log->created_at->format('d.m.Y H:i') }} Uhr · {{ $log->user?->name ?? 'System' }}
+                                @if (($log->old_values['price'] ?? null) !== ($log->new_values['price'] ?? null))
+                                    · {{ \App\Support\Ui::money($log->old_values['price'] ?? 0) }} → {{ \App\Support\Ui::money($log->new_values['price'] ?? 0) }}
+                                @endif
+                            </span>
+                            @if ($log->description)<span class="text-small text-ink-soft">Begründung: {{ $log->description }}</span>@endif
+                        </li>
+                    @endforeach
+                </ol>
+            </x-ui.section>
+        @endif
 
         {{-- E-Mail-Verlauf --}}
         <x-ui.section title="E-Mail-Verlauf" description="Alle E-Mails, die zu dieser Buchung automatisch oder durch Sie versendet wurden.">

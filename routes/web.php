@@ -287,6 +287,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::post('/bookings/{booking}/resend', [Organizer\BookingManagementController::class, 'resend'])->name('bookings.resend');
         Route::post('/bookings/{booking}/release-tickets', [Organizer\BookingManagementController::class, 'releaseTickets'])->name('bookings.release-tickets');
         Route::post('/bookings/{booking}/cancel', [Organizer\BookingManagementController::class, 'cancel'])->name('bookings.cancel');
+        Route::put('/bookings/{booking}/ticket-type', [Organizer\BookingManagementController::class, 'changeTicketType'])->name('bookings.change-ticket-type');
         Route::post('/bookings/{booking}/approve', [Organizer\BookingManagementController::class, 'approveBooking'])->name('bookings.approve');
         Route::post('/bookings/{booking}/reject', [Organizer\BookingManagementController::class, 'rejectBooking'])->name('bookings.reject');
         Route::post('/events/{event}/approve-all-pending', [Organizer\BookingManagementController::class, 'approveAllPending'])->name('events.approve-all-pending');
