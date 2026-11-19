@@ -39,7 +39,7 @@ Es gibt genau diese Farben. Neue Töne werden nicht „nach Gefühl" ergänzt, s
 | Token | Hex | Verwendung | Kontrast |
 |---|---|---|---|
 | `ink` | `#1E3135` | Text, Überschriften, Fokus-Ring, Button-Hover | 13,6:1 auf Weiß |
-| `primary` | `#2B4347` | Primärbutton, Abschnittsmarken, Zeichen der Wortmarke | Weiß darauf 10,5:1 |
+| `primary` | `#2B4347` | Primärbutton, Abschnittsmarken | Weiß darauf 10,5:1 |
 | `ink-soft` | `#3B5053` | Sekundärtext mit Gewicht (z. B. Platzstatus) | 8,5:1 |
 | `muted` | `#55676A` | Sekundärtext, Labels in Zellen, Kategoriezeile | 5,9:1 auf Weiß, 5,5:1 auf `zone` |
 | `line` | `#DCE3E2` | Trennlinien, Kontur von Containern | nur Dekor |
@@ -48,7 +48,7 @@ Es gibt genau diese Farben. Neue Töne werden nicht „nach Gefühl" ergänzt, s
 | `surface` | `#FFFFFF` | Seitengrund, Felder, Listencontainer | – |
 | `zone` | `#F3F6F5` | ruhige Zonen: Einstieg, Schwerpunkt, Zusammenfassung, Footer, Datumsblock | – |
 | `zone-hover` | `#F6F8F8` | Hover einer Listenzeile | – |
-| `leaf` | `#8DC11D` | 8-px-Statuspunkt „frei", Blatt im Zeichen | nie als Textfarbe, nie mit weißer Schrift |
+| `leaf` | `#8DC11D` | 8-px-Statuspunkt „frei" | nie als Textfarbe, nie mit weißer Schrift |
 
 Meldungsfarben (nicht im Entwurf enthalten, hier festgelegt; immer Fläche + Kontur + Text + Icon):
 
@@ -122,9 +122,21 @@ Kleiner als 13 px wird nichts gesetzt. Überschriften stehen linksbündig, nie z
 
 ### A6 Wortmarke
 
-Das Logo ist offen. Bis ein endgültiges vorliegt, gilt der Platzhalter aus der Referenz:
-Petrol-Kreis (36 px) mit Blattgrün-Blatt, daneben „Bildungsportal" (17 px, 600) und darunter
-„Hauptfach Mensch" (13 px, `muted`). Die Wortmarke wird als eine Komponente gebaut
+Das Zeichen „Keimling" folgt dem Bauprinzip der ESDi-Logos: ein Navy-Kreis, darin zwei Blätter
+aus je zwei Viertelkreisen über einer Halbkreis-Schale, jede Teilfläche in einem eigenen Grünton.
+Daneben steht „Bildungsportal" (17 px, 600) und darunter „Hauptfach Mensch" (13 px, `muted`).
+Das Zeichen misst 36 px im Kopf und 32 px im Fuß.
+
+Logofarben (nur im Zeichen, nie in der Oberfläche):
+
+| Teil | Hex |
+|---|---|
+| Kreis | `#22224A` |
+| linkes Blatt | `#95E01F` / `#3BAE00` |
+| rechtes Blatt | `#6FD600` / `#007A1C` |
+| Schale | `#004D24` / `#006400` |
+
+Die Wortmarke wird als eine Komponente gebaut
 (`<x-wordmark>`), damit der Tausch später an einer Stelle geschieht. Der Name kommt aus
 `config('app.name')`. `public/images/logo.png` (Koralle/Aubergine) wird nicht mehr verwendet.
 
@@ -528,7 +540,7 @@ Emojis in `app/` (Benachrichtigungen, Betreffzeilen) ersetzen.
 | Thema | Vorschlag in diesem Dokument | Entscheidung nötig von |
 |---|---|---|
 | Dunkelmodus | vorerst abschalten, später über Tokens (B2) | Auftraggeber |
-| Endgültiges Logo und Name („Bildungsportal") | Platzhalter-Wortmarke (A6) | Auftraggeber |
+| Endgültiges Logo und Name („Bildungsportal") | Zeichen „Keimling" im ESDi-Stil (A6), Abnahme offen | Auftraggeber |
 | Kategoriefarben | in der Oberfläche nicht mehr anzeigen (A2) | Auftraggeber |
 | Veranstaltungsbilder | nur auf der Detailseite, ohne Platzhalter (A5) | Auftraggeber |
 | Mobile Navigation ab mehr als drei Links | zweite Zeile; Menü erst bei Bedarf (B4) | bei Phase 1 |

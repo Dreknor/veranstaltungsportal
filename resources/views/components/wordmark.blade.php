@@ -1,5 +1,5 @@
 {{--
-    Wortmarke (A6, Platzhalter bis zum endgültigen Logo): Petrol-Kreis mit Blattgrün-Blatt,
+    Wortmarke (A6): Zeichen "Keimling" im ESDi-Stil (Navy-Kreis, zwei Blätter über einer Schale),
     daneben der Name aus config('app.name') und darunter "Hauptfach Mensch".
     Für helle Flächen (weiß, zone). size="md" im Kopf (36 px / 17 px), size="sm" im Fuß (32 px / 16 px).
     Verlinkt auf "/"; href=false gibt sie ohne Link aus.
@@ -22,10 +22,15 @@
         'min-h-14' => $size !== 'sm',
         'min-h-11' => $size === 'sm',
     ]) }}>
-    <svg width="{{ $mark }}" height="{{ $mark }}" viewBox="0 0 36 36" aria-hidden="true" class="flex-none">
-        <circle cx="18" cy="18" r="18" class="fill-primary" />
-        <path d="M11 25c0-8.5 5-14 14-14 0 8.5-5 14-14 14z" class="fill-leaf" />
-        <path d="M11 25l8-8" class="stroke-primary" stroke-width="1.5" stroke-linecap="round" fill="none" />
+    {{-- Zeichen "Keimling" im ESDi-Stil; Farben sind Logofarben (A6), keine UI-Tokens. --}}
+    <svg width="{{ $mark }}" height="{{ $mark }}" viewBox="0 0 360 360" aria-hidden="true" class="flex-none">
+        <circle cx="180" cy="180" r="180" fill="#22224A" />
+        <path d="M75 75A105 105 0 0 1 180 180Z" fill="#95E01F" />
+        <path d="M180 180A105 105 0 0 1 75 75Z" fill="#3BAE00" />
+        <path d="M285 75A105 105 0 0 0 180 180Z" fill="#6FD600" />
+        <path d="M180 180A105 105 0 0 0 285 75Z" fill="#007A1C" />
+        <path d="M180 180H75A105 105 0 0 0 180 285Z" fill="#004D24" />
+        <path d="M180 180V285A105 105 0 0 0 285 180Z" fill="#006400" />
     </svg>
     <span class="flex flex-col leading-[1.15]">
         <span @class([
