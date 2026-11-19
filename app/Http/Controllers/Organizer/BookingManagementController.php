@@ -297,7 +297,7 @@ class BookingManagementController extends Controller
      * Ticketart einzelner Positionen ändern (z. B. Fehlbuchung einer eingeschränkten Ticketart).
      * Nicht buchbare oder ausverkaufte Ticketarten dürfen nur nach ausdrücklicher Bestätigung zugewiesen werden.
      */
-    public function changeTicketType(Request $request, Booking $booking, BookingWorkflowService $workflow)
+    public function changeTicketType(Request $request, Booking $booking, BookingWorkflowService $workflow): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $booking);
 
@@ -339,7 +339,7 @@ class BookingManagementController extends Controller
             ])->withInput();
         }
 
-        $result = $workflow->changeTicketType($booking, $items->pluck('id'), $target, $validated['reason']);
+        $result = $workflow->changeTicketType($booking, $items->pluck('id')->all(), $target, $validated['reason']);
 
         $message = $result['changed'] === 1
             ? "Ticketart für 1 Person auf „{$target->name}“ geändert."
