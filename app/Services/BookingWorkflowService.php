@@ -419,12 +419,12 @@ class BookingWorkflowService
      *  - Bezahlte Buchungen (oder mit Rechnungsnummer) behalten den bisherigen Preis.
      *  - Ticketnummer und Check-in bleiben erhalten; Tickets werden mit der Änderungs-E-Mail neu versendet.
      *
-     * @param  iterable<int>  $itemIds
+     * @param  array<int, int|string>  $itemIds
      * @return array{changed: int, price_locked: bool, old_total: string, new_total: string, payment_requested: bool}
      */
-    public function changeTicketType(Booking $booking, iterable $itemIds, TicketType $target, string $reason): array
+    public function changeTicketType(Booking $booking, array $itemIds, TicketType $target, string $reason): array
     {
-        $itemIds = collect($itemIds)->map(fn ($id) => (int) $id)->all();
+        $itemIds = array_map('intval', array_values($itemIds));
 
         $result = DB::transaction(function () use ($booking, $itemIds, $target, $reason) {
             $booking = Booking::whereKey($booking->id)->lockForUpdate()->firstOrFail();
@@ -458,12 +458,11 @@ class BookingWorkflowService
                 $oldType = $ticketTypes->get($item->ticket_type_id);
                 $oldPrice = (string) $item->price;
 
-                $item->ticket_type_id = $target->id;
+                $item->ticketType()->associate($target);
                 if (!$priceLocked) {
                     $item->price = $target->price;
                 }
                 $item->save();
-                $item->setRelation('ticketType', $target);
 
                 $quantity = (int) $item->quantity;
                 if ($oldType) {
@@ -476,7 +475,7 @@ class BookingWorkflowService
                     'ticket_number' => $item->ticket_number,
                     'attendee' => $item->participantName(),
                     'old_ticket_type_id' => $oldType?->id,
-                    'old_ticket_type' => $oldType?->name ?? 'Ticket',
+                    'old_ticket_type' => $oldType->name ?? 'Ticket',
                     'new_ticket_type_id' => $target->id,
                     'new_ticket_type' => $target->name,
                     'old_price' => $oldPrice,
@@ -556,7 +555,7 @@ class BookingWorkflowService
      */
     protected function offerFreedSeatsToWaitlist(?Event $event, array $freed): void
     {
-        if (!$event || $event->is_cancelled || $event->start_date?->isPast()) {
+        if (!$event || $event->is_cancelled || $event->start_date->isPast()) {
             return;
         }
 
