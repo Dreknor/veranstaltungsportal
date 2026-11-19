@@ -346,6 +346,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::get('/billing-data/export', [Organizer\BillingDataExportController::class, 'export'])->name('billing-data.export');
         Route::get('/billing-data/export-datev', [Organizer\BillingDataExportController::class, 'exportDatev'])->name('billing-data.export-datev');
         Route::put('/billing-data/bulk-mark-invoiced', [Organizer\BillingDataExportController::class, 'bulkMarkAsInvoiced'])->name('billing-data.bulk-mark-invoiced');
+        Route::put('/billing-data/bulk-release-tickets', [Organizer\BillingDataExportController::class, 'bulkReleaseTickets'])->name('billing-data.bulk-release-tickets');
         Route::put('/billing-data/{booking}/mark-invoiced', [Organizer\BillingDataExportController::class, 'markAsInvoiced'])->name('billing-data.mark-invoiced');
 
         // Reviews

@@ -80,7 +80,7 @@ class BookingWorkflowService
      *
      * @return bool true, wenn Tickets/Zugangsdaten versendet wurden
      */
-    public function releaseTicketsBeforePayment(Booking $booking): bool
+    public function releaseTicketsBeforePayment(Booking $booking, bool $queue = false): bool
     {
         if (!in_array($booking->status, ['pending', 'confirmed']) || $booking->isFree() || $booking->isReadyForParticipation()) {
             return false;
@@ -92,7 +92,7 @@ class BookingWorkflowService
             'confirmed_at' => $booking->confirmed_at ?? now(),
         ]);
 
-        return $this->deliverTickets($booking);
+        return $this->deliverTickets($booking, $queue);
     }
 
     /**

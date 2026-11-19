@@ -140,6 +140,65 @@ test('Sammel-Fakturierung versendet Tickets für jede Buchung', function () {
     Mail::assertQueued(PaymentConfirmed::class, 2);
 });
 
+test('Sammelaktion versendet Tickets vorab für unbezahlte, nicht fakturierte Buchungen', function () {
+    Mail::fake();
+    ['organizer' => $organizer, 'event' => $event, 'ticketType' => $ticketType] =
+        workflowSetup([], ['invoice_mode' => 'external']);
+    $a = workflowBooking($event, $ticketType, ['customer_email' => 'a@example.com']);
+    $b = workflowBooking($event, $ticketType, ['customer_email' => 'b@example.com']);
+    $paid = workflowBooking($event, $ticketType, ['customer_email' => 'c@example.com', 'status' => 'confirmed', 'payment_status' => 'paid']);
+    $paypal = workflowBooking($event, $ticketType, ['customer_email' => 'd@example.com', 'payment_method' => 'paypal']);
+    $cancelled = workflowBooking($event, $ticketType, ['customer_email' => 'e@example.com', 'status' => 'cancelled']);
+
+    $this->actingAs($organizer)
+        ->put(route('organizer.billing-data.bulk-release-tickets'), [
+            'booking_ids' => [$a->id, $b->id, $paid->id, $paypal->id, $cancelled->id],
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('status');
+
+    foreach ([$a, $b] as $booking) {
+        $booking->refresh();
+        expect($booking->status)->toBe('confirmed')
+            ->and($booking->payment_status)->toBe('pending')
+            ->and($booking->externally_invoiced)->toBeFalsy()
+            ->and($booking->release_tickets_before_payment)->toBeTrue()
+            ->and($booking->isReadyForParticipation())->toBeTrue();
+    }
+    expect($paypal->fresh()->status)->toBe('pending')
+        ->and($cancelled->fresh()->status)->toBe('cancelled');
+
+    Mail::assertQueued(PaymentConfirmed::class, 2);
+    Mail::assertQueued(PaymentConfirmed::class, fn ($mail) => $mail->hasTo('a@example.com'));
+    Mail::assertQueued(PaymentConfirmed::class, fn ($mail) => $mail->hasTo('b@example.com'));
+});
+
+test('Sammel-Vorabversand sendet nicht doppelt und ignoriert fremde Buchungen', function () {
+    Mail::fake();
+    ['organizer' => $organizer, 'event' => $event, 'ticketType' => $ticketType] =
+        workflowSetup([], ['invoice_mode' => 'external']);
+    ['event' => $otherEvent, 'ticketType' => $otherTicketType] = workflowSetup([], ['invoice_mode' => 'external']);
+    $booking = workflowBooking($event, $ticketType, ['customer_email' => 'a@example.com']);
+    $foreign = workflowBooking($otherEvent, $otherTicketType, ['customer_email' => 'x@example.com']);
+
+    $this->actingAs($organizer)
+        ->put(route('organizer.billing-data.bulk-release-tickets'), ['booking_ids' => [$booking->id, $foreign->id]]);
+    $this->actingAs($organizer)
+        ->put(route('organizer.billing-data.bulk-release-tickets'), ['booking_ids' => [$booking->id]])
+        ->assertSessionHas('error');
+
+    expect($foreign->fresh()->status)->toBe('pending');
+    Mail::assertQueued(PaymentConfirmed::class, 1);
+});
+
+test('Sammel-Vorabversand verlangt eine Auswahl', function () {
+    ['organizer' => $organizer] = workflowSetup([], ['invoice_mode' => 'external']);
+
+    $this->actingAs($organizer)
+        ->put(route('organizer.billing-data.bulk-release-tickets'), [])
+        ->assertSessionHasErrors('booking_ids');
+});
+
 // ─── Stornierung ────────────────────────────────────────────────────────────
 
 test('Gast ohne verifizierten Zugriff kann fremde Buchung nicht stornieren', function () {

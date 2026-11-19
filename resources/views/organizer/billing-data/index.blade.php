@@ -38,9 +38,21 @@
     <div class="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
         <p class="m-0 text-ui text-muted tabular-nums">
             {{ trans_choice('{1} :count Buchung|[0,*] :count Buchungen', $bookings->total()) }}</p>
-        <x-ui.button type="submit" form="bulk-form" variant="secondary">Auswahl als fakturiert
-            markieren</x-ui.button>
+        <div class="flex flex-wrap items-center gap-3">
+            <x-ui.button type="submit" form="bulk-form" variant="secondary"
+                :formaction="route('organizer.billing-data.bulk-release-tickets')"
+                onclick="return confirm('Tickets bzw. Zugangsdaten für die ausgewählten Buchungen jetzt senden, obwohl die Rechnung noch nicht gestellt ist? Bereits versendete, fakturierte und bezahlte Buchungen werden übersprungen.')">
+                Tickets vorab senden – Rechnung folgt
+            </x-ui.button>
+            <x-ui.button type="submit" form="bulk-form" variant="secondary">Auswahl als fakturiert
+                markieren</x-ui.button>
+        </div>
     </div>
+
+    <p class="-mt-2 mb-4 text-small text-ink-soft">
+        „Tickets vorab senden“ versendet Tickets bzw. Zugangsdaten an alle ausgewählten Buchungen, die noch nicht
+        fakturiert und nicht bezahlt sind. Die Buchungen bleiben offen, bis Sie sie als fakturiert markieren.
+    </p>
 
     <x-ui.table label="Buchungen für die externe Fakturierung">
         <thead>
@@ -81,6 +93,9 @@
                                 <x-ui.status tone="success">Fakturiert</x-ui.status>
                             @else
                                 <x-ui.status tone="warning">Offen</x-ui.status>
+                                @if ($booking->isReadyForParticipation())
+                                    <span class="mt-0.5 block text-small text-muted">Tickets vorab versendet</span>
+                                @endif
                             @endif
                         </span>
                     </td>
@@ -108,6 +123,9 @@
                             </span>
                         @else
                             <x-ui.status tone="warning">Offen</x-ui.status>
+                            @if ($booking->isReadyForParticipation())
+                                <span class="mt-0.5 block text-small text-muted">Tickets vorab versendet</span>
+                            @endif
                         @endif
                     </td>
                     <td class="actions">

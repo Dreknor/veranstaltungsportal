@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Organizer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Services\BookingWorkflowService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
@@ -25,7 +26,7 @@ class BillingDataExportController extends Controller
         }
 
         $query = Booking::whereHas('event', fn ($q) => $q->where('organization_id', $organization->id))
-            ->with(['event', 'items.ticketType'])
+            ->with(['event.organization', 'items.ticketType'])
             ->where('status', '!=', 'cancelled')
             ->where('total', '>', 0);
 
@@ -309,6 +310,54 @@ class BillingDataExportController extends Controller
         }
 
         return back()->with('status', trans_choice('{1} :count Buchung wurde|[0,*] :count Buchungen wurden', $updated).' als fakturiert markiert.');
+    }
+
+    /**
+     * Tickets bzw. Zugangsdaten für mehrere noch nicht fakturierte und unbezahlte Buchungen
+     * vorab versenden (Rechnung folgt später). Bereits freigegebene, fakturierte, bezahlte,
+     * stornierte, kostenfreie und PayPal-Buchungen werden übersprungen.
+     */
+    public function bulkReleaseTickets(Request $request, BookingWorkflowService $workflow)
+    {
+        $organization = auth()->user()->currentOrganization();
+        if (! $organization) {
+            abort(403);
+        }
+
+        $request->validate([
+            'booking_ids' => 'required|array',
+            'booking_ids.*' => 'integer|exists:bookings,id',
+        ], [
+            'booking_ids.required' => 'Bitte wählen Sie mindestens eine Buchung aus.',
+        ]);
+
+        $bookings = Booking::whereIn('id', $request->booking_ids)
+            ->whereHas('event', fn ($q) => $q->where('organization_id', $organization->id))
+            ->with('event')
+            ->get();
+
+        $released = 0;
+        foreach ($bookings as $booking) {
+            if ($booking->payment_method === 'paypal' || $booking->externally_invoiced || $booking->isPaymentComplete()) {
+                continue;
+            }
+
+            if ($workflow->releaseTicketsBeforePayment($booking, queue: true)) {
+                $released++;
+            }
+        }
+
+        $skipped = count($request->booking_ids) - $released;
+        $message = $released > 0
+            ? trans_choice('{1} Für :count Buchung wurden|[0,*] Für :count Buchungen wurden', $released).' Tickets bzw. Zugangsdaten vorab versendet. Die Rechnung ist weiterhin offen.'
+            : 'Es wurden keine Tickets bzw. Zugangsdaten versendet.';
+
+        if ($skipped > 0) {
+            $message .= ' '.trans_choice('{1} :count Buchung wurde|[0,*] :count Buchungen wurden', $skipped)
+                .' übersprungen (bereits versendet, fakturiert, bezahlt, storniert, kostenfrei oder PayPal).';
+        }
+
+        return back()->with($released > 0 ? 'status' : 'error', $message);
     }
 
     /**
