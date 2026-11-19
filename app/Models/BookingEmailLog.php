@@ -45,6 +45,7 @@ class BookingEmailLog extends Model
         'AttendeeTicketMail' => 'Persönliches Ticket an Teilnehmer:in',
         'EventFollowUpMail' => 'Nachbereitung (Bescheinigung & Feedback)',
         'AttendeeMessageMail' => 'Nachricht des Veranstalters',
+        'TicketTypeChanged' => 'Ticketart geändert',
     ];
 
     /**
