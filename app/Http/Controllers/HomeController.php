@@ -19,7 +19,7 @@ class HomeController extends Controller
         // Empfohlene (bezahlt hervorgehobene) Veranstaltungen
         $featuredEvents = Event::listed()
             ->featured()
-            ->with(['category', 'ticketTypes'])
+            ->with(['category', 'ticketTypes', 'organization'])
             ->orderBy('start_date')
             ->limit(3)
             ->get();
@@ -27,7 +27,7 @@ class HomeController extends Controller
         // Kommende Veranstaltungen ohne die bereits empfohlenen; die Anzahl bleibt gleich
         $upcomingEvents = Event::listed()
             ->whereNotIn('id', $featuredEvents->modelKeys())
-            ->with(['category', 'ticketTypes'])
+            ->with(['category', 'ticketTypes', 'organization'])
             ->orderBy('start_date')
             ->limit(self::UPCOMING_LIMIT)
             ->get();

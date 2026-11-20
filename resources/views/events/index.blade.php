@@ -73,7 +73,7 @@
             <x-ui.row-list>
                 @foreach ($items as $itemData)
                     @if ($itemData['type'] === 'event')
-                        <x-ui.event-row :event="$itemData['item']" heading="h2" />
+                        <x-ui.event-row :event="$itemData['item']" heading="h2" organizer-rating />
                     @else
                         @php
                             $series = $itemData['item'];

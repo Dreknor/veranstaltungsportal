@@ -8,6 +8,8 @@
       meta   – Inhalt der Spalte "Format · Ort / Zeit"
       aside  – Inhalt der Spalte "Preis / Status"
       Standard-Slot – zusätzliche Zeile(n) unter dem Titel (z. B. Buchungsnummer)
+    organizer-rating: Veranstalter mit Gesamtbewertung unter dem Titel (öffentliche Listen; erst ab
+      ReviewSummary::MIN_COUNT Bewertungen, sonst nichts). Für Listen 'organization' vorladen.
     Ist ein Slot gesetzt, werden die zugehörigen Werte nicht berechnet (keine Abfragen).
 
     Für Listen bitte vorladen: Event::with(['category', 'ticketTypes']).
@@ -21,6 +23,7 @@
     'action' => null,
     'meta' => null,
     'aside' => null,
+    'organizerRating' => false,
 ])
 
 @php
@@ -96,6 +99,10 @@
         <a href="{{ $href }}"
             class="text-ink no-underline underline-offset-[3px] hover:underline">{{ $event->title }}</a>
         </{{ $heading }}>
+        @if ($organizerRating && $event->organization)
+            <x-ui.rating :summary="$event->organization->reviewSummary()" :prefix="$event->organization->name"
+                size="small" hide-if-few />
+        @endif
         {{ $slot }}
 
         <x-slot:meta>

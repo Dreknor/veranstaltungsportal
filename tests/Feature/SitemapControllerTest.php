@@ -114,7 +114,7 @@ class SitemapControllerTest extends TestCase
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
-    public function organizers_sitemap_contains_organizers_with_published_events(): void
+    public function organizers_sitemap_contains_profiles_of_organizations_with_published_events(): void
     {
         $organizerWithEvents = \App\Models\User::factory()->create(['is_organizer' => true]);
         $organization = \App\Models\Organization::factory()->create();
@@ -124,13 +124,13 @@ class SitemapControllerTest extends TestCase
             'is_published' => true,
         ]);
 
-        $organizerWithoutEvents = \App\Models\User::factory()->create(['is_organizer' => true]);
+        $organizationWithoutEvents = \App\Models\Organization::factory()->create();
 
         $response = $this->get(route('sitemap.organizers'));
 
         $response->assertOk();
-        $response->assertSee(route('users.show', $organizerWithEvents->id));
-        $response->assertDontSee(route('users.show', $organizerWithoutEvents->id));
+        $response->assertSee(route('organizations.show', $organization));
+        $response->assertDontSee(route('organizations.show', $organizationWithoutEvents));
     }
 
     #[\PHPUnit\Framework\Attributes\Test]

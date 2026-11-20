@@ -110,8 +110,6 @@ class EventReviewTest extends TestCase
     #[Test]
     public function only_approved_reviews_are_visible()
     {
-        $this->markTestSkipped('events.show returns 404, possible slug or routing issue');
-
         $event = Event::factory()->create(['is_published' => true]);
 
         $approvedReview = \App\Models\EventReview::factory()->create([
