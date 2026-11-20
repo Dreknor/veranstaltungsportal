@@ -579,6 +579,7 @@ class BookingController extends Controller
         $validated = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
+            'show_full_name' => 'nullable|boolean',
         ], [
             'rating.required' => 'Bitte wählen Sie eine Bewertung von 1 bis 5 Sternen.',
         ]);
@@ -589,6 +590,7 @@ class BookingController extends Controller
             'user_id' => $booking->user_id,
             'rating' => $validated['rating'],
             'comment' => $validated['comment'] ?? null,
+            'show_full_name' => $request->boolean('show_full_name'),
             'is_approved' => false,
         ]);
 

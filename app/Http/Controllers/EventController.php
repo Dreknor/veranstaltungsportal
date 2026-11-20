@@ -116,7 +116,7 @@ class EventController extends Controller
     public function show($slug)
     {
         $event = Event::where('slug', $slug)
-            ->with(['category', 'organization.users', 'ticketTypes', 'reviews.user', 'dates'])
+            ->with(['category', 'organization.users', 'ticketTypes', 'reviews.user', 'reviews.booking', 'dates'])
             ->firstOrFail();
 
         // Increment view count
@@ -143,6 +143,33 @@ class EventController extends Controller
             ->limit(3)
             ->get();
 
+        // Bewertungen: diese Veranstaltung, frühere Termine desselben Angebots, Veranstalter gesamt
+        $approvedReviews = $event->reviews
+            ->where('is_approved', true)
+            ->sortByDesc('created_at')
+            ->values();
+        $eventSummary = $event->reviewSummary();
+
+        $predecessorQuery = $event->predecessor_id ? $event->predecessorReviews() : null;
+        $predecessorSummary = $predecessorQuery
+            ? \App\Support\ReviewSummary::fromQuery($predecessorQuery)
+            : \App\Support\ReviewSummary::empty();
+        $predecessorReviews = $predecessorQuery && $predecessorSummary->hasReviews()
+            ? $predecessorQuery->with(['event', 'user', 'booking'])->latest()->limit(5)->get()
+            : collect();
+
+        $organizationSummary = $event->organization?->reviewSummary() ?? \App\Support\ReviewSummary::empty();
+        $organizationProfileUrl = $event->organization?->hasPublicProfile()
+            ? route('organizations.show', $event->organization)
+            : null;
+
+        // Vergangene Veranstaltung: auf den nächsten Termin desselben Angebots verweisen
+        $nextEvent = $event->hasEnded() ? $event->upcomingSuccessor() : null;
+
+        $userReview = auth()->check()
+            ? $event->reviews->firstWhere('user_id', auth()->id())
+            : null;
+
         // Social Share URLs
         $socialShareService = app(\App\Services\SocialShareService::class);
         $shareUrls = $socialShareService->getAllShareUrls($event);
@@ -151,7 +178,20 @@ class EventController extends Controller
         // Unterscheide zwischen angemeldeten und nicht-angemeldeten Benutzern
         $view = auth()->check() ? 'events.show-auth' : 'events.show';
 
-        return view($view, compact('event', 'relatedEvents', 'shareUrls', 'shareableLink'));
+        return view($view, compact(
+            'event',
+            'relatedEvents',
+            'shareUrls',
+            'shareableLink',
+            'approvedReviews',
+            'eventSummary',
+            'predecessorSummary',
+            'predecessorReviews',
+            'organizationSummary',
+            'organizationProfileUrl',
+            'nextEvent',
+            'userReview',
+        ));
     }
 
     public function access($slug)

@@ -49,7 +49,7 @@
                         $event = $itemData['item'];
                         $isFavorite = auth()->user()->hasFavorited($event);
                     @endphp
-                    <x-ui.event-row :event="$event" heading="h2">
+                    <x-ui.event-row :event="$event" heading="h2" organizer-rating>
                         <button type="button" onclick="toggleFavorite({{ $event->id }}, this)"
                             data-favorited="{{ $isFavorite ? 'true' : 'false' }}"
                             aria-pressed="{{ $isFavorite ? 'true' : 'false' }}"

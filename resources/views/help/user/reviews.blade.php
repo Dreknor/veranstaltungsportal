@@ -9,6 +9,7 @@
             <li><a href="#write">1. Bewertung schreiben</a></li>
             <li><a href="#guidelines">2. Bewertungs-Richtlinien</a></li>
             <li><a href="#after">3. Nach dem Absenden</a></li>
+            <li><a href="#visible">4. Wo Bewertungen erscheinen</a></li>
         </ul>
     </nav>
 
@@ -29,6 +30,8 @@
                     Veranstaltung gefallen?“</strong></li>
             <li>Vergeben Sie 1 bis 5 Sterne</li>
             <li>Schreiben Sie einen Kommentar (optional, aber empfohlen)</li>
+            <li>Entscheiden Sie, ob Ihr vollständiger Name erscheinen soll. Sonst wird nur Ihr Vorname mit dem
+                Anfangsbuchstaben des Nachnamens gezeigt, zum Beispiel „Daniela R.“</li>
             <li>Klicken Sie auf <strong>„Bewertung abgeben“</strong> bzw. <strong>„Feedback senden“</strong></li>
         </ol>
 
@@ -54,18 +57,49 @@
             <li><strong>Beleidigende Sprache:</strong> Keine Beleidigungen, Drohungen oder Diskriminierung</li>
             <li><strong>Persönliche Angriffe:</strong> Kritisieren Sie Inhalte, nicht Personen</li>
             <li><strong>Spam oder Werbung:</strong> Keine Werbung für eigene Produkte oder externe Links</li>
+            <li><strong>Persönliche Daten Dritter:</strong> Keine Namen, Telefonnummern oder Adressen anderer
+                Teilnehmender</li>
+            <li><strong>Kein Bezug zur Veranstaltung:</strong> Bewerten Sie die Veranstaltung, nicht etwa die Anreise
+                mit der Bahn</li>
         </ul>
 
-        <x-ui.alert tone="warning" title="Hinweis">Bewertungen, die gegen die Richtlinien verstoßen, werden moderiert
-            und können gelöscht werden.</x-ui.alert>
+        <x-ui.alert tone="warning" title="Hinweis">Abgelehnt werden nur Bewertungen, die gegen diese Richtlinien
+            verstoßen – eine schlechte Note allein ist kein Grund. Die Plattform sieht, wie viele Bewertungen ein
+            Veranstalter ablehnt.</x-ui.alert>
     </section>
 
     <section id="after">
         <h2>3. Nach dem Absenden</h2>
         <p>
-            Jede Veranstaltung können Sie einmal bewerten. Ihre Bewertung wird vom Veranstalter geprüft und dann auf
-            der Veranstaltungsseite veröffentlicht. Bis dahin sehen Sie dort den Hinweis, dass Ihre Bewertung geprüft
+            Jede Veranstaltung können Sie einmal bewerten. Ihre Bewertung wird vom Veranstalter geprüft und dann
+            veröffentlicht. Bis dahin sehen Sie auf der Veranstaltungsseite den Hinweis, dass Ihre Bewertung geprüft
             wird.
+        </p>
+        <h3>Bewertung ändern</h3>
+        <p>
+            Auf der Veranstaltungsseite finden Sie unter „Ihre Bewertung“ den Punkt <strong>„Bewertung ändern“</strong>.
+            Ändern Sie Sterne oder Kommentar, wird die Bewertung erneut geprüft und ist bis zur Freigabe nicht
+            sichtbar.
+        </p>
+        <h3>Antwort des Veranstalters</h3>
+        <p>
+            Veranstalter können öffentlich auf Bewertungen antworten. Die Antwort steht direkt unter Ihrer Bewertung.
+        </p>
+    </section>
+
+    <section id="visible">
+        <h2>4. Wo Bewertungen erscheinen</h2>
+        <ul>
+            <li><strong>Auf der Veranstaltungsseite:</strong> unter „Bewertungen“, auch nachdem die Veranstaltung
+                vorbei ist.</li>
+            <li><strong>Bei späteren Terminen desselben Angebots:</strong> Wird eine Veranstaltung wiederholt, sehen
+                Interessierte Ihre Bewertung beim neuen Termin unter „Bewertungen früherer Termine“.</li>
+            <li><strong>Im Veranstalter-Profil:</strong> Dort stehen alle Bewertungen und die Gesamtbewertung des
+                Veranstalters aus den letzten 24 Monaten.</li>
+        </ul>
+        <p>
+            Einen Durchschnitt zeigen wir erst ab drei Bewertungen, und immer zusammen mit der Anzahl. So bekommt eine
+            einzelne Note kein zu großes Gewicht.
         </p>
     </section>
 </x-help.article>

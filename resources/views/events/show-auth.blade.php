@@ -63,11 +63,16 @@
             in_array($state, ['bookable', 'waitlist', 'closed'], true) &&
             ($visibleTickets->isNotEmpty() || $event->price_from !== null);
 
-        $approvedReviews = $event->reviews->where('is_approved', true);
         $organization = $event->organization;
-        $showOrganization =
-            $organization &&
-            ($organization->description || $organization->email || $organization->phone || $organization->website);
+        $hasEnded = $event->hasEnded();
+
+        // Eine Bewertungszeile unter dem Titel: eigene Bewertungen (nach dem Ende), sonst frühere Termine,
+        // sonst der Veranstalter insgesamt – jeweils erst ab ReviewSummary::MIN_COUNT Bewertungen.
+        [$headlineSummary, $headlinePrefix, $headlineHref] = match (true) {
+            $eventSummary->isMeaningful() => [$eventSummary, null, '#bewertungen'],
+            $predecessorSummary->isMeaningful() => [$predecessorSummary, 'Frühere Termine:', '#fruehere-termine'],
+            default => [$organizationSummary, 'Veranstalter:', $organizationProfileUrl],
+        };
     @endphp
 
     <div class="mx-auto max-w-page px-page pt-6 pb-16">
@@ -88,8 +93,16 @@
                 <p class="m-0 text-ui text-ink-soft">
                     <x-event-type-badge :event="$event" size="md" />
                     <span aria-hidden="true">·</span>
-                    Veranstalter: {{ $event->getOrganizerName() }}
+                    Veranstalter:
+                    @if ($organizationProfileUrl)
+                        <a href="{{ $organizationProfileUrl }}"
+                            class="text-ink-soft underline underline-offset-[3px] hover:text-ink">{{ $event->getOrganizerName() }}</a>
+                    @else
+                        {{ $event->getOrganizerName() }}
+                    @endif
                 </p>
+                <x-ui.rating :summary="$headlineSummary" :prefix="$headlinePrefix" :href="$headlineHref" size="small"
+                    hide-if-few />
 
                 @if ($event->is_cancelled)
                     <x-ui.alert tone="danger" title="Diese Veranstaltung wurde abgesagt." size="base"
@@ -105,8 +118,21 @@
                 @elseif($event->end_date->isPast())
                     <x-ui.alert tone="info" title="Diese Veranstaltung hat bereits stattgefunden." size="base"
                         class="mt-3">
-                        Sie endete am {{ Ui::date($event->end_date) }} um {{ $event->end_date->format('H:i') }} Uhr.
-                        Eine Buchung ist nicht mehr möglich.
+                        <p>Sie endete am {{ Ui::date($event->end_date) }} um {{ $event->end_date->format('H:i') }} Uhr.
+                            Eine Buchung ist nicht mehr möglich.</p>
+                        @if ($nextEvent)
+                            <p>
+                                Nächster Termin: <a href="{{ route('events.show', $nextEvent->slug) }}"
+                                    class="font-medium text-ink underline underline-offset-[3px]">{{ $nextEvent->title }}</a>
+                                am <span class="tabular-nums">{{ Ui::date($nextEvent->start_date) }}</span>
+                            </p>
+                        @elseif ($organizationProfileUrl)
+                            <p>
+                                <a href="{{ $organizationProfileUrl }}"
+                                    class="font-medium text-ink underline underline-offset-[3px]">Aktuelle Veranstaltungen
+                                    von {{ $event->getOrganizerName() }}</a>
+                            </p>
+                        @endif
                     </x-ui.alert>
                 @endif
             </header>
@@ -195,6 +221,10 @@
                         @case('past')
                             <x-ui.status tone="neutral">Beendet</x-ui.status>
                             <p class="m-0 text-small text-ink-soft">Eine Buchung ist nicht mehr möglich.</p>
+                            @if ($nextEvent)
+                                <x-ui.button :href="route('events.show', $nextEvent->slug)" size="lg" full>Zum nächsten
+                                    Termin</x-ui.button>
+                            @endif
                         @break
 
                         @default
@@ -358,7 +388,7 @@
                     </x-ui.section>
                 @endif
 
-                @if ($showOrganization)
+                @if ($organization)
                     <x-ui.section title="Veranstalter" id="veranstalter">
                         <div class="flex flex-col gap-4">
                             <div class="flex items-center gap-4">
@@ -367,7 +397,11 @@
                                         alt="{{ $organization->name }} Logo"
                                         class="h-16 w-16 flex-none rounded-control border border-line bg-surface object-contain p-2">
                                 @endif
-                                <p class="m-0 text-h3">{{ $organization->name }}</p>
+                                <div class="flex min-w-0 flex-col gap-1">
+                                    <p class="m-0 text-h3">{{ $organization->name }}</p>
+                                    <x-ui.rating :summary="$organizationSummary" :href="$organizationProfileUrl ? $organizationProfileUrl . '?ansicht=bewertungen' : null"
+                                        size="small" />
+                                </div>
                             </div>
                             @if ($organization->description)
                                 <p class="m-0 max-w-prose text-base text-ink-soft">{{ $organization->description }}
@@ -392,124 +426,96 @@
                                     @endif
                                 </ul>
                             @endif
+                            @if ($organizationProfileUrl)
+                                <div>
+                                    <x-ui.button variant="link" :href="$organizationProfileUrl" arrow>Alle Veranstaltungen und
+                                        Bewertungen</x-ui.button>
+                                </div>
+                            @endif
                         </div>
                     </x-ui.section>
                 @endif
 
                 <x-ui.section title="Bewertungen" id="bewertungen">
-                    @if ($approvedReviews->count() > 0)
-                        @php $average = $event->averageRating(); @endphp
-                        <div class="mb-6 flex items-center gap-4">
-                            <span class="text-h2 tabular-nums">{{ number_format($average, 1, ',', '.') }}</span>
-                            <div class="flex flex-col gap-1">
-                                <span class="flex text-ink" role="img"
-                                    aria-label="{{ number_format($average, 1, ',', '.') }} von 5 Sternen">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        @if ($i <= $average)
-                                            <x-icon.star-filled class="h-5 w-5" />
-                                        @else
-                                            <x-icon.star class="h-5 w-5 text-line-strong" />
-                                        @endif
-                                    @endfor
-                                </span>
-                                <span
-                                    class="text-small text-muted">{{ trans_choice(':count Bewertung|:count Bewertungen', $approvedReviews->count()) }}</span>
-                            </div>
-                        </div>
-
-                        <ul class="m-0 flex list-none flex-col divide-y divide-line border-t border-line p-0">
-                            @foreach ($approvedReviews->take(5) as $review)
-                                <li class="flex flex-col gap-2 py-4">
-                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                                        <span class="text-ui font-medium">{{ $review->reviewerName() }}</span>
-                                        <span class="flex text-ink" role="img"
-                                            aria-label="{{ $review->rating }} von 5 Sternen">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $review->rating)
-                                                    <x-icon.star-filled class="h-4 w-4" />
-                                                @else
-                                                    <x-icon.star class="h-4 w-4 text-line-strong" />
-                                                @endif
-                                            @endfor
-                                        </span>
-                                        <span
-                                            class="text-small text-muted">{{ $review->created_at->diffForHumans() }}</span>
-                                    </div>
-                                    @if ($review->comment)
-                                        <p class="m-0 max-w-prose text-base text-ink-soft">{{ $review->comment }}</p>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <p class="m-0 text-base text-muted">Noch keine Bewertungen vorhanden.</p>
-                    @endif
-
-                    <!-- Review Form for Authenticated Users -->
-                    @auth
-                        @php
-                            $userReview = $event
-                                ->reviews()
-                                ->where('user_id', auth()->id())
-                                ->first();
-                            $hasAttended = $event->canBeReviewedBy(auth()->user());
-                        @endphp
-
-                        @if ($hasAttended && !$userReview)
-                            <div class="mt-8 max-w-form">
-                                <h3 class="m-0 mb-4 text-h3">Ihre Bewertung</h3>
-                                <form action="{{ route('events.reviews.store', $event) }}" method="POST"
-                                    class="flex flex-col gap-y-5">
-                                    @csrf
-
-                                    <!-- Star Rating -->
-                                    <fieldset class="m-0 min-w-0 border-0 p-0">
-                                        <x-ui.label as="legend" required>Bewertung</x-ui.label>
-                                        <div class="flex gap-1" x-data="{ rating: 0, hoverRating: 0 }">
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                <button type="button" @click="rating = {{ $i }}"
-                                                    @mouseenter="hoverRating = {{ $i }}"
-                                                    @mouseleave="hoverRating = 0"
-                                                    aria-label="{{ $i }} von 5 Sternen"
-                                                    :aria-pressed="(rating === {{ $i }}).toString()"
-                                                    class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control transition-colors duration-150 hover:bg-zone"
-                                                    :class="(hoverRating >= {{ $i }} || (rating >=
-                                                        {{ $i }} && hoverRating === 0)) ? 'text-ink' :
-                                                    'text-line-strong'">
-                                                    <x-icon.star-filled class="h-6 w-6" />
-                                                </button>
-                                            @endfor
-                                            <input type="hidden" name="rating" x-model="rating" required>
-                                        </div>
-                                        <x-ui.field-error name="rating" />
-                                    </fieldset>
-
-                                    <!-- Comment -->
-                                    <x-ui.textarea label="Kommentar" name="comment" optional rows="4"
-                                        placeholder="Teilen Sie Ihre Erfahrungen mit anderen Teilnehmenden." />
-
-                                    <div>
-                                        <x-ui.button type="submit">Bewertung abgeben</x-ui.button>
-                                    </div>
-                                </form>
-                            </div>
-                        @elseif($userReview)
-                            <x-ui.alert tone="info" title="Ihre Bewertung wurde eingereicht." class="mt-6">
-                                @if ($userReview->is_approved)
-                                    Ihre Bewertung ist veröffentlicht.
-                                @else
-                                    Ihre Bewertung wird gerade geprüft und in Kürze veröffentlicht.
+                    <div class="flex flex-col gap-10">
+                        @if ($hasEnded || $approvedReviews->isNotEmpty())
+                            <div class="flex flex-col gap-6">
+                                <x-review.summary :summary="$eventSummary" />
+                                @if ($approvedReviews->isNotEmpty())
+                                    <x-review.list :reviews="$approvedReviews->take(10)" :organization-name="$organization?->name" />
                                 @endif
-                            </x-ui.alert>
-                        @elseif(!$hasAttended && $event->hasEnded())
-                            <p class="m-0 mt-6 text-small text-muted">Nur Teilnehmende können eine Bewertung abgeben.</p>
+                            </div>
                         @endif
-                    @else
-                        <div class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3">
-                            <p class="m-0 text-base text-ink-soft">Melden Sie sich an, um eine Bewertung abzugeben.</p>
-                            <x-ui.button variant="secondary" :href="route('login')">Anmelden</x-ui.button>
-                        </div>
-                    @endauth
+
+                        @if ($predecessorSummary->hasReviews())
+                            <section aria-labelledby="fruehere-termine" class="flex flex-col gap-6">
+                                <div class="flex flex-col gap-1">
+                                    <h3 id="fruehere-termine" class="m-0 scroll-mt-6 text-h3">Bewertungen früherer Termine</h3>
+                                    <p class="m-0 max-w-prose text-small text-muted">Diese Veranstaltung wurde schon
+                                        einmal angeboten. Die Bewertungen stammen von Teilnehmenden früherer Termine.</p>
+                                </div>
+                                <x-review.summary :summary="$predecessorSummary" />
+                                <x-review.list :reviews="$predecessorReviews" show-event :organization-name="$organization?->name" />
+                            </section>
+                        @endif
+
+                        @if (!$hasEnded && $approvedReviews->isEmpty() && !$predecessorSummary->hasReviews())
+                            <div class="flex flex-col gap-3">
+                                <p class="m-0 max-w-prose text-base text-muted">Teilnehmende können diese Veranstaltung
+                                    nach ihrem Ende bewerten.</p>
+                                @if ($organizationSummary->isMeaningful())
+                                    <x-ui.rating :summary="$organizationSummary" prefix="Bewertung des Veranstalters:"
+                                        :href="$organizationProfileUrl ? $organizationProfileUrl . '?ansicht=bewertungen' : null" />
+                                @endif
+                            </div>
+                        @endif
+
+                        @auth
+                            @php $hasAttended = $event->canBeReviewedBy(auth()->user()); @endphp
+
+                            @if ($hasAttended && !$userReview)
+                                <section aria-labelledby="ihre-bewertung" class="flex flex-col gap-4 border-t border-line pt-8">
+                                    <h3 id="ihre-bewertung" class="m-0 text-h3">Ihre Bewertung</h3>
+                                    <x-review.form :action="route('events.reviews.store', $event)" />
+                                </section>
+                            @elseif ($userReview)
+                                <section aria-labelledby="ihre-bewertung" class="flex flex-col gap-4 border-t border-line pt-8">
+                                    <h3 id="ihre-bewertung" class="m-0 text-h3">Ihre Bewertung</h3>
+                                    @if ($userReview->is_approved)
+                                        <x-ui.alert tone="success" title="Ihre Bewertung ist veröffentlicht." />
+                                    @elseif ($userReview->isRejected())
+                                        <x-ui.alert tone="warning" title="Ihre Bewertung wurde nicht veröffentlicht.">
+                                            Sie verstößt gegen die Bewertungsrichtlinien. Sie können sie ändern; danach
+                                            wird sie erneut geprüft.
+                                        </x-ui.alert>
+                                    @else
+                                        <x-ui.alert tone="info" title="Ihre Bewertung wurde eingereicht.">
+                                            Sie wird gerade geprüft und in Kürze veröffentlicht.
+                                        </x-ui.alert>
+                                    @endif
+                                    <details class="group" @if ($errors->has('rating') || $errors->has('comment')) open @endif>
+                                        <summary
+                                            class="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 text-ui font-medium text-ink underline-offset-[3px] hover:underline [&::-webkit-details-marker]:hidden">
+                                            <x-icon.chevron-down class="h-4 w-4 transition-transform duration-150 group-open:rotate-180" />
+                                            Bewertung ändern
+                                        </summary>
+                                        <x-review.form :action="route('reviews.update', $userReview)" :review="$userReview"
+                                            comment-id="review-comment-edit" class="mt-4" />
+                                    </details>
+                                </section>
+                            @elseif ($hasEnded)
+                                <p class="m-0 text-small text-muted">Nur Teilnehmende können eine Bewertung abgeben.</p>
+                            @endif
+                        @else
+                            @if ($hasEnded)
+                                <div class="flex flex-wrap items-center gap-x-4 gap-y-3">
+                                    <p class="m-0 text-base text-ink-soft">Sie haben teilgenommen? Melden Sie sich an, um
+                                        eine Bewertung abzugeben.</p>
+                                    <x-ui.button variant="secondary" :href="route('login')">Anmelden</x-ui.button>
+                                </div>
+                            @endif
+                        @endauth
+                    </div>
                 </x-ui.section>
 
                 <x-social-share :event="$event" :shareUrls="$shareUrls" :shareableLink="$shareableLink" />

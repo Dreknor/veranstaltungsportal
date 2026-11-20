@@ -569,6 +569,7 @@ Radius 12, Trennlinien); `event-row` ermittelt alles aus dem Event-Modell:
 | `href` | Detailseite | Ziel des Titels |
 | `heading` | `h3` | Element des Titels (`h2` · `h3` · `p`) |
 | `show-action` | `true` | `false` blendet die Aktionsspalte aus |
+| `organizer-rating` | `false` | Veranstalter mit Gesamtbewertung unter dem Titel (öffentliche Listen; erst ab drei Bewertungen, sonst nichts). `organization` vorladen. |
 
 Slots zum Überschreiben: `meta`, `aside` (Preis/Status), `action`; Standard-Slot = zusätzliche Zeile
 unter dem Titel. Gesetzte Slots sparen die zugehörigen Abfragen.
@@ -996,6 +997,46 @@ Slot zeigt „–".
     <x-ui.dl-item label="Status"><x-ui.status :tone="\App\Support\Ui::bookingTone($booking->status)">{{ $booking->statusLabel() }}</x-ui.status></x-ui.dl-item>
 </x-ui.dl>
 ```
+
+## Bewertungen
+
+Kennzahlen kommen immer aus `App\Support\ReviewSummary` (`$event->reviewSummary()`,
+`$organization->reviewSummary()`, `ReviewSummary::fromQuery(...)`): nur freigegebene Bewertungen, ein
+Durchschnitt erst ab `ReviewSummary::MIN_COUNT` (3), die Anzahl steht immer dabei. Sterne sind
+`ink` (gefüllt) und `line-strong` (leer) – kein Gelb.
+
+### `<x-ui.stars>`
+
+Sternreihe 1–5 als `role="img"` mit „4,6 von 5 Sternen". `value` (auch Kommazahl), `size` (`sm` 16 px ·
+`md` 20 px), `decorative` (ausblenden, wenn die Zahl daneben als Text steht).
+
+### `<x-ui.rating>`
+
+Kompakte Zeile „(5 Sterne) 4,6 von 5 · 38 Bewertungen". Unter drei Bewertungen „Noch zu wenige Bewertungen …"
+oder – mit `hide-if-few` – gar nichts.
+
+| Prop | Default | |
+|---|---|---|
+| `summary` | – | `ReviewSummary` |
+| `href` | `null` | Anzahl als Link (z. B. Veranstalter-Profil `?ansicht=bewertungen`) |
+| `prefix` | `null` | Text davor in `muted`, z. B. „Veranstalter:" |
+| `size` | `ui` | `ui` 15 px · `small` 14 px |
+| `hide-if-few` | `false` | unter drei Bewertungen nichts ausgeben |
+
+```blade
+<x-ui.rating :summary="$organization->reviewSummary()" :href="route('organizations.show', $organization)" />
+```
+
+### `<x-review.summary>`, `<x-review.list>`, `<x-review.item>`, `<x-review.status>`, `<x-review.form>`
+
+- `review.summary`: Durchschnitt groß, Sterne, Anzahl, Verteilung 5 → 1 als `x-ui.progress decorative`;
+  `note` ergänzt die Anzahl („aus den letzten 24 Monaten").
+- `review.list` / `review.item`: veröffentlichte Bewertungen mit gekürztem Namen (`publicName()`), Datum,
+  Kommentar und Antwort des Veranstalters (Kasten auf `zone`). `show-event` nennt die bewertete
+  Veranstaltung („Teilnahme an … am …") – für Profil und frühere Termine.
+- `review.status`: Moderationsstand Freigegeben · Abgelehnt · Wartet (`long`: „Wartet auf Freigabe").
+- `review.form`: Sterne als Radio-Gruppe, Kommentar, „Meinen vollständigen Namen anzeigen". Ohne `review`
+  POST, mit `review` PUT („Bewertung ändern"). `submit-label`, `comment-id`, `placeholder`.
 
 ## Navigation
 

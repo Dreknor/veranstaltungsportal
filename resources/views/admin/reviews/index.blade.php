@@ -1,16 +1,54 @@
 <x-layouts.app title="Bewertungen" :header="false">
     <x-ui.page-header title="Bewertungen verwalten" />
 
-    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <x-ui.stat label="Gesamt" :value="$stats['total']" />
         <x-ui.stat label="Warten auf Freigabe" :value="$stats['pending']" />
         <x-ui.stat label="Freigegeben" :value="$stats['approved']" />
+        <x-ui.stat label="Abgelehnt" :value="$stats['rejected']" />
         <x-ui.stat label="Durchschnittliche Bewertung" :value="number_format((float) ($stats['average_rating'] ?? 0), 1, ',', '.') . ' von 5'" />
     </div>
 
+    @if ($moderation->isNotEmpty())
+        <x-ui.section title="Ablehnungen je Veranstalter" id="ablehnungen" class="mb-10"
+            description="Abgelehnt werden darf nur bei Verstoß gegen die Bewertungsrichtlinien, nicht wegen schlechter Noten. Ab {{ \App\Http\Controllers\Admin\ReviewManagementController::REJECTION_ALERT_PERCENT }} % abgelehnter Bewertungen ist der Veranstalter markiert.">
+            <x-ui.table label="Ablehnungen je Veranstalter">
+                <thead>
+                    <tr>
+                        <th scope="col">Veranstalter</th>
+                        <th scope="col" class="text-right">Entschieden</th>
+                        <th scope="col" class="text-right">Abgelehnt</th>
+                        <th scope="col" class="text-right">Quote</th>
+                        <th scope="col" class="actions"><span class="sr-only">Aktionen</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($moderation as $row)
+                        <tr>
+                            <td>
+                                {{ $row->organization?->name ?? 'Gelöschter Veranstalter' }}
+                                @if ($row->percent >= \App\Http\Controllers\Admin\ReviewManagementController::REJECTION_ALERT_PERCENT)
+                                    <x-ui.status tone="warning" class="mt-1">Auffällig viele Ablehnungen</x-ui.status>
+                                @endif
+                            </td>
+                            <td class="text-right tabular-nums">{{ $row->decided }}</td>
+                            <td class="text-right tabular-nums">{{ $row->rejected }}</td>
+                            <td class="text-right tabular-nums">{{ $row->percent }} %</td>
+                            <td class="actions">
+                                <x-ui.button variant="link" size="sm"
+                                    :href="route('admin.reviews.index', ['status' => 'rejected', 'organization_id' => $row->organization_id])">Abgelehnte
+                                    ansehen</x-ui.button>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </x-ui.table>
+        </x-ui.section>
+    @endif
+
     <form method="GET" action="{{ route('admin.reviews.index') }}"
         class="mb-6 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] items-end gap-x-4 gap-y-5">
-        <x-ui.select label="Status" name="status" :old="false" :options="['' => 'Alle', 'pending' => 'Warten auf Freigabe', 'approved' => 'Freigegeben']" :selected="request('status')" />
+        <x-ui.select label="Status" name="status" :old="false" :options="['' => 'Alle', 'pending' => 'Warten auf Freigabe', 'approved' => 'Freigegeben', 'rejected' => 'Abgelehnt']" :selected="request('status')" />
         <x-ui.select label="Bewertung" name="rating" :old="false">
             <option value="">Alle</option>
             @for ($i = 5; $i >= 1; $i--)
@@ -18,6 +56,9 @@
                     {{ $i === 1 ? 'Stern' : 'Sterne' }}</option>
             @endfor
         </x-ui.select>
+        @if (request('organization_id'))
+            <input type="hidden" name="organization_id" value="{{ request('organization_id') }}">
+        @endif
         <x-ui.field label="Suche" name="search" :old="false" :value="request('search')"
             placeholder="Veranstaltung, Benutzer" />
         <div>
@@ -34,12 +75,12 @@
             <div class="flex flex-wrap items-center gap-3">
                 <form method="POST" action="{{ route('admin.reviews.bulk-approve') }}" id="bulk-approve-form">
                     @csrf
-                    <input type="hidden" name="review_ids" id="bulk-approve-ids">
+                    <div class="bulk-ids"></div>
                     <x-ui.button type="submit">Freigeben</x-ui.button>
                 </form>
                 <form method="POST" action="{{ route('admin.reviews.bulk-reject') }}" id="bulk-reject-form">
                     @csrf
-                    <input type="hidden" name="review_ids" id="bulk-reject-ids">
+                    <div class="bulk-ids"></div>
                     <x-ui.button type="submit" variant="secondary">Ablehnen</x-ui.button>
                 </form>
             </div>
@@ -70,6 +111,9 @@
                     <td class="min-w-48 max-sm:min-w-0">
                         <a href="{{ route('events.show', $review->event->slug) }}" target="_blank" rel="noopener"
                             class="text-ink underline underline-offset-[3px]">{{ Str::limit($review->event->title, 40) }}</a>
+                        @if ($review->event->organization)
+                            <span class="block text-small text-muted">{{ $review->event->organization->name }}</span>
+                        @endif
                         <span
                             class="block text-small text-muted tabular-nums">{{ $review->created_at->format('d.m.Y') }}</span>
                         <span class="block text-small text-muted tabular-nums sm:hidden">{{ $review->reviewerName() }}
@@ -90,6 +134,8 @@
                     <td>
                         @if ($review->is_approved)
                             <x-ui.status tone="success">Freigegeben</x-ui.status>
+                        @elseif ($review->isRejected())
+                            <x-ui.status tone="danger">Abgelehnt</x-ui.status>
                         @else
                             <x-ui.status tone="warning">Wartet</x-ui.status>
                         @endif
@@ -99,7 +145,8 @@
                             @if (!$review->is_approved)
                                 <x-ui.dropdown-item type="submit"
                                     :form="'approve-' . ($review->id)">Freigeben</x-ui.dropdown-item>
-                            @else
+                            @endif
+                            @if (!$review->isRejected())
                                 <x-ui.dropdown-item type="submit"
                                     :form="'reject-' . ($review->id)">Ablehnen</x-ui.dropdown-item>
                             @endif
@@ -110,7 +157,8 @@
                             <form id="approve-{{ $review->id }}" method="POST"
                                 action="{{ route('admin.reviews.approve', $review) }}" class="hidden">@csrf
                                 @method('PATCH')</form>
-                        @else
+                        @endif
+                        @if (!$review->isRejected())
                             <form id="reject-{{ $review->id }}" method="POST"
                                 action="{{ route('admin.reviews.reject', $review) }}" class="hidden">@csrf
                                 @method('PATCH')</form>
@@ -160,8 +208,15 @@
                 bulkActions.style.display = 'block';
                 selectedCountEl.textContent = selected.length;
                 document.getElementById('selected-label').textContent = selected.length === 1 ? 'Bewertung' : 'Bewertungen';
-                document.getElementById('bulk-approve-ids').value = JSON.stringify(selectedIds);
-                document.getElementById('bulk-reject-ids').value = JSON.stringify(selectedIds);
+                document.querySelectorAll('#bulk-actions .bulk-ids').forEach(container => {
+                    container.replaceChildren(...selectedIds.map(id => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'review_ids[]';
+                        input.value = id;
+                        return input;
+                    }));
+                });
             } else {
                 bulkActions.style.display = 'none';
             }

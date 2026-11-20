@@ -104,6 +104,27 @@
                     <x-ui.markdown-editor label="Beschreibung" name="description" :value="$event->description" required />
 
                     <div class="flex flex-col gap-3">
+                        <x-ui.select label="Früherer Termin dieses Angebots" name="predecessor_id" optional
+                            :options="$predecessorOptions" :selected="$event->predecessor_id"
+                            placeholder="Kein früherer Termin"
+                            hint="Wird diese Veranstaltung wiederholt angeboten, wählen Sie den vorherigen Termin. Dessen Bewertungen erscheinen dann auf der Veranstaltungsseite unter „Bewertungen früherer Termine“. Beim Duplizieren wird der Termin automatisch verknüpft." />
+                        @if ($event->predecessor)
+                            <p class="m-0 text-small text-muted">
+                                Verknüpft mit
+                                <a href="{{ route('organizer.events.edit', $event->predecessor) }}"
+                                    class="text-ink underline underline-offset-[3px]">{{ $event->predecessor->title }}</a>
+                                ·
+                                {{ $predecessorReviewCount === 1 ? '1 freigegebene Bewertung' : $predecessorReviewCount . ' freigegebene Bewertungen' }}
+                                aus früheren Terminen
+                            </p>
+                        @endif
+                        @error('predecessor_id')
+                            <x-ui.checkbox name="confirm_predecessor" id="confirm_predecessor"
+                                label="Ja, es ist dasselbe Angebot – Bewertungen des früheren Termins übernehmen" />
+                        @enderror
+                    </div>
+
+                    <div class="flex flex-col gap-3">
                         <x-ui.label as="span" class="mb-0">Titelbild</x-ui.label>
 
                         @if ($event->featured_image)

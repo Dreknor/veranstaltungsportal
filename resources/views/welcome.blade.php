@@ -30,7 +30,7 @@
             <x-ui.section title="Empfohlene Veranstaltungen" class="pt-[clamp(40px,5vw,64px)]">
                 <x-ui.row-list>
                     @foreach ($featuredEvents as $event)
-                        <x-ui.event-row :event="$event" />
+                        <x-ui.event-row :event="$event" organizer-rating />
                     @endforeach
                 </x-ui.row-list>
             </x-ui.section>
@@ -42,7 +42,7 @@
             @if ($upcomingEvents->isNotEmpty())
                 <x-ui.row-list>
                     @foreach ($upcomingEvents as $event)
-                        <x-ui.event-row :event="$event" />
+                        <x-ui.event-row :event="$event" organizer-rating />
                     @endforeach
                 </x-ui.row-list>
             @else

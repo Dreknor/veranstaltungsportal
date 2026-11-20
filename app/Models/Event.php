@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ReviewSummary;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,10 +30,14 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @property int|null $cancellation_days_before
  * @property bool $free_ticket_auto_confirm
  * @property bool $tickets_before_invoice
+ * @property int|null $predecessor_id
  */
 class Event extends Model implements HasMedia
 {
     use HasFactory, InteractsWithMedia, SoftDeletes;
+
+    /** Höchstens so viele Glieder einer Termin-Kette werden verfolgt. */
+    private const LINEAGE_LIMIT = 50;
 
     /**
      * Get the route key for the model.
@@ -44,6 +49,7 @@ class Event extends Model implements HasMedia
 
     protected $fillable = [
         'organization_id',
+        'predecessor_id',
         'series_id',
         'series_position',
         'event_category_id',
@@ -482,7 +488,116 @@ class Event extends Model implements HasMedia
 
     public function averageRating(): float
     {
-        return $this->reviews()->where('is_approved', true)->avg('rating') ?? 0;
+        return $this->reviewSummary()->average;
+    }
+
+    /**
+     * Kennzahlen der freigegebenen Bewertungen dieser Veranstaltung.
+     */
+    public function reviewSummary(): ReviewSummary
+    {
+        return ReviewSummary::fromQuery($this->reviews());
+    }
+
+    /**
+     * Früherer Termin desselben Angebots (z. B. beim Duplizieren gesetzt).
+     *
+     * @return BelongsTo<Event, $this>
+     */
+    public function predecessor(): BelongsTo
+    {
+        return $this->belongsTo(Event::class, 'predecessor_id');
+    }
+
+    /**
+     * Spätere Termine, die direkt an diese Veranstaltung anschließen.
+     *
+     * @return HasMany<Event, $this>
+     */
+    public function successors(): HasMany
+    {
+        return $this->hasMany(Event::class, 'predecessor_id');
+    }
+
+    /**
+     * IDs aller früheren Termine desselben Angebots, neueste zuerst.
+     * Nur Glieder desselben Veranstalters zählen – fremde Bewertungen lassen sich nicht „erben“.
+     *
+     * @return list<int>
+     */
+    public function predecessorIds(): array
+    {
+        $ids = [];
+        $seen = [$this->id => true];
+        $nextId = $this->predecessor_id;
+
+        while ($nextId && ! isset($seen[$nextId]) && count($ids) < self::LINEAGE_LIMIT) {
+            $row = static::withTrashed()->whereKey($nextId)->first(['id', 'predecessor_id', 'organization_id']);
+            if (! $row || $row->organization_id !== $this->organization_id) {
+                break;
+            }
+            $seen[$row->id] = true;
+            $ids[] = $row->id;
+            $nextId = $row->predecessor_id;
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Freigegebene Bewertungen der früheren Termine dieses Angebots.
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<EventReview>
+     */
+    public function predecessorReviews(): \Illuminate\Database\Eloquent\Builder
+    {
+        return EventReview::query()
+            ->approved()
+            ->whereIn('event_id', $this->predecessorIds() ?: [0]);
+    }
+
+    /**
+     * Nächster öffentlich buchbarer Termin desselben Angebots (für Seiten vergangener Veranstaltungen).
+     */
+    public function upcomingSuccessor(): ?Event
+    {
+        $frontier = [$this->id];
+        $seen = [$this->id => true];
+
+        for ($depth = 0; $depth < self::LINEAGE_LIMIT && $frontier; $depth++) {
+            $children = static::query()
+                ->whereIn('predecessor_id', $frontier)
+                ->where('organization_id', $this->organization_id)
+                ->get(['id', 'predecessor_id', 'start_date', 'is_published', 'is_private', 'is_cancelled']);
+
+            $upcoming = $children
+                ->filter(fn (Event $e) => $e->is_published && ! $e->is_private && ! $e->is_cancelled && $e->start_date->isFuture())
+                ->sortBy('start_date')
+                ->first();
+            if ($upcoming) {
+                return static::find($upcoming->id);
+            }
+
+            $frontier = $children->pluck('id')->reject(fn ($id) => isset($seen[$id]))->values()->all();
+            foreach ($frontier as $id) {
+                $seen[$id] = true;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Ist $candidate als früherer Termin dieser Veranstaltung zulässig?
+     * Gleicher Veranstalter, nicht sie selbst, kein Kreis (der Kandidat darf nicht auf diese Veranstaltung zurückführen).
+     */
+    public function canHavePredecessor(Event $candidate): bool
+    {
+        if ($candidate->id === $this->id || $candidate->organization_id !== $this->organization_id) {
+            return false;
+        }
+
+        return ! in_array($this->id, $candidate->predecessorIds(), true);
     }
 
     /**

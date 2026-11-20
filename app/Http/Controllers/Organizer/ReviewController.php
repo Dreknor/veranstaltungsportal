@@ -23,14 +23,13 @@ class ReviewController extends Controller
         })->with(['event', 'user'])
           ->orderBy('created_at', 'desc');
 
-        // Filter by status
-        if ($request->has('status')) {
-            if ($request->status === 'pending') {
-                $query->where('is_approved', false);
-            } elseif ($request->status === 'approved') {
-                $query->where('is_approved', true);
-            }
-        }
+        // Filter by moderation status
+        match ($request->get('status')) {
+            'pending' => $query->pending(),
+            'approved' => $query->approved(),
+            'rejected' => $query->rejected(),
+            default => null,
+        };
 
         // Filter by event
         if ($request->has('event_id') && $request->event_id) {
@@ -42,28 +41,22 @@ class ReviewController extends Controller
             $query->where('rating', $request->rating);
         }
 
-        $reviews = $query->paginate(20);
+        $reviews = $query->paginate(20)->withQueryString();
 
         // Get organizer's events for filter
         $events = $organization->events()->orderBy('title')->get();
 
         // Statistics
+        $ofOrganization = fn () => EventReview::whereHas('event', fn ($q) => $q->where('organization_id', $organization->id));
         $stats = [
-            'total' => EventReview::whereHas('event', function ($q) use ($organization) {
-                $q->where('organization_id', $organization->id);
-            })->count(),
-            'pending' => EventReview::whereHas('event', function ($q) use ($organization) {
-                $q->where('organization_id', $organization->id);
-            })->where('is_approved', false)->count(),
-            'approved' => EventReview::whereHas('event', function ($q) use ($organization) {
-                $q->where('organization_id', $organization->id);
-            })->where('is_approved', true)->count(),
-            'average_rating' => round(EventReview::whereHas('event', function ($q) use ($organization) {
-                $q->where('organization_id', $organization->id);
-            })->where('is_approved', true)->avg('rating'), 1),
+            'total' => $ofOrganization()->count(),
+            'pending' => $ofOrganization()->pending()->count(),
+            'approved' => $ofOrganization()->approved()->count(),
+            'rejected' => $ofOrganization()->rejected()->count(),
         ];
+        $summary = $organization->reviewSummary();
 
-        return view('organizer.reviews.index', compact('reviews', 'events', 'stats', 'organization'));
+        return view('organizer.reviews.index', compact('reviews', 'events', 'stats', 'summary', 'organization'));
     }
 
     /**
@@ -89,10 +82,7 @@ class ReviewController extends Controller
             abort(403);
         }
 
-        $review->update(['is_approved' => true]);
-
-        // Update event average rating
-        $this->updateEventAverageRating($review->event);
+        $review->approve();
 
         return back()->with('success', 'Bewertung wurde freigegeben.');
     }
@@ -107,10 +97,7 @@ class ReviewController extends Controller
             abort(403);
         }
 
-        $review->update(['is_approved' => false]);
-
-        // Update event average rating
-        $this->updateEventAverageRating($review->event);
+        $review->reject();
 
         return back()->with('success', 'Bewertung wurde abgelehnt.');
     }
@@ -125,23 +112,33 @@ class ReviewController extends Controller
             abort(403);
         }
 
-        $event = $review->event;
         $review->delete();
-
-        // Update event average rating
-        $this->updateEventAverageRating($event);
 
         return redirect()->route('organizer.reviews.index')
             ->with('success', 'Bewertung wurde gelöscht.');
     }
 
     /**
-     * Update event average rating
+     * Öffentliche Antwort des Veranstalters speichern (leer = Antwort entfernen).
      */
-    private function updateEventAverageRating($event)
+    public function reply(Request $request, EventReview $review)
     {
-        $averageRating = $event->reviews()->where('is_approved', true)->avg('rating');
-        $event->update(['average_rating' => $averageRating]);
+        $organization = auth()->user()->currentOrganization();
+        if (! $organization || $review->event->organization_id !== $organization->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'organizer_reply' => 'nullable|string|max:1000',
+        ]);
+
+        $reply = trim((string) ($validated['organizer_reply'] ?? ''));
+
+        $review->update([
+            'organizer_reply' => $reply !== '' ? $reply : null,
+            'organizer_replied_at' => $reply !== '' ? now() : null,
+        ]);
+
+        return back()->with('success', $reply !== '' ? 'Ihre Antwort wurde gespeichert.' : 'Ihre Antwort wurde entfernt.');
     }
 }
-

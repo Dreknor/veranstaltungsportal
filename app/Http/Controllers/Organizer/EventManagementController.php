@@ -205,7 +205,37 @@ class EventManagementController extends Controller
         $currentUser = User::findOrFail(auth()->id());
         $publishingCosts = $costCalculationService->calculatePublishingCosts($event, $currentUser);
 
-        return view('organizer.events.edit', compact('event', 'categories', 'ticketTypes', 'publishingCosts'));
+        // Mögliche frühere Termine: andere Veranstaltungen desselben Veranstalters, die früher beginnen
+        $predecessorOptions = Event::query()
+            ->where('organization_id', $event->organization_id)
+            ->whereKeyNot($event->id)
+            ->where('start_date', '<', $event->start_date)
+            ->orderByDesc('start_date')
+            ->limit(200)
+            ->get(['id', 'title', 'start_date', 'predecessor_id', 'organization_id'])
+            ->filter(fn (Event $candidate) => $event->canHavePredecessor($candidate))
+            ->mapWithKeys(fn (Event $candidate) => [
+                $candidate->id => $candidate->title.' ('.$candidate->start_date->format('d.m.Y').')',
+            ]);
+
+        // Aktuell verknüpfter Termin bleibt auswählbar, auch wenn er später beginnt
+        if ($event->predecessor && ! $predecessorOptions->has($event->predecessor_id)) {
+            $predecessorOptions->put(
+                $event->predecessor_id,
+                $event->predecessor->title.' ('.$event->predecessor->start_date->format('d.m.Y').')',
+            );
+        }
+
+        $predecessorReviewCount = $event->predecessor_id ? $event->predecessorReviews()->count() : 0;
+
+        return view('organizer.events.edit', compact(
+            'event',
+            'categories',
+            'ticketTypes',
+            'publishingCosts',
+            'predecessorOptions',
+            'predecessorReviewCount',
+        ));
     }
 
     public function update(Request $request, Event $event)
@@ -246,9 +276,22 @@ class EventManagementController extends Controller
             'organization_field_mode' => 'nullable|in:none,optional,required',
             'free_ticket_auto_confirm' => 'boolean',
             'tickets_before_invoice' => 'boolean',
+            'predecessor_id' => 'nullable|integer|exists:events,id',
+            'confirm_predecessor' => 'nullable|boolean',
         ]);
 
-        unset($validated['has_multiple_dates']);
+        unset($validated['has_multiple_dates'], $validated['confirm_predecessor']);
+
+        // Früherer Termin: nur aus demselben Veranstalter, ohne Kreis; bei stark abweichendem Titel bestätigen lassen
+        if ($request->exists('predecessor_id')) {
+            $predecessorError = $this->checkPredecessor($request, $event, $validated['predecessor_id'] ?? null);
+            if ($predecessorError) {
+                return back()->withInput()->withErrors(['predecessor_id' => $predecessorError]);
+            }
+            $validated['predecessor_id'] = $validated['predecessor_id'] ?? null;
+        } else {
+            unset($validated['predecessor_id']);
+        }
 
         // Check if trying to publish without complete organizer data
         if ($request->boolean('is_published') && ! $event->is_published) {
@@ -307,6 +350,51 @@ class EventManagementController extends Controller
             ->with('success', 'Event erfolgreich aktualisiert!');
     }
 
+    /**
+     * Prüft die Verknüpfung mit einem früheren Termin. Gibt eine Fehlermeldung zurück oder null.
+     */
+    private function checkPredecessor(Request $request, Event $event, ?int $predecessorId): ?string
+    {
+        if (! $predecessorId || $predecessorId === $event->predecessor_id) {
+            return null;
+        }
+
+        $candidate = Event::find($predecessorId);
+        if (! $candidate || ! $event->canHavePredecessor($candidate)) {
+            return 'Dieser Termin kann nicht als früherer Termin gewählt werden.';
+        }
+
+        if (! self::titlesMatch($candidate->title, (string) $request->input('title', $event->title))
+            && ! $request->boolean('confirm_predecessor')) {
+            return 'Der Titel weicht stark vom früheren Termin ab. Bitte bestätigen Sie, dass es dasselbe Angebot ist – '
+                .'sonst würden fremde Bewertungen übernommen.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Gleiches Angebot? Titel ohne „(Kopie)“, Jahreszahlen und Satzzeichen zu mindestens 60 % ähnlich.
+     */
+    public static function titlesMatch(string $a, string $b): bool
+    {
+        $normalize = fn (string $title) => trim(preg_replace(
+            ['/\(kopie\)/iu', '/\b(19|20)\d{2}\b/u', '/[^\p{L}\p{N}]+/u'],
+            ['', '', ' '],
+            Str::lower($title),
+        ));
+
+        $a = $normalize($a);
+        $b = $normalize($b);
+        if ($a === '' || $b === '') {
+            return false;
+        }
+
+        similar_text($a, $b, $percent);
+
+        return $percent >= 60;
+    }
+
     public function destroy(Event $event)
     {
         $this->authorize('delete', $event);
@@ -327,6 +415,8 @@ class EventManagementController extends Controller
         $newEvent->slug = Str::slug($event->title).'-'.Str::random(6);
         $newEvent->is_published = false;
         $newEvent->is_featured = false;
+        // Neuer Termin desselben Angebots: Bewertungen des Originals erscheinen dort als „frühere Termine“
+        $newEvent->predecessor_id = $event->id;
         $newEvent->created_at = now();
         $newEvent->updated_at = now();
         $newEvent->save();
@@ -348,7 +438,7 @@ class EventManagementController extends Controller
         }
 
         return redirect()->route('organizer.events.edit', $newEvent)
-            ->with('success', 'Event erfolgreich dupliziert! Bitte aktualisieren Sie die Daten.');
+            ->with('success', 'Veranstaltung dupliziert. Bitte aktualisieren Sie die Daten. Die Kopie ist als neuer Termin mit dem Original verknüpft; dessen Bewertungen erscheinen dort als Bewertungen früherer Termine.');
     }
 
     public function addTicketType(Request $request, Event $event)

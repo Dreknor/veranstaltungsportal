@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\ReviewSummary;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
@@ -199,6 +202,61 @@ class Organization extends Model
     public function events(): HasMany
     {
         return $this->hasMany(Event::class);
+    }
+
+    /**
+     * Bewertungen aller Veranstaltungen dieses Veranstalters (jeder Moderationsstand).
+     *
+     * @return HasManyThrough<EventReview, Event, $this>
+     */
+    public function reviews(): HasManyThrough
+    {
+        return $this->hasManyThrough(EventReview::class, Event::class);
+    }
+
+    /**
+     * Freigegebene Bewertungen der letzten ReviewSummary::ORGANIZATION_MONTHS Monate.
+     *
+     * @return HasManyThrough<EventReview, Event, $this>
+     */
+    public function recentApprovedReviews(): HasManyThrough
+    {
+        return $this->reviews()
+            ->where('event_reviews.is_approved', true)
+            ->where('event_reviews.created_at', '>=', now()->subMonths(ReviewSummary::ORGANIZATION_MONTHS));
+    }
+
+    /**
+     * Gesamtbewertung des Veranstalters (zwischengespeichert; EventReview verwirft den Speicher bei Änderungen).
+     */
+    public function reviewSummary(): ReviewSummary
+    {
+        $data = Cache::remember(
+            self::reviewSummaryCacheKey($this->id),
+            now()->addHours(6),
+            fn () => ReviewSummary::fromQuery($this->recentApprovedReviews())->toArray(),
+        );
+
+        return ReviewSummary::fromArray($data);
+    }
+
+    public static function forgetReviewSummary(int $organizationId): void
+    {
+        Cache::forget(self::reviewSummaryCacheKey($organizationId));
+    }
+
+    private static function reviewSummaryCacheKey(int $organizationId): string
+    {
+        return 'organization-review-summary:'.$organizationId;
+    }
+
+    /**
+     * Hat der Veranstalter ein öffentliches Profil? Aktiv und mindestens eine veröffentlichte Veranstaltung.
+     */
+    public function hasPublicProfile(): bool
+    {
+        return $this->is_active !== false
+            && $this->events()->where('is_published', true)->where('is_private', false)->exists();
     }
 
     /**

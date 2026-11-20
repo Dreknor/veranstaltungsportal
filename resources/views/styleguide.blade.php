@@ -90,6 +90,7 @@
         'rahmen' => 'Anmelderahmen und Lesetext',
         'menues' => 'Dialog, Menü, Reiter',
         'kennzahlen' => 'Kennzahlen, Fortschritt, Detail-Paare',
+        'bewertungen' => 'Bewertungen',
         'seiten' => 'Seitennavigation',
         'icons' => 'Icons',
     ];
@@ -920,6 +921,91 @@
                     <x-ui.dl-item label="Ort">Radebeul, Ev. Schulzentrum</x-ui.dl-item>
                     <x-ui.dl-item label="Preis" num>45,00 €</x-ui.dl-item>
                 </x-ui.dl>
+            </div>
+        </x-ui.section>
+
+        {{-- Bewertungen --}}
+        @php
+            $sgSummary = new \App\Support\ReviewSummary(38, 4.6, [1 => 1, 2 => 1, 3 => 3, 4 => 8, 5 => 25]);
+            $sgFew = new \App\Support\ReviewSummary(2, 5.0, [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 2]);
+            $sgEvent = (new \App\Models\Event())->forceFill([
+                'title' => 'Beziehung vor Stoff: Klassenführung, die trägt',
+                'slug' => 'beispiel-klassenfuehrung',
+                'start_date' => now()->subMonths(3)->setTime(14, 0),
+            ]);
+            $sgReviews = collect([
+                (new \App\Models\EventReview())
+                    ->forceFill([
+                        'rating' => 5,
+                        'comment' => 'Sehr praxisnah, ich habe am nächsten Tag zwei Methoden ausprobiert.',
+                        'show_full_name' => false,
+                        'is_approved' => true,
+                        'created_at' => now()->subMonths(2),
+                        'organizer_reply' => 'Vielen Dank! Im Frühjahr gibt es einen Aufbaukurs.',
+                        'organizer_replied_at' => now()->subMonths(2)->addDays(3),
+                    ])
+                    ->setRelation(
+                        'user',
+                        (new \App\Models\User())->forceFill(['first_name' => 'Daniela', 'last_name' => 'Richter']),
+                    )
+                    ->setRelation('event', $sgEvent),
+                (new \App\Models\EventReview())
+                    ->forceFill([
+                        'rating' => 3,
+                        'comment' => 'Inhaltlich gut, aber zu wenig Zeit für Fragen.',
+                        'show_full_name' => true,
+                        'is_approved' => true,
+                        'created_at' => now()->subMonth(),
+                    ])
+                    ->setRelation(
+                        'user',
+                        (new \App\Models\User())->forceFill(['first_name' => 'Jonas', 'last_name' => 'Bergmann']),
+                    )
+                    ->setRelation('event', $sgEvent),
+            ]);
+        @endphp
+        <x-ui.section title="Bewertungen" id="bewertungen"
+            description="Sterne, Bewertungszeile, Übersicht mit Verteilung, Liste mit Antwort des Veranstalters, Moderationsstand. Ein Durchschnitt erscheint erst ab drei Bewertungen.">
+            <div class="flex flex-col gap-10">
+                <div class="flex flex-col gap-3">
+                    <h3 class="m-0 text-h3">Sterne &lt;x-ui.stars&gt;</h3>
+                    <div class="flex flex-wrap items-center gap-6">
+                        <x-ui.stars :value="5" />
+                        <x-ui.stars :value="4.6" />
+                        <x-ui.stars :value="2" size="sm" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h3 class="m-0 text-h3">Bewertungszeile &lt;x-ui.rating&gt;</h3>
+                    <x-ui.rating :summary="$sgSummary" href="#bewertungen" />
+                    <x-ui.rating :summary="$sgSummary" prefix="Akademie Elbtal" size="small" />
+                    <x-ui.rating :summary="$sgFew" />
+                    <x-ui.rating :summary="\App\Support\ReviewSummary::empty()" />
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h3 class="m-0 text-h3">Übersicht &lt;x-review.summary&gt;</h3>
+                    <x-review.summary :summary="$sgSummary" note="aus den letzten 24 Monaten" />
+                    <x-review.summary :summary="$sgFew" />
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h3 class="m-0 text-h3">Liste &lt;x-review.list&gt; mit Veranstaltung und Antwort</h3>
+                    <x-review.list :reviews="$sgReviews" show-event organization-name="Akademie Elbtal" />
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h3 class="m-0 text-h3">Moderationsstand &lt;x-review.status&gt;</h3>
+                    <div class="flex flex-wrap gap-6">
+                        <x-review.status :review="(new \App\Models\EventReview())->forceFill(['is_approved' => false])" long />
+                        <x-review.status :review="(new \App\Models\EventReview())->forceFill(['is_approved' => true])" />
+                        <x-review.status :review="(new \App\Models\EventReview())->forceFill([
+                            'is_approved' => false,
+                            'rejected_at' => now(),
+                        ])" />
+                    </div>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <h3 class="m-0 text-h3">Formular &lt;x-review.form&gt;</h3>
+                    <x-review.form action="#bewertungen" comment-id="sg-review-comment" />
+                </div>
             </div>
         </x-ui.section>
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\EventCategory;
-use App\Models\User;
+use App\Models\Organization;
 use Illuminate\Http\Response;
 use Carbon\Carbon;
 
@@ -24,7 +24,7 @@ class SitemapController extends Controller
             ['loc' => route('sitemap.static'),     'lastmod' => now()->toW3cString()],
             ['loc' => route('sitemap.events'),     'lastmod' => Carbon::parse(Event::where('is_published', true)->max('updated_at') ?? now())->toW3cString()],
             ['loc' => route('sitemap.categories'), 'lastmod' => Carbon::parse(EventCategory::max('updated_at') ?? now())->toW3cString()],
-            ['loc' => route('sitemap.organizers'), 'lastmod' => Carbon::parse(User::where('is_organizer', true)->max('updated_at') ?? now())->toW3cString()],
+            ['loc' => route('sitemap.organizers'), 'lastmod' => Carbon::parse(Organization::max('updated_at') ?? now())->toW3cString()],
         ];
 
         $xml  = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
@@ -107,18 +107,17 @@ class SitemapController extends Controller
      */
     public function organizers(): Response
     {
-        $organizers = User::where('is_organizer', true)
-            ->whereHas('organizations', function ($query) {
-                $query->whereHas('events', function ($q) {
-                    $q->where('is_published', true);
-                });
+        // Öffentliche Veranstalter-Profile (mit Veranstaltungen und Bewertungen)
+        $organizations = Organization::where('is_active', true)
+            ->whereHas('events', function ($q) {
+                $q->where('is_published', true)->where('is_private', false);
             })
             ->get();
 
-        $urls = $organizers->map(function ($organizer) {
+        $urls = $organizations->map(function (Organization $organization) {
             return [
-                'loc'        => route('users.show', $organizer->id),
-                'lastmod'    => $organizer->updated_at->toW3cString(),
+                'loc'        => route('organizations.show', $organization),
+                'lastmod'    => $organization->updated_at->toW3cString(),
                 'priority'   => '0.6',
                 'changefreq' => 'weekly',
             ];

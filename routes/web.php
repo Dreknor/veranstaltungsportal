@@ -185,6 +185,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/connections/{user}/unblock', [\App\Http\Controllers\ConnectionController::class, 'unblock'])->name('connections.unblock');
 });
 
+// Öffentliches Veranstalter-Profil mit Bewertungen
+Route::get('/veranstalter/{organization:slug}', [\App\Http\Controllers\OrganizationProfileController::class, 'show'])
+    ->name('organizations.show');
+
 // User Profiles (public, no auth required for viewing)
 Route::get('/users/{user}', [\App\Http\Controllers\UserProfileController::class, 'show'])->name('users.show');
 Route::get('/users/{user}/followers', [\App\Http\Controllers\UserProfileController::class, 'followers'])->name('users.followers');
@@ -348,6 +352,7 @@ Route::middleware(['auth', 'verified', 'organizer'])->prefix('organizer')->name(
         Route::get('/reviews/{review}/moderate', [Organizer\ReviewController::class, 'moderate'])->name('reviews.moderate');
         Route::patch('/reviews/{review}/approve', [Organizer\ReviewController::class, 'approve'])->name('reviews.approve');
         Route::patch('/reviews/{review}/reject', [Organizer\ReviewController::class, 'reject'])->name('reviews.reject');
+        Route::patch('/reviews/{review}/reply', [Organizer\ReviewController::class, 'reply'])->name('reviews.reply');
         Route::delete('/reviews/{review}', [Organizer\ReviewController::class, 'destroy'])->name('reviews.destroy');
 
         // Featured Events

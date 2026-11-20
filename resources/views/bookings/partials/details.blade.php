@@ -363,51 +363,31 @@
                     <h2 id="feedback-titel" class="m-0 text-h3">Danke für Ihr Feedback</h2>
                     <p class="mt-2 mb-0 flex items-center gap-2 text-base text-ink-soft">
                         Ihre Bewertung:
-                        <span class="flex gap-0.5 text-ink" aria-hidden="true">
-                            @for ($i = 1; $i <= 5; $i++)
-                                @if ($i <= $booking->review->rating)
-                                    <x-icon.star-filled class="h-5 w-5" />
-                                @else
-                                    <x-icon.star class="h-5 w-5 text-line-strong" />
-                                @endif
-                            @endfor
-                        </span>
-                        <span class="sr-only">{{ $booking->review->rating }} von 5 Sternen</span>
+                        <x-ui.stars :value="$booking->review->rating" />
                     </p>
+                    <p class="mt-2 mb-0 flex flex-wrap items-center gap-x-3 gap-y-1 text-small text-muted">
+                        <x-review.status :review="$booking->review" long />
+                        @if ($booking->review->is_approved && $booking->event->organization?->hasPublicProfile())
+                            <a href="{{ route('organizations.show', $booking->event->organization) }}?ansicht=bewertungen"
+                                class="text-ink underline underline-offset-[3px]">Auf dem Veranstalter-Profil
+                                ansehen</a>
+                        @endif
+                    </p>
+                    @if ($booking->review->hasOrganizerReply())
+                        <div
+                            class="mt-4 flex max-w-prose flex-col gap-1 rounded-control border border-line bg-zone px-4 py-3">
+                            <p class="m-0 text-small font-medium text-ink">Antwort des Veranstalters</p>
+                            <p class="m-0 text-base text-ink-soft">{!! nl2br(e($booking->review->organizer_reply)) !!}</p>
+                        </div>
+                    @endif
                 @else
                     <h2 id="feedback-titel" class="m-0 text-h2">Wie hat Ihnen die Veranstaltung gefallen?</h2>
                     <p class="mt-1 mb-0 text-base text-muted">Ihr Feedback hilft dem Veranstalter, zukünftige Angebote
                         zu
                         verbessern.</p>
-                    <form method="POST" action="{{ route('bookings.feedback', $booking->booking_number) }}"
-                        class="mt-6 flex max-w-form flex-col gap-5" x-data="{ rating: {{ (int) old('rating', 0) }} }">
-                        @csrf
-                        <fieldset class="m-0 min-w-0 border-0 p-0">
-                            <x-ui.label as="legend" required>Bewertung</x-ui.label>
-                            <div class="flex gap-1">
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <label
-                                        class="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-control has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink">
-                                        <input type="radio" name="rating" value="{{ $i }}"
-                                            class="sr-only" x-model.number="rating" @checked(old('rating') == $i)>
-                                        <span aria-hidden="true"
-                                            :class="rating >= {{ $i }} ? 'text-ink' : 'text-line-strong'"
-                                            class="text-line-strong transition-colors duration-150">
-                                            <x-icon.star-filled class="h-7 w-7" />
-                                        </span>
-                                        <span class="sr-only">{{ $i }} von 5 Sternen</span>
-                                    </label>
-                                @endfor
-                            </div>
-                            <x-ui.field-error name="rating" />
-                        </fieldset>
-                        <x-ui.textarea label="Kommentar" name="comment" id="feedback-comment" optional
-                            rows="3" maxlength="1000"
-                            placeholder="Was war besonders hilfreich? Was können wir verbessern?" />
-                        <div>
-                            <x-ui.button type="submit">Feedback senden</x-ui.button>
-                        </div>
-                    </form>
+                    <x-review.form :action="route('bookings.feedback', $booking->booking_number)" class="mt-6" submit-label="Feedback senden"
+                        comment-id="feedback-comment"
+                        placeholder="Was war besonders hilfreich? Was können wir verbessern?" />
                 @endif
             </section>
         @endif
